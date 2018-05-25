@@ -1,0 +1,41 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27703.2018
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoherentSolutions.AspNetCore.ServiceFabric.Hosting", "CoherentSolutions.AspNetCore.ServiceFabric.Hosting\CoherentSolutions.AspNetCore.ServiceFabric.Hosting.csproj", "{A501A897-6BC0-4233-83EC-B71654152529}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests", "CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests\CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.csproj", "{DB757D07-65BE-4E71-BE71-687521BE0E76}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|x64 = Debug|x64
+		Release|Any CPU = Release|Any CPU
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A501A897-6BC0-4233-83EC-B71654152529}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A501A897-6BC0-4233-83EC-B71654152529}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A501A897-6BC0-4233-83EC-B71654152529}.Debug|x64.ActiveCfg = Debug|x64
+		{A501A897-6BC0-4233-83EC-B71654152529}.Debug|x64.Build.0 = Debug|x64
+		{A501A897-6BC0-4233-83EC-B71654152529}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A501A897-6BC0-4233-83EC-B71654152529}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A501A897-6BC0-4233-83EC-B71654152529}.Release|x64.ActiveCfg = Release|x64
+		{A501A897-6BC0-4233-83EC-B71654152529}.Release|x64.Build.0 = Release|x64
+		{DB757D07-65BE-4E71-BE71-687521BE0E76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DB757D07-65BE-4E71-BE71-687521BE0E76}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DB757D07-65BE-4E71-BE71-687521BE0E76}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{DB757D07-65BE-4E71-BE71-687521BE0E76}.Debug|x64.Build.0 = Debug|Any CPU
+		{DB757D07-65BE-4E71-BE71-687521BE0E76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DB757D07-65BE-4E71-BE71-687521BE0E76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DB757D07-65BE-4E71-BE71-687521BE0E76}.Release|x64.ActiveCfg = Release|Any CPU
+		{DB757D07-65BE-4E71-BE71-687521BE0E76}.Release|x64.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B16C2BAA-9054-459B-8E39-30F5BA77F6FE}
+	EndGlobalSection
+EndGlobal

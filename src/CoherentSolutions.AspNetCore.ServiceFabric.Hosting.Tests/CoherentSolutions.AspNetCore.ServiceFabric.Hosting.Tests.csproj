@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+      <DebugType>portable</DebugType>
+      <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+      <RuntimeFrameworkVersion>2.0.0</RuntimeFrameworkVersion>
+      <Description>This project contains unit-tests designed to ensure quality of CoherentSolutions.AspNetCore.ServiceFabric.Hosting project.</Description>
+      <Authors>Coherent Solutions, Inc</Authors>
+      <Copyright>2018 Coherent Solutions, Inc</Copyright>
+      <Version>0.5.1-alpha</Version>
+      <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+      <Product>CoherentSolutions.AspNetCore.ServiceFabric.Hosting</Product>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile></DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+      <PackageReference Include="Moq" Version="4.8.2" />
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.2" />
+    <PackageReference Include="xunit" Version="2.3.1" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
+    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CoherentSolutions.AspNetCore.ServiceFabric.Hosting\CoherentSolutions.AspNetCore.ServiceFabric.Hosting.csproj" />
+  </ItemGroup>
+
+</Project>
