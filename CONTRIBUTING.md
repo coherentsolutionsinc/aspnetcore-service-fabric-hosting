@@ -14,9 +14,9 @@ The project is created using Visual Studio 2017. You are encouraged to use Visua
 
 ## Questions and Issues
 
-Have a question? - [Ask][1] 
+Have a question? - [Ask][1]!
 
-An idea? - [Request][1] 
+An idea? - [Request][1]!
 
 Found an issue? - [Report][1]!
 
