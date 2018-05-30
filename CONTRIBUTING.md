@@ -9,11 +9,15 @@ The project is created using Visual Studio 2017. You are encouraged to use Visua
 
 ## Set up the development environment
 
-* Clone the master branch. `git clone https://github.com/ <path to the local folder>`
+* Clone the master branch. `git clone https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/ <path to the local folder>`
 * Build & Run Tests. `build-and-test.ps1`
 
 ## Questions and Issues
 
-Have a question? Or an idea? Found an issue? - Don't hesitate and [report][1]!
+Have a question? - [Ask][1] 
 
-[1]: http://nowhere.com "Ask a question or report an issue"
+An idea? - [Request][1] 
+
+Found an issue? - [Report][1]!
+
+[1]: https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/issues "Ask a question or report an issue"
