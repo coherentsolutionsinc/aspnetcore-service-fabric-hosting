@@ -134,5 +134,5 @@ public static void Main(string[] args)
 }
 ```
 
-[1]: images/bs-modify-existing-create-sf-project.gif "Create new Service Fabric Application & Service projects"
-[2]: images/bs-modify-existing-copy-package-dir-and-replace-ref.gif "Copy PackageRoot directory"
+[1]: images/basic-scenarios/modify-existing-create-sf-project.gif "Create new Service Fabric Application & Service projects"
+[2]: images/basic-scenarios/modify-existing-copy-package-dir-and-replace-ref.gif "Copy PackageRoot directory"
