@@ -46,6 +46,6 @@ This project is licensed under the MS-PL License - see the [LICENSE.md][9] for d
 [6]:  RELEASE_NOTES.md "Release notes"
 [7]:  CONTRIBUTING.md "Contributing"
 [8]:  https://www.coherentsolutions.com/ "Coherent Solutions Inc."
-[9]:  LICENCE.md "License"
-[10]: docs/BASIC_SCENARIOS.md#modify-existing-asp.net-core-application-for-execution-inside-service-fabric-as-reliable-service "License"
+[9]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/blob/master/LICENSE.md "License"
+[10]: docs/BASIC_SCENARIOS.md#modify-existing-asp.net-core-application-for-execution-inside-service-fabric-as-reliable-service "Modify existing ASP.NET Core application for execution inside Service Fabric as Reliable Service"
 
