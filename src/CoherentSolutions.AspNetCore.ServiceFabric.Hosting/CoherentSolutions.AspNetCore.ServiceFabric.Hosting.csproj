@@ -1,9 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <NetStandardImplicitPackageVersion>2.0.0</NetStandardImplicitPackageVersion>
     <Platforms>AnyCPU;x64</Platforms>
-    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Copyright>2018 Coherent Solutions, Inc</Copyright>
     <Company>Coherent Solutions, Inc</Company>
@@ -15,6 +15,9 @@
     <Version>0.5.1-alpha</Version>
     <PackageReleaseNotes>The initial release.</PackageReleaseNotes>
     <Product>CoherentSolutions.AspNetCore.ServiceFabric.Hosting</Product>
+    <RepositoryUrl>https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting</PackageProjectUrl>
+    <PackageLicenseUrl>https://opensource.org/licenses/MS-PL</PackageLicenseUrl>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DocumentationFile>bin\Debug\netstandard2.0\CoherentSolutions.AspNetCore.ServiceFabric.Hosting.xml</DocumentationFile>
@@ -23,8 +26,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore" Version="2.0.3" />
-    <PackageReference Include="Microsoft.ServiceFabric" Version="6.2.274" />
-    <PackageReference Include="Microsoft.ServiceFabric.AspNetCore.Kestrel" Version="3.1.274" />
-    <PackageReference Include="Microsoft.ServiceFabric.Services" Version="3.1.274" />
+    <PackageReference Include="Microsoft.ServiceFabric" Version="6.2.283" />
+    <PackageReference Include="Microsoft.ServiceFabric.AspNetCore.Kestrel" Version="3.1.283" />
+    <PackageReference Include="Microsoft.ServiceFabric.Services" Version="3.1.283" />
   </ItemGroup>
 </Project>
