@@ -1,7 +1,7 @@
 ﻿# BASIC SCENARIOS
 
 ## Table of Contents:
-* [Modify existing ASP.NET Core application for execution inside Service Fabric as Reliable Service](#modify-existing-asp.net-core-application-for-execution-inside-service-fabric-as-reliable-service)
+* [Modify existing ASP.NET Core application for execution inside Service Fabric as Reliable Service](#modify-existing-aspnet-core-application-for-execution-inside-service-fabric-as-reliable-service)
 
 ## Modify existing ASP.NET Core application for execution inside Service Fabric as Reliable Service
 

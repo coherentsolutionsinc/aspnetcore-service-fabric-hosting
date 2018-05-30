@@ -1,7 +1,7 @@
 ﻿# ADVANCED SCENARIOS
 
 ## Table of Contents
-* [Executing an action before IWebHost.Run()](#executing-an-action-before-iwebhost.run())
+* [Executing an action before IWebHost.Run()](#executing-an-action-before-iwebhostrun)
 
 ## Executing an action before IWebHost.Run()
 
