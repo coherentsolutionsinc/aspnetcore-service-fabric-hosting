@@ -2,7 +2,6 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <NetStandardImplicitPackageVersion>2.0.0</NetStandardImplicitPackageVersion>
-    <Platforms>AnyCPU;x64</Platforms>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Copyright>2018 Coherent Solutions, Inc</Copyright>
@@ -18,10 +17,7 @@
     <RepositoryUrl>https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting</RepositoryUrl>
     <PackageProjectUrl>https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting</PackageProjectUrl>
     <PackageLicenseUrl>https://opensource.org/licenses/MS-PL</PackageLicenseUrl>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>bin\Debug\netstandard2.0\CoherentSolutions.AspNetCore.ServiceFabric.Hosting.xml</DocumentationFile>
-    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
