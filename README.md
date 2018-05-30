@@ -3,7 +3,7 @@
 **CoherentSolutions.AspNetCore.ServiceFabric.Hosting** is a tiny library that is intended to simplify implementation of ASP.NET Core apps that need to have an ability to run both inside and outside of Service Fabric.
 
 It may be of use when you need to:
-1. Run ASP.NET Core application as *self-hosted / containerized / etc.* in *dev / test* environments and run the same application in Service Fabric as Reliable Service   (Stateless or Stateful)
+1. Run ASP.NET Core application as *self-hosted / containerized / etc.* in *dev / test* environments and run the same application in Service Fabric as Reliable Service (Stateless or Stateful)
 2. Reduce initialization code duplication and have clear separation between self-hosted and Service Fabric - specific initialization code
 
 ## Eager to start? 
