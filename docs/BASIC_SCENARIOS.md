@@ -66,7 +66,7 @@ private static IWebHostBuilder BuildWebHostBuilder(string[] args)
 }
 ```
 
-Update `Main()` to use `HostBuilder()`.
+Update `Main()` to use `HybridHostBuilder()`.
 
 ``` csharp
 public static void Main(string[] args)
