@@ -81,7 +81,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting
         public static TCaller UseStatefulServiceHostBuilder<TCaller>(
             this TCaller @this,
             Func<IStatefulServiceHostBuilder> factoryFunc)
-            where TCaller : IConfigurableObject<IHostBuilderConfigurator>
+            where TCaller : IConfigurableObject<IHybridHostBuilderConfigurator>
         {
             @this.ConfigureObject(
                 configurator => configurator.UseStatefulServiceHostBuilder(factoryFunc));
@@ -92,7 +92,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting
         public static TCaller UseStatelessServiceHostBuilder<TCaller>(
             this TCaller @this,
             Func<IStatelessServiceHostBuilder> factoryFunc)
-            where TCaller : IConfigurableObject<IHostBuilderConfigurator>
+            where TCaller : IConfigurableObject<IHybridHostBuilderConfigurator>
         {
             @this.ConfigureObject(
                 configurator => configurator.UseStatelessServiceHostBuilder(factoryFunc));
@@ -103,7 +103,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting
         public static TCaller UseHostSelector<TCaller>(
             this TCaller @this,
             Func<IHostSelector> factoryFunc)
-            where TCaller : IConfigurableObject<IHostBuilderConfigurator>
+            where TCaller : IConfigurableObject<IHybridHostBuilderConfigurator>
         {
             @this.ConfigureObject(
                 configurator => configurator.UseHostSelector(factoryFunc));
@@ -114,7 +114,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting
         public static TCaller UseHost<TCaller>(
             this TCaller @this,
             Func<IHostRunner, IHost> factoryFunc)
-            where TCaller : IConfigurableObject<IHostBuilderConfigurator>
+            where TCaller : IConfigurableObject<IHybridHostBuilderConfigurator>
         {
             @this.ConfigureObject(
                 configurator => configurator.UseHost(factoryFunc));
@@ -218,9 +218,9 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting
             return @this;
         }
 
-        public static IHostBuilder Configure(
-            this IHostBuilder @this,
-            Action<IHostBuilderConfigurator> configAction)
+        public static IHybridHostBuilder Configure(
+            this IHybridHostBuilder @this,
+            Action<IHybridHostBuilderConfigurator> configAction)
         {
             @this.ConfigureObject(configAction);
 
@@ -291,7 +291,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting
         public static TCaller ConfigureStatefulServiceHost<TCaller>(
             this TCaller @this,
             Action<IStatefulServiceHostBuilder> configAction)
-            where TCaller : IConfigurableObject<IHostBuilderConfigurator>
+            where TCaller : IConfigurableObject<IHybridHostBuilderConfigurator>
         {
             @this.ConfigureObject(
                 configurator => configurator.ConfigureStatefulServiceHost(configAction));
@@ -302,7 +302,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting
         public static TCaller ConfigureStatelessServiceHost<TCaller>(
             this TCaller @this,
             Action<IStatelessServiceHostBuilder> configAction)
-            where TCaller : IConfigurableObject<IHostBuilderConfigurator>
+            where TCaller : IConfigurableObject<IHybridHostBuilderConfigurator>
         {
             @this.ConfigureObject(
                 configurator => configurator.ConfigureStatelessServiceHost(configAction));
@@ -328,7 +328,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting
             {
                 throw new InvalidOperationException(
                     $"Unable to configure on-run action execution because this "
-                  + $"method is invoked outside of {nameof(IHostBuilder)} boundaries.");
+                  + $"method is invoked outside of {nameof(IHybridHostBuilder)} boundaries.");
             }
 
             @this.ConfigureServices(

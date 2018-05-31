@@ -10,9 +10,9 @@ using Microsoft.Extensions.Configuration;
 
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting
 {
-    public class HostBuilder
-        : ConfigurableObject<IHostBuilderConfigurator>,
-          IHostBuilder
+    public class HybridHostBuilder
+        : ConfigurableObject<IHybridHostBuilderConfigurator>,
+          IHybridHostBuilder
     {
         private enum ServiceHostKind
         {
@@ -25,7 +25,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting
 
         private class Parameters
             : IHostBuilderParameters,
-              IHostBuilderConfigurator
+              IHybridHostBuilderConfigurator
         {
             public ServiceHostKind ServiceHostKind { get; private set; }
 

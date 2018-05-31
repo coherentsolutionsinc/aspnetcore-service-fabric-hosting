@@ -2,7 +2,7 @@
 
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting
 {
-    public interface IHostBuilder : IConfigurableObject<IHostBuilderConfigurator>
+    public interface IHybridHostBuilder : IConfigurableObject<IHybridHostBuilderConfigurator>
     {
         IHost Build();
     }

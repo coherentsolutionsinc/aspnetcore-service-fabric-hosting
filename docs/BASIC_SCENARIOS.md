@@ -78,7 +78,7 @@ public static void Main(string[] args)
 ``` csharp
 public static void Main(string[] args)
 {
-  new HostBuilder()
+  new HybridHostBuilder()
     .UseWebHostBuilder(() => BuildWebHostBuilder(args))
     .ConfigureDefaultWebHost()
     .Build()
@@ -91,7 +91,7 @@ Initialize *Stateful* or *Stateless* service using `ConfigureStatelessServiceHos
 ``` csharp
 public static void Main(string[] args)
 {
-  new HostBuilder()
+  new HybridHostBuilder()
     /*
       Register a IWebHostBuilder factory to use for both 
       inside and outside Azure Service Fabric.

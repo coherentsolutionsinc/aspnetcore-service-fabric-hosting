@@ -25,13 +25,13 @@ All `builders` use the following naming convention / pattern when exposing their
 
 1. Multiple invocations don't stack - only the last invocation counts.
    ``` csharp
-   new HostBuilder()
+   new HybridHostBuilder()
      .UseWebHostBuilder(() => CreateBuilderA())
      .UseWebHostBuilder(() => CreateBuilderB()) // This is the final value
    ```
 2. Values set by `Use()` methods are inherited and reused by downstream `builders`.
    ``` csharp
-   new HostBuilder()
+   new HybridHostBuilder()
      .UseWebHostBuilder(() => CreateBuilderA()) // Can be called on build
      .ConfigureStatelessServiceHost(
        serviceHostBuilder =>
@@ -66,7 +66,7 @@ All `builders` use the following naming convention / pattern when exposing their
 
 1. Multiple invocations do stack - and maintain order.
    ``` csharp
-   new HostBuilder()
+   new HybridHostBuilder()
      .ConfigureWebHost(builder => /* code1 */)
      .ConfigureWebHost(builder => /* code2 */)
    
@@ -87,7 +87,7 @@ All `builders` use the following naming convention / pattern when exposing their
 1. Multiple invocations count. Each `Define()` method instructs builder to create a separate builder for configurable component.
    ``` csharp
    /* Plenty of code is omitted for brevity */
-   new HostBuilder()
+   new HybridHostBuilder()
      .ConfigureStatelessServiceHost(
        serviceHostBuilder =>
        {

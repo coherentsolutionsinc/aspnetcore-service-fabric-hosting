@@ -4,7 +4,7 @@ using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tools;
 
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting
 {
-    public interface IHostBuilderConfigurator
+    public interface IHybridHostBuilderConfigurator
         : IConfigurableObjectWebHostConfigurator
     {
         void UseStatefulServiceHostBuilder(

@@ -8,7 +8,7 @@
     <Company>Coherent Solutions, Inc</Company>
     <Authors>Coherent Solutions, Inc</Authors>
     <RootNamespace>CoherentSolutions.AspNetCore.ServiceFabric.Hosting</RootNamespace>
-    <Description>This package provides a HostBuilder class that simplifies configuring a service implementation for hosting in both ASP.NET Core and Service Fabric runtimes.</Description>
+    <Description>This package provides a HybridHostBuilder class that simplifies configuring a service implementation for hosting in both ASP.NET Core and Service Fabric runtimes.</Description>
     <PackageTags>aspnetcore, servicefabric, hosting</PackageTags>
     <RepositoryType>Git</RepositoryType>
     <Version>0.5.1-alpha</Version>

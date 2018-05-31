@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using CoherentSolutions.AspNetCore.ServiceFabric.Hosting;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Common.Exceptions;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Stubs;
@@ -10,7 +11,7 @@ using Xunit;
 
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests
 {
-    public class HostBuilderTests
+    public class HybridHostBuilderTests
     {
         [Fact]
         public void
@@ -21,7 +22,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests
 
             var config = new Mock<Action<IStatefulServiceHostBuilder>>();
 
-            var builder = new HostBuilder()
+            var builder = new HybridHostBuilder()
                .UseHostSelector(HostSelectorStub.Func)
                .UseStatefulServiceHostBuilder(factory.Object)
                .ConfigureStatefulServiceHost(config.Object);
@@ -43,7 +44,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests
 
             var config = new Mock<Action<IStatelessServiceHostBuilder>>();
 
-            var builder = new HostBuilder()
+            var builder = new HybridHostBuilder()
                .UseHostSelector(HostSelectorStub.Func)
                .UseStatelessServiceHostBuilder(factory.Object)
                .ConfigureStatelessServiceHost(config.Object);
@@ -63,7 +64,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests
             // Arrange
             var factory = new Mock<Func<IWebHostBuilder>>();
 
-            var builder = new HostBuilder()
+            var builder = new HybridHostBuilder()
                .UseHostSelector(HostSelectorStub.Func)
                .UseWebHostBuilder(factory.Object)
                .ConfigureDefaultWebHost();
@@ -83,7 +84,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests
 
             var config = new Mock<Action<IWebHostBuilder>>();
 
-            var builder = new HostBuilder()
+            var builder = new HybridHostBuilder()
                .UseHostSelector(HostSelectorStub.Func)
                .Configure(c => c.UseWebHostExtensionsImpl(factory.Object))
                .ConfigureWebHost(config.Object);
@@ -104,7 +105,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests
             var selector = new Mock<IHostSelector>();
 
             // Act
-            var builder = new HostBuilder()
+            var builder = new HybridHostBuilder()
                .UseHostSelector(() => selector.Object);
 
             // Assert
@@ -128,7 +129,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests
                .Returns(new HostSelectorStub());
 
             // Act
-            new HostBuilder()
+            new HybridHostBuilder()
                .UseHostSelector(factory.Object)
                .Build();
 
@@ -147,7 +148,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests
                .Returns(new StatefulServiceHostBuilderStub());
 
             // Act
-            new HostBuilder()
+            new HybridHostBuilder()
                .UseHostSelector(HostSelectorStub.Func)
                .UseStatefulServiceHostBuilder(factory.Object)
                .ConfigureStatefulServiceHost(
@@ -171,7 +172,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests
                .Returns(new StatelessServiceHostBuilderStub());
 
             // Act
-            new HostBuilder()
+            new HybridHostBuilder()
                .UseHostSelector(HostSelectorStub.Func)
                .UseStatelessServiceHostBuilder(factory.Object)
                .ConfigureStatelessServiceHost(
@@ -195,7 +196,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests
                .Returns(new WebHostBuilderStub());
 
             // Act
-            new HostBuilder()
+            new HybridHostBuilder()
                .UseHostSelector(HostSelectorStub.Func)
                .UseWebHostBuilder(factory.Object)
                .ConfigureDefaultWebHost()
@@ -213,7 +214,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests
             var action = new Mock<Action<IStatefulServiceHostBuilder>>();
 
             // Act
-            new HostBuilder()
+            new HybridHostBuilder()
                .UseHostSelector(HostSelectorStub.Func)
                .ConfigureStatefulServiceHost(action.Object)
                .Build();
@@ -230,7 +231,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests
             var action = new Mock<Action<IStatelessServiceHostBuilder>>();
 
             // Act
-            new HostBuilder()
+            new HybridHostBuilder()
                .UseHostSelector(HostSelectorStub.Func)
                .ConfigureStatelessServiceHost(action.Object)
                .Build();
@@ -257,7 +258,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests
                .Returns(new Mock<IStatefulServiceHost>().Object);
 
             // Act
-            new HostBuilder()
+            new HybridHostBuilder()
                .UseHostSelector(HostSelectorStub.Func)
                .UseWebHostBuilder(WebHostBuilderStub.Func)
                .UseStatefulServiceHostBuilder(() => builder.Object)
@@ -290,7 +291,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests
                .Returns(new Mock<IStatelessServiceHost>().Object);
 
             // Act
-            new HostBuilder()
+            new HybridHostBuilder()
                .UseHostSelector(HostSelectorStub.Func)
                .UseWebHostBuilder(WebHostBuilderStub.Func)
                .UseStatelessServiceHostBuilder(() => builder.Object)
@@ -323,7 +324,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests
                .Returns(new Mock<IStatefulServiceHost>().Object);
 
             // Act
-            new HostBuilder()
+            new HybridHostBuilder()
                .UseHostSelector(HostSelectorStub.Func)
                .UseWebHostBuilder(factory.Object)
                .UseStatefulServiceHostBuilder(() => builder.Object)
@@ -355,7 +356,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests
                .Returns(new Mock<IStatelessServiceHost>().Object);
 
             // Act
-            new HostBuilder()
+            new HybridHostBuilder()
                .UseHostSelector(HostSelectorStub.Func)
                .UseWebHostBuilder(factory.Object)
                .UseStatelessServiceHostBuilder(() => builder.Object)
@@ -379,7 +380,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests
                .Setup(instance => instance(It.IsAny<IWebHostBuilder>()));
 
             // Act
-            new HostBuilder()
+            new HybridHostBuilder()
                .UseHostSelector(HostSelectorStub.Func)
                .UseWebHostBuilder(WebHostBuilderStub.Func)
                .ConfigureWebHost(action.Object)

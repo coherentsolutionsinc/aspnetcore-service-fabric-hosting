@@ -57,7 +57,7 @@ public class Program
 > 
 > This scenario doesn't include the configuration for Stateful or Stateless service because it is related to `IWebHostBuilder` rather than any of these `builders`. 
 
-Transforming this code to use `HostBuilder` has one problem illustrated below:
+Transforming this code to use `HybridHostBuilder` has one problem illustrated below:
 
 ``` csharp
 public class Program
@@ -65,7 +65,7 @@ public class Program
   public static void Main(
     string[] args)
   {
-    var host = new HostBuilder()
+    var host = new HybridHostBuilder()
        .UseWebHostBuilder(() => BuildWebHostBuilder(args))
        .ConfigureDefaultWebHost()
        .Build();
@@ -114,7 +114,7 @@ public class Program
   public static void Main(
     string[] args)
   {
-      var host = new HostBuilder()
+      var host = new HybridHostBuilder()
          .UseWebHostBuilder(() => BuildWebHostBuilder(args))
          .ConfigureWebHost(
               builder =>
