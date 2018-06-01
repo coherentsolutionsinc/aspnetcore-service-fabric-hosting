@@ -1,14 +1,15 @@
-﻿# CoherentSolutions.AspNetCore.ServiceFabric.Hosting
+# CoherentSolutions.AspNetCore.ServiceFabric.Hosting
 
 **CoherentSolutions.AspNetCore.ServiceFabric.Hosting** is a tiny library that is intended to simplify implementation of ASP.NET Core apps that need to have an ability to run both inside and outside of Service Fabric.
 
 It may be of use when you need to:
 1. Run ASP.NET Core application as *self-hosted / containerized / etc.* in *dev / test* environments and run the same application in Service Fabric as Reliable Service (Stateless or Stateful)
 2. Reduce initialization code duplication and have clear separation between self-hosted and Service Fabric - specific initialization code
+3. Simplify configuration of Service Fabric services by providing clear and flexible builder interface.
 
 ## Eager to start? 
 
-See [Modify existing ASP.NET Core application for execution inside Service Fabric as Reliable Service][10] for a quick start!
+Install [NuGet][11] package and start configure your Service Fabric services or see [detailed guide][10] to understand how to modify an existing ASP.NET Core application for executing inside Service Fabric!
 
 ## Documentation
 
@@ -48,4 +49,5 @@ This project is licensed under the MS-PL License - see the [LICENSE.md][9] for d
 [8]:  https://www.coherentsolutions.com/ "Coherent Solutions Inc."
 [9]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/blob/master/LICENSE.md "License"
 [10]: docs/BASIC_SCENARIOS.md#modify-existing-aspnet-core-application-for-execution-inside-service-fabric-as-reliable-service "Modify existing ASP.NET Core application for execution inside Service Fabric as Reliable Service"
+[11]: https://www.nuget.org/packages/CoherentSolutions.AspNetCore.ServiceFabric.Hosting/0.5.1-alpha "NuGet package"
 
