@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics.Tracing;
 using System.Fabric;
 using System.Linq;
+
 using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 
@@ -10,11 +12,18 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
     {
         private readonly IEnumerable<IStatefulServiceHostListenerReplicator> listenerReplicators;
 
+        private readonly ServiceEventSource eventSource;
+
         public StatefulService(
             StatefulServiceContext serviceContext,
             IEnumerable<IStatefulServiceHostListenerReplicator> listenerReplicators)
             : base(serviceContext)
         {
+            this.eventSource = new ServiceEventSource(
+                serviceContext,
+                $"{serviceContext.CodePackageActivationContext.ApplicationTypeName}.{serviceContext.ServiceTypeName}",
+                EventSourceSettings.Default);
+
             this.listenerReplicators = listenerReplicators
              ?? Enumerable.Empty<IStatefulServiceHostListenerReplicator>();
         }
@@ -27,6 +36,16 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
         public IReliableStateManager GetReliableStateManager()
         {
             return this.StateManager;
+        }
+
+        public ServiceContext GetContext()
+        {
+            return this.Context;
+        }
+
+        public IServiceEventSource GetEventSource()
+        {
+            return this.eventSource;
         }
 
         public IServicePartition GetPartition()

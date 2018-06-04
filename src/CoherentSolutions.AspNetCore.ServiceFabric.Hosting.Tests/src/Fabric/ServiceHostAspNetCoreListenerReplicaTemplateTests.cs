@@ -75,7 +75,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric
 
             // Assert
             serviceCollection.Verify(
-                instance => instance.Add(It.Is<ServiceDescriptor>(v => typeof(IServiceHostAspNetCoreListenerInformation) == v.ServiceType)),
+                instance => instance.Add(It.Is<ServiceDescriptor>(v => typeof(IServiceAspNetCoreListenerInformation) == v.ServiceType)),
                 Times.Once());
         }
 
@@ -123,9 +123,9 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric
                 instance => instance.Add(
                     It.Is<ServiceDescriptor>(
                         v =>
-                            typeof(IServiceHostAspNetCoreListenerInformation) == v.ServiceType
-                         && ((IServiceHostAspNetCoreListenerInformation) v.ImplementationInstance).EndpointName == EndpointName
-                         && ((IServiceHostAspNetCoreListenerInformation) v.ImplementationInstance).UrlSuffix != string.Empty
+                            typeof(IServiceAspNetCoreListenerInformation) == v.ServiceType
+                         && ((IServiceAspNetCoreListenerInformation) v.ImplementationInstance).EndpointName == EndpointName
+                         && ((IServiceAspNetCoreListenerInformation) v.ImplementationInstance).UrlSuffix != string.Empty
                     )),
                 Times.Once());
         }
