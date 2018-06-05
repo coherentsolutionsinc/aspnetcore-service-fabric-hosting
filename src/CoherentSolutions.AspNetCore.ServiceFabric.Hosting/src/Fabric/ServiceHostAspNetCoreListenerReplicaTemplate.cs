@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics.Tracing;
 using System.Fabric;
 
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Common;
@@ -27,6 +26,8 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 
             public ServiceFabricIntegrationOptions IntegrationOptions { get; private set; }
 
+            public Func<IServiceAspNetCoreListenerLoggerOptions> AspNetCoreListenerLoggerOptionsFunc { get; private set; }
+
             public Func<ServiceContext, string, Func<string, AspNetCoreCommunicationListener, IWebHost>, AspNetCoreCommunicationListener>
                 AspNetCoreCommunicationListenerFunc { get; private set; }
 
@@ -42,6 +43,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
             {
                 this.EndpointName = string.Empty;
                 this.IntegrationOptions = ServiceFabricIntegrationOptions.None;
+                this.AspNetCoreListenerLoggerOptionsFunc = DefaultAspNetCoreListenerLoggerOptionsFunc;
                 this.AspNetCoreCommunicationListenerFunc = null;
                 this.WebHostBuilderExtensionsImplFunc = DefaultWebHostBuilderExtensionsImplFunc;
                 this.WebHostExtensionsImplFunc = DefaultWebHostExtensionsImplFunc;
@@ -83,6 +85,13 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                  ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
 
+            public void UseLoggerOptions(
+                Func<IServiceAspNetCoreListenerLoggerOptions> factoryFunc)
+            {
+                this.AspNetCoreListenerLoggerOptionsFunc = factoryFunc
+                 ?? throw new ArgumentNullException(nameof(factoryFunc));
+            }
+
             public void UseAspNetCoreCommunicationListener(
                 Func<ServiceContext, string, Func<string, AspNetCoreCommunicationListener, IWebHost>, AspNetCoreCommunicationListener> factoryFunc)
             {
@@ -99,6 +108,11 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                 }
 
                 this.WebHostConfigAction = this.WebHostConfigAction.Chain(configAction);
+            }
+
+            private static ServiceAspNetCoreListenerLoggerOptions DefaultAspNetCoreListenerLoggerOptionsFunc()
+            {
+                return new ServiceAspNetCoreListenerLoggerOptions();
             }
 
             private static IWebHostBuilderExtensionsImpl DefaultWebHostBuilderExtensionsImplFunc()
@@ -194,14 +208,16 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                                     services.Add(new ServiceDescriptor(typeof(IStatelessServicePartition), servicePartition));
                                     break;
                             }
+
                             services.Add(new ServiceDescriptor(typeof(IServiceAspNetCoreListenerInformation), listenerInformation));
                         });
 
                     // Configure logging provider
+                    var loggerOptions = parameters.AspNetCoreListenerLoggerOptionsFunc();
                     builder.ConfigureLogging(
                         config =>
                         {
-                            config.AddProvider(new ServiceAspNetCoreListenerLoggerProvider(listenerInformation, serviceEventSource));
+                            config.AddProvider(new ServiceAspNetCoreListenerLoggerProvider(listenerInformation, loggerOptions, serviceEventSource));
                         });
 
                     return new ExtensibleWebHost(builder.Build());

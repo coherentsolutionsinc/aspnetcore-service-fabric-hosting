@@ -10,6 +10,8 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
     {
         private readonly IServiceAspNetCoreListenerInformation listenerInformation;
 
+        private readonly IServiceAspNetCoreListenerLoggerOptions loggerOptions;
+
         private readonly IServiceEventSource eventSource;
 
         private readonly ConcurrentDictionary<string, ServiceAspNetCoreListenerLogger> loggers;
@@ -18,10 +20,14 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 
         public ServiceAspNetCoreListenerLoggerProvider(
             IServiceAspNetCoreListenerInformation listenerInformation,
+            IServiceAspNetCoreListenerLoggerOptions loggerOptions,
             IServiceEventSource eventSource)
         {
             this.listenerInformation = listenerInformation
              ?? throw new ArgumentNullException(nameof(listenerInformation));
+
+            this.loggerOptions = loggerOptions 
+             ?? throw new ArgumentNullException(nameof(loggerOptions));
 
             this.eventSource = eventSource
              ?? throw new ArgumentNullException(nameof(eventSource));
@@ -36,7 +42,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 
             return this.loggers.GetOrAdd(
                 categoryName,
-                key => new ServiceAspNetCoreListenerLogger(this.listenerInformation, this.eventSource, categoryName));
+                key => new ServiceAspNetCoreListenerLogger(this.listenerInformation, this.loggerOptions, this.eventSource, categoryName));
         }
 
         public void Dispose()

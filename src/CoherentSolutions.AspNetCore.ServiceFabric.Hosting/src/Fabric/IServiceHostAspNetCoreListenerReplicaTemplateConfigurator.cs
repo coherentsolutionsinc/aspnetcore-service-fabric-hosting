@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Fabric;
+
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tools;
+
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 
@@ -15,6 +17,9 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 
         void UseIntegrationOptions(
             ServiceFabricIntegrationOptions integrationOptions);
+
+        void UseLoggerOptions(
+            Func<IServiceAspNetCoreListenerLoggerOptions> factoryFunc);
 
         void UseAspNetCoreCommunicationListener(
             Func<ServiceContext, string, Func<string, AspNetCoreCommunicationListener, IWebHost>, AspNetCoreCommunicationListener> factoryFunc);

@@ -67,23 +67,32 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 
         private const string REQUEST_PATH = "RequestPath";
 
+        private static readonly AsyncLocal<ServiceAspNetCoreListenerRequestLoggerScope> listenerRequestScope;
+
         private readonly IServiceAspNetCoreListenerInformation listenerInformation;
 
-        private readonly AsyncLocal<ServiceAspNetCoreListenerRequestLoggerScope> listenerRequestScope;
+        private readonly IServiceAspNetCoreListenerLoggerOptions loggerOptions;
 
         private readonly IServiceEventSource eventSource;
 
         private readonly string eventCategoryName;
 
+        static ServiceAspNetCoreListenerLogger()
+        {
+            listenerRequestScope = new AsyncLocal<ServiceAspNetCoreListenerRequestLoggerScope>();
+        }
+
         public ServiceAspNetCoreListenerLogger(
             IServiceAspNetCoreListenerInformation listenerInformation,
+            IServiceAspNetCoreListenerLoggerOptions loggerOptions,
             IServiceEventSource eventSource,
             string categoryName)
         {
             this.listenerInformation = listenerInformation
              ?? throw new ArgumentNullException(nameof(listenerInformation));
 
-            this.listenerRequestScope = new AsyncLocal<ServiceAspNetCoreListenerRequestLoggerScope>();
+            this.loggerOptions = loggerOptions
+             ?? throw new ArgumentNullException(nameof(loggerOptions));
 
             this.eventSource = eventSource
              ?? throw new ArgumentNullException(nameof(eventSource));
@@ -106,10 +115,13 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                 EndpointName = this.listenerInformation.EndpointName
             };
 
-            if (this.listenerRequestScope.Value != null)
+            if (this.loggerOptions.IncludeRequestInformation)
             {
-                eventData.RequestId = this.listenerRequestScope.Value.RequestId;
-                eventData.RequestPath = this.listenerRequestScope.Value.RequestPath;
+                if (listenerRequestScope.Value != null)
+                {
+                    eventData.RequestId = listenerRequestScope.Value.RequestId;
+                    eventData.RequestPath = listenerRequestScope.Value.RequestPath;
+                }
             }
 
             switch (logLevel)
@@ -139,6 +151,10 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
         public bool IsEnabled(
             LogLevel logLevel)
         {
+            if (this.loggerOptions.LogLevel > logLevel)
+            {
+                return false;
+            }
             switch (logLevel)
             {
                 case LogLevel.None:
@@ -161,20 +177,43 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
         public IDisposable BeginScope<TState>(
             TState state)
         {
-            if (this.listenerRequestScope.Value == null && state is IDictionary<string, object> dictionary)
+            if (listenerRequestScope.Value != null)
             {
-                if (dictionary.TryGetValue(REQUEST_ID, out var requestId) && dictionary.TryGetValue(REQUEST_PATH, out var requestPath))
-                {
-                    this.listenerRequestScope.Value = new ServiceAspNetCoreListenerRequestLoggerScope(
-                        requestId as string,
-                        requestPath as string,
-                        () =>
-                        {
-                            this.listenerRequestScope.Value = null;
-                        });
+                return null;
+            }
 
-                    return this.listenerRequestScope.Value;
+            if (state is IEnumerable<KeyValuePair<string, object>> enumerable)
+            {
+                string requestId = null,
+                       requestPath = null;
+
+                foreach (var kv in enumerable)
+                {
+                    if (kv.Key.Equals(REQUEST_ID, StringComparison.OrdinalIgnoreCase))
+                    {
+                        requestId = kv.Value as string;
+                    }
+
+                    if (kv.Key.Equals(REQUEST_PATH, StringComparison.OrdinalIgnoreCase))
+                    {
+                        requestPath = kv.Value as string;
+                    }
                 }
+
+                if (string.IsNullOrEmpty(requestId) || string.IsNullOrEmpty(requestPath))
+                {
+                    return null;
+                }
+
+                listenerRequestScope.Value = new ServiceAspNetCoreListenerRequestLoggerScope(
+                    requestId,
+                    requestPath,
+                    () =>
+                    {
+                        listenerRequestScope.Value = null;
+                    });
+
+                return listenerRequestScope.Value;
             }
 
             return null;

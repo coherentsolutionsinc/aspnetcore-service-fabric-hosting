@@ -63,7 +63,8 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting
             string serviceName)
             where TCaller : IConfigurableObject<IServiceHostBuilderConfigurator>
         {
-            @this.ConfigureObject(configurator => configurator.UseServiceName(serviceName));
+            @this.ConfigureObject(
+                configurator => configurator.UseServiceName(serviceName));
 
             return @this;
         }
@@ -73,7 +74,19 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting
             string endpointName)
             where TCaller : IConfigurableObject<IServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
         {
-            @this.ConfigureObject(configurator => configurator.UseEndpointName(endpointName));
+            @this.ConfigureObject(
+                configurator => configurator.UseEndpointName(endpointName));
+
+            return @this;
+        }
+
+        public static TCaller UseLoggerOptions<TCaller>(
+            this TCaller @this,
+            Func<IServiceAspNetCoreListenerLoggerOptions> factoryFunc)
+            where TCaller : IConfigurableObject<IServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseLoggerOptions(factoryFunc));
 
             return @this;
         }
