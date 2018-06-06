@@ -12,14 +12,18 @@ Let's see how it works in `WebService/Program.cs`
 new HybridHostBuilder()
     .UseWebHostBuilder(() => WebHost.CreateDefaultBuilder(args).UseStartup<Startup>())
     .ConfigureWebHost(webHostBuilder => {
-        webHostBuilder.ConfigureServices(services => { services.AddTransient<IInformationService, WebInformationService>(); });
+        webHostBuilder.ConfigureServices(services => { 
+            services.AddTransient<IInformationService, WebInformationService>(); 
+        });
     })
     .ConfigureStatefulServiceHost(serviceHostBuilder => {
         serviceHostBuilder
             .DefineAspNetCoreListener(listenerBuilder => {
                 listenerBuilder
                     .ConfigureWebHost(webHostBuilder => {
-                        webHostBuilder.ConfigureServices(services => { services.AddTransient<IInformationService, FabricInformationService>(); });
+                        webHostBuilder.ConfigureServices(services => { 
+                            services.AddTransient<IInformationService, FabricInformationService>(); 
+                        });
                     });
                 });
     })
