@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Fabric;
 using System.Threading;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric;
@@ -92,6 +93,9 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric.Servic
             var service = this.CreateService();
 
             var serviceCollection = new Mock<IServiceCollection>();
+            serviceCollection
+               .Setup(instance => instance.GetEnumerator())
+               .Returns(new Mock<IEnumerator<ServiceDescriptor>>().Object);
 
             var builder = new Mock<IWebHostBuilder>(MockBehavior.Loose);
             builder
@@ -131,6 +135,9 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric.Servic
             var service = this.CreateService();
 
             var serviceCollection = new Mock<IServiceCollection>();
+            serviceCollection
+               .Setup(instance => instance.GetEnumerator())
+               .Returns(new Mock<IEnumerator<ServiceDescriptor>>().Object);
 
             var builder = new Mock<IWebHostBuilder>(MockBehavior.Loose);
             builder
