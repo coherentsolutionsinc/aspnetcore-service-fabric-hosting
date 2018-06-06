@@ -30,11 +30,14 @@ Please follow the instructions below to run AspNetCore application self-hosted i
 
 Please follow the instructions below to run AspNetCore application in Service Fabric cluster.
 
+> **Important**
+>
+> In order to run the application as Service Fabric Reliable Service you need to have configured **Service Fabric Cluster** either locally or in the cloud.
+
 **Visual Studio**
 
 1. Open `HybridHostingSample.sln` solution
 2. Right click on the `App` project and select `Publish...`
-
 3. Select the appropriate destination cluster and click `Publish`
 4. In Service Fabric explorer navigate to `fabric:/App/WebService` and copy the URI from replica's `Web Service Endpoint` endpoint.
 5. Open `{web-service-endpoint-uri}/api/me` in browser.
