@@ -14,14 +14,15 @@ namespace WebService
         {
             new HybridHostBuilder()
                 /*
-                    This configuration would flow to both .ConfigureWebHost() method below and
-                    to listenerBuilder.ConfigureWebHost() method inside .ConfigureStatefulServiceHost.
-
-                    So we put shared configuration into .UseWebHostBuilder.
+                    Calling .UseWebHostBuilder() sets the factory function used to create 
+                    instances of `IWebHostBuilder` during the build for both Web App and Service Fabric. 
+                    
+                    In general this allows to separate shared configuration by providing partially preconfigured
+                    IWebHostBuilder from specific configuration done .ConfigureWebHost() methods. 
                 */
                 .UseWebHostBuilder(() => WebHost.CreateDefaultBuilder(args).UseStartup<Startup>())
                 .ConfigureWebHost(
-                    webHostBuilder =>
+                    webHostBuilder => // Here we are receiving and instance of IWebHostBuilder from .UseWebHostBuilder()
                     {
                         /*
                             Configuring services to use when hosting as self-hosted app.
@@ -51,7 +52,7 @@ namespace WebService
                                         .UseEndpointName("WebServiceEndpoint")
                                         .UseUniqueServiceUrlIntegration()
                                         .ConfigureWebHost(
-                                            webHostBuilder =>
+                                            webHostBuilder => // Here we are receiving and instance of IWebHostBuilder from .UseWebHostBuilder()
                                             {
                                                 /*
                                                     Configuring services to use when hosting as reliable service.

@@ -1,39 +1,6 @@
 # About this Sample
 
-This application demonstrates how to use `HybridHostBuilder` to configure AspNetCore application to be able to run both as Web App and Service Fabric reliable service. `HybridHostBuilder` was designed to reduce code duplication and simplify configuration. That is why it supports so called *configuration flow*.
-
-Let's see how it works in `WebService/Program.cs` 
-
-> **NOTE**
->
-> In this code sample all unrelated configuration is omitted.
-
-``` csharp
-new HybridHostBuilder()
-    .UseWebHostBuilder(() => WebHost.CreateDefaultBuilder(args).UseStartup<Startup>())
-    .ConfigureWebHost(webHostBuilder => {
-        webHostBuilder.ConfigureServices(services => { 
-            services.AddTransient<IInformationService, WebInformationService>(); 
-        });
-    })
-    .ConfigureStatefulServiceHost(serviceHostBuilder => {
-        serviceHostBuilder
-            .DefineAspNetCoreListener(listenerBuilder => {
-                listenerBuilder
-                    .ConfigureWebHost(webHostBuilder => {
-                        webHostBuilder.ConfigureServices(services => { 
-                            services.AddTransient<IInformationService, FabricInformationService>(); 
-                        });
-                    });
-                });
-    })
-    .Build()
-    .Run();
-```
-
-Calling `.UseWebHostBuilder(() => WebHost.CreateDefaultBuilder(args).UseStartup<Startup>())` sets the factory function used to create an instances of `IWebHostBuilder` during the build. Using this factory allows to make sure that all shareable configuration is accessible in both call to `.ConfigureWebHost()`. 
-
-More information about *configuration flow* can be found [here][2].
+This application demonstrates how to use `HybridHostBuilder` to configure AspNetCore application to run both as Web App and Service Fabric reliable service. `HybridHostBuilder` was designed to reduce code duplication, simplify configuration and provide a single place for entry point configuration. 
 
 ## Usage
 
@@ -67,10 +34,10 @@ Please follow the instructions below to run AspNetCore application in Service Fa
 
 1. Open `HybridHostingSample.sln` solution
 2. Right click on the `App` project and select `Publish...`
+
 3. Select the appropriate destination cluster and click `Publish`
 4. In Service Fabric explorer navigate to `fabric:/App/WebService` and copy the URI from replica's `Web Service Endpoint` endpoint.
 5. Open `{web-service-endpoint-uri}/api/me` in browser.
 6. In the browser windows you should receive "Hello! I am running inside 'Service Fabric'." message.
 
 [1]: https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/blob/master/docs/BASIC_SCENARIOS.md#modify-existing-aspnet-core-application-for-execution-inside-service-fabric-as-reliable-service
-[2]: https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/blob/master/docs/IMPLEMENTATION_DETAILS.md
