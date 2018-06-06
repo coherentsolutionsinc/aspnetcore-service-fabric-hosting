@@ -36,12 +36,18 @@ namespace WebService
                     serviceHostBuilder =>
                     {
                         serviceHostBuilder
+                            /*
+                                Set name of service type defined in PackageRoot/ServiceManifest.xml
+                            */
                             .UseServiceName("WebServiceType")
                             .DefineAspNetCoreListener(
                                 listenerBuilder =>
                                 {
                                     listenerBuilder
                                         .UseKestrel()
+                                        /*
+                                            Set name of the endpoint defined in PackageRoot/ServiceManifest.xml
+                                        */
                                         .UseEndpointName("WebServiceEndpoint")
                                         .UseUniqueServiceUrlIntegration()
                                         .ConfigureWebHost(
