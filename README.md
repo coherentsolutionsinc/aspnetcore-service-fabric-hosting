@@ -1,11 +1,10 @@
 # About the project
 
-**CoherentSolutions.AspNetCore.ServiceFabric.Hosting** is a simple project to basically simplifies two things:
+**CoherentSolutions.AspNetCore.ServiceFabric.Hosting** is a simple project that simplifies:
 
-1. Configuration of stateful or stateless reliable service (based on the [IWebHost][1])
-2. Configuration of **aspnetcore** application that also should be stateful or stateless reliable service by providing support for shared configuration hybrid execution that allow application to run as self-hosted **aspnetcore** application or as reliable service without future code modifications.
-    
-    
+1. Configuration of reliable services oriented for web request processing using [IWebHost][1].
+2. Configuration of **aspnetcore** service that needs to be hosted in both ASP.NET Core and Service Fabric runtimes by providing shared configuration support and reducing amount of infrastructure code.
+        
     _This can be useful for those who performs a migration to Service Fabric and would like to retain the ability for self-hosted execution (in development, continues integration etc.)_
 
 More information can be found in [wiki][12]
