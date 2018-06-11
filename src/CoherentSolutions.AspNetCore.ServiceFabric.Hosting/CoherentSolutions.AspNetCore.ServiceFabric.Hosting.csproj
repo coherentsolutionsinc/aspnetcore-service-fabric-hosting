@@ -11,8 +11,10 @@
     <Description>This package provides a HybridHostBuilder class that simplifies configuring a service implementation for hosting in both ASP.NET Core and Service Fabric runtimes.</Description>
     <PackageTags>aspnetcore, servicefabric, hosting</PackageTags>
     <RepositoryType>Git</RepositoryType>
-    <Version>0.5.1-alpha</Version>
-    <PackageReleaseNotes>The initial release.</PackageReleaseNotes>
+    <Version>0.6.2-alpha</Version>
+    <PackageReleaseNotes>Added basic support for Event Tracing for Windows. Now all events written by ILogger are redirected to appropriate Event Source (there isn't need for separate class anymore) with all request related information.
+
+Please see https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Integration#microsoftextensionslogging---built-in-iloggerprovider for details.</PackageReleaseNotes>
     <Product>CoherentSolutions.AspNetCore.ServiceFabric.Hosting</Product>
     <RepositoryUrl>https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting</RepositoryUrl>
     <PackageProjectUrl>https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting</PackageProjectUrl>
