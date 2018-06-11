@@ -4,6 +4,8 @@
 
 1. Configuration of stateful or stateless reliable service (based on the [IWebHost][1])
 2. Configuration of **aspnetcore** application that also should be stateful or stateless reliable service by providing support for shared configuration hybrid execution that allow application to run as self-hosted **aspnetcore** application or as reliable service without future code modifications.
+    
+    
     _This can be useful for those who performs a migration to Service Fabric and would like to retain the ability for self-hosted execution (in development, continues integration etc.)_
 
 More information can be found in [wiki][12]
