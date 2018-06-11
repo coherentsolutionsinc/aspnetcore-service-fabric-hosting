@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Fabric;
+
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Common;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Common.Exceptions;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Web;
+
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
@@ -23,6 +26,8 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 
             public ServiceFabricIntegrationOptions IntegrationOptions { get; private set; }
 
+            public Func<IServiceAspNetCoreListenerLoggerOptions> AspNetCoreListenerLoggerOptionsFunc { get; private set; }
+
             public Func<ServiceContext, string, Func<string, AspNetCoreCommunicationListener, IWebHost>, AspNetCoreCommunicationListener>
                 AspNetCoreCommunicationListenerFunc { get; private set; }
 
@@ -38,6 +43,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
             {
                 this.EndpointName = string.Empty;
                 this.IntegrationOptions = ServiceFabricIntegrationOptions.None;
+                this.AspNetCoreListenerLoggerOptionsFunc = DefaultAspNetCoreListenerLoggerOptionsFunc;
                 this.AspNetCoreCommunicationListenerFunc = null;
                 this.WebHostBuilderExtensionsImplFunc = DefaultWebHostBuilderExtensionsImplFunc;
                 this.WebHostExtensionsImplFunc = DefaultWebHostExtensionsImplFunc;
@@ -79,6 +85,13 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                  ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
 
+            public void UseLoggerOptions(
+                Func<IServiceAspNetCoreListenerLoggerOptions> factoryFunc)
+            {
+                this.AspNetCoreListenerLoggerOptionsFunc = factoryFunc
+                 ?? throw new ArgumentNullException(nameof(factoryFunc));
+            }
+
             public void UseAspNetCoreCommunicationListener(
                 Func<ServiceContext, string, Func<string, AspNetCoreCommunicationListener, IWebHost>, AspNetCoreCommunicationListener> factoryFunc)
             {
@@ -95,6 +108,11 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                 }
 
                 this.WebHostConfigAction = this.WebHostConfigAction.Chain(configAction);
+            }
+
+            private static ServiceAspNetCoreListenerLoggerOptions DefaultAspNetCoreListenerLoggerOptionsFunc()
+            {
+                return new ServiceAspNetCoreListenerLoggerOptions();
             }
 
             private static IWebHostBuilderExtensionsImpl DefaultWebHostBuilderExtensionsImplFunc()
@@ -141,8 +159,10 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                     url,
                     listener) =>
                 {
-                    var serviceContext = listener.ServiceContext;
+                    var serviceContext = service.GetContext();
                     var servicePartition = service.GetPartition();
+                    var serviceEventSource = service.GetEventSource();
+
                     var builder = parameters.WebHostBuilderFunc();
                     if (builder == null)
                     {
@@ -163,7 +183,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                     extensionsImpl.UseUrls(builder, url);
 
                     // This is important to let UseServiceFabricIntegration execute first - otherwise listener.UrlSuffix would be an empty string.
-                    var listenerInformation = new ServiceHostAspNetCoreListenerInformation(
+                    var listenerInformation = new ServiceAspNetCoreListenerInformation(
                         parameters.EndpointName,
                         listener.UrlSuffix);
 
@@ -173,29 +193,31 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                             // This is used for service type agnostic code
                             services.Add(new ServiceDescriptor(typeof(ServiceContext), serviceContext));
                             services.Add(new ServiceDescriptor(typeof(IServicePartition), servicePartition));
+                            services.Add(new ServiceDescriptor(typeof(IServiceEventSource), serviceEventSource));
+                            services.Add(new ServiceDescriptor(typeof(IServiceListenerInformation), listenerInformation));
 
                             // This is used for service type dependent code
                             switch (serviceContext)
                             {
                                 case StatefulServiceContext _:
                                     services.Add(new ServiceDescriptor(typeof(StatefulServiceContext), serviceContext));
+                                    services.Add(new ServiceDescriptor(typeof(IStatefulServicePartition), servicePartition));
                                     break;
                                 case StatelessServiceContext _:
                                     services.Add(new ServiceDescriptor(typeof(StatelessServiceContext), serviceContext));
-                                    break;
-                            }
-                            switch (servicePartition)
-                            {
-                                case IStatefulServicePartition _:
-                                    services.Add(new ServiceDescriptor(typeof(IStatefulServicePartition), servicePartition));
-                                    break;
-                                case IStatelessServicePartition _:
                                     services.Add(new ServiceDescriptor(typeof(IStatelessServicePartition), servicePartition));
                                     break;
                             }
 
-                            // These are services to link IWebHostBuilder with the Listener and Service
-                            services.Add(new ServiceDescriptor(typeof(IServiceHostAspNetCoreListenerInformation), listenerInformation));
+                            services.Add(new ServiceDescriptor(typeof(IServiceAspNetCoreListenerInformation), listenerInformation));
+                        });
+
+                    // Configure logging provider
+                    var loggerOptions = parameters.AspNetCoreListenerLoggerOptionsFunc();
+                    builder.ConfigureLogging(
+                        config =>
+                        {
+                            config.AddProvider(new ServiceAspNetCoreListenerLoggerProvider(listenerInformation, loggerOptions, serviceEventSource));
                         });
 
                     return new ExtensibleWebHost(builder.Build());

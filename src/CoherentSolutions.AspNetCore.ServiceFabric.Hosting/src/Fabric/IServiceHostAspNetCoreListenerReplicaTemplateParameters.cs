@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Fabric;
+
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Web;
+
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 
@@ -11,6 +13,8 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
         string EndpointName { get; }
 
         ServiceFabricIntegrationOptions IntegrationOptions { get; }
+
+        Func<IServiceAspNetCoreListenerLoggerOptions> AspNetCoreListenerLoggerOptionsFunc { get; }
 
         Func<ServiceContext, string, Func<string, AspNetCoreCommunicationListener, IWebHost>, AspNetCoreCommunicationListener>
             AspNetCoreCommunicationListenerFunc { get; }
