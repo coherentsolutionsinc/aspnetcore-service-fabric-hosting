@@ -7,5 +7,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
         LogLevel LogLevel { get; }
 
         bool IncludeRequestInformation { get; }
+
+        bool IncludeExceptionStackTrace { get; }
     }
 }

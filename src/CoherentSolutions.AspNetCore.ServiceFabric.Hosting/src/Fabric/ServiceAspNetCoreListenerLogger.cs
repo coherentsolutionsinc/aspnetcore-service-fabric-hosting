@@ -56,10 +56,13 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
         [EventData]
         private class ServiceAspNetCoreListenerLoggerEventSourceData : ServiceEventSourceData
         {
+            [EventField]
             public string RequestId { get; set; }
 
+            [EventField]
             public string RequestPath { get; set; }
 
+            [EventField]
             public string EndpointName { get; set; }
         }
 
@@ -115,13 +118,15 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                 EndpointName = this.listenerInformation.EndpointName
             };
 
-            if (this.loggerOptions.IncludeRequestInformation)
+            if (this.loggerOptions.IncludeRequestInformation && listenerRequestScope.Value != null)
             {
-                if (listenerRequestScope.Value != null)
-                {
-                    eventData.RequestId = listenerRequestScope.Value.RequestId;
-                    eventData.RequestPath = listenerRequestScope.Value.RequestPath;
-                }
+                eventData.RequestId = listenerRequestScope.Value.RequestId;
+                eventData.RequestPath = listenerRequestScope.Value.RequestPath;
+            }
+
+            if (this.loggerOptions.IncludeExceptionStackTrace && exception != null)
+            {
+                eventData.EventStackTrace = exception.StackTrace;
             }
 
             switch (logLevel)
@@ -155,6 +160,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
             {
                 return false;
             }
+
             switch (logLevel)
             {
                 case LogLevel.None:

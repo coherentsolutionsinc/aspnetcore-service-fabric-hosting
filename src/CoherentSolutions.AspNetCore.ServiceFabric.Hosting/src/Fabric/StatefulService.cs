@@ -22,7 +22,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
             this.eventSource = new ServiceEventSource(
                 serviceContext,
                 $"{serviceContext.CodePackageActivationContext.ApplicationTypeName}.{serviceContext.ServiceTypeName}",
-                EventSourceSettings.Default);
+                EventSourceSettings.EtwSelfDescribingEventFormat);
 
             this.listenerReplicators = listenerReplicators
              ?? Enumerable.Empty<IStatefulServiceHostListenerReplicator>();
