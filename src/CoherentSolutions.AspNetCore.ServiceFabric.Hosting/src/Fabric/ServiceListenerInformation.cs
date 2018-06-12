@@ -9,7 +9,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
         protected ServiceListenerInformation(
             string endpointName)
         {
-            this.EndpointName = endpointName 
+            this.EndpointName = endpointName
              ?? throw new ArgumentNullException(nameof(endpointName));
         }
     }

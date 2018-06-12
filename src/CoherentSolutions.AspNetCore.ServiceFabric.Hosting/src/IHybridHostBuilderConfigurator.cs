@@ -1,4 +1,5 @@
 ﻿using System;
+
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tools;
 

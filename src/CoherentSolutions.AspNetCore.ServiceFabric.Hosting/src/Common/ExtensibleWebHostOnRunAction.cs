@@ -1,4 +1,5 @@
 ﻿using System;
+
 using Microsoft.AspNetCore.Hosting;
 
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Common

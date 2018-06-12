@@ -26,7 +26,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
             this.listenerInformation = listenerInformation
              ?? throw new ArgumentNullException(nameof(listenerInformation));
 
-            this.loggerOptions = loggerOptions 
+            this.loggerOptions = loggerOptions
              ?? throw new ArgumentNullException(nameof(loggerOptions));
 
             this.eventSource = eventSource

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+
 using Microsoft.Extensions.Configuration;
 
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting

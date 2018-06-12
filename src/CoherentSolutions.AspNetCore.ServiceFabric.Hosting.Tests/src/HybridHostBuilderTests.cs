@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using CoherentSolutions.AspNetCore.ServiceFabric.Hosting;
+
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Common.Exceptions;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Stubs;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Web;
+
 using Microsoft.AspNetCore.Hosting;
+
 using Moq;
+
 using Xunit;
 
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests
