@@ -21,7 +21,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ServiceAspNetCoreListenerLoggerOptions"/> class.
+        ///     Initializes a new instance of the <see cref="ServiceAspNetCoreListenerLoggerOptions" /> class.
         /// </summary>
         public ServiceAspNetCoreListenerLoggerOptions()
         {

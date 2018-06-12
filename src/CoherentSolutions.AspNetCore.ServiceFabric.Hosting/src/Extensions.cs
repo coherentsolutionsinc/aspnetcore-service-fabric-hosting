@@ -2,9 +2,11 @@
 using System.ComponentModel;
 using System.Fabric;
 using System.Reflection;
+
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Common;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tools;
+
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ServiceFabric.Services.Communication.AspNetCore;

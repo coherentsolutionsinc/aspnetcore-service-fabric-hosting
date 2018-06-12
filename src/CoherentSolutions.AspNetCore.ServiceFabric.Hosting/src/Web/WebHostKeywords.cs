@@ -6,7 +6,10 @@
 
         public WebHostKeywords()
         {
-            this.keywords = new[] { HostKeywords.ENVIRONMENT_ASPNET_CORE };
+            this.keywords = new[]
+            {
+                HostKeywords.ENVIRONMENT_ASPNET_CORE
+            };
         }
 
         public string[] GetKeywords()

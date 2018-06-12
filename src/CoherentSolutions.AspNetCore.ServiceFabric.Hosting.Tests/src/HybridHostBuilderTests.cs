@@ -1,18 +1,42 @@
 ﻿using System;
 using System.Collections.Generic;
-using CoherentSolutions.AspNetCore.ServiceFabric.Hosting;
+
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Common.Exceptions;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Stubs;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Web;
+
 using Microsoft.AspNetCore.Hosting;
+
 using Moq;
+
 using Xunit;
 
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests
 {
     public class HybridHostBuilderTests
     {
+        private class MinimalStartup
+        {
+            public void Configure()
+            {
+            }
+        }
+
+        // Bug: https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/issues/6
+        [Fact]
+        public void
+            Should_build_IHost_When_HybridHostBuilder_configuring_web_host_with_minimal_configuration()
+        {
+            new HybridHostBuilder()
+               .ConfigureWebHost(
+                    b =>
+                    {
+                        b.UseStartup<MinimalStartup>();
+                    })
+               .Build();
+        }
+
         [Fact]
         public void
             Should_throw_FactoryProducesNullInstanceException_When_stateful_service_host_builder_func_returns_null()

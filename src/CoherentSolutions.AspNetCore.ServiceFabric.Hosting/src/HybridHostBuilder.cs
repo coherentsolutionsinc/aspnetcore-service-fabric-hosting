@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Common;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Common.Exceptions;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tools;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Web;
+
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 
@@ -192,7 +195,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting
 
             private static IWebHostBuilder DefaultWebHostBuilderFuncImpl()
             {
-                return new WebHostBuilder();
+                return WebHost.CreateDefaultBuilder();
             }
 
             private static IStatefulServiceHostBuilder DefaultStatefulServiceHostBuilderFuncImpl()
@@ -221,7 +224,9 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting
         {
             var hostDescriptors = new List<IHostDescriptor>();
             var hostKeywordsProviders = new List<IHostKeywordsProvider>
-                { new HostKeywordsProvider(new ConfigurationBuilder().AddEnvironmentVariables().Build()) };
+            {
+                new HostKeywordsProvider(new ConfigurationBuilder().AddEnvironmentVariables().Build())
+            };
 
             var parameters = new Parameters();
 

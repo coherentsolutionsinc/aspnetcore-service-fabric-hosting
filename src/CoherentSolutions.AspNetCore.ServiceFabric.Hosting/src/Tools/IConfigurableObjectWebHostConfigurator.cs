@@ -1,5 +1,7 @@
 ﻿using System;
+
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Web;
+
 using Microsoft.AspNetCore.Hosting;
 
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tools
