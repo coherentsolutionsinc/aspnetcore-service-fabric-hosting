@@ -76,7 +76,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric.Servic
 
             // Act
             var listener = new StatelessServiceHostAspNetCoreListenerReplicaTemplate()
-               .UseAspNetCoreCommunicationListener(AspNetCoreCommunicationListenerStub.Func)
+               .UseCommunicationListener(AspNetCoreCommunicationListenerStub.Func)
                .UseWebHostBuilder(WebHostBuilderStub.Func)
                .UseEndpointName(endpoint)
                .Activate(service.Object);
@@ -111,7 +111,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric.Servic
             replicaTemplate.ConfigureObject(
                 config =>
                 {
-                    config.UseAspNetCoreCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
+                    config.UseCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
                     config.UseWebHostBuilder(() => builder.Object);
                     config.UseWebHostBuilderExtensionsImpl(WebHostBuilderExtensionsImplStub.Func);
                 });
@@ -153,7 +153,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric.Servic
             replicaTemplate.ConfigureObject(
                 config =>
                 {
-                    config.UseAspNetCoreCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
+                    config.UseCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
                     config.UseWebHostBuilder(() => builder.Object);
                 });
 

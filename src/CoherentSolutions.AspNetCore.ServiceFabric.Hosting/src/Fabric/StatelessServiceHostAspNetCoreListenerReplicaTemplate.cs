@@ -10,8 +10,8 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
               ServiceInstanceListener>,
           IStatelessServiceHostAspNetCoreListenerReplicaTemplate
     {
-        private class StatelessParameters
-            : Parameters,
+        private class StatelessListenerParameters
+            : AspNetCoreListenerParameters,
               IStatelessServiceHostAspNetCoreListenerReplicaTemplateParameters,
               IStatelessServiceHostAspNetCoreListenerReplicaTemplateConfigurator
         {
@@ -20,11 +20,11 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
         public override ServiceInstanceListener Activate(
             IStatelessService service)
         {
-            var parameters = new StatelessParameters();
+            var parameters = new StatelessListenerParameters();
 
             this.UpstreamConfiguration(parameters);
 
-            var factoryFunc = this.CreateAspNetCoreCommunicationListenerFunc(service, parameters);
+            var factoryFunc = this.CreateCommunicationListenerFunc(service, parameters);
 
             return new ServiceInstanceListener(factoryFunc, parameters.EndpointName);
         }

@@ -12,6 +12,6 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
             Func<TAspNetCoreReplicaTemplate> factoryFunc);
 
         void DefineAspNetCoreListener(
-            Action<TAspNetCoreReplicaTemplate> declareAction);
+            Action<TAspNetCoreReplicaTemplate> defineAction);
     }
 }

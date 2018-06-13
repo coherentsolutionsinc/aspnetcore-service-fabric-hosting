@@ -2,11 +2,11 @@
 
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 {
-    public interface IServiceAspNetCoreListenerLoggerOptions
+    public interface IServiceHostListenerLoggerOptions
     {
         LogLevel LogLevel { get; }
 
-        bool IncludeRequestInformation { get; }
+        bool IncludeMetadata { get; }
 
         bool IncludeExceptionStackTrace { get; }
     }

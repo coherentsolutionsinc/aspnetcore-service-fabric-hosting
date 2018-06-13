@@ -14,16 +14,20 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric
         TReplicableTemplate,
         TAspNetCoreReplicaTemplate,
         TAspNetCoreReplicaTemplateConfigurator,
+        TRemotingReplicaTemplate,
+        TRemotingReplicaTemplateConfigurator,
         TReplicator>
         where TParameters :
         class,
         IServiceHostBuilderParameters,
         IServiceHostBuilderAspNetCoreListenerParameters<TAspNetCoreReplicaTemplate>,
+        IServiceHostBuilderRemotingListenerParameters<TRemotingReplicaTemplate>,
         IServiceHostBuilderListenerReplicationParameters<TReplicableTemplate, TReplicator>
         where TConfigurator :
         class,
         IServiceHostBuilderConfigurator,
         IServiceHostBuilderAspNetCoreListenerConfigurator<TAspNetCoreReplicaTemplate>,
+        IServiceHostBuilderRemotingListenerConfigurator<TRemotingReplicaTemplate>,
         IServiceHostBuilderListenerReplicationConfigurator<TReplicableTemplate, TReplicator>
         where TAspNetCoreReplicaTemplate :
         class,
@@ -32,6 +36,13 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric
         where TAspNetCoreReplicaTemplateConfigurator :
         class,
         IServiceHostAspNetCoreListenerReplicaTemplateConfigurator
+        where TRemotingReplicaTemplate :
+        class,
+        TReplicableTemplate,
+        IServiceHostRemotingListenerReplicaTemplate<TRemotingReplicaTemplateConfigurator>
+        where TRemotingReplicaTemplateConfigurator :
+        class,
+        IServiceHostRemotingListenerReplicaTemplateConfigurator
         where TReplicator :
         class
     {
@@ -40,6 +51,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric
             TConfigurator,
             TReplicableTemplate,
             TAspNetCoreReplicaTemplate,
+            TRemotingReplicaTemplate,
             TReplicator
         > CreateInstance();
 

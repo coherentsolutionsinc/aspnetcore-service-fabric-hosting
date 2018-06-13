@@ -2,6 +2,8 @@
 {
     public enum ServiceHostListenerType
     {
-        AspNetCore
+        AspNetCore,
+
+        Remoting
     }
 }

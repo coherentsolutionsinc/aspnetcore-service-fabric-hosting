@@ -12,16 +12,10 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
         : IServiceHostListenerReplicaTemplateConfigurator,
           IConfigurableObjectWebHostConfigurator
     {
-        void UseEndpointName(
-            string endpointName);
-
         void UseIntegrationOptions(
             ServiceFabricIntegrationOptions integrationOptions);
 
-        void UseLoggerOptions(
-            Func<IServiceAspNetCoreListenerLoggerOptions> factoryFunc);
-
-        void UseAspNetCoreCommunicationListener(
+        void UseCommunicationListener(
             Func<ServiceContext, string, Func<string, AspNetCoreCommunicationListener, IWebHost>, AspNetCoreCommunicationListener> factoryFunc);
     }
 }

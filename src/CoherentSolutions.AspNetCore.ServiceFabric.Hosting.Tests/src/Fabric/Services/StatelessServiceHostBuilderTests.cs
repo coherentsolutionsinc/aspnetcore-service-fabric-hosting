@@ -9,6 +9,8 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric.Servic
             IStatelessServiceHostListenerReplicableTemplate,
             IStatelessServiceHostAspNetCoreListenerReplicaTemplate,
             IStatelessServiceHostAspNetCoreListenerReplicaTemplateConfigurator,
+            IStatelessServiceHostRemotingListenerReplicaTemplate,
+            IStatelessServiceHostRemotingListenerReplicaTemplateConfigurator,
             IStatelessServiceHostListenerReplicator
         >
     {
@@ -18,6 +20,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric.Servic
                 IStatelessServiceHostBuilderConfigurator,
                 IStatelessServiceHostListenerReplicableTemplate,
                 IStatelessServiceHostAspNetCoreListenerReplicaTemplate,
+                IStatelessServiceHostRemotingListenerReplicaTemplate,
                 IStatelessServiceHostListenerReplicator
             >
             CreateInstance()

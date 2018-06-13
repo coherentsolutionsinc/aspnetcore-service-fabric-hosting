@@ -1,6 +1,6 @@
 ﻿namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 {
-    public interface IServiceAspNetCoreListenerInformation : IServiceListenerInformation
+    public interface IServiceHostAspNetCoreListenerInformation : IServiceHostListenerInformation
     {
         string UrlSuffix { get; }
     }

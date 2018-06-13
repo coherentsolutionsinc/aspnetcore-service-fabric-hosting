@@ -8,13 +8,9 @@ using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 {
-    public interface IServiceHostAspNetCoreListenerReplicaTemplateParameters
+    public interface IServiceHostAspNetCoreListenerReplicaTemplateParameters : IServiceHostListenerReplicaTemplateParameters
     {
-        string EndpointName { get; }
-
         ServiceFabricIntegrationOptions IntegrationOptions { get; }
-
-        Func<IServiceAspNetCoreListenerLoggerOptions> AspNetCoreListenerLoggerOptionsFunc { get; }
 
         Func<ServiceContext, string, Func<string, AspNetCoreCommunicationListener, IWebHost>, AspNetCoreCommunicationListener>
             AspNetCoreCommunicationListenerFunc { get; }

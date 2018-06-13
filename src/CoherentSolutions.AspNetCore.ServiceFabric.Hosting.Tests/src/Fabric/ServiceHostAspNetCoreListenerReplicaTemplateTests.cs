@@ -69,7 +69,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric
             replicaTemplate.ConfigureObject(
                 config =>
                 {
-                    config.UseAspNetCoreCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
+                    config.UseCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
                     config.UseWebHostBuilder(() => builder.Object);
                 });
 
@@ -80,7 +80,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric
 
             // Assert
             serviceCollection.Verify(
-                instance => instance.Add(It.Is<ServiceDescriptor>(v => typeof(IServiceAspNetCoreListenerInformation) == v.ServiceType)),
+                instance => instance.Add(It.Is<ServiceDescriptor>(v => typeof(IServiceHostAspNetCoreListenerInformation) == v.ServiceType)),
                 Times.Once());
         }
 
@@ -110,7 +110,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric
             replicaTemplate.ConfigureObject(
                 config =>
                 {
-                    config.UseAspNetCoreCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
+                    config.UseCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
                     config.UseWebHostBuilder(() => builder.Object);
                 });
 
@@ -153,7 +153,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric
             replicaTemplate.ConfigureObject(
                 config =>
                 {
-                    config.UseAspNetCoreCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
+                    config.UseCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
                     config.UseWebHostBuilder(() => builder.Object);
 
                     config.UseEndpointName(EndpointName);
@@ -172,9 +172,9 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric
                 instance => instance.Add(
                     It.Is<ServiceDescriptor>(
                         v =>
-                            typeof(IServiceAspNetCoreListenerInformation) == v.ServiceType
-                         && ((IServiceAspNetCoreListenerInformation) v.ImplementationInstance).EndpointName == EndpointName
-                         && ((IServiceAspNetCoreListenerInformation) v.ImplementationInstance).UrlSuffix != string.Empty
+                            typeof(IServiceHostAspNetCoreListenerInformation) == v.ServiceType
+                         && ((IServiceHostAspNetCoreListenerInformation) v.ImplementationInstance).EndpointName == EndpointName
+                         && ((IServiceHostAspNetCoreListenerInformation) v.ImplementationInstance).UrlSuffix != string.Empty
                     )),
                 Times.Once());
         }
@@ -205,7 +205,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric
             replicaTemplate.ConfigureObject(
                 config =>
                 {
-                    config.UseAspNetCoreCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
+                    config.UseCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
                     config.UseWebHostBuilder(() => builder.Object);
                     config.UseWebHostBuilderExtensionsImpl(WebHostBuilderExtensionsImplStub.Func);
                 });
@@ -247,7 +247,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric
             replicaTemplate.ConfigureObject(
                 config =>
                 {
-                    config.UseAspNetCoreCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
+                    config.UseCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
                     config.UseWebHostBuilder(() => builder.Object);
                 });
 
@@ -274,7 +274,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric
             replicaTemplate.ConfigureObject(
                 config =>
                 {
-                    config.UseAspNetCoreCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
+                    config.UseCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
                     config.UseWebHostBuilderExtensionsImpl(WebHostBuilderExtensionsImplStub.Func);
                     config.UseWebHostBuilder(() => null);
                 });
@@ -323,7 +323,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric
             replicaTemplate.ConfigureObject(
                 config =>
                 {
-                    config.UseAspNetCoreCommunicationListener(factory.Object);
+                    config.UseCommunicationListener(factory.Object);
                     config.UseWebHostBuilderExtensionsImpl(WebHostBuilderExtensionsImplStub.Func);
                     config.UseWebHostBuilder(WebHostBuilderStub.Func);
                 });
@@ -359,7 +359,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric
             replicaTemplate.ConfigureObject(
                 config =>
                 {
-                    config.UseAspNetCoreCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
+                    config.UseCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
                     config.UseWebHostBuilderExtensionsImpl(WebHostBuilderExtensionsImplStub.Func);
                     config.UseWebHostBuilder(factory.Object);
                 });
@@ -387,7 +387,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric
             replicaTemplate.ConfigureObject(
                 config =>
                 {
-                    config.UseAspNetCoreCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
+                    config.UseCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
                     config.UseWebHostBuilderExtensionsImpl(() => impl.Object);
                     config.UseWebHostBuilder(WebHostBuilderStub.Func);
                 });
@@ -420,7 +420,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric
             replicaTemplate.ConfigureObject(
                 config =>
                 {
-                    config.UseAspNetCoreCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
+                    config.UseCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
                     config.UseWebHostBuilderExtensionsImpl(() => impl.Object);
                     config.UseWebHostBuilder(WebHostBuilderStub.Func);
                 });

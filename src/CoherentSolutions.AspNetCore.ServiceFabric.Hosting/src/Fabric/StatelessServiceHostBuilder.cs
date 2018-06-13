@@ -7,6 +7,7 @@
               IStatelessServiceHostBuilderConfigurator,
               IStatelessServiceHostListenerReplicableTemplate,
               IStatelessServiceHostAspNetCoreListenerReplicaTemplate,
+              IStatelessServiceHostRemotingListenerReplicaTemplate,
               IStatelessServiceHostListenerReplicator>,
           IStatelessServiceHostBuilder
     {
@@ -18,12 +19,18 @@
             public StatelessParameters()
             {
                 this.UseAspNetCoreListenerReplicaTemplate(DefaultAspNetCoreListenerReplicaTemplate);
+                this.UseRemotingListenerReplicaTemplate(DefaultRemotingListenerReplicaTemplate);
                 this.UseListenerReplicator(DefaultListenerReplicatorFactory);
             }
 
             private static IStatelessServiceHostAspNetCoreListenerReplicaTemplate DefaultAspNetCoreListenerReplicaTemplate()
             {
                 return new StatelessServiceHostAspNetCoreListenerReplicaTemplate();
+            }
+
+            private static IStatelessServiceHostRemotingListenerReplicaTemplate DefaultRemotingListenerReplicaTemplate()
+            {
+                return new StatelessServiceHostRemotingListenerReplicaTemplate();
             }
 
             private static IStatelessServiceHostListenerReplicator DefaultListenerReplicatorFactory(
