@@ -1,4 +1,6 @@
-﻿using Microsoft.ServiceFabric.Services.Communication.Runtime;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.ServiceFabric.Data;
+using Microsoft.ServiceFabric.Services.Communication.Runtime;
 
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 {
@@ -32,6 +34,12 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
             IStatefulService service)
         {
             var parameters = new StatefulListenerParameters();
+
+            parameters.ConfigureDependencies(
+                services =>
+                {
+                    services.Add(new ServiceDescriptor(typeof(IReliableStateManager), service.GetReliableStateManager()));
+                });
 
             this.UpstreamConfiguration(parameters);
 
