@@ -7,6 +7,7 @@ using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tools;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Web;
 
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 {
@@ -57,6 +58,8 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 
             public Func<TReplicableTemplate, TReplicator> ListenerReplicatorFunc { get; private set; }
 
+            public Action<IServiceCollection> DependenciesConfigAction { get; private set; }
+
             public Func<IWebHostBuilderExtensionsImpl> WebHostBuilderExtensionsImplFunc { get; private set; }
 
             public Func<IWebHostExtensionsImpl> WebHostExtensionsImplFunc { get; private set; }
@@ -72,6 +75,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                 this.AspNetCoreListenerReplicaTemplateFunc = null;
                 this.RemotingListenerReplicaTemplateFunc = null;
                 this.ListenerReplicatorFunc = null;
+                this.DependenciesConfigAction = null;
                 this.WebHostBuilderExtensionsImplFunc = DefaultWebHostBuilderExtensionsImplFunc;
                 this.WebHostExtensionsImplFunc = DefaultWebHostExtensionsImplFunc;
                 this.WebHostBuilderFunc = DefaultWebHostBuilderFunc;
@@ -125,6 +129,17 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
             {
                 this.WebHostBuilderFunc = factoryFunc
                  ?? throw new ArgumentNullException(nameof(factoryFunc));
+            }
+
+            public void ConfigureDependencies(
+                Action<IServiceCollection> configAction)
+            {
+                if (configAction == null)
+                {
+                    throw new ArgumentNullException(nameof(configAction));
+                }
+
+                this.DependenciesConfigAction = this.DependenciesConfigAction.Chain(configAction);
             }
 
             public void ConfigureWebHost(
@@ -208,6 +223,14 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                     $"No {nameof(parameters.ListenerReplicatorFunc)} was configured");
             }
 
+            var factory = new DefaultServiceProviderFactory();
+
+            var collection = factory.CreateBuilder(new ServiceCollection());
+
+            parameters.DependenciesConfigAction?.Invoke(collection);
+
+            var provider = new DefaultServiceProviderFactory().CreateServiceProvider(collection);
+
             var replicators = parameters.ListenerDescriptors == null
                 ? Enumerable.Empty<TReplicator>()
                 : parameters.ListenerDescriptors
@@ -236,6 +259,11 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                                             {
                                                 c.UseWebHostBuilderExtensionsImpl(parameters.WebHostBuilderExtensionsImplFunc);
                                                 c.UseWebHostBuilder(parameters.WebHostBuilderFunc);
+                                                c.ConfigureDependencies(
+                                                    services =>
+                                                    {
+                                                        ServiceHostDependencyRegistrant.Register(services, collection, provider);
+                                                    });
                                             });
 
                                         descriptor.ConfigAction(template);
@@ -256,6 +284,16 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                                         {
                                             throw new FactoryProducesNullInstanceException<TRemotingReplicaTemplate>();
                                         }
+
+                                        template.ConfigureObject(
+                                            c =>
+                                            {
+                                                c.ConfigureDependencies(
+                                                    services =>
+                                                    {
+                                                        ServiceHostDependencyRegistrant.Register(services, collection, provider);
+                                                    });
+                                            });
 
                                         descriptor.ConfigAction(template);
 

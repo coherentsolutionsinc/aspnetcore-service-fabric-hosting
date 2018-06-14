@@ -113,5 +113,56 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
             serviceCollection.Add(new ServiceDescriptor(typeof(IServiceHostListenerInformation), listenerInformation));
             serviceCollection.Add(new ServiceDescriptor(typeof(IServiceHostRemotingListenerInformation), listenerInformation));
         }
+
+        public static void Register(
+            IServiceCollection serviceCollection,
+            IServiceCollection outerServiceCollection,
+            IServiceProvider outerServiceProvider)
+        {
+            if (serviceCollection == null)
+            {
+                throw new ArgumentNullException(nameof(serviceCollection));
+            }
+
+            if (outerServiceCollection == null)
+            {
+                throw new ArgumentNullException(nameof(outerServiceCollection));
+            }
+
+            if (outerServiceProvider == null)
+            {
+                throw new ArgumentNullException(nameof(outerServiceProvider));
+            }
+
+            foreach (var serviceDescriptor in outerServiceCollection)
+            {
+                switch (serviceDescriptor.Lifetime)
+                {
+                    case ServiceLifetime.Singleton:
+                        if (serviceDescriptor.ImplementationInstance != null)
+                        {
+                            serviceCollection.Add(serviceDescriptor);
+                        }
+                        else
+                        {
+                            serviceCollection.Add(
+                                new ServiceDescriptor(
+                                    serviceDescriptor.ServiceType,
+                                    provider => outerServiceProvider.GetService(serviceDescriptor.ServiceType),
+                                    ServiceLifetime.Singleton));
+                        }
+                        break;
+                    case ServiceLifetime.Scoped:
+                    case ServiceLifetime.Transient:
+                        serviceCollection.Add(serviceDescriptor);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(
+                            nameof(outerServiceCollection), 
+                            serviceDescriptor.Lifetime, 
+                            typeof(ServiceLifetime).FullName);
+                }
+            }
+        }
     }
 }

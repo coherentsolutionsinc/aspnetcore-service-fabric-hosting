@@ -85,6 +85,8 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                     ServiceHostDependencyRegistrant.Register(services, serviceEventSource);
                     ServiceHostDependencyRegistrant.Register(services, listenerInformation);
 
+                    parameters.DependenciesConfigAction?.Invoke(services);
+
                     var loggerOptions = parameters.LoggerOptionsFunc();
                     if (loggerOptions == null)
                     {
