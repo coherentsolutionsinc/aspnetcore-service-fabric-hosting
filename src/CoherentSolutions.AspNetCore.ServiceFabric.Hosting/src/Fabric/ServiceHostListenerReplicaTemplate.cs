@@ -3,6 +3,7 @@ using System.Fabric;
 
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tools;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
@@ -21,10 +22,13 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 
             public Func<IServiceHostListenerLoggerOptions> LoggerOptionsFunc { get; private set; }
 
+            public Action<IServiceCollection> DependenciesConfigAction { get; private set; }
+
             protected ListenerParameters()
             {
                 this.EndpointName = string.Empty;
                 this.LoggerOptionsFunc = DefaultLoggerOptionsFunc;
+                this.DependenciesConfigAction = null;
             }
 
             public void UseEndpointName(
@@ -44,6 +48,17 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
             private static IServiceHostListenerLoggerOptions DefaultLoggerOptionsFunc()
             {
                 return new ServiceHostListenerLoggerOptions();
+            }
+
+            public void ConfigureDependencies(
+                Action<IServiceCollection> configAction)
+            {
+                if (configAction == null)
+                {
+                    throw new ArgumentNullException(nameof(configAction));
+                }
+
+                this.DependenciesConfigAction = this.DependenciesConfigAction.Chain(configAction);
             }
         }
 

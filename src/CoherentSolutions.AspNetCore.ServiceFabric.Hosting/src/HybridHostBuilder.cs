@@ -27,7 +27,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting
         }
 
         private class Parameters
-            : IHostBuilderParameters,
+            : IHybridHostBuilderParameters,
               IHybridHostBuilderConfigurator
         {
             public ServiceHostKind ServiceHostKind { get; private set; }

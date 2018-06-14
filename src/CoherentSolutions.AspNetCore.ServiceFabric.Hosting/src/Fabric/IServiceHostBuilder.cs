@@ -2,9 +2,9 @@
 
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 {
-    public interface IServiceHostBuilder<out TServiceHist, out TConfigurator> : IConfigurableObject<TConfigurator>
+    public interface IServiceHostBuilder<out TServiceHost, out TConfigurator> : IConfigurableObject<TConfigurator>
         where TConfigurator : IServiceHostBuilderConfigurator
     {
-        TServiceHist Build();
+        TServiceHost Build();
     }
 }
