@@ -1,3 +1,0 @@
-﻿# FAQ
-
-Nothing here yet!

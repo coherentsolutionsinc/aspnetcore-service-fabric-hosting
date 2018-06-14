@@ -1,27 +1,14 @@
 # About the project
 
-**CoherentSolutions.AspNetCore.ServiceFabric.Hosting** is a simple project that simplifies:
+**CoherentSolutions.AspNetCore.ServiceFabric.Hosting** is a simple project that changes a way how you setup your Service Fabric Reliable Services. The main idea is to simplify **Reliable Services** setup by providing a hierarchy structured way to put all configuration in one place.
 
-1. Configuration of reliable services oriented for web request processing using [IWebHost][1].
-2. Configuration of **aspnetcore** service that needs to be hosted in both ASP.NET Core and Service Fabric runtimes by providing shared configuration support and reducing amount of infrastructure code.
-        
-    _This can be useful for those who performs a migration to Service Fabric and would like to retain the ability for self-hosted execution (in development, continues integration etc.)_
+## How to start?
 
-More information can be found in [wiki][12]
-
-## Eager to start? 
-
-Install [NuGet][11] package and start configure your Service Fabric services or see [detailed guide][10] to understand how to modify an existing ASP.NET Core application for executing inside Service Fabric!
+Install [NuGet][11] package and start using `HybridHostBuilder`.
 
 ## Documentation
 
-For questions please see [FAQ.md][1].
-
-For basic scenarios please refer to [BASIC_SCENARIOS.md][2].
-
-For advanced scenarios please refer to [ADVANCED_SCENARIOS.md][3].
-
-For implementation details please see [IMPLEMENTATION_DETAILS.ms][4].
+All project related information can be found on [wiki][12].
 
 ## Future & Past
 
@@ -41,16 +28,11 @@ This project is owned and maintained by [Coherent Solutions][8].
 
 This project is licensed under the MS-PL License - see the [LICENSE.md][9] for details.
 
-[1]:  docs/FAQ.md "Frequently Asked Questions"
-[2]:  docs/BASIC_SCENARIOS.md "Basic scenarios"
-[3]:  docs/ADVANCED_SCENARIOS.md "Advanced scenarios"
-[4]:  docs/IMPLEMENTATION_DETAILS.md "Implementation details"
 [5]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Roadmap "Project roadmap"
 [6]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/VersionHistory "Version History"
 [7]:  CONTRIBUTING.md "Contributing"
 [8]:  https://www.coherentsolutions.com/ "Coherent Solutions Inc."
 [9]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/blob/master/LICENSE.md "License"
-[10]: docs/BASIC_SCENARIOS.md#modify-existing-aspnet-core-application-for-execution-inside-service-fabric-as-reliable-service "Modify existing ASP.NET Core application for execution inside Service Fabric as Reliable Service"
-[11]: https://www.nuget.org/packages/CoherentSolutions.AspNetCore.ServiceFabric.Hosting/0.5.1-alpha "NuGet package"
+[11]: https://www.nuget.org/packages/CoherentSolutions.AspNetCore.ServiceFabric.Hosting "NuGet package"
 [12]: https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki "Project wiki"
 
