@@ -1,6 +1,6 @@
 ﻿namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 {
-    public interface IServiceListenerInformation
+    public interface IServiceHostListenerInformation
     {
         string EndpointName { get; }
     }

@@ -12,14 +12,14 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
               ServiceReplicaListener>,
           IStatefulServiceHostAspNetCoreListenerReplicaTemplate
     {
-        private class StatefulParameters
-            : Parameters,
+        private class StatefulListenerParameters
+            : AspNetCoreListenerParameters,
               IStatefulServiceHostAspNetCoreListenerReplicaTemplateParameters,
               IStatefulServiceHostAspNetCoreListenerReplicaTemplateConfigurator
         {
             public bool ListenerOnSecondary { get; private set; }
 
-            public StatefulParameters()
+            public StatefulListenerParameters()
             {
                 this.ListenerOnSecondary = false;
             }
@@ -33,7 +33,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
         public override ServiceReplicaListener Activate(
             IStatefulService service)
         {
-            var parameters = new StatefulParameters();
+            var parameters = new StatefulListenerParameters();
 
             parameters.ConfigureWebHost(
                 builder =>
@@ -47,7 +47,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 
             this.UpstreamConfiguration(parameters);
 
-            var factoryFunc = this.CreateAspNetCoreCommunicationListenerFunc(service, parameters);
+            var factoryFunc = this.CreateCommunicationListenerFunc(service, parameters);
 
             return new ServiceReplicaListener(factoryFunc, parameters.EndpointName, parameters.ListenerOnSecondary);
         }

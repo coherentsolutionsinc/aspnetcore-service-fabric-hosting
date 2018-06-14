@@ -1,8 +1,8 @@
 ﻿namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 {
     public interface IStatefulServiceHostAspNetCoreListenerReplicaTemplateConfigurator
-        : IServiceHostAspNetCoreListenerReplicaTemplateConfigurator
+        : IStatefulServiceListenerReplicaTemplateConfigurator,
+          IServiceHostAspNetCoreListenerReplicaTemplateConfigurator
     {
-        void UseListenerOnSecondary();
     }
 }

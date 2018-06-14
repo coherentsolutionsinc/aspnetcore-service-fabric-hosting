@@ -22,6 +22,9 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
         public string EventStackTrace { get; set; }
 
         [EventField]
+        public string EventMetadata { get; set; }
+
+        [EventField]
         public string ServiceName { get; set; }
 
         [EventField]

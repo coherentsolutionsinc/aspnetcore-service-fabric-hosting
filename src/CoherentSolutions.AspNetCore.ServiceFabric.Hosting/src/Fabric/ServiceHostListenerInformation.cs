@@ -2,11 +2,11 @@
 
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 {
-    public abstract class ServiceListenerInformation : IServiceListenerInformation
+    public abstract class ServiceHostListenerInformation : IServiceHostListenerInformation
     {
         public string EndpointName { get; }
 
-        protected ServiceListenerInformation(
+        protected ServiceHostListenerInformation(
             string endpointName)
         {
             this.EndpointName = endpointName

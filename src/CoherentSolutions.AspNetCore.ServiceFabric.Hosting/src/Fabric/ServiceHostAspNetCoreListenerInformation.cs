@@ -2,11 +2,11 @@
 
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 {
-    public class ServiceAspNetCoreListenerInformation : ServiceListenerInformation, IServiceAspNetCoreListenerInformation
+    public class ServiceHostAspNetCoreListenerInformation : ServiceHostListenerInformation, IServiceHostAspNetCoreListenerInformation
     {
         public string UrlSuffix { get; }
 
-        public ServiceAspNetCoreListenerInformation(
+        public ServiceHostAspNetCoreListenerInformation(
             string endpointName,
             string urlSuffix)
             : base(endpointName)
