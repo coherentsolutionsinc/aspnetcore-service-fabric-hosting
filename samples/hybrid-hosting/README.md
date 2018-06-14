@@ -1,6 +1,6 @@
 # About this Sample
 
-This application demonstrates how to use `HybridHostBuilder` to configure AspNetCore application to run both as Web App and Service Fabric reliable service. `HybridHostBuilder` was designed to reduce code duplication, simplify configuration and provide a single place for entry point configuration. 
+This application demonstrates how to use `HybridHostBuilder` to configure AspNetCore application to run both as Web App and Service Fabric reliable service. 
 
 ## Usage
 
