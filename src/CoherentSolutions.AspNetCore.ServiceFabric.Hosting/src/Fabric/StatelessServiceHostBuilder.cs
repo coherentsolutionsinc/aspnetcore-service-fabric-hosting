@@ -48,7 +48,7 @@
 
             var replicators = this.BuildReplicators(parameters);
 
-            return new StatelessServiceHost(parameters.ServiceName, replicators);
+            return new StatelessServiceHost(parameters.ServiceTypeName, replicators);
         }
     }
 }

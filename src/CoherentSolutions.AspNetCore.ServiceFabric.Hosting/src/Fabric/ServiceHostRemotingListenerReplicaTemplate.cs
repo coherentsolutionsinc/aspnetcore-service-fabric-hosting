@@ -2,6 +2,7 @@
 using System.Fabric;
 
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Common.Exceptions;
+using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric.Tools;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -80,10 +81,10 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 
                     var services = new ServiceCollection();
 
-                    ServiceHostDependencyRegistrant.Register(services, serviceContext);
-                    ServiceHostDependencyRegistrant.Register(services, servicePartition);
-                    ServiceHostDependencyRegistrant.Register(services, serviceEventSource);
-                    ServiceHostDependencyRegistrant.Register(services, listenerInformation);
+                    DependencyRegistrant.Register(services, serviceContext);
+                    DependencyRegistrant.Register(services, servicePartition);
+                    DependencyRegistrant.Register(services, serviceEventSource);
+                    DependencyRegistrant.Register(services, listenerInformation);
 
                     parameters.DependenciesConfigAction?.Invoke(services);
 

@@ -1,17 +1,14 @@
 ﻿using System;
 
-using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tools;
-
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 {
-    public interface IServiceHostBuilderAspNetCoreListenerConfigurator<TAspNetCoreReplicaTemplate>
-        : IConfigurableObjectWebHostConfigurator
-        where TAspNetCoreReplicaTemplate : IServiceHostAspNetCoreListenerReplicaTemplate<IServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
+    public interface IServiceHostBuilderAspNetCoreListenerConfigurator<TReplicaTemplate>
+        where TReplicaTemplate : IServiceHostAspNetCoreListenerReplicaTemplate<IServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
     {
         void UseAspNetCoreListenerReplicaTemplate(
-            Func<TAspNetCoreReplicaTemplate> factoryFunc);
+            Func<TReplicaTemplate> factoryFunc);
 
         void DefineAspNetCoreListener(
-            Action<TAspNetCoreReplicaTemplate> defineAction);
+            Action<TReplicaTemplate> defineAction);
     }
 }

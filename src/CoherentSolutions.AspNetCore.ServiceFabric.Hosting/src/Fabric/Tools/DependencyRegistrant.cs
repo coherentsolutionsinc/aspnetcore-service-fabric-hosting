@@ -3,9 +3,9 @@ using System.Fabric;
 
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
+namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric.Tools
 {
-    public static class ServiceHostDependencyRegistrant
+    public static class DependencyRegistrant
     {
         public static void Register(
             IServiceCollection serviceCollection,
@@ -80,87 +80,88 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 
         public static void Register(
             IServiceCollection serviceCollection,
-            IServiceHostAspNetCoreListenerInformation listenerInformation)
+            IServiceHostAspNetCoreListenerInformation aspNetCoreListenerInformation)
         {
             if (serviceCollection == null)
             {
                 throw new ArgumentNullException(nameof(serviceCollection));
             }
 
-            if (listenerInformation == null)
+            if (aspNetCoreListenerInformation == null)
             {
-                throw new ArgumentNullException(nameof(listenerInformation));
+                throw new ArgumentNullException(nameof(aspNetCoreListenerInformation));
             }
 
-            serviceCollection.Add(new ServiceDescriptor(typeof(IServiceHostListenerInformation), listenerInformation));
-            serviceCollection.Add(new ServiceDescriptor(typeof(IServiceHostAspNetCoreListenerInformation), listenerInformation));
+            serviceCollection.Add(new ServiceDescriptor(typeof(IServiceHostListenerInformation), aspNetCoreListenerInformation));
+            serviceCollection.Add(new ServiceDescriptor(typeof(IServiceHostAspNetCoreListenerInformation), aspNetCoreListenerInformation));
         }
 
         public static void Register(
             IServiceCollection serviceCollection,
-            IServiceHostRemotingListenerInformation listenerInformation)
+            IServiceHostRemotingListenerInformation remotingListenerInformation)
         {
             if (serviceCollection == null)
             {
                 throw new ArgumentNullException(nameof(serviceCollection));
             }
 
-            if (listenerInformation == null)
+            if (remotingListenerInformation == null)
             {
-                throw new ArgumentNullException(nameof(listenerInformation));
+                throw new ArgumentNullException(nameof(remotingListenerInformation));
             }
 
-            serviceCollection.Add(new ServiceDescriptor(typeof(IServiceHostListenerInformation), listenerInformation));
-            serviceCollection.Add(new ServiceDescriptor(typeof(IServiceHostRemotingListenerInformation), listenerInformation));
+            serviceCollection.Add(new ServiceDescriptor(typeof(IServiceHostListenerInformation), remotingListenerInformation));
+            serviceCollection.Add(new ServiceDescriptor(typeof(IServiceHostRemotingListenerInformation), remotingListenerInformation));
         }
 
         public static void Register(
             IServiceCollection serviceCollection,
-            IServiceCollection outerServiceCollection,
-            IServiceProvider outerServiceProvider)
+            IServiceCollection proxyServiceCollection,
+            IServiceProvider proxyServiceProvider)
         {
             if (serviceCollection == null)
             {
                 throw new ArgumentNullException(nameof(serviceCollection));
             }
 
-            if (outerServiceCollection == null)
+            if (proxyServiceCollection == null)
             {
-                throw new ArgumentNullException(nameof(outerServiceCollection));
+                throw new ArgumentNullException(nameof(proxyServiceCollection));
             }
 
-            if (outerServiceProvider == null)
+            if (proxyServiceProvider == null)
             {
-                throw new ArgumentNullException(nameof(outerServiceProvider));
+                throw new ArgumentNullException(nameof(proxyServiceProvider));
             }
 
-            foreach (var serviceDescriptor in outerServiceCollection)
+            foreach (var descriptor in proxyServiceCollection)
             {
-                switch (serviceDescriptor.Lifetime)
+                switch (descriptor.Lifetime)
                 {
                     case ServiceLifetime.Singleton:
-                        if (serviceDescriptor.ImplementationInstance != null)
+                        if (descriptor.ImplementationInstance != null)
                         {
-                            serviceCollection.Add(serviceDescriptor);
+                            serviceCollection.Add(descriptor);
+                        }
+                        else if (descriptor.ImplementationFactory != null)
+                        {
+                            serviceCollection.Add(descriptor);
                         }
                         else
                         {
                             serviceCollection.Add(
                                 new ServiceDescriptor(
-                                    serviceDescriptor.ServiceType,
-                                    provider => outerServiceProvider.GetService(serviceDescriptor.ServiceType),
+                                    descriptor.ServiceType,
+                                    provider => proxyServiceProvider.GetService(descriptor.ServiceType),
                                     ServiceLifetime.Singleton));
                         }
                         break;
                     case ServiceLifetime.Scoped:
                     case ServiceLifetime.Transient:
-                        serviceCollection.Add(serviceDescriptor);
+                        serviceCollection.Add(descriptor);
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException(
-                            nameof(outerServiceCollection), 
-                            serviceDescriptor.Lifetime, 
-                            typeof(ServiceLifetime).FullName);
+                        throw new ArgumentOutOfRangeException(nameof(proxyServiceCollection), descriptor.Lifetime, typeof(ServiceLifetime).FullName);
                 }
             }
         }

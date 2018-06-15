@@ -9,6 +9,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Moq;
+
+using ServiceFabric.Mocks;
+
 using Xunit;
 
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric.Services
@@ -51,7 +54,14 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric.Servic
 
         protected override IStatefulService CreateService()
         {
-            return new StatefulServiceStub();
+            var setup = new Mock<IStatefulService>();
+
+            setup.Setup(instance => instance.GetContext()).Returns(MockStatefulServiceContextFactory.Default);
+            setup.Setup(instance => instance.GetPartition()).Returns(new Mock<IStatefulServicePartition>().Object);
+            setup.Setup(instance => instance.GetEventSource()).Returns(new Mock<IServiceEventSource>().Object);
+            setup.Setup(instance => instance.GetReliableStateManager()).Returns(new Mock<IReliableStateManager>().Object);
+
+            return setup.Object;
         }
 
         protected override ServiceHostAspNetCoreListenerReplicaTemplate<IStatefulService, IStatefulServiceHostAspNetCoreListenerReplicaTemplateParameters,

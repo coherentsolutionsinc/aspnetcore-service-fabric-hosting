@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Common.Exceptions;
+using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric.Tools;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tools;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Web;
 
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
@@ -48,7 +50,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
               IServiceHostBuilderListenerReplicationParameters<TReplicableTemplate, TReplicator>,
               IServiceHostBuilderListenerReplicationConfigurator<TReplicableTemplate, TReplicator>
         {
-            public string ServiceName { get; private set; }
+            public string ServiceTypeName { get; private set; }
 
             public List<IServiceHostListenerDescriptor> ListenerDescriptors { get; private set; }
 
@@ -60,32 +62,20 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 
             public Action<IServiceCollection> DependenciesConfigAction { get; private set; }
 
-            public Func<IWebHostBuilderExtensionsImpl> WebHostBuilderExtensionsImplFunc { get; private set; }
-
-            public Func<IWebHostExtensionsImpl> WebHostExtensionsImplFunc { get; private set; }
-
-            public Func<IWebHostBuilder> WebHostBuilderFunc { get; private set; }
-
-            public Action<IWebHostBuilder> WebHostConfigAction { get; private set; }
-
             protected Parameters()
             {
-                this.ServiceName = string.Empty;
+                this.ServiceTypeName = string.Empty;
                 this.ListenerDescriptors = null;
                 this.AspNetCoreListenerReplicaTemplateFunc = null;
                 this.RemotingListenerReplicaTemplateFunc = null;
                 this.ListenerReplicatorFunc = null;
                 this.DependenciesConfigAction = null;
-                this.WebHostBuilderExtensionsImplFunc = DefaultWebHostBuilderExtensionsImplFunc;
-                this.WebHostExtensionsImplFunc = DefaultWebHostExtensionsImplFunc;
-                this.WebHostBuilderFunc = DefaultWebHostBuilderFunc;
-                this.WebHostConfigAction = null;
             }
 
-            public void UseServiceName(
+            public void UseServiceType(
                 string serviceName)
             {
-                this.ServiceName = serviceName
+                this.ServiceTypeName = serviceName
                  ?? throw new ArgumentNullException(nameof(serviceName));
             }
 
@@ -110,27 +100,6 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                  ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
 
-            public void UseWebHostBuilderExtensionsImpl(
-                Func<IWebHostBuilderExtensionsImpl> factoryFunc)
-            {
-                this.WebHostBuilderExtensionsImplFunc = factoryFunc
-                 ?? throw new ArgumentNullException(nameof(factoryFunc));
-            }
-
-            public void UseWebHostExtensionsImpl(
-                Func<IWebHostExtensionsImpl> factoryFunc)
-            {
-                this.WebHostExtensionsImplFunc = factoryFunc
-                 ?? throw new ArgumentNullException(nameof(factoryFunc));
-            }
-
-            public void UseWebHostBuilder(
-                Func<IWebHostBuilder> factoryFunc)
-            {
-                this.WebHostBuilderFunc = factoryFunc
-                 ?? throw new ArgumentNullException(nameof(factoryFunc));
-            }
-
             public void ConfigureDependencies(
                 Action<IServiceCollection> configAction)
             {
@@ -140,17 +109,6 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                 }
 
                 this.DependenciesConfigAction = this.DependenciesConfigAction.Chain(configAction);
-            }
-
-            public void ConfigureWebHost(
-                Action<IWebHostBuilder> configAction)
-            {
-                if (configAction == null)
-                {
-                    throw new ArgumentNullException(nameof(configAction));
-                }
-
-                this.WebHostConfigAction = this.WebHostConfigAction.Chain(configAction);
             }
 
             public void DefineAspNetCoreListener(
@@ -190,21 +148,6 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                         ServiceHostListenerType.Remoting,
                         replicaTemplate => defineAction((TRemotingReplicaTemplate) replicaTemplate)));
             }
-
-            private static IWebHostBuilderExtensionsImpl DefaultWebHostBuilderExtensionsImplFunc()
-            {
-                return new WebHostBuilderExtensionsImpl();
-            }
-
-            private static IWebHostExtensionsImpl DefaultWebHostExtensionsImplFunc()
-            {
-                return new WebHostExtensionsImpl();
-            }
-
-            private static IWebHostBuilder DefaultWebHostBuilderFunc()
-            {
-                return new WebHostBuilder();
-            }
         }
 
         public abstract TServiceHost Build();
@@ -223,13 +166,12 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                     $"No {nameof(parameters.ListenerReplicatorFunc)} was configured");
             }
 
-            var factory = new DefaultServiceProviderFactory();
+            // Initialize direct dependencies
+            var dependenciesCollection = new ServiceCollection();
+            
+            parameters.DependenciesConfigAction?.Invoke(dependenciesCollection);
 
-            var collection = factory.CreateBuilder(new ServiceCollection());
-
-            parameters.DependenciesConfigAction?.Invoke(collection);
-
-            var provider = new DefaultServiceProviderFactory().CreateServiceProvider(collection);
+            var dependenciesServices = new DefaultServiceProviderFactory().CreateServiceProvider(dependenciesCollection);
 
             var replicators = parameters.ListenerDescriptors == null
                 ? Enumerable.Empty<TReplicator>()
@@ -257,12 +199,10 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                                         template.ConfigureObject(
                                             c =>
                                             {
-                                                c.UseWebHostBuilderExtensionsImpl(parameters.WebHostBuilderExtensionsImplFunc);
-                                                c.UseWebHostBuilder(parameters.WebHostBuilderFunc);
                                                 c.ConfigureDependencies(
                                                     services =>
                                                     {
-                                                        ServiceHostDependencyRegistrant.Register(services, collection, provider);
+                                                        DependencyRegistrant.Register(services, dependenciesCollection, dependenciesServices);
                                                     });
                                             });
 
@@ -291,7 +231,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                                                 c.ConfigureDependencies(
                                                     services =>
                                                     {
-                                                        ServiceHostDependencyRegistrant.Register(services, collection, provider);
+                                                        DependencyRegistrant.Register(services, dependenciesCollection, dependenciesServices);
                                                     });
                                             });
 

@@ -6,8 +6,12 @@ using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Stubs;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Moq;
+
+using ServiceFabric.Mocks;
+
 using Xunit;
 
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric.Services
@@ -50,7 +54,13 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric.Servic
 
         protected override IStatelessService CreateService()
         {
-            return new StatelessServiceStub();
+            var setup = new Mock<IStatelessService>();
+
+            setup.Setup(instance => instance.GetContext()).Returns(MockStatelessServiceContextFactory.Default);
+            setup.Setup(instance => instance.GetPartition()).Returns(new Mock<IStatelessServicePartition>().Object);
+            setup.Setup(instance => instance.GetEventSource()).Returns(new Mock<IServiceEventSource>().Object);
+
+            return setup.Object;
         }
 
         protected override ServiceHostAspNetCoreListenerReplicaTemplate<IStatelessService, IStatelessServiceHostAspNetCoreListenerReplicaTemplateParameters,

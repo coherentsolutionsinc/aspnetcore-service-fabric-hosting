@@ -1,8 +1,10 @@
 ﻿using System;
+
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Common.Exceptions;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric;
-using Microsoft.AspNetCore.Hosting;
+
 using Moq;
+
 using Xunit;
 
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric
@@ -72,6 +74,32 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric
                 {
                     config.UseAspNetCoreListenerReplicaTemplate(factory.Object);
                     config.DefineAspNetCoreListener(
+                        c =>
+                        {
+                        });
+                });
+
+            // Assert
+            Assert.Throws<FactoryProducesNullInstanceException<TAspNetCoreReplicaTemplate>>(() => builder.Build());
+        }
+
+        [Fact]
+        public void
+            Should_throw_FactoryProducesNullInstanceException_When_remoting_replica_template_func_returns_null()
+        {
+            // Arrange
+            var factory = new Mock<Func<TRemotingReplicaTemplate>>();
+            factory
+               .Setup(instance => instance())
+               .Returns<TRemotingReplicaTemplate>(null);
+
+            // Act
+            var builder = this.CreateInstance();
+            builder.ConfigureObject(
+                config =>
+                {
+                    config.UseRemotingListenerReplicaTemplate(factory.Object);
+                    config.DefineRemotingListener(
                         c =>
                         {
                         });
@@ -158,13 +186,40 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric
 
         [Fact]
         public void
+            Should_use_custom_remoting_replica_template_func_When_remoting_replica_template_func_is_configured()
+        {
+            // Arrange
+            var factory = new Mock<Func<TRemotingReplicaTemplate>>();
+            factory
+               .Setup(instance => instance())
+               .Returns(new Mock<TRemotingReplicaTemplate>().Object);
+
+            // Act
+            var builder = this.CreateInstance();
+            builder.ConfigureObject(
+                config =>
+                {
+                    config.UseRemotingListenerReplicaTemplate(factory.Object);
+                    config.DefineRemotingListener(
+                        c =>
+                        {
+                        });
+                });
+            builder.Build();
+
+            // Assert
+            factory.Verify(instance => instance(), Times.Once());
+        }
+
+        [Fact]
+        public void
             Should_use_custom_replicator_func_When_replicator_func_is_configured()
         {
             // Arrange
             var factory = new Mock<Func<TReplicableTemplate, TReplicator>>();
             factory
                .Setup(instance => instance(It.IsAny<TReplicableTemplate>()))
-               .Returns(new Mock<TReplicator>(MockBehavior.Loose).Object);
+               .Returns(new Mock<TReplicator>().Object);
 
             // Act
             var builder = this.CreateInstance();
@@ -185,39 +240,24 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Fabric
 
         [Fact]
         public void
-            Should_web_host_builder_func_from_service_When_configuring_aspnetcore_listener_without_web_host_builder_func()
+            Should_use_remoting_listener_configuration_action_When_configuring_remoting_listener()
         {
             // Arrange
-            var webfactory = new Mock<Func<IWebHostBuilder>>();
-
-            var configurator = new Mock<TAspNetCoreReplicaTemplateConfigurator>();
-
-            var builder = new Mock<TAspNetCoreReplicaTemplate>();
-            builder
-               .Setup(instance => instance.ConfigureObject(It.Is<Action<TAspNetCoreReplicaTemplateConfigurator>>(v => true)))
-               .Callback<Action<TAspNetCoreReplicaTemplateConfigurator>>(action => action(configurator.Object));
-
-            var factory = new Mock<Func<TAspNetCoreReplicaTemplate>>();
-            factory
-               .Setup(instance => instance())
-               .Returns(builder.Object);
+            var action = new Mock<Action<TRemotingReplicaTemplate>>();
+            action
+               .Setup(instance => instance(It.IsAny<TRemotingReplicaTemplate>()));
 
             // Act
-            var configurable = this.CreateInstance();
-            configurable.ConfigureObject(
+            var builder = this.CreateInstance();
+            builder.ConfigureObject(
                 config =>
                 {
-                    config.UseWebHostBuilder(webfactory.Object);
-                    config.UseAspNetCoreListenerReplicaTemplate(factory.Object);
-                    config.DefineAspNetCoreListener(
-                        c =>
-                        {
-                        });
+                    config.DefineRemotingListener(action.Object);
                 });
-            configurable.Build();
+            builder.Build();
 
             // Assert
-            configurator.Verify(instance => instance.UseWebHostBuilder(webfactory.Object), Times.Once());
+            action.Verify(instance => instance(It.IsAny<TRemotingReplicaTemplate>()), Times.Once());
         }
     }
 }

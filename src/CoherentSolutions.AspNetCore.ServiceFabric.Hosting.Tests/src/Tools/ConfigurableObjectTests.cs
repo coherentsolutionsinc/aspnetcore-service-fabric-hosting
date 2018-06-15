@@ -7,7 +7,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Tools
 {
     public class ConfigurableObjectTests
     {
-        private class ConfigurableObjectStub : ConfigurableObject<object>
+        private class ConfigurableObjectImpl : ConfigurableObject<object>
         {
             public void BuildConfiguration()
             {
@@ -38,12 +38,11 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests.Tools
                .Setup(instance => instance(It.IsAny<object>()));
 
             // Act
-            var obj = new ConfigurableObjectStub();
-            obj.ConfigureObject(first.Object);
-            obj.ConfigureObject(second.Object);
-            obj.ConfigureObject(third.Object);
-
-            obj.BuildConfiguration();
+            var impl = new ConfigurableObjectImpl();
+            impl.ConfigureObject(first.Object);
+            impl.ConfigureObject(second.Object);
+            impl.ConfigureObject(third.Object);
+            impl.BuildConfiguration();
 
             // Assert
             first.Verify(instance => instance(It.IsAny<object>()), Times.Once());

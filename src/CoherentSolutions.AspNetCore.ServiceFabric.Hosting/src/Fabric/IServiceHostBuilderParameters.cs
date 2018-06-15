@@ -5,10 +5,9 @@ using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tools;
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 {
     public interface IServiceHostBuilderParameters
-        : IConfigurableObjectDependenciesParameters,
-          IConfigurableObjectWebHostParameters
+        : IConfigurableObjectDependenciesParameters
     {
-        string ServiceName { get; }
+        string ServiceTypeName { get; }
 
         List<IServiceHostListenerDescriptor> ListenerDescriptors { get; }
     }

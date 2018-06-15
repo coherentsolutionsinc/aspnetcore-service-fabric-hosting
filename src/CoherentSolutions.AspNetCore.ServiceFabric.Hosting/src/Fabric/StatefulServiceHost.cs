@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 using Microsoft.ServiceFabric.Services.Runtime;
 
@@ -10,6 +11,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
     public class StatefulServiceHost : IStatefulServiceHost
     {
         private readonly string serviceName;
+
 
         private readonly IEnumerable<IStatefulServiceHostListenerReplicator> listenerReplicators;
 
@@ -24,15 +26,19 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
              ?? Enumerable.Empty<IStatefulServiceHostListenerReplicator>();
         }
 
-        public void Run()
+        public async Task StartAsync(
+            CancellationToken cancellationToken)
         {
-            ServiceRuntime.RegisterServiceAsync(
-                    this.serviceName,
-                    serviceContext => new StatefulService(serviceContext, this.listenerReplicators))
-               .GetAwaiter()
-               .GetResult();
+            await ServiceRuntime.RegisterServiceAsync(
+                this.serviceName,
+                serviceContext => new StatefulService(serviceContext, this.listenerReplicators),
+                cancellationToken: cancellationToken);
+        }
 
-            Thread.Sleep(Timeout.Infinite);
+        public Task StopAsync(
+            CancellationToken cancellationToken)
+        {
+            return Task.CompletedTask;
         }
     }
 }

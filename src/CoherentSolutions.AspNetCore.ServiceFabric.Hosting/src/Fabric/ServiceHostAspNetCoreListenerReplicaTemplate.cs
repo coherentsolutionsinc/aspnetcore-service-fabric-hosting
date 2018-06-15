@@ -3,6 +3,7 @@ using System.Fabric;
 
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Common;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Common.Exceptions;
+using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric.Tools;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Web;
 
 using Microsoft.AspNetCore.Hosting;
@@ -142,8 +143,6 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                         throw new FactoryProducesNullInstanceException<IWebHostBuilder>();
                     }
 
-                    builder = new ExtensibleWebHostBuilder(builder);
-
                     parameters.WebHostConfigAction(builder);
 
                     var extensionsImpl = parameters.WebHostBuilderExtensionsImplFunc();
@@ -163,10 +162,10 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                     builder.ConfigureServices(
                         services =>
                         {
-                            ServiceHostDependencyRegistrant.Register(services, serviceContext);
-                            ServiceHostDependencyRegistrant.Register(services, servicePartition);
-                            ServiceHostDependencyRegistrant.Register(services, serviceEventSource);
-                            ServiceHostDependencyRegistrant.Register(services, listenerInformation);
+                            DependencyRegistrant.Register(services, serviceContext);
+                            DependencyRegistrant.Register(services, servicePartition);
+                            DependencyRegistrant.Register(services, serviceEventSource);
+                            DependencyRegistrant.Register(services, listenerInformation);
 
                             parameters.DependenciesConfigAction?.Invoke(services);
                         });
@@ -183,7 +182,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
                             config.AddProvider(new ServiceHostAspNetCoreListenerLoggerProvider(listenerInformation, loggerOptions, serviceEventSource));
                         });
 
-                    return new ExtensibleWebHost(builder.Build());
+                    return builder.Build();
                 });
 
             return context => parameters.AspNetCoreCommunicationListenerFunc(context, parameters.EndpointName, build);

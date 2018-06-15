@@ -3,10 +3,9 @@
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 {
     public interface IServiceHostBuilderConfigurator
-        : IConfigurableObjectDependenciesConfigurator,
-          IConfigurableObjectWebHostConfigurator
+        : IConfigurableObjectDependenciesConfigurator
     {
-        void UseServiceName(
-            string serviceName);
+        void UseServiceType(
+            string serviceTypeName);
     }
 }

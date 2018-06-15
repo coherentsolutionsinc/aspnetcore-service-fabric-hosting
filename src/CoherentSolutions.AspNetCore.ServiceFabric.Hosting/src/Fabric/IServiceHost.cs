@@ -1,7 +1,14 @@
-﻿namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
+﻿using System.Threading;
+using System.Threading.Tasks;
+
+namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 {
     public interface IServiceHost
     {
-        void Run();
+        Task StartAsync(
+            CancellationToken cancellationToken);
+
+        Task StopAsync(
+            CancellationToken cancellationToken);
     }
 }
