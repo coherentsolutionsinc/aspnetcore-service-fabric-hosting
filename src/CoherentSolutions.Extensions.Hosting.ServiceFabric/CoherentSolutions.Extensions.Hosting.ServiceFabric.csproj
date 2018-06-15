@@ -1,0 +1,37 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <NetStandardImplicitPackageVersion>2.0.0</NetStandardImplicitPackageVersion>
+    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Copyright>2018 Coherent Solutions, Inc</Copyright>
+    <Company>Coherent Solutions, Inc</Company>
+    <Authors>Coherent Solutions, Inc</Authors>
+    <RootNamespace>CoherentSolutions.Extensions.Hosting.ServiceFabric</RootNamespace>
+    <Description>This package provides an extensions to HostBuilder class that simplify configuration of Service Fabric reliable services.</Description>
+    <PackageTags>aspnetcore, servicefabric, hosting</PackageTags>
+    <RepositoryType>Git</RepositoryType>
+    <Version>0.8.1-alpha</Version>
+    <PackageReleaseNotes>Please visit https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Version-History for details.</PackageReleaseNotes>
+    <Product>CoherentSolutions.AspNetCore.ServiceFabric.Hosting</Product>
+    <RepositoryUrl>https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting</PackageProjectUrl>
+    <PackageLicenseUrl>https://opensource.org/licenses/MS-PL</PackageLicenseUrl>
+    <PlatformTarget>x64</PlatformTarget>
+    <PackageId>CoherentSolutions.Extensions.Hosting.ServiceFabric</PackageId>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DocumentationFile></DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.0.3" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.1.0" />
+    <PackageReference Include="Microsoft.ServiceFabric" Version="6.1.480" />
+    <PackageReference Include="Microsoft.ServiceFabric.AspNetCore.Kestrel" Version="3.0.480" />
+    <PackageReference Include="Microsoft.ServiceFabric.Diagnostics.Internal" Version="3.0.480" />
+    <PackageReference Include="Microsoft.ServiceFabric.FabricTransport.Internal" Version="3.0.480" />
+    <PackageReference Include="Microsoft.ServiceFabric.Services" Version="3.0.480" />
+    <PackageReference Include="Microsoft.ServiceFabric.Services.Remoting" Version="3.0.480" />
+  </ItemGroup>
+</Project>
