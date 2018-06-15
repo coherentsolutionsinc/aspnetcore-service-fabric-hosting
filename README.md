@@ -1,10 +1,18 @@
 # About the project
 
-**CoherentSolutions.AspNetCore.ServiceFabric.Hosting** is a simple project that changes a way how you setup your Service Fabric Reliable Services. The main idea is to simplify **Reliable Services** setup by providing a hierarchy structured way to put all configuration in one place.
+**CoherentSolutions.AspNetCore.ServiceFabric.Hosting** is a simple project that changes a way how you setup your Reliable Services. This package integrates with [HostBuilder][3] and allows to configure **Reliable Services** with ease using set of builder classes.
+
+The **CoherentSolutions.AspNetCore.ServiceFabric.Hosting** supports:
+* Configuration of Stateful or Stateless service without a need to implement any infrastructure classes (like `EventSource`, descendant from `StatefulService` or `StatelessService` etc.)
+* Integration with well known packages and components:
+    * **Microsoft.Extensions.Logging** i.e. you can use `ILogger` and all of the events / scopes will be redirected to dedicated Event Source. Please see [article][1] for details.
+    * **Microsoft.Extensions.DependencyInjection** i.e. you can request and register dependencies using standard approach. Please see [article][2] for details.
 
 ## How to start?
 
-Install [NuGet][11] package and start using `HybridHostBuilder`.
+* Read about [HostBuilder][1]
+* Install [CoherentSolutions.AspNetCore.ServiceFabric.Hosting][11] package
+* Enjoy... :)
 
 ## Documentation
 
@@ -28,8 +36,9 @@ This project is owned and maintained by [Coherent Solutions][8].
 
 This project is licensed under the MS-PL License - see the [LICENSE.md][9] for details.
 
-[5]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Roadmap "Project roadmap"
-[6]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/VersionHistory "Version History"
+[1]:  https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-2.1 "docs.microsoft.com HostBuilder"
+[5]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Roadmap "wiki: Project roadmap"
+[6]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/VersionHistory "wiki: Version History"
 [7]:  CONTRIBUTING.md "Contributing"
 [8]:  https://www.coherentsolutions.com/ "Coherent Solutions Inc."
 [9]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/blob/master/LICENSE.md "License"
