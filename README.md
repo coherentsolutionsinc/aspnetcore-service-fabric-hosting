@@ -52,7 +52,7 @@ This project is owned and maintained by [Coherent Solutions][8].
 This project is licensed under the MS-PL License - see the [LICENSE.md][9] for details.
 
 [1]:  https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-2.1 "docs.microsoft.com HostBuilder"
-[2]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/tree/mastersamples/configure-service "sample: Configure Services"
+[2]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/tree/master/samples/configure-service "sample: Configure Services"
 [3]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/tree/master/samples/dependency-injection "sample: Dependency Injection"
 [5]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Roadmap "wiki: Project roadmap"
 [6]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/VersionHistory "wiki: Version History"
