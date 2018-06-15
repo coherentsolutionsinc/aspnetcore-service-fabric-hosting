@@ -238,7 +238,7 @@ if ($RunTests)
         -OnFailureText '[FAILED]' `
         -Invocation `
             { 
-                $working_path = Join-Path -Path $root -ChildPath 'src/CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Tests'
+                $working_path = Join-Path -Path $root -ChildPath 'src/CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests'
 
                 Push-Location $working_path
 
@@ -258,7 +258,7 @@ if ($RunTests)
 
     if (-not $result)
     {
-        Write-Error "Service Fabric application packaging ended with errors. Please see '$build_log' for details."
+        Write-Error "The solution testsing ended with errors. Please see '$tests_log' for details."
         return
     }
 }
