@@ -29,9 +29,9 @@ The **CoherentSolutions.Extensions.Hosting.ServiceFabric** supports:
 
 All project related information can be found on [wiki][12] (_in progress_).
 
-There are also samples gallery:
-* [service-configuration][2] - this sample demonstrated how to configure stateful service using `HostBuilder` and **CoherentSolutions.Extensions.Hosting.ServiceFabric**.
-* [hierarchical services registration][3] - this sample demonstrates how **hierarchical services registration** feature works by configuring stateful service with **aspnetcore** and **remoting** listeners that share common services.
+You are also encouraged to check sample projects:
+* [Configure Service][2] - this sample demonstrated how to configure a simple stateful service with one **aspnetcore** listener using `HostBuilder` and **CoherentSolutions.Extensions.Hosting.ServiceFabric**.
+* [Dependency Injection][3] - this sample demonstrates how to use dependency injection support provided by **CoherentSolutions.Extensions.Hosting.ServiceFabric** to share services registrations between **aspnetcore** and **remoting** listeners of simple stateful service.
 
 ## Future & Past
 
@@ -52,8 +52,8 @@ This project is owned and maintained by [Coherent Solutions][8].
 This project is licensed under the MS-PL License - see the [LICENSE.md][9] for details.
 
 [1]:  https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-2.1 "docs.microsoft.com HostBuilder"
-[2]:   
-[3]:
+[2]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/samples/configure-service "sample: Configure Services"
+[3]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/samples/dependency-injection "sample: Dependency Injection"
 [5]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Roadmap "wiki: Project roadmap"
 [6]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/VersionHistory "wiki: Version History"
 [7]:  CONTRIBUTING.md "Contributing"
