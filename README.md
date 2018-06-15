@@ -16,7 +16,11 @@ The **CoherentSolutions.AspNetCore.ServiceFabric.Hosting** supports:
 
 ## Documentation
 
-All project related information can be found on [wiki][12].
+All project related information can be found on [wiki][12] (_in progress_).
+
+There are also samples gallery:
+* [service-configuration][2] - this sample demonstrated how to configure stateful service using `HostBuilder` and **CoherentSolutions.AspNetCore.ServiceFabric.Hosting**.
+* [hierarchical services registration][3] - this sample demonstrates how **hierarchical services registration** feature works by configuring stateful service with **aspnetcore** and **remoting** listeners that share common services.
 
 ## Future & Past
 
@@ -37,6 +41,8 @@ This project is owned and maintained by [Coherent Solutions][8].
 This project is licensed under the MS-PL License - see the [LICENSE.md][9] for details.
 
 [1]:  https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-2.1 "docs.microsoft.com HostBuilder"
+[2]:   
+[3]:
 [5]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Roadmap "wiki: Project roadmap"
 [6]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/VersionHistory "wiki: Version History"
 [7]:  CONTRIBUTING.md "Contributing"
