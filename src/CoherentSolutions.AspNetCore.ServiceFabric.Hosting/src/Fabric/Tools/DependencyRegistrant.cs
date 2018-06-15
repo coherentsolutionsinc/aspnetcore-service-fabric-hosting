@@ -3,6 +3,8 @@ using System.Fabric;
 
 using Microsoft.Extensions.DependencyInjection;
 
+using System.Reflection;
+
 namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric.Tools
 {
     public static class DependencyRegistrant
@@ -139,21 +141,26 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric.Tools
                 switch (descriptor.Lifetime)
                 {
                     case ServiceLifetime.Singleton:
-                        if (descriptor.ImplementationInstance != null)
-                        {
-                            serviceCollection.Add(descriptor);
-                        }
-                        else if (descriptor.ImplementationFactory != null)
+                        if (descriptor.ImplementationInstance != null ||
+                            descriptor.ImplementationFactory != null)
                         {
                             serviceCollection.Add(descriptor);
                         }
                         else
                         {
-                            serviceCollection.Add(
-                                new ServiceDescriptor(
-                                    descriptor.ServiceType,
-                                    provider => proxyServiceProvider.GetService(descriptor.ServiceType),
-                                    ServiceLifetime.Singleton));
+                            if (descriptor.ServiceType.GetTypeInfo().IsGenericTypeDefinition)
+                            {
+                                // We have open generic here. Register as-is.
+                                serviceCollection.Add(descriptor);
+                            }
+                            else
+                            {
+                                serviceCollection.Add(
+                                    new ServiceDescriptor(
+                                        descriptor.ServiceType, 
+                                        provider => proxyServiceProvider.GetService(descriptor.ServiceType),
+                                        ServiceLifetime.Singleton));
+                            }
                         }
                         break;
                     case ServiceLifetime.Scoped:
