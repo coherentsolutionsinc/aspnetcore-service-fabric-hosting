@@ -6,6 +6,7 @@ using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Common.Exceptions;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric.Tools;
 using CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Web;
 
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
@@ -104,7 +105,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 
             private static IWebHostBuilder DefaultWebHostBuilderFunc()
             {
-                return new WebHostBuilder();
+                return WebHost.CreateDefaultBuilder();
             }
 
             private static void DefaultWebHostConfigAction(
