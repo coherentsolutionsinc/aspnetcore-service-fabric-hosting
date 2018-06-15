@@ -47,7 +47,7 @@ namespace CoherentSolutions.AspNetCore.ServiceFabric.Hosting.Fabric
 
             private static IServiceHostListenerLoggerOptions DefaultLoggerOptionsFunc()
             {
-                return new ServiceHostListenerLoggerOptions();
+                return ServiceHostListenerLoggerOptions.Disabled;
             }
 
             public void ConfigureDependencies(
