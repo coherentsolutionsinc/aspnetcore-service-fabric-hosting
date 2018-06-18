@@ -46,9 +46,9 @@
 
             this.UpstreamConfiguration(parameters);
 
-            var replicators = this.BuildReplicators(parameters);
+            var compilation = this.CompileParameters(parameters);
 
-            return new StatefulServiceHost(parameters.ServiceTypeName, replicators);
+            return new StatefulServiceHost(parameters.ServiceTypeName, compilation.Replicators);
         }
     }
 }

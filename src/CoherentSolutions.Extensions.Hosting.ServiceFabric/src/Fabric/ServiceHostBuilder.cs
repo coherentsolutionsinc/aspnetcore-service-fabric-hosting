@@ -147,9 +147,26 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             }
         }
 
+        protected class Compilation
+        {
+            public IServiceProvider Dependencies { get; }
+            public IReadOnlyList<TReplicator> Replicators { get; }
+
+            public Compilation(
+                IServiceProvider dependencies,
+                IReadOnlyList<TReplicator> replicators)
+            {
+                this.Dependencies = dependencies 
+                 ?? throw new ArgumentNullException(nameof(dependencies));
+
+                this.Replicators = replicators 
+                 ?? throw new ArgumentNullException(nameof(replicators));
+            }
+        }
+
         public abstract TServiceHost Build();
 
-        protected IEnumerable<TReplicator> BuildReplicators(
+        protected Compilation CompileParameters(
             TParameters parameters)
         {
             if (parameters == null)
@@ -163,15 +180,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                     $"No {nameof(parameters.ListenerReplicatorFunc)} was configured");
             }
 
-            // Initialize direct dependencies
+            // Initialize service dependencies
             var dependenciesCollection = new ServiceCollection();
             
             parameters.DependenciesConfigAction?.Invoke(dependenciesCollection);
 
-            var dependenciesServices = new DefaultServiceProviderFactory().CreateServiceProvider(dependenciesCollection);
+            var dependencies = new DefaultServiceProviderFactory().CreateServiceProvider(dependenciesCollection);
 
             var replicators = parameters.ListenerDescriptors == null
-                ? Enumerable.Empty<TReplicator>()
+                ? Array.Empty<TReplicator>()
                 : parameters.ListenerDescriptors
                    .Select(
                         descriptor =>
@@ -199,7 +216,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                                 c.ConfigureDependencies(
                                                     services =>
                                                     {
-                                                        DependencyRegistrant.Register(services, dependenciesCollection, dependenciesServices);
+                                                        DependencyRegistrant.Register(services, dependenciesCollection, dependencies);
                                                     });
                                             });
 
@@ -228,7 +245,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                                 c.ConfigureDependencies(
                                                     services =>
                                                     {
-                                                        DependencyRegistrant.Register(services, dependenciesCollection, dependenciesServices);
+                                                        DependencyRegistrant.Register(services, dependenciesCollection, dependencies);
                                                     });
                                             });
 
@@ -251,7 +268,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                         })
                    .ToArray();
 
-            return replicators;
+            return new Compilation(dependencies, replicators);
         }
     }
 }
