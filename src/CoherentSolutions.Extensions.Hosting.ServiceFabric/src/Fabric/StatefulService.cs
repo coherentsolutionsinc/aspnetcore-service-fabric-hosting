@@ -17,27 +17,52 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
         private readonly ServiceEventSource eventSource;
 
+        private readonly ServiceEventSynchronization eventSynchronization;
+
         public StatefulService(
             StatefulServiceContext serviceContext,
             IServiceProvider serviceDependencies,
-            IEnumerable<IStatefulServiceHostListenerReplicator> serviceListenerReplicators)
+            IReadOnlyList<IStatefulServiceHostListenerReplicator> serviceListenerReplicators)
             : base(serviceContext)
         {
+            if (serviceDependencies == null)
+            {
+                throw new ArgumentNullException(nameof(serviceDependencies));
+            }
+
+            if (serviceListenerReplicators == null)
+            {
+                throw new ArgumentNullException(nameof(serviceListenerReplicators));
+            }
+
             this.eventSource = new ServiceEventSource(
                 serviceContext,
                 $"{serviceContext.CodePackageActivationContext.ApplicationTypeName}.{serviceContext.ServiceTypeName}",
                 EventSourceSettings.EtwSelfDescribingEventFormat);
 
-            this.serviceDependencies = serviceDependencies 
-             ?? throw new ArgumentNullException(nameof(serviceDependencies));
+            this.eventSynchronization = new ServiceEventSynchronization(
+                serviceListenerReplicators.Count);
 
-            this.serviceListenerReplicators = serviceListenerReplicators
-             ?? Enumerable.Empty<IStatefulServiceHostListenerReplicator>();
+            this.serviceDependencies = serviceDependencies;
+            this.serviceListenerReplicators = serviceListenerReplicators;
         }
 
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
         {
-            return this.serviceListenerReplicators.Select(replicator => replicator.ReplicateFor(this));
+            return this.serviceListenerReplicators
+               .Select(replicator =>
+                {
+                    var replicaListener = replicator.ReplicateFor(this);
+                    return new ServiceReplicaListener(
+                        context =>
+                        {
+                            return new ServiceCommunicationListenerEventDecorator(
+                                this.eventSynchronization,
+                                replicaListener.CreateCommunicationListener(context));
+                        },
+                        replicaListener.Name,
+                        replicaListener.ListenOnSecondary);
+                });
         }
 
         public IReliableStateManager GetReliableStateManager()

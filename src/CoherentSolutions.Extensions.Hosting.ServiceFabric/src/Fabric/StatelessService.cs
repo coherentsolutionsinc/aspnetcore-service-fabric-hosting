@@ -12,31 +12,55 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
     {
         private readonly IServiceProvider serviceDependencies;
 
-        private readonly IEnumerable<IStatelessServiceHostListenerReplicator> serviceListenerReplicators;
+        private readonly IReadOnlyList<IStatelessServiceHostListenerReplicator> serviceListenerReplicators;
 
         private readonly ServiceEventSource eventSource;
+
+        private readonly ServiceEventSynchronization eventSynchronization;
 
         public StatelessService(
             StatelessServiceContext serviceContext,
             IServiceProvider serviceDependencies,
-            IEnumerable<IStatelessServiceHostListenerReplicator> serviceListenerReplicators)
+            IReadOnlyList<IStatelessServiceHostListenerReplicator> serviceListenerReplicators)
             : base(serviceContext)
         {
+            if (serviceDependencies == null)
+            {
+                throw new ArgumentNullException(nameof(serviceDependencies));
+            }
+
+            if (serviceListenerReplicators == null)
+            {
+                throw new ArgumentNullException(nameof(serviceListenerReplicators));
+            }
+
             this.eventSource = new ServiceEventSource(
                 serviceContext,
                 $"{serviceContext.CodePackageActivationContext.ApplicationTypeName}.{serviceContext.ServiceTypeName}",
                 EventSourceSettings.EtwSelfDescribingEventFormat);
 
-            this.serviceDependencies = serviceDependencies 
-             ?? throw new ArgumentNullException(nameof(serviceDependencies));
+            this.eventSynchronization = new ServiceEventSynchronization(
+                serviceListenerReplicators.Count);
 
-            this.serviceListenerReplicators = serviceListenerReplicators
-             ?? Enumerable.Empty<IStatelessServiceHostListenerReplicator>();
+            this.serviceDependencies = serviceDependencies;
+            this.serviceListenerReplicators = serviceListenerReplicators;
         }
 
         protected override IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners()
         {
-            return this.serviceListenerReplicators.Select(replicator => replicator.ReplicateFor(this));
+            return this.serviceListenerReplicators
+               .Select(replicator =>
+                {
+                    var replicaListener = replicator.ReplicateFor(this);
+                    return new ServiceInstanceListener(
+                        context =>
+                        {
+                            return new ServiceCommunicationListenerEventDecorator(
+                                this.eventSynchronization,
+                                replicaListener.CreateCommunicationListener(context));
+                        },
+                        replicaListener.Name);
+                });
         }
 
         public ServiceContext GetContext()
