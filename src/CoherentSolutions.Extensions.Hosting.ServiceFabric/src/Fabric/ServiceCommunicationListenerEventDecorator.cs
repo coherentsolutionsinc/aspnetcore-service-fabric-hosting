@@ -10,10 +10,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
     {
         private readonly ICommunicationListener successor;
 
-        private readonly ServiceEventSynchronization eventSynchronization;
+        private readonly IServiceEventSynchronization eventSynchronization;
 
         public ServiceCommunicationListenerEventDecorator(
-            ServiceEventSynchronization eventSynchronization,
+            IServiceEventSynchronization eventSynchronization,
             ICommunicationListener successor)
         {
             this.eventSynchronization = eventSynchronization 

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Fabric;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
@@ -17,7 +19,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
         private readonly ServiceEventSource eventSource;
 
-        private readonly ServiceEventSynchronization eventSynchronization;
+        private readonly StatefulServiceEventSynchronization eventSynchronization;
 
         public StatefulService(
             StatefulServiceContext serviceContext,
@@ -40,8 +42,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 $"{serviceContext.CodePackageActivationContext.ApplicationTypeName}.{serviceContext.ServiceTypeName}",
                 EventSourceSettings.EtwSelfDescribingEventFormat);
 
-            this.eventSynchronization = new ServiceEventSynchronization(
-                serviceListenerReplicators.Count);
+            this.eventSynchronization = new StatefulServiceEventSynchronization();
 
             this.serviceDependencies = serviceDependencies;
             this.serviceListenerReplicators = serviceListenerReplicators;
@@ -63,6 +64,26 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                         replicaListener.Name,
                         replicaListener.ListenOnSecondary);
                 });
+        }
+
+        protected override Task OnOpenAsync(
+            ReplicaOpenMode openMode,
+            CancellationToken cancellationToken)
+        {
+            return base.OnOpenAsync(openMode, cancellationToken);
+        }
+
+        protected override Task OnChangeRoleAsync(
+            ReplicaRole newRole,
+            CancellationToken cancellationToken)
+        {
+            return base.OnChangeRoleAsync(newRole, cancellationToken);
+        }
+
+        protected override Task RunAsync(
+            CancellationToken cancellationToken)
+        {
+            return base.RunAsync(cancellationToken);
         }
 
         public IReliableStateManager GetReliableStateManager()

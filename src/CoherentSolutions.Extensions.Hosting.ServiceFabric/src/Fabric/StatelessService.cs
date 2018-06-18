@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Fabric;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 
@@ -16,7 +18,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
         private readonly ServiceEventSource eventSource;
 
-        private readonly ServiceEventSynchronization eventSynchronization;
+        private readonly StatelessServiceEventSynchronization eventSynchronization;
 
         public StatelessService(
             StatelessServiceContext serviceContext,
@@ -39,7 +41,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 $"{serviceContext.CodePackageActivationContext.ApplicationTypeName}.{serviceContext.ServiceTypeName}",
                 EventSourceSettings.EtwSelfDescribingEventFormat);
 
-            this.eventSynchronization = new ServiceEventSynchronization(
+            this.eventSynchronization = new StatelessServiceEventSynchronization(
                 serviceListenerReplicators.Count);
 
             this.serviceDependencies = serviceDependencies;
@@ -61,6 +63,18 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                         },
                         replicaListener.Name);
                 });
+        }
+
+        protected override async Task RunAsync(
+            CancellationToken cancellationToken)
+        {
+            await this.eventSynchronization.WhenAllListeners(cancellationToken);
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                // The service was shutdown. Just ignore the rest and let Service Fabric to delete this replica.
+                return;
+            }
         }
 
         public ServiceContext GetContext()
