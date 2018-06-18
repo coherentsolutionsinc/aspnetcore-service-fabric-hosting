@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Fabric;
 using System.Linq;
@@ -10,13 +11,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public class StatefulService : Microsoft.ServiceFabric.Services.Runtime.StatefulService, IStatefulService
     {
-        private readonly IEnumerable<IStatefulServiceHostListenerReplicator> listenerReplicators;
+        private readonly IServiceProvider serviceDependencies;
+
+        private readonly IEnumerable<IStatefulServiceHostListenerReplicator> serviceListenerReplicators;
 
         private readonly ServiceEventSource eventSource;
 
         public StatefulService(
             StatefulServiceContext serviceContext,
-            IEnumerable<IStatefulServiceHostListenerReplicator> listenerReplicators)
+            IServiceProvider serviceDependencies,
+            IEnumerable<IStatefulServiceHostListenerReplicator> serviceListenerReplicators)
             : base(serviceContext)
         {
             this.eventSource = new ServiceEventSource(
@@ -24,13 +28,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 $"{serviceContext.CodePackageActivationContext.ApplicationTypeName}.{serviceContext.ServiceTypeName}",
                 EventSourceSettings.EtwSelfDescribingEventFormat);
 
-            this.listenerReplicators = listenerReplicators
+            this.serviceDependencies = serviceDependencies 
+             ?? throw new ArgumentNullException(nameof(serviceDependencies));
+
+            this.serviceListenerReplicators = serviceListenerReplicators
              ?? Enumerable.Empty<IStatefulServiceHostListenerReplicator>();
         }
 
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
         {
-            return this.listenerReplicators.Select(replicator => replicator.ReplicateFor(this));
+            return this.serviceListenerReplicators.Select(replicator => replicator.ReplicateFor(this));
         }
 
         public IReliableStateManager GetReliableStateManager()

@@ -48,7 +48,7 @@
 
             var compilation = this.CompileParameters(parameters);
 
-            return new StatelessServiceHost(parameters.ServiceTypeName, compilation.Replicators);
+            return new StatelessServiceHost(parameters.ServiceTypeName, compilation.Dependencies, compilation.Replicators);
         }
     }
 }

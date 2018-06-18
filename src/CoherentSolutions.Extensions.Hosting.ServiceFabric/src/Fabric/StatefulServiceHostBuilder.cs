@@ -48,7 +48,7 @@
 
             var compilation = this.CompileParameters(parameters);
 
-            return new StatefulServiceHost(parameters.ServiceTypeName, compilation.Replicators);
+            return new StatefulServiceHost(parameters.ServiceTypeName, compilation.Dependencies, compilation.Replicators);
         }
     }
 }
