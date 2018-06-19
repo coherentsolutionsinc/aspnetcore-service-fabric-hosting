@@ -13,13 +13,56 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public class StatefulService : Microsoft.ServiceFabric.Services.Runtime.StatefulService, IStatefulService
     {
+        private class EventSynchronization
+        {
+            private TaskCompletionSource<int> whenRoleDetermined;
+
+            public EventSynchronization()
+            {
+                this.whenRoleDetermined = new TaskCompletionSource<int>();
+            }
+
+            public void NotifyRoleDetermined(
+                ReplicaRole toRole)
+            {
+                // Initialization or promotion - we can reuse existing Task.
+                if (toRole == ReplicaRole.Primary)
+                {
+                    this.whenRoleDetermined.SetResult(0);
+                }
+                else
+                {
+                    this.whenRoleDetermined = new TaskCompletionSource<int>();
+                }
+            }
+
+            public async Task WhenAllListenersOpened(
+                CancellationToken cancellationToken)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                var allSource = this.whenRoleDetermined;
+                using (cancellationToken.Register(
+                    () =>
+                    {
+                        allSource.SetCanceled();
+                    }))
+                {
+                    await allSource.Task;
+                }
+            }
+        }
+
         private readonly IServiceProvider serviceDependencies;
 
         private readonly IEnumerable<IStatefulServiceHostListenerReplicator> serviceListenerReplicators;
 
         private readonly ServiceEventSource eventSource;
 
-        private readonly StatefulServiceEventSynchronization eventSynchronization;
+        private readonly EventSynchronization eventSynchronization;
 
         public StatefulService(
             StatefulServiceContext serviceContext,
@@ -27,63 +70,46 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             IReadOnlyList<IStatefulServiceHostListenerReplicator> serviceListenerReplicators)
             : base(serviceContext)
         {
-            if (serviceDependencies == null)
-            {
-                throw new ArgumentNullException(nameof(serviceDependencies));
-            }
-
-            if (serviceListenerReplicators == null)
-            {
-                throw new ArgumentNullException(nameof(serviceListenerReplicators));
-            }
-
             this.eventSource = new ServiceEventSource(
                 serviceContext,
                 $"{serviceContext.CodePackageActivationContext.ApplicationTypeName}.{serviceContext.ServiceTypeName}",
                 EventSourceSettings.EtwSelfDescribingEventFormat);
 
-            this.eventSynchronization = new StatefulServiceEventSynchronization();
+            this.eventSynchronization = new EventSynchronization();
 
-            this.serviceDependencies = serviceDependencies;
-            this.serviceListenerReplicators = serviceListenerReplicators;
+            this.serviceDependencies = serviceDependencies 
+             ?? throw new ArgumentNullException(nameof(serviceDependencies));
+
+            this.serviceListenerReplicators = serviceListenerReplicators 
+             ?? throw new ArgumentNullException(nameof(serviceListenerReplicators));
         }
 
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
         {
-            return this.serviceListenerReplicators
-               .Select(replicator =>
-                {
-                    var replicaListener = replicator.ReplicateFor(this);
-                    return new ServiceReplicaListener(
-                        context =>
-                        {
-                            return new ServiceCommunicationListenerEventDecorator(
-                                this.eventSynchronization,
-                                replicaListener.CreateCommunicationListener(context));
-                        },
-                        replicaListener.Name,
-                        replicaListener.ListenOnSecondary);
-                });
-        }
-
-        protected override Task OnOpenAsync(
-            ReplicaOpenMode openMode,
-            CancellationToken cancellationToken)
-        {
-            return base.OnOpenAsync(openMode, cancellationToken);
+            return this.serviceListenerReplicators.Select(replicator =>replicator.ReplicateFor(this));
         }
 
         protected override Task OnChangeRoleAsync(
             ReplicaRole newRole,
             CancellationToken cancellationToken)
         {
-            return base.OnChangeRoleAsync(newRole, cancellationToken);
+            this.eventSynchronization.NotifyRoleDetermined(newRole);
+
+            return Task.CompletedTask;
         }
 
-        protected override Task RunAsync(
+        protected override async Task RunAsync(
             CancellationToken cancellationToken)
         {
-            return base.RunAsync(cancellationToken);
+            // Wait when all listeners are opened
+            await this.eventSynchronization.WhenAllListenersOpened(cancellationToken);
+
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
+            // Run async operations
         }
 
         public IReliableStateManager GetReliableStateManager()
