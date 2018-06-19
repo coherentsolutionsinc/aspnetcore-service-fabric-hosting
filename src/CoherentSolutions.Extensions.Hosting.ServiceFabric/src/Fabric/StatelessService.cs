@@ -192,6 +192,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             await this.eventSynchronization.WhenAllListenersOpened(cancellationToken);
 
             // Run async operations
+            foreach (var @delegate in this.serviceDelegateReplicators
+               .Select(replicator => replicator.ReplicateFor(this)))
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                await @delegate.InvokeAsync();
+            }
         }
 
         public ServiceContext GetContext()
