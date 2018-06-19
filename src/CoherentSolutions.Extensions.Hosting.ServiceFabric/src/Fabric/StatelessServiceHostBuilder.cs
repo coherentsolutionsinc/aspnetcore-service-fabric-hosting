@@ -5,9 +5,9 @@
               IStatelessServiceHost,
               IStatelessServiceHostBuilderParameters,
               IStatelessServiceHostBuilderConfigurator,
-              IStatelessServiceHostAsyncDelegateReplicableTemplate,
-              IStatelessServiceHostAsyncDelegateReplicaTemplate,
-              IStatelessServiceHostAsyncDelegateReplicator,
+              IStatelessServiceHostDelegateReplicableTemplate,
+              IStatelessServiceHostDelegateReplicaTemplate,
+              IStatelessServiceHostDelegateReplicator,
               IStatelessServiceHostListenerReplicableTemplate,
               IStatelessServiceHostAspNetCoreListenerReplicaTemplate,
               IStatelessServiceHostRemotingListenerReplicaTemplate,
@@ -28,15 +28,15 @@
                 this.UseListenerReplicator(DefaultListenerReplicatorFactory);
             }
 
-            private static IStatelessServiceHostAsyncDelegateReplicaTemplate DefaultAsyncDelegateReplicaTemplate()
+            private static IStatelessServiceHostDelegateReplicaTemplate DefaultAsyncDelegateReplicaTemplate()
             {
-                return new StatelessServiceHostAsyncDelegateReplicaTemplate();
+                return new StatelessServiceHostDelegateReplicaTemplate();
             }
 
-            private static IStatelessServiceHostAsyncDelegateReplicator DefaultAsyncDelegateReplicatorFactory(
-                IStatelessServiceHostAsyncDelegateReplicableTemplate template)
+            private static IStatelessServiceHostDelegateReplicator DefaultAsyncDelegateReplicatorFactory(
+                IStatelessServiceHostDelegateReplicableTemplate template)
             {
-                return new StatelessServiceHostAsyncDelegateReplicator(template);
+                return new StatelessServiceHostDelegateReplicator(template);
             }
 
             private static IStatelessServiceHostAspNetCoreListenerReplicaTemplate DefaultAspNetCoreListenerReplicaTemplate()

@@ -26,26 +26,26 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
         where TParameters :
         class,
         IServiceHostBuilderParameters,
-        IServiceHostBuilderAsyncDelegateParameters<TAsyncDelegateReplicaTemplate>,
-        IServiceHostBuilderAsyncDelegateReplicationParameters<TAsyncDelegateReplicableTemplate, TAsyncDelegateReplicator>,
+        IServiceHostBuilderDelegateParameters<TAsyncDelegateReplicaTemplate>,
+        IServiceHostBuilderDelegateReplicationParameters<TAsyncDelegateReplicableTemplate, TAsyncDelegateReplicator>,
         IServiceHostBuilderAspNetCoreListenerParameters<TListenerAspNetCoreReplicaTemplate>,
         IServiceHostBuilderRemotingListenerParameters<TListenerRemotingReplicaTemplate>,
         IServiceHostBuilderListenerReplicationParameters<TListenerReplicableTemplate, TListenerReplicator>
         where TConfigurator :
         class,
         IServiceHostBuilderConfigurator,
-        IServiceHostBuilderAsyncDelegateConfigurator<TAsyncDelegateReplicaTemplate>,
-        IServiceHostBuilderAsyncDelegateReplicationConfigurator<TAsyncDelegateReplicableTemplate, TAsyncDelegateReplicator>,
+        IServiceHostBuilderDelegateConfigurator<TAsyncDelegateReplicaTemplate>,
+        IServiceHostBuilderDelegateReplicationConfigurator<TAsyncDelegateReplicableTemplate, TAsyncDelegateReplicator>,
         IServiceHostBuilderAspNetCoreListenerConfigurator<TListenerAspNetCoreReplicaTemplate>,
         IServiceHostBuilderRemotingListenerConfigurator<TListenerRemotingReplicaTemplate>,
         IServiceHostBuilderListenerReplicationConfigurator<TListenerReplicableTemplate, TListenerReplicator>
         where TAsyncDelegateReplicaTemplate :
         class,
         TAsyncDelegateReplicableTemplate,
-        IServiceHostAsyncDelegateReplicaTemplate<TAsyncDelegateReplicaTemplateConfigurator>
+        IServiceHostDelegateReplicaTemplate<TAsyncDelegateReplicaTemplateConfigurator>
         where TAsyncDelegateReplicaTemplateConfigurator :
         class,
-        IServiceHostAsyncDelegateReplicaTemplateConfigurator
+        IServiceHostDelegateReplicaTemplateConfigurator
         where TAsyncDelegateReplicator :
         class
         where TListenerAspNetCoreReplicaTemplate :

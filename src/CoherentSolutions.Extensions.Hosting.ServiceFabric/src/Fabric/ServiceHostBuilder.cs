@@ -25,21 +25,21 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
           IServiceHostBuilder<TServiceHost, TConfigurator>
         where TParameters :
         IServiceHostBuilderParameters,
-        IServiceHostBuilderAsyncDelegateParameters<TAsyncDelegateReplicaTemplate>,
-        IServiceHostBuilderAsyncDelegateReplicationParameters<TAsyncDelegateReplicableTemplate, TAsyncDelegateReplicator>,
+        IServiceHostBuilderDelegateParameters<TAsyncDelegateReplicaTemplate>,
+        IServiceHostBuilderDelegateReplicationParameters<TAsyncDelegateReplicableTemplate, TAsyncDelegateReplicator>,
         IServiceHostBuilderAspNetCoreListenerParameters<TListenerAspNetCoreReplicaTemplate>,
         IServiceHostBuilderRemotingListenerParameters<TListenerRemotingReplicaTemplate>,
         IServiceHostBuilderListenerReplicationParameters<TListenerReplicableTemplate, TListenerReplicator>
         where TConfigurator :
         IServiceHostBuilderConfigurator,
-        IServiceHostBuilderAsyncDelegateConfigurator<TAsyncDelegateReplicaTemplate>,
-        IServiceHostBuilderAsyncDelegateReplicationConfigurator<TAsyncDelegateReplicableTemplate, TAsyncDelegateReplicator>,
+        IServiceHostBuilderDelegateConfigurator<TAsyncDelegateReplicaTemplate>,
+        IServiceHostBuilderDelegateReplicationConfigurator<TAsyncDelegateReplicableTemplate, TAsyncDelegateReplicator>,
         IServiceHostBuilderAspNetCoreListenerConfigurator<TListenerAspNetCoreReplicaTemplate>,
         IServiceHostBuilderRemotingListenerConfigurator<TListenerRemotingReplicaTemplate>,
         IServiceHostBuilderListenerReplicationConfigurator<TListenerReplicableTemplate, TListenerReplicator>
         where TAsyncDelegateReplicaTemplate :
         TAsyncDelegateReplicableTemplate,
-        IServiceHostAsyncDelegateReplicaTemplate<IServiceHostAsyncDelegateReplicaTemplateConfigurator>
+        IServiceHostDelegateReplicaTemplate<IServiceHostDelegateReplicaTemplateConfigurator>
         where TListenerAspNetCoreReplicaTemplate :
         TListenerReplicableTemplate,
         IServiceHostAspNetCoreListenerReplicaTemplate<IServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
@@ -50,10 +50,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         protected abstract class Parameters
             : IServiceHostBuilderParameters,
               IServiceHostBuilderConfigurator,
-              IServiceHostBuilderAsyncDelegateParameters<TAsyncDelegateReplicaTemplate>,
-              IServiceHostBuilderAsyncDelegateConfigurator<TAsyncDelegateReplicaTemplate>,
-              IServiceHostBuilderAsyncDelegateReplicationParameters<TAsyncDelegateReplicableTemplate, TAsyncDelegateReplicator>,
-              IServiceHostBuilderAsyncDelegateReplicationConfigurator<TAsyncDelegateReplicableTemplate, TAsyncDelegateReplicator>,
+              IServiceHostBuilderDelegateParameters<TAsyncDelegateReplicaTemplate>,
+              IServiceHostBuilderDelegateConfigurator<TAsyncDelegateReplicaTemplate>,
+              IServiceHostBuilderDelegateReplicationParameters<TAsyncDelegateReplicableTemplate, TAsyncDelegateReplicator>,
+              IServiceHostBuilderDelegateReplicationConfigurator<TAsyncDelegateReplicableTemplate, TAsyncDelegateReplicator>,
               IServiceHostBuilderAspNetCoreListenerParameters<TListenerAspNetCoreReplicaTemplate>,
               IServiceHostBuilderAspNetCoreListenerConfigurator<TListenerAspNetCoreReplicaTemplate>,
               IServiceHostBuilderRemotingListenerParameters<TListenerRemotingReplicaTemplate>,
@@ -65,7 +65,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             public List<IServiceHostListenerDescriptor> ListenerDescriptors { get; private set; }
 
-            public List<IServiceHostAsyncDelegateDescriptor> DelegateDescriptors { get; private set; }
+            public List<IServiceHostDelegateDescriptor> DelegateDescriptors { get; private set; }
 
             public Func<TAsyncDelegateReplicaTemplate> AsyncDelegateReplicaTemplateFunc { get; private set; }
 
@@ -155,11 +155,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
                 if (this.DelegateDescriptors == null)
                 {
-                    this.DelegateDescriptors = new List<IServiceHostAsyncDelegateDescriptor>();
+                    this.DelegateDescriptors = new List<IServiceHostDelegateDescriptor>();
                 }
 
                 this.DelegateDescriptors.Add(
-                    new ServiceHostAsyncDelegateDescriptor(
+                    new ServiceHostDelegateDescriptor(
                         replicaTemplate => defineAction((TAsyncDelegateReplicaTemplate) replicaTemplate)));
             }
 

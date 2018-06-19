@@ -3,22 +3,22 @@ using Microsoft.ServiceFabric.Data;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public class StatefulServiceHostAsyncDelegateReplicaTemplate
-        : ServiceHostAsyncDelegateReplicaTemplate<
+    public class StatefulServiceHostDelegateReplicaTemplate
+        : ServiceHostDelegateReplicaTemplate<
               IStatefulService,
-              IStatefulServiceHostAsyncDelegateReplicaTemplateParameters,
-              IStatefulServiceHostAsyncDelegateReplicaTemplateConfigurator,
-              IServiceHostAsyncDelegate>,
-          IStatefulServiceHostAsyncDelegateReplicaTemplate
+              IStatefulServiceHostDelegateReplicaTemplateParameters,
+              IStatefulServiceHostDelegateReplicaTemplateConfigurator,
+              IServiceHostDelegate>,
+          IStatefulServiceHostDelegateReplicaTemplate
     {
         private class StatefulAsyncDelegateParameters
             : DelegateParameters,
-              IStatefulServiceHostAsyncDelegateReplicaTemplateParameters,
-              IStatefulServiceHostAsyncDelegateReplicaTemplateConfigurator
+              IStatefulServiceHostDelegateReplicaTemplateParameters,
+              IStatefulServiceHostDelegateReplicaTemplateConfigurator
         {
         }
 
-        public override IServiceHostAsyncDelegate Activate(
+        public override IServiceHostDelegate Activate(
             IStatefulService service)
         {
             var parameters = new StatefulAsyncDelegateParameters();

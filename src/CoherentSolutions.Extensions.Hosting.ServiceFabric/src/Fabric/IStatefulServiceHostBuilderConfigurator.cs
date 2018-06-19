@@ -2,8 +2,8 @@
 {
     public interface IStatefulServiceHostBuilderConfigurator
         : IServiceHostBuilderConfigurator,
-          IServiceHostBuilderAsyncDelegateConfigurator<IStatefulServiceHostAsyncDelegateReplicaTemplate>,
-          IServiceHostBuilderAsyncDelegateReplicationConfigurator<IStatefulServiceHostAsyncDelegateReplicableTemplate, IStatefulServiceHostAsyncDelegateReplicator>,
+          IServiceHostBuilderDelegateConfigurator<IStatefulServiceHostDelegateReplicaTemplate>,
+          IServiceHostBuilderDelegateReplicationConfigurator<IStatefulServiceHostDelegateReplicableTemplate, IStatefulServiceHostDelegateReplicator>,
           IServiceHostBuilderAspNetCoreListenerConfigurator<IStatefulServiceHostAspNetCoreListenerReplicaTemplate>,
           IServiceHostBuilderRemotingListenerConfigurator<IStatefulServiceHostRemotingListenerReplicaTemplate>,
           IServiceHostBuilderListenerReplicationConfigurator<IStatefulServiceHostListenerReplicableTemplate, IStatefulServiceHostListenerReplicator>

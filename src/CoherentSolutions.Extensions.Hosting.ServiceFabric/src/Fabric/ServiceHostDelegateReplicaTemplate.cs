@@ -7,15 +7,15 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public abstract class ServiceHostAsyncDelegateReplicaTemplate<TService, TParameters, TConfigurator, TDelegate>
-        : ConfigurableObject<TConfigurator>, IServiceHostAsyncDelegateReplicaTemplate<TConfigurator>
+    public abstract class ServiceHostDelegateReplicaTemplate<TService, TParameters, TConfigurator, TDelegate>
+        : ConfigurableObject<TConfigurator>, IServiceHostDelegateReplicaTemplate<TConfigurator>
         where TService : IService
-        where TParameters : IServiceHostAsyncDelegateReplicaTemplateParameters
-        where TConfigurator : IServiceHostAsyncDelegateReplicaTemplateConfigurator
+        where TParameters : IServiceHostDelegateReplicaTemplateParameters
+        where TConfigurator : IServiceHostDelegateReplicaTemplateConfigurator
     {
         protected abstract class DelegateParameters
-            : IServiceHostAsyncDelegateReplicaTemplateParameters,
-              IServiceHostAsyncDelegateReplicaTemplateConfigurator
+            : IServiceHostDelegateReplicaTemplateParameters,
+              IServiceHostDelegateReplicaTemplateConfigurator
         {
             public Delegate Delegate { get; private set; }
 
@@ -48,7 +48,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         public abstract TDelegate Activate(
             TService service);
 
-        protected Func<IServiceHostAsyncDelegate> CreateFunc(
+        protected Func<IServiceHostDelegate> CreateFunc(
             TService service,
             TParameters parameters)
         {
@@ -71,7 +71,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             var provider = new DefaultServiceProviderFactory().CreateServiceProvider(services);
 
-            return () => new ServiceHostAsyncDelegate(parameters.Delegate, provider);
+            return () => new ServiceHostDelegate(parameters.Delegate, provider);
         }
     }
 }

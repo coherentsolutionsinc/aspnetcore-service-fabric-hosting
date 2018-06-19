@@ -2,8 +2,8 @@
 {
     public interface IStatefulServiceHostBuilderParameters
         : IServiceHostBuilderParameters,
-          IServiceHostBuilderAsyncDelegateParameters<IStatefulServiceHostAsyncDelegateReplicaTemplate>,
-          IServiceHostBuilderAsyncDelegateReplicationParameters<IStatefulServiceHostAsyncDelegateReplicableTemplate, IStatefulServiceHostAsyncDelegateReplicator>,
+          IServiceHostBuilderDelegateParameters<IStatefulServiceHostDelegateReplicaTemplate>,
+          IServiceHostBuilderDelegateReplicationParameters<IStatefulServiceHostDelegateReplicableTemplate, IStatefulServiceHostDelegateReplicator>,
           IServiceHostBuilderAspNetCoreListenerParameters<IStatefulServiceHostAspNetCoreListenerReplicaTemplate>,
           IServiceHostBuilderRemotingListenerParameters<IStatefulServiceHostRemotingListenerReplicaTemplate>,
           IServiceHostBuilderListenerReplicationParameters<IStatefulServiceHostListenerReplicableTemplate, IStatefulServiceHostListenerReplicator>

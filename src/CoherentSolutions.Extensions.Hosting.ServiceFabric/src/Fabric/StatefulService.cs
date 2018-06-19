@@ -56,7 +56,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             }
         }
 
-        private readonly IReadOnlyList<IStatefulServiceHostAsyncDelegateReplicator> serviceDelegateReplicators;
+        private readonly IReadOnlyList<IStatefulServiceHostDelegateReplicator> serviceDelegateReplicators;
 
         private readonly IEnumerable<IStatefulServiceHostListenerReplicator> serviceListenerReplicators;
 
@@ -66,7 +66,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
         public StatefulService(
             StatefulServiceContext serviceContext,
-            IReadOnlyList<IStatefulServiceHostAsyncDelegateReplicator> serviceDelegateReplicators,
+            IReadOnlyList<IStatefulServiceHostDelegateReplicator> serviceDelegateReplicators,
             IReadOnlyList<IStatefulServiceHostListenerReplicator> serviceListenerReplicators)
             : base(serviceContext)
         {

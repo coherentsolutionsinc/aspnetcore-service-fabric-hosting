@@ -13,13 +13,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         private readonly string serviceName;
 
 
-        private readonly IReadOnlyList<IStatefulServiceHostAsyncDelegateReplicator> serviceDelegatesReplicators;
+        private readonly IReadOnlyList<IStatefulServiceHostDelegateReplicator> serviceDelegatesReplicators;
 
         private readonly IReadOnlyList<IStatefulServiceHostListenerReplicator> serviceListenerReplicators;
 
         public StatefulServiceHost(
             string serviceName,
-            IReadOnlyList<IStatefulServiceHostAsyncDelegateReplicator> serviceDelegatesReplicators,
+            IReadOnlyList<IStatefulServiceHostDelegateReplicator> serviceDelegatesReplicators,
             IReadOnlyList<IStatefulServiceHostListenerReplicator> serviceListenerReplicators)
         {
             this.serviceName = serviceName

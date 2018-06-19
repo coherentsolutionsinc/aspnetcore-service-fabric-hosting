@@ -9,14 +9,14 @@ using Microsoft.ServiceFabric.Services.Communication.Runtime;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public class ServiceHostAsyncDelegate
-        : IServiceHostAsyncDelegate
+    public class ServiceHostDelegate
+        : IServiceHostDelegate
     {
         private readonly Delegate @delegate;
 
         private readonly object[] arguments;
 
-        public ServiceHostAsyncDelegate(
+        public ServiceHostDelegate(
             Delegate @delegate,
             IServiceProvider services)
         {

@@ -11,6 +11,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
         List<IServiceHostListenerDescriptor> ListenerDescriptors { get; }
 
-        List<IServiceHostAsyncDelegateDescriptor> DelegateDescriptors { get; }
+        List<IServiceHostDelegateDescriptor> DelegateDescriptors { get; }
     }
 }

@@ -2,8 +2,8 @@
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public interface IServiceHostBuilderAsyncDelegateConfigurator<TReplicaTemplate>
-        where TReplicaTemplate : IServiceHostAsyncDelegateReplicaTemplate<IServiceHostAsyncDelegateReplicaTemplateConfigurator>
+    public interface IServiceHostBuilderDelegateConfigurator<TReplicaTemplate>
+        where TReplicaTemplate : IServiceHostDelegateReplicaTemplate<IServiceHostDelegateReplicaTemplateConfigurator>
     {
         void UseAsyncDelegateReplicaTemplate(
             Func<TReplicaTemplate> factoryFunc);

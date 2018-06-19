@@ -2,13 +2,13 @@
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public abstract class ServiceHostAsyncDelegateReplicator<TReplicableTemplate, TService, TDelegate>
-        : IServiceHostAsyncDelegateReplicator<TService, TDelegate>
-        where TReplicableTemplate : class, IServiceHostAsyncDelegateReplicableTemplate<TService, TDelegate>
+    public abstract class ServiceHostDelegateReplicator<TReplicableTemplate, TService, TDelegate>
+        : IServiceHostDelegateReplicator<TService, TDelegate>
+        where TReplicableTemplate : class, IServiceHostDelegateReplicableTemplate<TService, TDelegate>
     {
         private readonly TReplicableTemplate replicableTemplate;
 
-        protected ServiceHostAsyncDelegateReplicator(
+        protected ServiceHostDelegateReplicator(
             TReplicableTemplate replicableTemplate)
         {
             this.replicableTemplate = replicableTemplate
