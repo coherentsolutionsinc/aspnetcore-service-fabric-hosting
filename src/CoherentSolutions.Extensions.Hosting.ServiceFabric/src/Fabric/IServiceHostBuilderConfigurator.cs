@@ -1,12 +1,4 @@
-﻿using System.Collections;
-using System.ComponentModel;
-using System.Fabric;
-using System.Runtime.CompilerServices;
-
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
-
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
+﻿using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {

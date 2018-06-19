@@ -1,6 +1,6 @@
 ﻿namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public interface IStatefulServiceListenerReplicaTemplateConfigurator
+    public interface IStatefulServiceHostListenerReplicaTemplateConfigurator
     {
         void UseListenerOnSecondary();
     }

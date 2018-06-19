@@ -5,6 +5,9 @@
               IStatefulServiceHost,
               IStatefulServiceHostBuilderParameters,
               IStatefulServiceHostBuilderConfigurator,
+              IStatefulServiceHostAsyncDelegateReplicableTemplate,
+              IStatefulServiceHostAsyncDelegateReplicaTemplate,
+              IStatefulServiceHostAsyncDelegateReplicator,
               IStatefulServiceHostListenerReplicableTemplate,
               IStatefulServiceHostAspNetCoreListenerReplicaTemplate,
               IStatefulServiceHostRemotingListenerReplicaTemplate,
@@ -18,9 +21,22 @@
         {
             public StatefulParameters()
             {
+                this.UseAsyncDelegateReplicaTemplate(DefaultAsyncDelegateReplicaTemplate);
+                this.UseAsyncDelegateReplicator(DefaultAsyncDelegateReplicatorFactory);
                 this.UseAspNetCoreListenerReplicaTemplate(DefaultAspNetCoreListenerReplicaTemplate);
                 this.UseRemotingListenerReplicaTemplate(DefaultRemotingListenerReplicaTemplate);
                 this.UseListenerReplicator(DefaultListenerReplicatorFactory);
+            }
+
+            private static IStatefulServiceHostAsyncDelegateReplicaTemplate DefaultAsyncDelegateReplicaTemplate()
+            {
+                return new StatefulServiceHostAsyncDelegateReplicaTemplate();
+            }
+
+            private static IStatefulServiceHostAsyncDelegateReplicator DefaultAsyncDelegateReplicatorFactory(
+                IStatefulServiceHostAsyncDelegateReplicableTemplate template)
+            {
+                return new StatefulServiceHostAsyncDelegateReplicator(template);
             }
 
             private static IStatefulServiceHostAspNetCoreListenerReplicaTemplate DefaultAspNetCoreListenerReplicaTemplate()
@@ -48,7 +64,10 @@
 
             var compilation = this.CompileParameters(parameters);
 
-            return new StatefulServiceHost(parameters.ServiceTypeName, compilation.Dependencies, compilation.Replicators);
+            return new StatefulServiceHost(
+                parameters.ServiceTypeName, 
+                compilation.DelegateReplicators,
+                compilation.ListenerReplicators);
         }
     }
 }

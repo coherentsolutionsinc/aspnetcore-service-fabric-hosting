@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Fabric;
+using System.Threading.Tasks;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
@@ -129,7 +130,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
 
         public static TCaller UseListenerOnSecondary<TCaller>(
             this TCaller @this)
-            where TCaller : IConfigurableObject<IStatefulServiceListenerReplicaTemplateConfigurator>
+            where TCaller : IConfigurableObject<IStatefulServiceHostListenerReplicaTemplateConfigurator>
         {
             @this.ConfigureObject(
                 configurator => configurator.UseListenerOnSecondary());
@@ -299,6 +300,26 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
         {
             @this.ConfigureObject(
                 configurator => configurator.ConfigureDependencies(configAction));
+
+            return @this;
+        }
+
+        public static IStatefulServiceHostBuilder DefineDelegate(
+            this IStatefulServiceHostBuilder @this,
+            Action<IStatefulServiceHostAsyncDelegateReplicaTemplate> configAction)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.DefineAsyncDelegate(configAction));
+
+            return @this;
+        }
+        
+        public static IStatelessServiceHostBuilder DefineDelegate(
+            this IStatelessServiceHostBuilder @this,
+            Action<IStatelessServiceHostAsyncDelegateReplicaTemplate> configAction)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.DefineAsyncDelegate(configAction));
 
             return @this;
         }

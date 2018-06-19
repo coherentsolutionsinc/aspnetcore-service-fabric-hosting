@@ -12,20 +12,20 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
     {
         private readonly string serviceName;
 
-        private readonly IServiceProvider serviceDependencies;
+        private readonly IReadOnlyList<IStatelessServiceHostAsyncDelegateReplicator> serviceDelegatesReplicators;
 
         private readonly IReadOnlyList<IStatelessServiceHostListenerReplicator> serviceListenerReplicators;
 
         public StatelessServiceHost(
             string serviceName,
-            IServiceProvider serviceDependencies,
+            IReadOnlyList<IStatelessServiceHostAsyncDelegateReplicator> serviceDelegatesReplicators,
             IReadOnlyList<IStatelessServiceHostListenerReplicator> serviceListenerReplicators)
         {
             this.serviceName = serviceName
              ?? throw new ArgumentNullException(nameof(serviceName));
 
-            this.serviceDependencies = serviceDependencies 
-             ?? throw new ArgumentNullException(nameof(serviceDependencies));
+            this.serviceDelegatesReplicators = serviceDelegatesReplicators 
+             ?? throw new ArgumentNullException(nameof(serviceDelegatesReplicators));
 
             this.serviceListenerReplicators = serviceListenerReplicators
              ?? Array.Empty<IStatelessServiceHostListenerReplicator>();
@@ -36,7 +36,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         {
             await ServiceRuntime.RegisterServiceAsync(
                 this.serviceName,
-                serviceContext => new StatelessService(serviceContext, this.serviceDependencies, this.serviceListenerReplicators),
+                serviceContext => new StatelessService(
+                    serviceContext, 
+                    this.serviceDelegatesReplicators,
+                    this.serviceListenerReplicators),
                 cancellationToken: cancellationToken);
         }
 

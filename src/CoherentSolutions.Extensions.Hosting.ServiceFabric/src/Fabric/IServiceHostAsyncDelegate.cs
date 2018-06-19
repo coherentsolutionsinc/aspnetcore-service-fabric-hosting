@@ -3,8 +3,8 @@ using System.Threading.Tasks;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public interface IServiceHostDelegateInvokerAsync
+    public interface IServiceHostAsyncDelegate
     {
-        Task InvokeAsync(Delegate @delegate);
+        Task InvokeAsync();
     }
 }

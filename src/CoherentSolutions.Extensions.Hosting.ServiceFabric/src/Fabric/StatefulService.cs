@@ -56,7 +56,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             }
         }
 
-        private readonly IServiceProvider serviceDependencies;
+        private readonly IReadOnlyList<IStatefulServiceHostAsyncDelegateReplicator> serviceDelegateReplicators;
 
         private readonly IEnumerable<IStatefulServiceHostListenerReplicator> serviceListenerReplicators;
 
@@ -66,7 +66,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
         public StatefulService(
             StatefulServiceContext serviceContext,
-            IServiceProvider serviceDependencies,
+            IReadOnlyList<IStatefulServiceHostAsyncDelegateReplicator> serviceDelegateReplicators,
             IReadOnlyList<IStatefulServiceHostListenerReplicator> serviceListenerReplicators)
             : base(serviceContext)
         {
@@ -77,8 +77,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             this.eventSynchronization = new EventSynchronization();
 
-            this.serviceDependencies = serviceDependencies 
-             ?? throw new ArgumentNullException(nameof(serviceDependencies));
+            this.serviceDelegateReplicators = serviceDelegateReplicators 
+             ?? throw new ArgumentNullException(nameof(serviceDelegateReplicators));
 
             this.serviceListenerReplicators = serviceListenerReplicators 
              ?? throw new ArgumentNullException(nameof(serviceListenerReplicators));
@@ -86,7 +86,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
         {
-            return this.serviceListenerReplicators.Select(replicator =>replicator.ReplicateFor(this));
+            return this.serviceListenerReplicators.Select(replicator => replicator.ReplicateFor(this));
         }
 
         protected override Task OnChangeRoleAsync(
@@ -103,11 +103,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         {
             // Wait when all listeners are opened
             await this.eventSynchronization.WhenAllListenersOpened(cancellationToken);
-
-            if (cancellationToken.IsCancellationRequested)
-            {
-                return;
-            }
 
             // Run async operations
         }

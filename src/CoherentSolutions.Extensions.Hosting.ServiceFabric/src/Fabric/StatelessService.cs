@@ -134,7 +134,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             }
         }
 
-        private readonly IServiceProvider serviceDependencies;
+        private readonly IReadOnlyList<IStatelessServiceHostAsyncDelegateReplicator> serviceDelegateReplicators;
 
         private readonly IReadOnlyList<IStatelessServiceHostListenerReplicator> serviceListenerReplicators;
 
@@ -144,15 +144,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
         public StatelessService(
             StatelessServiceContext serviceContext,
-            IServiceProvider serviceDependencies,
+            IReadOnlyList<IStatelessServiceHostAsyncDelegateReplicator> serviceDelegateReplicators,
             IReadOnlyList<IStatelessServiceHostListenerReplicator> serviceListenerReplicators)
             : base(serviceContext)
         {
-            if (serviceDependencies == null)
-            {
-                throw new ArgumentNullException(nameof(serviceDependencies));
-            }
-
             if (serviceListenerReplicators == null)
             {
                 throw new ArgumentNullException(nameof(serviceListenerReplicators));
@@ -166,7 +161,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             this.eventSynchronization = new EventSynchronization(
                 serviceListenerReplicators.Count);
 
-            this.serviceDependencies = serviceDependencies;
+            this.serviceDelegateReplicators = serviceDelegateReplicators 
+             ?? throw new ArgumentNullException(nameof(serviceDelegateReplicators));
+
             this.serviceListenerReplicators = serviceListenerReplicators;
         }
 
@@ -193,10 +190,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         {
             // Wait when all listeners are opened
             await this.eventSynchronization.WhenAllListenersOpened(cancellationToken);
-
-            if (cancellationToken.IsCancellationRequested)
-            {
-            }
 
             // Run async operations
         }

@@ -45,11 +45,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                  ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
 
-            private static IServiceHostListenerLoggerOptions DefaultLoggerOptionsFunc()
-            {
-                return ServiceHostListenerLoggerOptions.Disabled;
-            }
-
             public void ConfigureDependencies(
                 Action<IServiceCollection> configAction)
             {
@@ -59,6 +54,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 }
 
                 this.DependenciesConfigAction = this.DependenciesConfigAction.Chain(configAction);
+            }
+
+            private static IServiceHostListenerLoggerOptions DefaultLoggerOptionsFunc()
+            {
+                return ServiceHostListenerLoggerOptions.Disabled;
             }
         }
 
