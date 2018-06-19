@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools;
@@ -10,6 +11,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
 {
     public static class HostingExtensions
     {
+        private static readonly HashSet<Type> dontPropagateTypes = new HashSet<Type>
+        {
+            typeof(IHostedService) // For a reason see https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/issues/30
+        };
+
         private static IHostBuilder ConfigureReliableService<TBuilder>(
             this IHostBuilder @this,
             string buildersKey,
@@ -62,7 +68,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
                                     configurator.ConfigureDependencies(
                                         dependencies =>
                                         {
-                                            DependencyRegistrant.Register(dependencies, services, provider);
+                                            // We should ignore certain types.
+                                            DependencyRegistrant.Register(
+                                                dependencies, 
+                                                services, 
+                                                provider,
+                                                type => !dontPropagateTypes.Contains(type));
                                         });
                                 });
 

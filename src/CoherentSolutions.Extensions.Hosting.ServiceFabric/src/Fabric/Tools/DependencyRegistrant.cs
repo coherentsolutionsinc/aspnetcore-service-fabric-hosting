@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Fabric;
+using System.Linq;
 using System.Reflection;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -116,26 +117,32 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
         }
 
         public static void Register(
-            IServiceCollection serviceCollection,
-            IServiceCollection proxyServiceCollection,
-            IServiceProvider proxyServiceProvider)
+            IServiceCollection destination,
+            IServiceCollection source,
+            IServiceProvider services,
+            Func<Type, bool> predicate = null)
         {
-            if (serviceCollection == null)
+            if (destination == null)
             {
-                throw new ArgumentNullException(nameof(serviceCollection));
+                throw new ArgumentNullException(nameof(destination));
             }
 
-            if (proxyServiceCollection == null)
+            if (source == null)
             {
-                throw new ArgumentNullException(nameof(proxyServiceCollection));
+                throw new ArgumentNullException(nameof(source));
             }
 
-            if (proxyServiceProvider == null)
+            if (services == null)
             {
-                throw new ArgumentNullException(nameof(proxyServiceProvider));
+                throw new ArgumentNullException(nameof(services));
             }
 
-            foreach (var descriptor in proxyServiceCollection)
+            if (predicate == null)
+            {
+                predicate = type => true;
+            }
+
+            foreach (var descriptor in source.Where(i => predicate(i.ServiceType)))
             {
                 switch (descriptor.Lifetime)
                 {
@@ -143,31 +150,31 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
                         if (descriptor.ImplementationInstance != null ||
                             descriptor.ImplementationFactory != null)
                         {
-                            serviceCollection.Add(descriptor);
+                            destination.Add(descriptor);
                         }
                         else
                         {
                             if (descriptor.ServiceType.GetTypeInfo().IsGenericTypeDefinition)
                             {
                                 // We have open generic here. Register as-is.
-                                serviceCollection.Add(descriptor);
+                                destination.Add(descriptor);
                             }
                             else
                             {
-                                serviceCollection.Add(
+                                destination.Add(
                                     new ServiceDescriptor(
                                         descriptor.ServiceType, 
-                                        provider => proxyServiceProvider.GetService(descriptor.ServiceType),
+                                        provider => services.GetService(descriptor.ServiceType),
                                         ServiceLifetime.Singleton));
                             }
                         }
                         break;
                     case ServiceLifetime.Scoped:
                     case ServiceLifetime.Transient:
-                        serviceCollection.Add(descriptor);
+                        destination.Add(descriptor);
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException(nameof(proxyServiceCollection), descriptor.Lifetime, typeof(ServiceLifetime).FullName);
+                        throw new ArgumentOutOfRangeException(nameof(source), descriptor.Lifetime, typeof(ServiceLifetime).FullName);
                 }
             }
         }

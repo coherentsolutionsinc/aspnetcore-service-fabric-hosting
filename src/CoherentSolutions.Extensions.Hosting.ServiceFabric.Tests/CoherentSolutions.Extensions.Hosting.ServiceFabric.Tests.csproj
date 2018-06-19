@@ -8,7 +8,7 @@
     <Description>This project contains unit-tests designed to ensure quality of CoherentSolutions.AspNetCore.ServiceFabric.Hosting project.</Description>
     <Authors>Coherent Solutions, Inc</Authors>
     <Copyright>2018 Coherent Solutions, Inc</Copyright>
-    <Version>0.6.3-alpha</Version>
+    <Version>0.8.2-alpha</Version>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Product>CoherentSolutions.AspNetCore.ServiceFabric.Hosting</Product>
     <PlatformTarget>x64</PlatformTarget>
