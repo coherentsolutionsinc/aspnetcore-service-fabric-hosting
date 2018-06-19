@@ -7,6 +7,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
     {
         void NotifyListenerOpened();
 
-        Task WhenAllListeners(CancellationToken cancellationToken);
+        Task WhenAllListenersOpened(
+            CancellationToken cancellationToken);
     }
 }

@@ -68,13 +68,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         protected override async Task RunAsync(
             CancellationToken cancellationToken)
         {
-            await this.eventSynchronization.WhenAllListeners(cancellationToken);
+            // Wait when all listeners are opened
+            await this.eventSynchronization.WhenAllListenersOpened(cancellationToken);
 
             if (cancellationToken.IsCancellationRequested)
             {
-                // The service was shutdown. Just ignore the rest and let Service Fabric to delete this replica.
                 return;
             }
+
+            // Run async operations
         }
 
         public ServiceContext GetContext()

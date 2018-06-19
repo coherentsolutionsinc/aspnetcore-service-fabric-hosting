@@ -9,7 +9,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         {
         }
 
-        public Task WhenAllListeners(
+        public Task WhenAllListenersOpened(
             CancellationToken cancellationToken)
         {
             return new TaskCompletionSource<int>().Task;

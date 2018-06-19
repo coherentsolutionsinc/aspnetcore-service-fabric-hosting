@@ -7,7 +7,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
     public class StatelessServiceEventSynchronization
         : IServiceEventSynchronization
     {
-        private readonly TaskCompletionSource<int> whenListenersOpenedTask;
+        private readonly TaskCompletionSource<int> whenAllListenersOpenedTaskSource;
 
         private SpinLock spinLock;
 
@@ -23,11 +23,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             this.spinLock = new SpinLock();
             this.remainingListenersCount = listenersCount;
-            this.whenListenersOpenedTask = new TaskCompletionSource<int>();
+
+            this.whenAllListenersOpenedTaskSource = new TaskCompletionSource<int>();
 
             if (listenersCount == 0)
             {
-                this.whenListenersOpenedTask.SetResult(0);
+                this.whenAllListenersOpenedTaskSource.SetResult(0);
             }
         }
 
@@ -40,7 +41,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 if (this.remainingListenersCount > 0 && (--this.remainingListenersCount) == 0)
                 {
-                    this.whenListenersOpenedTask.SetResult(0);
+                    this.whenAllListenersOpenedTaskSource.SetResult(0);
                 }
             }
             finally
@@ -52,20 +53,28 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             }
         }
 
-        public Task WhenAllListeners(CancellationToken cancellationToken)
+        public async Task WhenAllListenersOpened(CancellationToken cancellationToken)
         {
-            cancellationToken.Register(
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
+            using (cancellationToken.Register(
                 () =>
                 {
                     var lockTaken = false;
+
                     this.spinLock.Enter(ref lockTaken);
                     try
                     {
-                        if (this.remainingListenersCount != 0)
+                        if (this.remainingListenersCount == 0)
                         {
-                            this.remainingListenersCount = -1;
-                            this.whenListenersOpenedTask.SetResult(0);
+                            return;
                         }
+
+                        this.remainingListenersCount = -1;
+                        this.whenAllListenersOpenedTaskSource.SetCanceled();
                     }
                     finally
                     {
@@ -74,9 +83,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                             this.spinLock.Exit(true);
                         }
                     }
-                });
-
-            return this.whenListenersOpenedTask.Task;
+                }))
+            {
+                await this.whenAllListenersOpenedTaskSource.Task;
+            }
         }
     }
 }
