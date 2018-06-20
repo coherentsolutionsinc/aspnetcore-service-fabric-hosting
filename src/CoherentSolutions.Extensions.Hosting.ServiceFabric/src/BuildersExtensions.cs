@@ -365,6 +365,26 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
+        public static IStatefulServiceHostBuilder UseDelegateReplicator(
+            this IStatefulServiceHostBuilder @this,
+            Func<IStatefulServiceHostDelegateReplicableTemplate, IStatefulServiceHostDelegateReplicator> factoryFunc)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegateReplicator(factoryFunc));
+
+            return @this;
+        }
+
+        public static IStatelessServiceHostBuilder UseDelegateReplicator(
+            this IStatelessServiceHostBuilder @this,
+            Func<IStatelessServiceHostDelegateReplicableTemplate, IStatelessServiceHostDelegateReplicator> factoryFunc)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegateReplicator(factoryFunc));
+
+            return @this;
+        }
+
         public static IStatefulServiceHostBuilder UseAspNetCoreListenerReplicaTemplate(
             this IStatefulServiceHostBuilder @this,
             Func<IStatefulServiceHostAspNetCoreListenerReplicaTemplate> configAction)
