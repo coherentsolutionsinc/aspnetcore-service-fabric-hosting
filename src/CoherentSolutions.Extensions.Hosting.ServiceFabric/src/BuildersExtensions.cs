@@ -224,6 +224,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
+        public static TCaller UseLifecycleEvent<TCaller>(
+            this TCaller @this,
+            ServiceLifecycleEvent lifecycleEvent)
+            where TCaller : IConfigurableObject<IServiceHostDelegateReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseLifecycleEvent(lifecycleEvent));
+
+            return @this;
+        }
+
         public static TCaller UseEndpointName<TCaller>(
             this TCaller @this,
             string endpointName)
@@ -310,6 +321,46 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
         {
             @this.ConfigureObject(
                 configurator => configurator.UseListenerOnSecondary());
+
+            return @this;
+        }
+
+        public static IStatefulServiceHostBuilder UseDelegateInvoker(
+            this IStatefulServiceHostBuilder @this,
+            Func<IServiceHostDelegateInvoker> configAction)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegateInvoker(configAction));
+
+            return @this;
+        }
+
+        public static IStatelessServiceHostBuilder UseDelegateInvoker(
+            this IStatelessServiceHostBuilder @this,
+            Func<IServiceHostDelegateInvoker> configAction)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegateInvoker(configAction));
+
+            return @this;
+        }
+
+        public static IStatefulServiceHostBuilder UseDelegateReplicaTemplate(
+            this IStatefulServiceHostBuilder @this,
+            Func<IStatefulServiceHostDelegateReplicaTemplate> configAction)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegateReplicaTemplate(configAction));
+
+            return @this;
+        }
+
+        public static IStatelessServiceHostBuilder UseDelegateReplicaTemplate(
+            this IStatelessServiceHostBuilder @this,
+            Func<IStatelessServiceHostDelegateReplicaTemplate> configAction)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegateReplicaTemplate(configAction));
 
             return @this;
         }

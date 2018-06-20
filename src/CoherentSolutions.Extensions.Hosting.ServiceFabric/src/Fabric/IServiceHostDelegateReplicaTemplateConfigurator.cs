@@ -8,5 +8,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
     {
         void UseDelegate(
             Delegate @delegate);
+
+        void UseLifecycleEvent(
+            ServiceLifecycleEvent schedule);
     }
 }

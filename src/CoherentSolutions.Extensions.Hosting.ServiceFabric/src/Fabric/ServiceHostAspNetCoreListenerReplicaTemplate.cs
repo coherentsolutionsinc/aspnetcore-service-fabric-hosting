@@ -117,6 +117,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             TService service,
             TParameters parameters)
         {
+            if (service == null)
+            {
+                throw new ArgumentNullException(nameof(service));
+            }
+
             if (parameters == null)
             {
                 throw new ArgumentNullException(nameof(parameters));

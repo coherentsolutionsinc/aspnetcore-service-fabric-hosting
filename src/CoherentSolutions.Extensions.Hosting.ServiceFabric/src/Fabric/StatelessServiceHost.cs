@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,20 +11,26 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
     {
         private readonly string serviceName;
 
-        private readonly IReadOnlyList<IStatelessServiceHostDelegateReplicator> serviceDelegatesReplicators;
+        private readonly IServiceHostDelegateInvoker serviceDelegateInvoker;
+
+        private readonly IReadOnlyList<IStatelessServiceHostDelegateReplicator> serviceDelegateReplicators;
 
         private readonly IReadOnlyList<IStatelessServiceHostListenerReplicator> serviceListenerReplicators;
 
         public StatelessServiceHost(
             string serviceName,
-            IReadOnlyList<IStatelessServiceHostDelegateReplicator> serviceDelegatesReplicators,
+            IServiceHostDelegateInvoker serviceDelegateInvoker,
+            IReadOnlyList<IStatelessServiceHostDelegateReplicator> serviceDelegateReplicators,
             IReadOnlyList<IStatelessServiceHostListenerReplicator> serviceListenerReplicators)
         {
             this.serviceName = serviceName
              ?? throw new ArgumentNullException(nameof(serviceName));
 
-            this.serviceDelegatesReplicators = serviceDelegatesReplicators 
-             ?? throw new ArgumentNullException(nameof(serviceDelegatesReplicators));
+            this.serviceDelegateInvoker = serviceDelegateInvoker
+             ?? throw new ArgumentNullException(nameof(serviceDelegateInvoker));
+
+            this.serviceDelegateReplicators = serviceDelegateReplicators
+             ?? throw new ArgumentNullException(nameof(serviceDelegateReplicators));
 
             this.serviceListenerReplicators = serviceListenerReplicators
              ?? Array.Empty<IStatelessServiceHostListenerReplicator>();
@@ -37,8 +42,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             await ServiceRuntime.RegisterServiceAsync(
                 this.serviceName,
                 serviceContext => new StatelessService(
-                    serviceContext, 
-                    this.serviceDelegatesReplicators,
+                    serviceContext,
+                    this.serviceDelegateInvoker,
+                    this.serviceDelegateReplicators,
                     this.serviceListenerReplicators),
                 cancellationToken: cancellationToken);
         }

@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Fabric.Management.ServiceModel;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.ServiceFabric.Services.Communication.Runtime;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
@@ -16,17 +15,37 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
         private readonly object[] arguments;
 
+        private readonly CancellationTokenSource cancellationTokenSource;
+
+        public ServiceLifecycleEvent LifecycleEvent { get; }
+
         public ServiceHostDelegate(
             Delegate @delegate,
+            ServiceLifecycleEvent lifecycleEvent,
             IServiceProvider services)
         {
-            this.@delegate = @delegate 
+            this.LifecycleEvent = lifecycleEvent;
+
+            this.@delegate = @delegate
              ?? throw new ArgumentNullException(nameof(@delegate));
-            
+
+            this.cancellationTokenSource = new CancellationTokenSource();
+
             this.arguments = this.@delegate
                .GetMethodInfo()
                .GetParameters()
-               .Select(pi => services.GetRequiredService(pi.ParameterType))
+               .Select(
+                    (
+                        pi,
+                        index) =>
+                    {
+                        if (pi.ParameterType == typeof(CancellationToken))
+                        {
+                            return this.cancellationTokenSource.Token;
+                        }
+
+                        return services.GetRequiredService(pi.ParameterType);
+                    })
                .ToArray();
 
             var mi = @delegate.GetMethodInfo();
@@ -36,9 +55,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             }
         }
 
-        public async Task InvokeAsync()
+        public async Task InvokeAsync(
+            CancellationToken cancellationToken)
         {
-            await (Task) this.@delegate.DynamicInvoke(this.arguments);
+            using (cancellationToken.Register(() => this.cancellationTokenSource.Cancel()))
+            {
+                await (Task) this.@delegate.DynamicInvoke(this.arguments);
+            }
         }
     }
 }

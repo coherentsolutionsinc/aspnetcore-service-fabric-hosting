@@ -134,6 +134,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             }
         }
 
+        private readonly IServiceHostDelegateInvoker serviceDelegateInvoker;
+
         private readonly IReadOnlyList<IStatelessServiceHostDelegateReplicator> serviceDelegateReplicators;
 
         private readonly IReadOnlyList<IStatelessServiceHostListenerReplicator> serviceListenerReplicators;
@@ -144,6 +146,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
         public StatelessService(
             StatelessServiceContext serviceContext,
+            IServiceHostDelegateInvoker serviceDelegateInvoker,
             IReadOnlyList<IStatelessServiceHostDelegateReplicator> serviceDelegateReplicators,
             IReadOnlyList<IStatelessServiceHostListenerReplicator> serviceListenerReplicators)
             : base(serviceContext)
@@ -160,6 +163,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             this.eventSynchronization = new EventSynchronization(
                 serviceListenerReplicators.Count);
+
+            this.serviceDelegateInvoker = serviceDelegateInvoker 
+             ?? throw new ArgumentNullException(nameof(serviceDelegateInvoker));
 
             this.serviceDelegateReplicators = serviceDelegateReplicators 
              ?? throw new ArgumentNullException(nameof(serviceDelegateReplicators));
@@ -188,20 +194,19 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         protected override async Task RunAsync(
             CancellationToken cancellationToken)
         {
-            // Wait when all listeners are opened
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var delegates = this.serviceDelegateReplicators
+               .Select(replicator => replicator.ReplicateFor(this))
+               .ToLookup(@delegate => @delegate.LifecycleEvent);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
             await this.eventSynchronization.WhenAllListenersOpened(cancellationToken);
 
-            // Run async operations
-            foreach (var @delegate in this.serviceDelegateReplicators
-               .Select(replicator => replicator.ReplicateFor(this)))
-            {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    return;
-                }
-
-                await @delegate.InvokeAsync();
-            }
+            await this.serviceDelegateInvoker.InvokeAsync(
+                delegates[ServiceLifecycleEvent.OnRunAsyncWhenAllListenersOpened], 
+                cancellationToken);
         }
 
         public ServiceContext GetContext()

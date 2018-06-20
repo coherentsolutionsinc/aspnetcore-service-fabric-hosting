@@ -1,13 +1,13 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public interface IServiceHostDelegate
+    public interface IServiceHostDelegateInvoker
     {
-        ServiceLifecycleEvent LifecycleEvent { get; }
-
         Task InvokeAsync(
+            IEnumerable<IServiceHostDelegate> delegates,
             CancellationToken cancellationToken);
     }
 }

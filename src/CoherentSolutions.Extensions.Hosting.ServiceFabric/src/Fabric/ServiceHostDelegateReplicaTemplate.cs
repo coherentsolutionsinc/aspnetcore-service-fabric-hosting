@@ -19,10 +19,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         {
             public Delegate Delegate { get; private set; }
 
+            public ServiceLifecycleEvent LifecycleEvent { get; private set; }
+
             public Action<IServiceCollection> DependenciesConfigAction { get; private set; }
 
             protected DelegateParameters()
             {
+                this.Delegate = null;
+                this.LifecycleEvent = ServiceLifecycleEvent.Unknown;
                 this.DependenciesConfigAction = null;
             }
 
@@ -31,6 +35,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 this.Delegate = @delegate
                  ?? throw new ArgumentNullException(nameof(@delegate));
+            }
+
+            public void UseLifecycleEvent(
+                ServiceLifecycleEvent lifecycleEvent)
+            {
+                this.LifecycleEvent = lifecycleEvent;
             }
 
             public void ConfigureDependencies(
@@ -52,9 +62,19 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             TService service,
             TParameters parameters)
         {
+            if (service == null)
+            {
+                throw new ArgumentNullException(nameof(service));
+            }
+
             if (parameters == null)
             {
                 throw new ArgumentNullException(nameof(parameters));
+            }
+
+            if (parameters.LifecycleEvent == ServiceLifecycleEvent.Unknown)
+            {
+                throw new ArgumentException("No service life-cycle event set for delegate.");
             }
 
             var serviceContext = service.GetContext();
@@ -71,7 +91,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             var provider = new DefaultServiceProviderFactory().CreateServiceProvider(services);
 
-            return () => new ServiceHostDelegate(parameters.Delegate, provider);
+            return () => new ServiceHostDelegate(parameters.Delegate, parameters.LifecycleEvent, provider);
         }
     }
 }

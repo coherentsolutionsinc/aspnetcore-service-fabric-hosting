@@ -21,8 +21,8 @@
         {
             public StatefulParameters()
             {
-                this.UseAsyncDelegateReplicaTemplate(DefaultAsyncDelegateReplicaTemplate);
-                this.UseAsyncDelegateReplicator(DefaultAsyncDelegateReplicatorFactory);
+                this.UseDelegateReplicaTemplate(DefaultAsyncDelegateReplicaTemplate);
+                this.UseDelegateReplicator(DefaultAsyncDelegateReplicatorFactory);
                 this.UseAspNetCoreListenerReplicaTemplate(DefaultAspNetCoreListenerReplicaTemplate);
                 this.UseRemotingListenerReplicaTemplate(DefaultRemotingListenerReplicaTemplate);
                 this.UseListenerReplicator(DefaultListenerReplicatorFactory);
@@ -66,6 +66,7 @@
 
             return new StatefulServiceHost(
                 parameters.ServiceTypeName, 
+                compilation.DelegateInvoker,
                 compilation.DelegateReplicators,
                 compilation.ListenerReplicators);
         }
