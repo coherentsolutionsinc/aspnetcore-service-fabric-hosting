@@ -1,7 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.Tracing;
 using System.Fabric;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 
@@ -9,27 +12,201 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public class StatelessService : Microsoft.ServiceFabric.Services.Runtime.StatelessService, IStatelessService
     {
-        private readonly IEnumerable<IStatelessServiceHostListenerReplicator> listenerReplicators;
+        private class EventSynchronization
+        {
+            private readonly TaskCompletionSource<int> whenAllListenersOpenedTaskSource;
+
+            private SpinLock spinLock;
+
+            private int remainingListenersCount;
+
+            public EventSynchronization(
+                int listenersCount)
+            {
+                if (listenersCount < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(listenersCount));
+                }
+
+                this.spinLock = new SpinLock();
+                this.remainingListenersCount = listenersCount;
+
+                this.whenAllListenersOpenedTaskSource = new TaskCompletionSource<int>();
+
+                if (listenersCount == 0)
+                {
+                    this.whenAllListenersOpenedTaskSource.SetResult(0);
+                }
+            }
+
+            public void NotifyListenerOpened()
+            {
+                var lockTaken = false;
+                try
+                {
+                    this.spinLock.Enter(ref lockTaken);
+
+                    if (--this.remainingListenersCount == 0)
+                    {
+                        this.whenAllListenersOpenedTaskSource.SetResult(0);
+                    }
+                }
+                finally
+                {
+                    if (lockTaken)
+                    {
+                        this.spinLock.Exit(true);
+                    }
+                }
+            }
+
+            public async Task WhenAllListenersOpened(
+                CancellationToken cancellationToken)
+            {
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                using (cancellationToken.Register(
+                    () =>
+                    {
+                        var lockTaken = false;
+                        try
+                        {
+                            this.spinLock.Enter(ref lockTaken);
+
+                            this.whenAllListenersOpenedTaskSource.SetCanceled();
+                        }
+                        finally
+                        {
+                            if (lockTaken)
+                            {
+                                this.spinLock.Exit(true);
+                            }
+                        }
+                    }))
+                {
+                    await this.whenAllListenersOpenedTaskSource.Task;
+                }
+            }
+        }
+
+        private class ListenerEventDecorator : ICommunicationListener
+        {
+            private readonly ICommunicationListener successor;
+
+            private readonly EventSynchronization eventSynchronization;
+
+            public ListenerEventDecorator(
+                EventSynchronization eventSynchronization,
+                ICommunicationListener successor)
+            {
+                this.eventSynchronization = eventSynchronization
+                 ?? throw new ArgumentNullException(nameof(eventSynchronization));
+
+                this.successor = successor
+                 ?? throw new ArgumentNullException(nameof(successor));
+            }
+
+            public async Task<string> OpenAsync(
+                CancellationToken cancellationToken)
+            {
+                try
+                {
+                    return await this.successor.OpenAsync(cancellationToken);
+                }
+                finally
+                {
+                    this.eventSynchronization.NotifyListenerOpened();
+                }
+            }
+
+            public Task CloseAsync(
+                CancellationToken cancellationToken)
+            {
+                return this.successor.CloseAsync(cancellationToken);
+            }
+
+            public void Abort()
+            {
+                this.successor.Abort();
+            }
+        }
+
+        private readonly IServiceHostDelegateInvoker serviceDelegateInvoker;
+
+        private readonly IReadOnlyList<IStatelessServiceHostDelegateReplicator> serviceDelegateReplicators;
+
+        private readonly IReadOnlyList<IStatelessServiceHostListenerReplicator> serviceListenerReplicators;
 
         private readonly ServiceEventSource eventSource;
 
+        private readonly EventSynchronization eventSynchronization;
+
         public StatelessService(
             StatelessServiceContext serviceContext,
-            IEnumerable<IStatelessServiceHostListenerReplicator> listenerReplicators)
+            IServiceHostDelegateInvoker serviceDelegateInvoker,
+            IReadOnlyList<IStatelessServiceHostDelegateReplicator> serviceDelegateReplicators,
+            IReadOnlyList<IStatelessServiceHostListenerReplicator> serviceListenerReplicators)
             : base(serviceContext)
         {
+            if (serviceListenerReplicators == null)
+            {
+                throw new ArgumentNullException(nameof(serviceListenerReplicators));
+            }
+
             this.eventSource = new ServiceEventSource(
                 serviceContext,
                 $"{serviceContext.CodePackageActivationContext.ApplicationTypeName}.{serviceContext.ServiceTypeName}",
                 EventSourceSettings.EtwSelfDescribingEventFormat);
 
-            this.listenerReplicators = listenerReplicators
-             ?? Enumerable.Empty<IStatelessServiceHostListenerReplicator>();
+            this.eventSynchronization = new EventSynchronization(
+                serviceListenerReplicators.Count);
+
+            this.serviceDelegateInvoker = serviceDelegateInvoker 
+             ?? throw new ArgumentNullException(nameof(serviceDelegateInvoker));
+
+            this.serviceDelegateReplicators = serviceDelegateReplicators 
+             ?? throw new ArgumentNullException(nameof(serviceDelegateReplicators));
+
+            this.serviceListenerReplicators = serviceListenerReplicators;
         }
 
         protected override IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners()
         {
-            return this.listenerReplicators.Select(replicator => replicator.ReplicateFor(this));
+            return this.serviceListenerReplicators
+               .Select(
+                    replicator =>
+                    {
+                        var replicaListener = replicator.ReplicateFor(this);
+                        return new ServiceInstanceListener(
+                            context =>
+                            {
+                                return new ListenerEventDecorator(
+                                    this.eventSynchronization,
+                                    replicaListener.CreateCommunicationListener(context));
+                            },
+                            replicaListener.Name);
+                    });
+        }
+
+        protected override async Task RunAsync(
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var delegates = this.serviceDelegateReplicators
+               .Select(replicator => replicator.ReplicateFor(this))
+               .ToLookup(@delegate => @delegate.LifecycleEvent);
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            await this.eventSynchronization.WhenAllListenersOpened(cancellationToken);
+
+            await this.serviceDelegateInvoker.InvokeAsync(
+                delegates[ServiceLifecycleEvent.OnRunAsyncWhenAllListenersOpened], 
+                cancellationToken);
         }
 
         public ServiceContext GetContext()

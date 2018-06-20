@@ -5,6 +5,9 @@
               IStatelessServiceHost,
               IStatelessServiceHostBuilderParameters,
               IStatelessServiceHostBuilderConfigurator,
+              IStatelessServiceHostDelegateReplicableTemplate,
+              IStatelessServiceHostDelegateReplicaTemplate,
+              IStatelessServiceHostDelegateReplicator,
               IStatelessServiceHostListenerReplicableTemplate,
               IStatelessServiceHostAspNetCoreListenerReplicaTemplate,
               IStatelessServiceHostRemotingListenerReplicaTemplate,
@@ -18,9 +21,22 @@
         {
             public StatelessParameters()
             {
+                this.UseDelegateReplicaTemplate(DefaultAsyncDelegateReplicaTemplate);
+                this.UseDelegateReplicator(DefaultAsyncDelegateReplicatorFactory);
                 this.UseAspNetCoreListenerReplicaTemplate(DefaultAspNetCoreListenerReplicaTemplate);
                 this.UseRemotingListenerReplicaTemplate(DefaultRemotingListenerReplicaTemplate);
                 this.UseListenerReplicator(DefaultListenerReplicatorFactory);
+            }
+
+            private static IStatelessServiceHostDelegateReplicaTemplate DefaultAsyncDelegateReplicaTemplate()
+            {
+                return new StatelessServiceHostDelegateReplicaTemplate();
+            }
+
+            private static IStatelessServiceHostDelegateReplicator DefaultAsyncDelegateReplicatorFactory(
+                IStatelessServiceHostDelegateReplicableTemplate template)
+            {
+                return new StatelessServiceHostDelegateReplicator(template);
             }
 
             private static IStatelessServiceHostAspNetCoreListenerReplicaTemplate DefaultAspNetCoreListenerReplicaTemplate()
@@ -46,9 +62,13 @@
 
             this.UpstreamConfiguration(parameters);
 
-            var replicators = this.BuildReplicators(parameters);
+            var compilation = this.CompileParameters(parameters);
 
-            return new StatelessServiceHost(parameters.ServiceTypeName, replicators);
+            return new StatelessServiceHost(
+                parameters.ServiceTypeName, 
+                compilation.DelegateInvoker,
+                compilation.DelegateReplicators,
+                compilation.ListenerReplicators);
         }
     }
 }

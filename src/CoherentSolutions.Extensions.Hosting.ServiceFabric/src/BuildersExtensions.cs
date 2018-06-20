@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Fabric;
+using System.Threading.Tasks;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
@@ -43,6 +44,193 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
         {
             @this.ConfigureObject(
                 configurator => configurator.UseServiceType(serviceName));
+
+            return @this;
+        }
+
+        public static TCaller UseDelegate<TCaller>(
+            this TCaller @this,
+            Func<Task> @delegate)
+            where TCaller : IConfigurableObject<IServiceHostDelegateReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegate(@delegate));
+
+            return @this;
+        }
+
+        public static TCaller UseDelegate<TCaller, T>(
+            this TCaller @this,
+            Func<T,Task> @delegate)
+            where TCaller : IConfigurableObject<IServiceHostDelegateReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegate(@delegate));
+
+            return @this;
+        }
+
+        public static TCaller UseDelegate<TCaller, T1, T2>(
+            this TCaller @this,
+            Func<T1, T2,Task> @delegate)
+            where TCaller : IConfigurableObject<IServiceHostDelegateReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegate(@delegate));
+
+            return @this;
+        }
+
+        public static TCaller UseDelegate<TCaller, T1, T2, T3>(
+            this TCaller @this,
+            Func<T1, T2, T3,Task> @delegate)
+            where TCaller : IConfigurableObject<IServiceHostDelegateReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegate(@delegate));
+
+            return @this;
+        }
+
+        public static TCaller UseDelegate<TCaller, T1, T2, T3, T4>(
+            this TCaller @this,
+            Func<T1, T2, T3, T4,Task> @delegate)
+            where TCaller : IConfigurableObject<IServiceHostDelegateReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegate(@delegate));
+
+            return @this;
+        }
+
+        public static TCaller UseDelegate<TCaller, T1, T2, T3, T4, T5>(
+            this TCaller @this,
+            Func<T1, T2, T3, T4, T5,Task> @delegate)
+            where TCaller : IConfigurableObject<IServiceHostDelegateReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegate(@delegate));
+
+            return @this;
+        }
+
+        public static TCaller UseDelegate<TCaller, T1, T2, T3, T4, T5, T6>(
+            this TCaller @this,
+            Func<T1, T2, T3, T4, T5, T6,Task> @delegate)
+            where TCaller : IConfigurableObject<IServiceHostDelegateReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegate(@delegate));
+
+            return @this;
+        }
+
+        public static TCaller UseDelegate<TCaller, T1, T2, T3, T4, T5, T6, T7>(
+            this TCaller @this,
+            Func<T1, T2, T3, T4, T5, T6, T7,Task> @delegate)
+            where TCaller : IConfigurableObject<IServiceHostDelegateReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegate(@delegate));
+
+            return @this;
+        }
+
+        public static TCaller UseDelegate<TCaller, T1, T2, T3, T4, T5, T6, T7, T8>(
+            this TCaller @this,
+            Func<T1, T2, T3, T4, T5, T6, T7, T8,Task> @delegate)
+            where TCaller : IConfigurableObject<IServiceHostDelegateReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegate(@delegate));
+
+            return @this;
+        }
+
+        public static TCaller UseDelegate<TCaller, T1, T2, T3, T4, T5, T6, T7, T8, T9>(
+            this TCaller @this,
+            Func<T1, T2, T3, T4, T5, T6, T7, T8, T9,Task> @delegate)
+            where TCaller : IConfigurableObject<IServiceHostDelegateReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegate(@delegate));
+
+            return @this;
+        }
+
+        public static TCaller UseDelegate<TCaller, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
+            this TCaller @this,
+            Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,Task> @delegate)
+            where TCaller : IConfigurableObject<IServiceHostDelegateReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegate(@delegate));
+
+            return @this;
+        }
+
+        public static TCaller UseDelegate<TCaller, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(
+            this TCaller @this,
+            Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11,Task> @delegate)
+            where TCaller : IConfigurableObject<IServiceHostDelegateReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegate(@delegate));
+
+            return @this;
+        }
+
+        public static TCaller UseDelegate<TCaller, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(
+            this TCaller @this,
+            Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12,Task> @delegate)
+            where TCaller : IConfigurableObject<IServiceHostDelegateReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegate(@delegate));
+
+            return @this;
+        }
+
+        public static TCaller UseDelegate<TCaller, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(
+            this TCaller @this,
+            Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13,Task> @delegate)
+            where TCaller : IConfigurableObject<IServiceHostDelegateReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegate(@delegate));
+
+            return @this;
+        }
+
+        public static TCaller UseDelegate<TCaller, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(
+            this TCaller @this,
+            Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14,Task> @delegate)
+            where TCaller : IConfigurableObject<IServiceHostDelegateReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegate(@delegate));
+
+            return @this;
+        }
+
+        public static TCaller UseDelegate<TCaller, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(
+            this TCaller @this,
+            Func<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15,Task> @delegate)
+            where TCaller : IConfigurableObject<IServiceHostDelegateReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegate(@delegate));
+
+            return @this;
+        }
+
+        public static TCaller UseLifecycleEvent<TCaller>(
+            this TCaller @this,
+            ServiceLifecycleEvent lifecycleEvent)
+            where TCaller : IConfigurableObject<IServiceHostDelegateReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseLifecycleEvent(lifecycleEvent));
 
             return @this;
         }
@@ -129,10 +317,70 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
 
         public static TCaller UseListenerOnSecondary<TCaller>(
             this TCaller @this)
-            where TCaller : IConfigurableObject<IStatefulServiceListenerReplicaTemplateConfigurator>
+            where TCaller : IConfigurableObject<IStatefulServiceHostListenerReplicaTemplateConfigurator>
         {
             @this.ConfigureObject(
                 configurator => configurator.UseListenerOnSecondary());
+
+            return @this;
+        }
+
+        public static IStatefulServiceHostBuilder UseDelegateInvoker(
+            this IStatefulServiceHostBuilder @this,
+            Func<IServiceHostDelegateInvoker> configAction)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegateInvoker(configAction));
+
+            return @this;
+        }
+
+        public static IStatelessServiceHostBuilder UseDelegateInvoker(
+            this IStatelessServiceHostBuilder @this,
+            Func<IServiceHostDelegateInvoker> configAction)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegateInvoker(configAction));
+
+            return @this;
+        }
+
+        public static IStatefulServiceHostBuilder UseDelegateReplicaTemplate(
+            this IStatefulServiceHostBuilder @this,
+            Func<IStatefulServiceHostDelegateReplicaTemplate> configAction)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegateReplicaTemplate(configAction));
+
+            return @this;
+        }
+
+        public static IStatelessServiceHostBuilder UseDelegateReplicaTemplate(
+            this IStatelessServiceHostBuilder @this,
+            Func<IStatelessServiceHostDelegateReplicaTemplate> configAction)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegateReplicaTemplate(configAction));
+
+            return @this;
+        }
+
+        public static IStatefulServiceHostBuilder UseDelegateReplicator(
+            this IStatefulServiceHostBuilder @this,
+            Func<IStatefulServiceHostDelegateReplicableTemplate, IStatefulServiceHostDelegateReplicator> factoryFunc)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegateReplicator(factoryFunc));
+
+            return @this;
+        }
+
+        public static IStatelessServiceHostBuilder UseDelegateReplicator(
+            this IStatelessServiceHostBuilder @this,
+            Func<IStatelessServiceHostDelegateReplicableTemplate, IStatelessServiceHostDelegateReplicator> factoryFunc)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegateReplicator(factoryFunc));
 
             return @this;
         }
@@ -299,6 +547,26 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
         {
             @this.ConfigureObject(
                 configurator => configurator.ConfigureDependencies(configAction));
+
+            return @this;
+        }
+
+        public static IStatefulServiceHostBuilder DefineDelegate(
+            this IStatefulServiceHostBuilder @this,
+            Action<IStatefulServiceHostDelegateReplicaTemplate> configAction)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.DefineAsyncDelegate(configAction));
+
+            return @this;
+        }
+        
+        public static IStatelessServiceHostBuilder DefineDelegate(
+            this IStatelessServiceHostBuilder @this,
+            Action<IStatelessServiceHostDelegateReplicaTemplate> configAction)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.DefineAsyncDelegate(configAction));
 
             return @this;
         }

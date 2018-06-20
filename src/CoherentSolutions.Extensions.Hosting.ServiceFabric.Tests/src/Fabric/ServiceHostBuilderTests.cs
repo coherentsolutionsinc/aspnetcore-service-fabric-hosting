@@ -13,48 +13,68 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
         TServiceHost,
         TParameters,
         TConfigurator,
-        TReplicableTemplate,
-        TAspNetCoreReplicaTemplate,
-        TAspNetCoreReplicaTemplateConfigurator,
-        TRemotingReplicaTemplate,
-        TRemotingReplicaTemplateConfigurator,
-        TReplicator>
+        TAsyncDelegateReplicableTemplate,
+        TAsyncDelegateReplicaTemplate,
+        TAsyncDelegateReplicaTemplateConfigurator,
+        TAsyncDelegateReplicator,
+        TListenerReplicableTemplate,
+        TListenerAspNetCoreReplicaTemplate,
+        TListenerAspNetCoreReplicaTemplateConfigurator,
+        TListenerRemotingReplicaTemplate,
+        TListenerRemotingReplicaTemplateConfigurator,
+        TListenerReplicator>
         where TParameters :
         class,
         IServiceHostBuilderParameters,
-        IServiceHostBuilderAspNetCoreListenerParameters<TAspNetCoreReplicaTemplate>,
-        IServiceHostBuilderRemotingListenerParameters<TRemotingReplicaTemplate>,
-        IServiceHostBuilderListenerReplicationParameters<TReplicableTemplate, TReplicator>
+        IServiceHostBuilderDelegateParameters<TAsyncDelegateReplicaTemplate>,
+        IServiceHostBuilderDelegateReplicationParameters<TAsyncDelegateReplicableTemplate, TAsyncDelegateReplicator>,
+        IServiceHostBuilderAspNetCoreListenerParameters<TListenerAspNetCoreReplicaTemplate>,
+        IServiceHostBuilderRemotingListenerParameters<TListenerRemotingReplicaTemplate>,
+        IServiceHostBuilderListenerReplicationParameters<TListenerReplicableTemplate, TListenerReplicator>
         where TConfigurator :
         class,
         IServiceHostBuilderConfigurator,
-        IServiceHostBuilderAspNetCoreListenerConfigurator<TAspNetCoreReplicaTemplate>,
-        IServiceHostBuilderRemotingListenerConfigurator<TRemotingReplicaTemplate>,
-        IServiceHostBuilderListenerReplicationConfigurator<TReplicableTemplate, TReplicator>
-        where TAspNetCoreReplicaTemplate :
+        IServiceHostBuilderDelegateConfigurator<TAsyncDelegateReplicaTemplate>,
+        IServiceHostBuilderDelegateReplicationConfigurator<TAsyncDelegateReplicableTemplate, TAsyncDelegateReplicator>,
+        IServiceHostBuilderAspNetCoreListenerConfigurator<TListenerAspNetCoreReplicaTemplate>,
+        IServiceHostBuilderRemotingListenerConfigurator<TListenerRemotingReplicaTemplate>,
+        IServiceHostBuilderListenerReplicationConfigurator<TListenerReplicableTemplate, TListenerReplicator>
+        where TAsyncDelegateReplicaTemplate :
         class,
-        TReplicableTemplate,
-        IServiceHostAspNetCoreListenerReplicaTemplate<TAspNetCoreReplicaTemplateConfigurator>
-        where TAspNetCoreReplicaTemplateConfigurator :
+        TAsyncDelegateReplicableTemplate,
+        IServiceHostDelegateReplicaTemplate<TAsyncDelegateReplicaTemplateConfigurator>
+        where TAsyncDelegateReplicaTemplateConfigurator :
+        class,
+        IServiceHostDelegateReplicaTemplateConfigurator
+        where TAsyncDelegateReplicator :
+        class
+        where TListenerAspNetCoreReplicaTemplate :
+        class,
+        TListenerReplicableTemplate,
+        IServiceHostAspNetCoreListenerReplicaTemplate<TListenerAspNetCoreReplicaTemplateConfigurator>
+        where TListenerAspNetCoreReplicaTemplateConfigurator :
         class,
         IServiceHostAspNetCoreListenerReplicaTemplateConfigurator
-        where TRemotingReplicaTemplate :
+        where TListenerRemotingReplicaTemplate :
         class,
-        TReplicableTemplate,
-        IServiceHostRemotingListenerReplicaTemplate<TRemotingReplicaTemplateConfigurator>
-        where TRemotingReplicaTemplateConfigurator :
+        TListenerReplicableTemplate,
+        IServiceHostRemotingListenerReplicaTemplate<TListenerRemotingReplicaTemplateConfigurator>
+        where TListenerRemotingReplicaTemplateConfigurator :
         class,
         IServiceHostRemotingListenerReplicaTemplateConfigurator
-        where TReplicator :
+        where TListenerReplicator :
         class
     {
         protected abstract ServiceHostBuilder<TServiceHost,
             TParameters,
             TConfigurator,
-            TReplicableTemplate,
-            TAspNetCoreReplicaTemplate,
-            TRemotingReplicaTemplate,
-            TReplicator
+            TAsyncDelegateReplicableTemplate,
+            TAsyncDelegateReplicaTemplate,
+            TAsyncDelegateReplicator,
+            TListenerReplicableTemplate,
+            TListenerAspNetCoreReplicaTemplate,
+            TListenerRemotingReplicaTemplate,
+            TListenerReplicator
         > CreateInstance();
 
         [Fact]
@@ -62,10 +82,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
             Should_throw_FactoryProducesNullInstanceException_When_aspnetcore_replica_template_func_returns_null()
         {
             // Arrange
-            var factory = new Mock<Func<TAspNetCoreReplicaTemplate>>();
+            var factory = new Mock<Func<TListenerAspNetCoreReplicaTemplate>>();
             factory
                .Setup(instance => instance())
-               .Returns<TAspNetCoreReplicaTemplate>(null);
+               .Returns<TListenerAspNetCoreReplicaTemplate>(null);
 
             // Act
             var builder = this.CreateInstance();
@@ -80,7 +100,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
                 });
 
             // Assert
-            Assert.Throws<FactoryProducesNullInstanceException<TAspNetCoreReplicaTemplate>>(() => builder.Build());
+            Assert.Throws<FactoryProducesNullInstanceException<TListenerAspNetCoreReplicaTemplate>>(() => builder.Build());
         }
 
         [Fact]
@@ -88,10 +108,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
             Should_throw_FactoryProducesNullInstanceException_When_remoting_replica_template_func_returns_null()
         {
             // Arrange
-            var factory = new Mock<Func<TRemotingReplicaTemplate>>();
+            var factory = new Mock<Func<TListenerRemotingReplicaTemplate>>();
             factory
                .Setup(instance => instance())
-               .Returns<TRemotingReplicaTemplate>(null);
+               .Returns<TListenerRemotingReplicaTemplate>(null);
 
             // Act
             var builder = this.CreateInstance();
@@ -106,7 +126,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
                 });
 
             // Assert
-            Assert.Throws<FactoryProducesNullInstanceException<TRemotingReplicaTemplate>>(() => builder.Build());
+            Assert.Throws<FactoryProducesNullInstanceException<TListenerRemotingReplicaTemplate>>(() => builder.Build());
         }
 
         [Fact]
@@ -114,10 +134,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
             Should_throw_FactoryProducesNullInstanceException_When_replicator_func_returns_null()
         {
             // Arrange
-            var factory = new Mock<Func<TReplicableTemplate, TReplicator>>();
+            var factory = new Mock<Func<TListenerReplicableTemplate, TListenerReplicator>>();
             factory
-               .Setup(instance => instance(It.IsAny<TReplicableTemplate>()))
-               .Returns<TReplicator>(null);
+               .Setup(instance => instance(It.IsAny<TListenerReplicableTemplate>()))
+               .Returns<TListenerReplicator>(null);
 
             // Act
             var builder = this.CreateInstance();
@@ -132,7 +152,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
                 });
 
             // Assert
-            Assert.Throws<FactoryProducesNullInstanceException<TReplicator>>(() => builder.Build());
+            Assert.Throws<FactoryProducesNullInstanceException<TListenerReplicator>>(() => builder.Build());
         }
 
         [Fact]
@@ -140,9 +160,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
             Should_use_aspnetcore_listener_configuration_action_When_configuring_aspnetcore_listener()
         {
             // Arrange
-            var action = new Mock<Action<TAspNetCoreReplicaTemplate>>();
+            var action = new Mock<Action<TListenerAspNetCoreReplicaTemplate>>();
             action
-               .Setup(instance => instance(It.IsAny<TAspNetCoreReplicaTemplate>()));
+               .Setup(instance => instance(It.IsAny<TListenerAspNetCoreReplicaTemplate>()));
 
             // Act
             var builder = this.CreateInstance();
@@ -154,7 +174,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
             builder.Build();
 
             // Assert
-            action.Verify(instance => instance(It.IsAny<TAspNetCoreReplicaTemplate>()), Times.Once());
+            action.Verify(instance => instance(It.IsAny<TListenerAspNetCoreReplicaTemplate>()), Times.Once());
         }
 
         [Fact]
@@ -162,10 +182,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
             Should_use_custom_aspnetcore_replica_template_func_When_aspnetcore_replica_template_func_is_configured()
         {
             // Arrange
-            var factory = new Mock<Func<TAspNetCoreReplicaTemplate>>();
+            var factory = new Mock<Func<TListenerAspNetCoreReplicaTemplate>>();
             factory
                .Setup(instance => instance())
-               .Returns(new Mock<TAspNetCoreReplicaTemplate>().Object);
+               .Returns(new Mock<TListenerAspNetCoreReplicaTemplate>().Object);
 
             // Act
             var builder = this.CreateInstance();
@@ -189,10 +209,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
             Should_use_custom_remoting_replica_template_func_When_remoting_replica_template_func_is_configured()
         {
             // Arrange
-            var factory = new Mock<Func<TRemotingReplicaTemplate>>();
+            var factory = new Mock<Func<TListenerRemotingReplicaTemplate>>();
             factory
                .Setup(instance => instance())
-               .Returns(new Mock<TRemotingReplicaTemplate>().Object);
+               .Returns(new Mock<TListenerRemotingReplicaTemplate>().Object);
 
             // Act
             var builder = this.CreateInstance();
@@ -216,10 +236,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
             Should_use_custom_replicator_func_When_replicator_func_is_configured()
         {
             // Arrange
-            var factory = new Mock<Func<TReplicableTemplate, TReplicator>>();
+            var factory = new Mock<Func<TListenerReplicableTemplate, TListenerReplicator>>();
             factory
-               .Setup(instance => instance(It.IsAny<TReplicableTemplate>()))
-               .Returns(new Mock<TReplicator>().Object);
+               .Setup(instance => instance(It.IsAny<TListenerReplicableTemplate>()))
+               .Returns(new Mock<TListenerReplicator>().Object);
 
             // Act
             var builder = this.CreateInstance();
@@ -235,7 +255,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
             builder.Build();
 
             // Assert
-            factory.Verify(instance => instance(It.IsAny<TReplicableTemplate>()), Times.Once());
+            factory.Verify(instance => instance(It.IsAny<TListenerReplicableTemplate>()), Times.Once());
         }
 
         [Fact]
@@ -243,9 +263,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
             Should_use_remoting_listener_configuration_action_When_configuring_remoting_listener()
         {
             // Arrange
-            var action = new Mock<Action<TRemotingReplicaTemplate>>();
+            var action = new Mock<Action<TListenerRemotingReplicaTemplate>>();
             action
-               .Setup(instance => instance(It.IsAny<TRemotingReplicaTemplate>()));
+               .Setup(instance => instance(It.IsAny<TListenerRemotingReplicaTemplate>()));
 
             // Act
             var builder = this.CreateInstance();
@@ -257,7 +277,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
             builder.Build();
 
             // Assert
-            action.Verify(instance => instance(It.IsAny<TRemotingReplicaTemplate>()), Times.Once());
+            action.Verify(instance => instance(It.IsAny<TListenerRemotingReplicaTemplate>()), Times.Once());
         }
     }
 }

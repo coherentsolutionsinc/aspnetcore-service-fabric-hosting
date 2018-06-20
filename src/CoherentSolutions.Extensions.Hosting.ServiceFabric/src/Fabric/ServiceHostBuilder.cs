@@ -14,48 +14,70 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             TServiceHost,
             TParameters,
             TConfigurator,
-            TReplicableTemplate,
-            TAspNetCoreReplicaTemplate,
-            TRemotingReplicaTemplate,
-            TReplicator>
+            TAsyncDelegateReplicableTemplate,
+            TAsyncDelegateReplicaTemplate,
+            TAsyncDelegateReplicator,
+            TListenerReplicableTemplate,
+            TListenerAspNetCoreReplicaTemplate,
+            TListenerRemotingReplicaTemplate,
+            TListenerReplicator>
         : ConfigurableObject<TConfigurator>,
           IServiceHostBuilder<TServiceHost, TConfigurator>
         where TParameters :
         IServiceHostBuilderParameters,
-        IServiceHostBuilderAspNetCoreListenerParameters<TAspNetCoreReplicaTemplate>,
-        IServiceHostBuilderRemotingListenerParameters<TRemotingReplicaTemplate>,
-        IServiceHostBuilderListenerReplicationParameters<TReplicableTemplate, TReplicator>
+        IServiceHostBuilderDelegateParameters<TAsyncDelegateReplicaTemplate>,
+        IServiceHostBuilderDelegateReplicationParameters<TAsyncDelegateReplicableTemplate, TAsyncDelegateReplicator>,
+        IServiceHostBuilderAspNetCoreListenerParameters<TListenerAspNetCoreReplicaTemplate>,
+        IServiceHostBuilderRemotingListenerParameters<TListenerRemotingReplicaTemplate>,
+        IServiceHostBuilderListenerReplicationParameters<TListenerReplicableTemplate, TListenerReplicator>
         where TConfigurator :
         IServiceHostBuilderConfigurator,
-        IServiceHostBuilderAspNetCoreListenerConfigurator<TAspNetCoreReplicaTemplate>,
-        IServiceHostBuilderRemotingListenerConfigurator<TRemotingReplicaTemplate>,
-        IServiceHostBuilderListenerReplicationConfigurator<TReplicableTemplate, TReplicator>
-        where TAspNetCoreReplicaTemplate :
-        TReplicableTemplate,
+        IServiceHostBuilderDelegateConfigurator<TAsyncDelegateReplicaTemplate>,
+        IServiceHostBuilderDelegateReplicationConfigurator<TAsyncDelegateReplicableTemplate, TAsyncDelegateReplicator>,
+        IServiceHostBuilderAspNetCoreListenerConfigurator<TListenerAspNetCoreReplicaTemplate>,
+        IServiceHostBuilderRemotingListenerConfigurator<TListenerRemotingReplicaTemplate>,
+        IServiceHostBuilderListenerReplicationConfigurator<TListenerReplicableTemplate, TListenerReplicator>
+        where TAsyncDelegateReplicaTemplate :
+        TAsyncDelegateReplicableTemplate,
+        IServiceHostDelegateReplicaTemplate<IServiceHostDelegateReplicaTemplateConfigurator>
+        where TListenerAspNetCoreReplicaTemplate :
+        TListenerReplicableTemplate,
         IServiceHostAspNetCoreListenerReplicaTemplate<IServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
-        where TRemotingReplicaTemplate :
-        TReplicableTemplate,
+        where TListenerRemotingReplicaTemplate :
+        TListenerReplicableTemplate,
         IServiceHostRemotingListenerReplicaTemplate<IServiceHostRemotingListenerReplicaTemplateConfigurator>
     {
         protected abstract class Parameters
             : IServiceHostBuilderParameters,
               IServiceHostBuilderConfigurator,
-              IServiceHostBuilderAspNetCoreListenerParameters<TAspNetCoreReplicaTemplate>,
-              IServiceHostBuilderAspNetCoreListenerConfigurator<TAspNetCoreReplicaTemplate>,
-              IServiceHostBuilderRemotingListenerParameters<TRemotingReplicaTemplate>,
-              IServiceHostBuilderRemotingListenerConfigurator<TRemotingReplicaTemplate>,
-              IServiceHostBuilderListenerReplicationParameters<TReplicableTemplate, TReplicator>,
-              IServiceHostBuilderListenerReplicationConfigurator<TReplicableTemplate, TReplicator>
+              IServiceHostBuilderDelegateParameters<TAsyncDelegateReplicaTemplate>,
+              IServiceHostBuilderDelegateConfigurator<TAsyncDelegateReplicaTemplate>,
+              IServiceHostBuilderDelegateReplicationParameters<TAsyncDelegateReplicableTemplate, TAsyncDelegateReplicator>,
+              IServiceHostBuilderDelegateReplicationConfigurator<TAsyncDelegateReplicableTemplate, TAsyncDelegateReplicator>,
+              IServiceHostBuilderAspNetCoreListenerParameters<TListenerAspNetCoreReplicaTemplate>,
+              IServiceHostBuilderAspNetCoreListenerConfigurator<TListenerAspNetCoreReplicaTemplate>,
+              IServiceHostBuilderRemotingListenerParameters<TListenerRemotingReplicaTemplate>,
+              IServiceHostBuilderRemotingListenerConfigurator<TListenerRemotingReplicaTemplate>,
+              IServiceHostBuilderListenerReplicationParameters<TListenerReplicableTemplate, TListenerReplicator>,
+              IServiceHostBuilderListenerReplicationConfigurator<TListenerReplicableTemplate, TListenerReplicator>
         {
             public string ServiceTypeName { get; private set; }
 
             public List<IServiceHostListenerDescriptor> ListenerDescriptors { get; private set; }
 
-            public Func<TAspNetCoreReplicaTemplate> AspNetCoreListenerReplicaTemplateFunc { get; private set; }
+            public List<IServiceHostDelegateDescriptor> DelegateDescriptors { get; private set; }
 
-            public Func<TRemotingReplicaTemplate> RemotingListenerReplicaTemplateFunc { get; private set; }
+            public Func<IServiceHostDelegateInvoker> DelegateInvokerFunc { get; private set; }
 
-            public Func<TReplicableTemplate, TReplicator> ListenerReplicatorFunc { get; private set; }
+            public Func<TAsyncDelegateReplicaTemplate> DelegateReplicaTemplateFunc { get; private set; }
+
+            public Func<TAsyncDelegateReplicableTemplate, TAsyncDelegateReplicator> DelegateReplicatorFunc { get; private set; }
+
+            public Func<TListenerAspNetCoreReplicaTemplate> AspNetCoreListenerReplicaTemplateFunc { get; private set; }
+
+            public Func<TListenerRemotingReplicaTemplate> RemotingListenerReplicaTemplateFunc { get; private set; }
+
+            public Func<TListenerReplicableTemplate, TListenerReplicator> ListenerReplicatorFunc { get; private set; }
 
             public Action<IServiceCollection> DependenciesConfigAction { get; private set; }
 
@@ -63,6 +85,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 this.ServiceTypeName = string.Empty;
                 this.ListenerDescriptors = null;
+                this.DelegateDescriptors = null;
+                this.DelegateInvokerFunc = DefaulDelegateInvokerFunc;
+                this.DelegateReplicaTemplateFunc = null;
+                this.DelegateReplicatorFunc = null;
                 this.AspNetCoreListenerReplicaTemplateFunc = null;
                 this.RemotingListenerReplicaTemplateFunc = null;
                 this.ListenerReplicatorFunc = null;
@@ -76,22 +102,43 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                  ?? throw new ArgumentNullException(nameof(serviceName));
             }
 
+            public void UseDelegateInvoker(
+                Func<IServiceHostDelegateInvoker> factoryFunc)
+            {
+                this.DelegateInvokerFunc = factoryFunc
+                 ?? throw new ArgumentNullException(nameof(factoryFunc));
+            }
+
+            public void UseDelegateReplicaTemplate(
+                Func<TAsyncDelegateReplicaTemplate> factoryFunc)
+            {
+                this.DelegateReplicaTemplateFunc = factoryFunc
+                 ?? throw new ArgumentNullException(nameof(factoryFunc));
+            }
+
+            public void UseDelegateReplicator(
+                Func<TAsyncDelegateReplicableTemplate, TAsyncDelegateReplicator> factoryFunc)
+            {
+                this.DelegateReplicatorFunc = factoryFunc
+                 ?? throw new ArgumentNullException(nameof(factoryFunc));
+            }
+
             public void UseAspNetCoreListenerReplicaTemplate(
-                Func<TAspNetCoreReplicaTemplate> factoryFunc)
+                Func<TListenerAspNetCoreReplicaTemplate> factoryFunc)
             {
                 this.AspNetCoreListenerReplicaTemplateFunc = factoryFunc
                  ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
 
             public void UseRemotingListenerReplicaTemplate(
-                Func<TRemotingReplicaTemplate> factoryFunc)
+                Func<TListenerRemotingReplicaTemplate> factoryFunc)
             {
                 this.RemotingListenerReplicaTemplateFunc = factoryFunc
                  ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
 
             public void UseListenerReplicator(
-                Func<TReplicableTemplate, TReplicator> factoryFunc)
+                Func<TListenerReplicableTemplate, TListenerReplicator> factoryFunc)
             {
                 this.ListenerReplicatorFunc = factoryFunc
                  ?? throw new ArgumentNullException(nameof(factoryFunc));
@@ -108,8 +155,26 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.DependenciesConfigAction = this.DependenciesConfigAction.Chain(configAction);
             }
 
+            public void DefineAsyncDelegate(
+                Action<TAsyncDelegateReplicaTemplate> defineAction)
+            {
+                if (defineAction == null)
+                {
+                    throw new ArgumentNullException(nameof(defineAction));
+                }
+
+                if (this.DelegateDescriptors == null)
+                {
+                    this.DelegateDescriptors = new List<IServiceHostDelegateDescriptor>();
+                }
+
+                this.DelegateDescriptors.Add(
+                    new ServiceHostDelegateDescriptor(
+                        replicaTemplate => defineAction((TAsyncDelegateReplicaTemplate) replicaTemplate)));
+            }
+
             public void DefineAspNetCoreListener(
-                Action<TAspNetCoreReplicaTemplate> defineAction)
+                Action<TListenerAspNetCoreReplicaTemplate> defineAction)
             {
                 if (defineAction == null)
                 {
@@ -124,11 +189,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.ListenerDescriptors.Add(
                     new ServiceHostListenerDescriptor(
                         ServiceHostListenerType.AspNetCore,
-                        replicaTemplate => defineAction((TAspNetCoreReplicaTemplate) replicaTemplate)));
+                        replicaTemplate => defineAction((TListenerAspNetCoreReplicaTemplate) replicaTemplate)));
             }
 
             public void DefineRemotingListener(
-                Action<TRemotingReplicaTemplate> defineAction)
+                Action<TListenerRemotingReplicaTemplate> defineAction)
             {
                 if (defineAction == null)
                 {
@@ -143,13 +208,42 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.ListenerDescriptors.Add(
                     new ServiceHostListenerDescriptor(
                         ServiceHostListenerType.Remoting,
-                        replicaTemplate => defineAction((TRemotingReplicaTemplate) replicaTemplate)));
+                        replicaTemplate => defineAction((TListenerRemotingReplicaTemplate) replicaTemplate)));
+            }
+
+            public static IServiceHostDelegateInvoker DefaulDelegateInvokerFunc()
+            {
+                return new ServiceHostDelegateInvoker();
+            }
+        }
+
+        protected class Compilation
+        {
+            public IServiceHostDelegateInvoker DelegateInvoker { get; }
+
+            public IReadOnlyList<TAsyncDelegateReplicator> DelegateReplicators { get; }
+
+            public IReadOnlyList<TListenerReplicator> ListenerReplicators { get; }
+
+            public Compilation(
+                IServiceHostDelegateInvoker delegateInvoker,
+                IReadOnlyList<TAsyncDelegateReplicator> delegateReplicators,
+                IReadOnlyList<TListenerReplicator> listenerReplicators)
+            {
+                this.DelegateInvoker = delegateInvoker
+                 ?? throw new ArgumentNullException(nameof(delegateInvoker));
+
+                this.DelegateReplicators = delegateReplicators
+                 ?? throw new ArgumentNullException(nameof(delegateReplicators));
+
+                this.ListenerReplicators = listenerReplicators
+                 ?? throw new ArgumentNullException(nameof(listenerReplicators));
             }
         }
 
         public abstract TServiceHost Build();
 
-        protected IEnumerable<TReplicator> BuildReplicators(
+        protected Compilation CompileParameters(
             TParameters parameters)
         {
             if (parameters == null)
@@ -163,20 +257,66 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                     $"No {nameof(parameters.ListenerReplicatorFunc)} was configured");
             }
 
-            // Initialize direct dependencies
+            // Initialize service dependencies
             var dependenciesCollection = new ServiceCollection();
-            
+
             parameters.DependenciesConfigAction?.Invoke(dependenciesCollection);
 
-            var dependenciesServices = new DefaultServiceProviderFactory().CreateServiceProvider(dependenciesCollection);
+            var dependencies = new DefaultServiceProviderFactory().CreateServiceProvider(dependenciesCollection);
 
-            var replicators = parameters.ListenerDescriptors == null
-                ? Enumerable.Empty<TReplicator>()
+            var delegateInvoker = parameters.DelegateInvokerFunc();
+            if (delegateInvoker == null)
+            {
+                throw new FactoryProducesNullInstanceException<IServiceHostDelegateInvoker>();
+            }
+
+            var delegateReplicators = parameters.DelegateDescriptors == null
+                ? Array.Empty<TAsyncDelegateReplicator>()
+                : parameters.DelegateDescriptors
+                   .Select(
+                        descriptor =>
+                        {
+                            if (parameters.DelegateReplicaTemplateFunc == null)
+                            {
+                                throw new InvalidOperationException(
+                                    $"No {nameof(parameters.DelegateReplicaTemplateFunc)} was configured");
+                            }
+
+                            var template = parameters.DelegateReplicaTemplateFunc();
+                            if (template == null)
+                            {
+                                throw new FactoryProducesNullInstanceException<TAsyncDelegateReplicaTemplate>();
+                            }
+
+                            template.ConfigureObject(
+                                c =>
+                                {
+                                    c.ConfigureDependencies(
+                                        services =>
+                                        {
+                                            DependencyRegistrant.Register(services, dependenciesCollection, dependencies);
+                                        });
+                                });
+
+                            descriptor.ConfigAction(template);
+
+                            var replicator = parameters.DelegateReplicatorFunc(template);
+                            if (replicator == null)
+                            {
+                                throw new FactoryProducesNullInstanceException<TAsyncDelegateReplicator>();
+                            }
+
+                            return replicator;
+                        })
+                   .ToArray();
+
+            var listenerReplicators = parameters.ListenerDescriptors == null
+                ? Array.Empty<TListenerReplicator>()
                 : parameters.ListenerDescriptors
                    .Select(
                         descriptor =>
                         {
-                            TReplicableTemplate replicableTemplate;
+                            TListenerReplicableTemplate replicableTemplate;
                             switch (descriptor.ListenerType)
                             {
                                 case ServiceHostListenerType.AspNetCore:
@@ -190,7 +330,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                         var template = parameters.AspNetCoreListenerReplicaTemplateFunc();
                                         if (template == null)
                                         {
-                                            throw new FactoryProducesNullInstanceException<TAspNetCoreReplicaTemplate>();
+                                            throw new FactoryProducesNullInstanceException<TListenerAspNetCoreReplicaTemplate>();
                                         }
 
                                         template.ConfigureObject(
@@ -199,7 +339,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                                 c.ConfigureDependencies(
                                                     services =>
                                                     {
-                                                        DependencyRegistrant.Register(services, dependenciesCollection, dependenciesServices);
+                                                        DependencyRegistrant.Register(services, dependenciesCollection, dependencies);
                                                     });
                                             });
 
@@ -219,7 +359,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                         var template = parameters.RemotingListenerReplicaTemplateFunc();
                                         if (template == null)
                                         {
-                                            throw new FactoryProducesNullInstanceException<TRemotingReplicaTemplate>();
+                                            throw new FactoryProducesNullInstanceException<TListenerRemotingReplicaTemplate>();
                                         }
 
                                         template.ConfigureObject(
@@ -228,7 +368,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                                 c.ConfigureDependencies(
                                                     services =>
                                                     {
-                                                        DependencyRegistrant.Register(services, dependenciesCollection, dependenciesServices);
+                                                        DependencyRegistrant.Register(services, dependenciesCollection, dependencies);
                                                     });
                                             });
 
@@ -244,14 +384,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                             var replicator = parameters.ListenerReplicatorFunc(replicableTemplate);
                             if (replicator == null)
                             {
-                                throw new FactoryProducesNullInstanceException<TReplicator>();
+                                throw new FactoryProducesNullInstanceException<TListenerReplicator>();
                             }
 
                             return replicator;
                         })
                    .ToArray();
 
-            return replicators;
+            return new Compilation(delegateInvoker, delegateReplicators, listenerReplicators);
         }
     }
 }

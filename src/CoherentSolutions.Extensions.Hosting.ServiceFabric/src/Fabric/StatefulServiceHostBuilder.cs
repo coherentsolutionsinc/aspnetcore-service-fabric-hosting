@@ -5,6 +5,9 @@
               IStatefulServiceHost,
               IStatefulServiceHostBuilderParameters,
               IStatefulServiceHostBuilderConfigurator,
+              IStatefulServiceHostDelegateReplicableTemplate,
+              IStatefulServiceHostDelegateReplicaTemplate,
+              IStatefulServiceHostDelegateReplicator,
               IStatefulServiceHostListenerReplicableTemplate,
               IStatefulServiceHostAspNetCoreListenerReplicaTemplate,
               IStatefulServiceHostRemotingListenerReplicaTemplate,
@@ -18,9 +21,22 @@
         {
             public StatefulParameters()
             {
+                this.UseDelegateReplicaTemplate(DefaultAsyncDelegateReplicaTemplate);
+                this.UseDelegateReplicator(DefaultAsyncDelegateReplicatorFactory);
                 this.UseAspNetCoreListenerReplicaTemplate(DefaultAspNetCoreListenerReplicaTemplate);
                 this.UseRemotingListenerReplicaTemplate(DefaultRemotingListenerReplicaTemplate);
                 this.UseListenerReplicator(DefaultListenerReplicatorFactory);
+            }
+
+            private static IStatefulServiceHostDelegateReplicaTemplate DefaultAsyncDelegateReplicaTemplate()
+            {
+                return new StatefulServiceHostDelegateReplicaTemplate();
+            }
+
+            private static IStatefulServiceHostDelegateReplicator DefaultAsyncDelegateReplicatorFactory(
+                IStatefulServiceHostDelegateReplicableTemplate template)
+            {
+                return new StatefulServiceHostDelegateReplicator(template);
             }
 
             private static IStatefulServiceHostAspNetCoreListenerReplicaTemplate DefaultAspNetCoreListenerReplicaTemplate()
@@ -46,9 +62,13 @@
 
             this.UpstreamConfiguration(parameters);
 
-            var replicators = this.BuildReplicators(parameters);
+            var compilation = this.CompileParameters(parameters);
 
-            return new StatefulServiceHost(parameters.ServiceTypeName, replicators);
+            return new StatefulServiceHost(
+                parameters.ServiceTypeName, 
+                compilation.DelegateInvoker,
+                compilation.DelegateReplicators,
+                compilation.ListenerReplicators);
         }
     }
 }
