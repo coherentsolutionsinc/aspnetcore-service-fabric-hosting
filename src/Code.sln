@@ -7,12 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoherentSolutions.Extension
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests", "CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests\CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.csproj", "{DB757D07-65BE-4E71-BE71-687521BE0E76}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NewFolder1", "NewFolder1", "{6588EA6B-4C05-4E26-89D1-8310D9B330E4}"
-EndProject
-Project("{A07B5EB6-E848-4116-A8D0-A826331D98C6}") = "App", "application\App\App.sfproj", "{E141FCA3-6B34-4433-8D74-27A0443F32BE}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StatefulService", "application\StatefulService\StatefulService.csproj", "{62998E70-A9B9-4D4D-A14B-DBD505B29843}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,29 +31,9 @@ Global
 		{DB757D07-65BE-4E71-BE71-687521BE0E76}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DB757D07-65BE-4E71-BE71-687521BE0E76}.Release|x64.ActiveCfg = Release|Any CPU
 		{DB757D07-65BE-4E71-BE71-687521BE0E76}.Release|x64.Build.0 = Release|Any CPU
-		{E141FCA3-6B34-4433-8D74-27A0443F32BE}.Debug|Any CPU.ActiveCfg = Debug|x64
-		{E141FCA3-6B34-4433-8D74-27A0443F32BE}.Debug|x64.ActiveCfg = Debug|x64
-		{E141FCA3-6B34-4433-8D74-27A0443F32BE}.Debug|x64.Build.0 = Debug|x64
-		{E141FCA3-6B34-4433-8D74-27A0443F32BE}.Debug|x64.Deploy.0 = Debug|x64
-		{E141FCA3-6B34-4433-8D74-27A0443F32BE}.Release|Any CPU.ActiveCfg = Release|x64
-		{E141FCA3-6B34-4433-8D74-27A0443F32BE}.Release|x64.ActiveCfg = Release|x64
-		{E141FCA3-6B34-4433-8D74-27A0443F32BE}.Release|x64.Build.0 = Release|x64
-		{E141FCA3-6B34-4433-8D74-27A0443F32BE}.Release|x64.Deploy.0 = Release|x64
-		{62998E70-A9B9-4D4D-A14B-DBD505B29843}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{62998E70-A9B9-4D4D-A14B-DBD505B29843}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{62998E70-A9B9-4D4D-A14B-DBD505B29843}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{62998E70-A9B9-4D4D-A14B-DBD505B29843}.Debug|x64.Build.0 = Debug|Any CPU
-		{62998E70-A9B9-4D4D-A14B-DBD505B29843}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{62998E70-A9B9-4D4D-A14B-DBD505B29843}.Release|Any CPU.Build.0 = Release|Any CPU
-		{62998E70-A9B9-4D4D-A14B-DBD505B29843}.Release|x64.ActiveCfg = Release|Any CPU
-		{62998E70-A9B9-4D4D-A14B-DBD505B29843}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{E141FCA3-6B34-4433-8D74-27A0443F32BE} = {6588EA6B-4C05-4E26-89D1-8310D9B330E4}
-		{62998E70-A9B9-4D4D-A14B-DBD505B29843} = {6588EA6B-4C05-4E26-89D1-8310D9B330E4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B16C2BAA-9054-459B-8E39-30F5BA77F6FE}
