@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -60,7 +61,18 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         {
             using (cancellationToken.Register(() => this.cancellationTokenSource.Cancel()))
             {
-                await (Task) this.@delegate.DynamicInvoke(this.arguments);
+                try
+                {
+                    await (Task) this.@delegate.DynamicInvoke(this.arguments);
+                }
+                catch (TargetInvocationException e)
+                {
+                    if (e.InnerException != null)
+                    {
+                        ExceptionDispatchInfo.Capture(e.InnerException).Throw();
+                    }
+                    throw;
+                }
             }
         }
     }
