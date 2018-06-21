@@ -2,9 +2,9 @@
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public class ServiceHostListenerLoggerOptions : IServiceHostListenerLoggerOptions
+    public class ServiceHostLoggerOptions : IServiceHostLoggerOptions
     {
-        public static readonly ServiceHostListenerLoggerOptions Disabled;
+        public static readonly ServiceHostLoggerOptions Disabled;
 
         public LogLevel LogLevel { get; set; }
 
@@ -12,15 +12,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
         public bool IncludeExceptionStackTrace { get; set; }
 
-        static ServiceHostListenerLoggerOptions()
+        static ServiceHostLoggerOptions()
         {
-            Disabled = new ServiceHostListenerLoggerOptions
+            Disabled = new ServiceHostLoggerOptions
             {
                 LogLevel = LogLevel.None
             };
         }
 
-        public ServiceHostListenerLoggerOptions()
+        public ServiceHostLoggerOptions()
         {
             this.LogLevel = LogLevel.Information;
             this.IncludeMetadata = true;

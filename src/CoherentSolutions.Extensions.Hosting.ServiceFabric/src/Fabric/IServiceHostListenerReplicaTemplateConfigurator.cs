@@ -10,6 +10,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             string endpointName);
 
         void UseLoggerOptions(
-            Func<IServiceHostListenerLoggerOptions> factoryFunc);
+            Func<IServiceHostLoggerOptions> factoryFunc);
     }
 }

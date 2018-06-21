@@ -11,7 +11,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             IServiceHostListenerInformation listenerInformation,
             IServiceEventSource eventSource,
             string eventCategoryName,
-            IServiceHostListenerLoggerOptions options)
+            IServiceHostLoggerOptions options)
             : base(eventSource, eventCategoryName, options)
         {
             this.listenerInformation = listenerInformation

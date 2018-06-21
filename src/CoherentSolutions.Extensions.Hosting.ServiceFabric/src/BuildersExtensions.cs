@@ -61,7 +61,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
 
         public static TCaller UseLoggerOptions<TCaller>(
             this TCaller @this,
-            Func<IServiceHostListenerLoggerOptions> factoryFunc)
+            Func<IServiceHostLoggerOptions> factoryFunc)
             where TCaller : IConfigurableObject<IServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
         {
             @this.ConfigureObject(

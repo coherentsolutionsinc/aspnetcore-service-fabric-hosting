@@ -8,6 +8,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
     {
         string EndpointName { get; }
 
-        Func<IServiceHostListenerLoggerOptions> LoggerOptionsFunc { get; }
+        Func<IServiceHostLoggerOptions> LoggerOptionsFunc { get; }
     }
 }

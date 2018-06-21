@@ -6,13 +6,13 @@ using Microsoft.Extensions.Logging;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public abstract class ServiceHostListenerLoggerProvider : ILoggerProvider
+    public abstract class ServiceHostLoggerProvider : ILoggerProvider
     {
         private readonly ConcurrentDictionary<string, ILogger> loggers;
 
         private bool disposed;
 
-        protected ServiceHostListenerLoggerProvider()
+        protected ServiceHostLoggerProvider()
         {
             this.loggers = new ConcurrentDictionary<string, ILogger>(StringComparer.OrdinalIgnoreCase);
         }

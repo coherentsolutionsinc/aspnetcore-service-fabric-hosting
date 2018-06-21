@@ -49,12 +49,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
         private readonly AsyncLocal<Scope> scope;
 
-        private readonly IServiceHostListenerLoggerOptions options;
+        private readonly IServiceHostLoggerOptions options;
 
         protected ServiceHostLogger(
             IServiceEventSource eventSource,
             string eventCategoryName,
-            IServiceHostListenerLoggerOptions options)
+            IServiceHostLoggerOptions options)
         {
             this.eventSource = eventSource
              ?? throw new ArgumentNullException(nameof(eventSource));

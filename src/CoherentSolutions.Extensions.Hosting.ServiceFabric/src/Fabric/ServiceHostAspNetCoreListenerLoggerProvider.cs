@@ -4,17 +4,17 @@ using Microsoft.Extensions.Logging;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public class ServiceHostAspNetCoreListenerLoggerProvider : ServiceHostListenerLoggerProvider
+    public class ServiceHostAspNetCoreListenerLoggerProvider : ServiceHostLoggerProvider
     {
         private readonly IServiceHostAspNetCoreListenerInformation listenerInformation;
 
-        private readonly IServiceHostListenerLoggerOptions loggerOptions;
+        private readonly IServiceHostLoggerOptions loggerOptions;
 
         private readonly IServiceEventSource eventSource;
 
         public ServiceHostAspNetCoreListenerLoggerProvider(
             IServiceHostAspNetCoreListenerInformation listenerInformation,
-            IServiceHostListenerLoggerOptions loggerOptions,
+            IServiceHostLoggerOptions loggerOptions,
             IServiceEventSource eventSource)
         {
             this.listenerInformation = listenerInformation
