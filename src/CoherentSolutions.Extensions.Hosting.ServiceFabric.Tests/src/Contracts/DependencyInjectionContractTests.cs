@@ -53,7 +53,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Contracts
                             }),
                         new[]
                         {
-                            typeof(IReliableStateManager)
+                            typeof(IReliableStateManager),
+                            typeof(StatefulServiceContext),
+                            typeof(IStatefulServicePartition)
                         }
                     };
                     yield return new object[]
@@ -81,7 +83,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Contracts
                             }),
                         new[]
                         {
-                            typeof(IReliableStateManager)
+                            typeof(IReliableStateManager),
+                            typeof(StatefulServiceContext),
+                            typeof(IStatefulServicePartition),
+                            typeof(IServiceHostListenerInformation),
+                            typeof(IServiceHostAspNetCoreListenerInformation)
                         }
                     };
                     yield return new object[]
@@ -104,7 +110,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Contracts
                             }),
                         new[]
                         {
-                            typeof(IReliableStateManager)
+                            typeof(IReliableStateManager),
+                            typeof(StatefulServiceContext),
+                            typeof(IStatefulServicePartition),
+                            typeof(IServiceHostListenerInformation),
+                            typeof(IServiceHostRemotingListenerInformation)
                         }
                     };
                     yield return new object[]
@@ -126,7 +136,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Contracts
                             {
                                 c.Activate(Tools.StatelessService);
                             }),
-                        Type.EmptyTypes
+                        new []
+                        {
+                            typeof(StatelessServiceContext),
+                            typeof(IStatelessServicePartition)
+                        }
                     };
                     yield return new object[]
                     {
@@ -151,7 +165,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Contracts
                                    .CreateCommunicationListener(Tools.StatelessContext)
                                    .OpenAsync(CancellationToken.None);
                             }),
-                        Type.EmptyTypes
+                        new []
+                        {
+                            typeof(StatelessServiceContext),
+                            typeof(IStatelessServicePartition),
+                            typeof(IServiceHostListenerInformation),
+                            typeof(IServiceHostAspNetCoreListenerInformation)
+                        }
                     };
                     yield return new object[]
                     {
@@ -171,7 +191,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Contracts
                                    .CreateCommunicationListener(Tools.StatelessContext)
                                    .OpenAsync(CancellationToken.None);
                             }),
-                        Type.EmptyTypes
+                        new []
+                        {
+                            typeof(StatelessServiceContext),
+                            typeof(IStatelessServicePartition),
+                            typeof(IServiceHostListenerInformation),
+                            typeof(IServiceHostRemotingListenerInformation)
+                        }
                     };
                 }
             }
