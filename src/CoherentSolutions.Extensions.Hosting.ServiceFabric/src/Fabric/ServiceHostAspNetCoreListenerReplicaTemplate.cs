@@ -40,7 +40,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             protected AspNetCoreListenerParameters()
             {
                 this.IntegrationOptions = ServiceFabricIntegrationOptions.None;
-                this.AspNetCoreCommunicationListenerFunc = null;
+                this.AspNetCoreCommunicationListenerFunc = DefaultAspNetCoreCommunicationListenerFunc;
                 this.WebHostBuilderExtensionsImplFunc = DefaultWebHostBuilderExtensionsImplFunc;
                 this.WebHostExtensionsImplFunc = DefaultWebHostExtensionsImplFunc;
                 this.WebHostBuilderFunc = DefaultWebHostBuilderFunc;
@@ -92,6 +92,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.WebHostConfigAction = this.WebHostConfigAction.Chain(configAction);
             }
 
+            private static AspNetCoreCommunicationListener DefaultAspNetCoreCommunicationListenerFunc(
+                ServiceContext serviceContext,
+                string endpointName,
+                Func<string, AspNetCoreCommunicationListener, IWebHost> build)
+            {
+                return new KestrelCommunicationListener(serviceContext, endpointName, build);
+            }
+
             private static IWebHostBuilderExtensionsImpl DefaultWebHostBuilderExtensionsImplFunc()
             {
                 return new WebHostBuilderExtensionsImpl();
@@ -125,12 +133,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             if (parameters == null)
             {
                 throw new ArgumentNullException(nameof(parameters));
-            }
-
-            if (parameters.AspNetCoreCommunicationListenerFunc == null)
-            {
-                throw new InvalidOperationException(
-                    $"No {nameof(parameters.AspNetCoreCommunicationListenerFunc)} was configured");
             }
 
             var build = new Func<string, AspNetCoreCommunicationListener, IWebHost>(
