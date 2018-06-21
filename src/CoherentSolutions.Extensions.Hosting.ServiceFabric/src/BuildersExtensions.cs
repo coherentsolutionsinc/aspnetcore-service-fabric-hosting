@@ -37,6 +37,39 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             };
         }
 
+        public static TCaller UseDependencies<TCaller>(
+            this TCaller @this,
+            Func<IServiceCollection> factoryFunc)
+            where TCaller : IConfigurableObject<IConfigurableObjectDependenciesConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDependencies(factoryFunc));
+
+            return @this;
+        }
+
+        public static TCaller UseWebHostBuilder<TCaller>(
+            this TCaller @this,
+            Func<IWebHostBuilder> factoryFunc)
+            where TCaller : IConfigurableObject<IServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseWebHostBuilder(factoryFunc));
+
+            return @this;
+        }
+
+        public static TCaller UseLoggerOptions<TCaller>(
+            this TCaller @this,
+            Func<IServiceHostListenerLoggerOptions> factoryFunc)
+            where TCaller : IConfigurableObject<IServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseLoggerOptions(factoryFunc));
+
+            return @this;
+        }
+
         public static TCaller UseServiceType<TCaller>(
             this TCaller @this,
             string serviceName)
@@ -411,28 +444,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
-        public static TCaller UseCommunicationListener<TCaller>(
-            this TCaller @this,
-            Func<ServiceContext, string, Func<string, AspNetCoreCommunicationListener, IWebHost>, AspNetCoreCommunicationListener> factoryFunc)
-            where TCaller : IConfigurableObject<IServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
-        {
-            @this.ConfigureObject(
-                configurator => configurator.UseCommunicationListener(factoryFunc));
-
-            return @this;
-        }
-
-        public static TCaller UseLoggerOptions<TCaller>(
-            this TCaller @this,
-            Func<IServiceHostListenerLoggerOptions> factoryFunc)
-            where TCaller : IConfigurableObject<IServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
-        {
-            @this.ConfigureObject(
-                configurator => configurator.UseLoggerOptions(factoryFunc));
-
-            return @this;
-        }
-
         public static TCaller UseKestrel<TCaller>(
             this TCaller @this)
             where TCaller : IConfigurableObject<IServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
@@ -443,6 +454,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
                         context,
                         endpoint,
                         factory) => new KestrelCommunicationListener(context, endpoint, factory)));
+
+            return @this;
+        }
+
+        public static TCaller UseCommunicationListener<TCaller>(
+            this TCaller @this,
+            Func<ServiceContext, string, Func<string, AspNetCoreCommunicationListener, IWebHost>, AspNetCoreCommunicationListener> factoryFunc)
+            where TCaller : IConfigurableObject<IServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseCommunicationListener(factoryFunc));
 
             return @this;
         }
@@ -465,17 +487,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             @this.ConfigureObject(
                 configurator
                     => configurator.UseIntegrationOptions(ServiceFabricIntegrationOptions.UseReverseProxyIntegration));
-
-            return @this;
-        }
-
-        public static TCaller UseWebHostBuilder<TCaller>(
-            this TCaller @this,
-            Func<IWebHostBuilder> factoryFunc)
-            where TCaller : IConfigurableObject<IServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
-        {
-            @this.ConfigureObject(
-                configurator => configurator.UseWebHostBuilder(factoryFunc));
 
             return @this;
         }
@@ -674,17 +685,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
-        public static TCaller ConfigureWebHost<TCaller>(
-            this TCaller @this,
-            Action<IWebHostBuilder> configAction)
-            where TCaller : IConfigurableObject<IServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
-        {
-            @this.ConfigureObject(
-                configurator => configurator.ConfigureWebHost(configAction));
-
-            return @this;
-        }
-
         public static TCaller ConfigureDependencies<TCaller>(
             this TCaller @this,
             Action<IServiceCollection> configAction)
@@ -692,6 +692,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
         {
             @this.ConfigureObject(
                 configurator => configurator.ConfigureDependencies(configAction));
+
+            return @this;
+        }
+
+        public static TCaller ConfigureWebHost<TCaller>(
+            this TCaller @this,
+            Action<IWebHostBuilder> configAction)
+            where TCaller : IConfigurableObject<IServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.ConfigureWebHost(configAction));
 
             return @this;
         }
