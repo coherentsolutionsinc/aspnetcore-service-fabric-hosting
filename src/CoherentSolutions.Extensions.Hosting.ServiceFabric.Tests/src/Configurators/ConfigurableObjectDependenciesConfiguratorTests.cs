@@ -1,19 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Fabric;
-using System.Fabric.Description;
 using System.Threading.Tasks;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.ServiceFabric.Data;
 
 using Moq;
-
-using ServiceFabric.Mocks;
 
 using Xunit;
 
@@ -29,15 +23,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators
 
         private static class ConfigurableObjectDependenciesConfiguratorDataSource
         {
-            private class EndpointResourceDescriptionCollection : KeyedCollection<string, EndpointResourceDescription>
-            {
-                protected override string GetKeyForItem(
-                    EndpointResourceDescription item)
-                {
-                    return item.Name;
-                }
-            }
-
             public static IEnumerable<object[]> Data
             {
                 get
@@ -58,7 +43,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators
                         new Action<IConfigurableObject<IConfigurableObjectDependenciesConfigurator>>(
                             c =>
                             {
-                                ((StatefulServiceHostDelegateReplicaTemplate) c).Activate(StatefulService);
+                                ((StatefulServiceHostDelegateReplicaTemplate) c).Activate(Tools.StatefulService);
                             })
                     };
                     yield return new object[]
@@ -69,8 +54,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators
                             c =>
                             {
                                 ((StatefulServiceHostRemotingListenerReplicaTemplate) c)
-                                   .Activate(StatefulService)
-                                   .CreateCommunicationListener(StatefulContext);
+                                   .Activate(Tools.StatefulService)
+                                   .CreateCommunicationListener(Tools.StatefulContext);
                             })
                     };
                     yield return new object[]
@@ -89,7 +74,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators
                         new Action<IConfigurableObject<IConfigurableObjectDependenciesConfigurator>>(
                             c =>
                             {
-                                ((StatelessServiceHostDelegateReplicaTemplate) c).Activate(StatelessService);
+                                ((StatelessServiceHostDelegateReplicaTemplate) c).Activate(Tools.StatelessService);
                             })
                     };
                     yield return new object[]
@@ -100,91 +85,18 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators
                             c =>
                             {
                                 ((StatelessServiceHostRemotingListenerReplicaTemplate) c)
-                                   .Activate(StatelessService)
-                                   .CreateCommunicationListener(StatelessContext);
+                                   .Activate(Tools.StatelessService)
+                                   .CreateCommunicationListener(Tools.StatelessContext);
                             })
                     };
-                }
-            }
-
-            private static StatefulServiceContext StatefulContext
-            {
-                get
-                {
-                    var package = new Mock<ICodePackageActivationContext>();
-                    package
-                       .Setup(instance => instance.GetEndpoints())
-                       .Returns(
-                            new EndpointResourceDescriptionCollection
-                            {
-                                new EndpointResourceDescription
-                                {
-                                    Name = "ServiceEndpoint"
-                                }
-                            });
-
-                    return MockStatefulServiceContextFactory.Create(
-                        package.Object,
-                        MockStatefulServiceContextFactory.ServiceTypeName,
-                        new Uri(MockStatefulServiceContextFactory.ServiceName),
-                        Guid.Empty,
-                        default(long));
-                }
-            }
-
-            private static StatelessServiceContext StatelessContext
-            {
-                get
-                {
-                    var package = new Mock<ICodePackageActivationContext>();
-                    package
-                       .Setup(instance => instance.GetEndpoints())
-                       .Returns(
-                            new EndpointResourceDescriptionCollection
-                            {
-                                new EndpointResourceDescription
-                                {
-                                    Name = "ServiceEndpoint"
-                                }
-                            });
-
-                    return MockStatelessServiceContextFactory.Create(
-                        package.Object,
-                        MockStatelessServiceContextFactory.ServiceTypeName,
-                        new Uri(MockStatelessServiceContextFactory.ServiceName),
-                        Guid.Empty,
-                        default(long));
-                }
-            }
-
-            private static IStatefulService StatefulService
-            {
-                get
-                {
-                    var service = new Mock<IStatefulService>();
-                    service.Setup(instance => instance.GetContext()).Returns(MockStatefulServiceContextFactory.Default);
-                    service.Setup(instance => instance.GetPartition()).Returns(new Mock<IStatefulServicePartition>().Object);
-                    service.Setup(instance => instance.GetEventSource()).Returns(new Mock<IServiceEventSource>().Object);
-                    service.Setup(instance => instance.GetReliableStateManager()).Returns(new Mock<IReliableStateManager>().Object);
-                    return service.Object;
-                }
-            }
-
-            private static IStatelessService StatelessService
-            {
-                get
-                {
-                    var service = new Mock<IStatelessService>();
-                    service.Setup(instance => instance.GetContext()).Returns(MockStatelessServiceContextFactory.Default);
-                    service.Setup(instance => instance.GetPartition()).Returns(new Mock<IStatelessServicePartition>().Object);
-                    service.Setup(instance => instance.GetEventSource()).Returns(new Mock<IServiceEventSource>().Object);
-                    return service.Object;
                 }
             }
         }
 
         [Theory]
-        [MemberData(nameof(ConfigurableObjectDependenciesConfiguratorDataSource.Data), MemberType = typeof(ConfigurableObjectDependenciesConfiguratorDataSource))]
+        [MemberData(
+            nameof(ConfigurableObjectDependenciesConfiguratorDataSource.Data),
+            MemberType = typeof(ConfigurableObjectDependenciesConfiguratorDataSource))]
         public void Should_use_collection_provided_by_UseDependencies_When_configuring_dependencies_by_ConfigureDependencies(
             IConfigurableObject<IConfigurableObjectDependenciesConfigurator> configurableObject,
             Action<IConfigurableObject<IConfigurableObjectDependenciesConfigurator>> invoke)

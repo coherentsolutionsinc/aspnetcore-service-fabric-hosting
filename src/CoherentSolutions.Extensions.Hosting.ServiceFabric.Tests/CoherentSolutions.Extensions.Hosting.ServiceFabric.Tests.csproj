@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <Folder Include="src\Fabric\Tools\" />
+    <Folder Include="src\Tools\" />
   </ItemGroup>
 
 </Project>
