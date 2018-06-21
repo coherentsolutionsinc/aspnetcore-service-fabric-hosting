@@ -2,16 +2,19 @@
 using System.Collections.ObjectModel;
 using System.Fabric;
 using System.Fabric.Description;
+using System.Threading;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
 
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.ServiceFabric.Data;
+using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 
 using Moq;
 
 using ServiceFabric.Mocks;
 
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
 {
     public static class Tools
     {
@@ -23,6 +26,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators
                 return item.Name;
             }
         }
+
+        private const string LOCALHOST = "localhost";
 
         private static readonly Mock<ICodePackageActivationContext> package;
 
@@ -64,6 +69,58 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators
                 service.Setup(instance => instance.GetPartition()).Returns(new Mock<IStatelessServicePartition>().Object);
                 service.Setup(instance => instance.GetEventSource()).Returns(new Mock<IServiceEventSource>().Object);
                 return service.Object;
+            }
+        }
+
+        public static Func<
+            ServiceContext,
+            string,
+            Func<string, AspNetCoreCommunicationListener, IWebHost>,
+            AspNetCoreCommunicationListener
+        > StatefulAspNetCoreCommunicationListenerFunc
+        {
+            get
+            {
+                return (
+                    context,
+                    s,
+                    arg3) =>
+                {
+                    var action = new Mock<Func<string, AspNetCoreCommunicationListener, IWebHost>>();
+                    var listener = new Mock<AspNetCoreCommunicationListener>(StatefulContext, action.Object);
+
+                    listener
+                       .Setup(instance => instance.OpenAsync(It.IsAny<CancellationToken>()))
+                       .Callback(() => arg3("localhost", listener.Object));
+
+                    return listener.Object;
+                };
+            }
+        }
+
+        public static Func<
+            ServiceContext,
+            string,
+            Func<string, AspNetCoreCommunicationListener, IWebHost>,
+            AspNetCoreCommunicationListener
+        > StatelessAspNetCoreCommunicationListenerFunc
+        {
+            get
+            {
+                return (
+                    context,
+                    s,
+                    arg3) =>
+                {
+                    var action = new Mock<Func<string, AspNetCoreCommunicationListener, IWebHost>>();
+                    var listener = new Mock<AspNetCoreCommunicationListener>(StatefulContext, action.Object);
+
+                    listener
+                       .Setup(instance => instance.OpenAsync(It.IsAny<CancellationToken>()))
+                       .Callback(() => arg3(LOCALHOST, listener.Object));
+
+                    return listener.Object;
+                };
             }
         }
 

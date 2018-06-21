@@ -5,9 +5,6 @@ using System.Threading.Tasks;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
-
 using Moq;
 
 using Xunit;
@@ -36,14 +33,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators
                     yield return new object[]
                     {
                         new StatefulServiceHostAspNetCoreListenerReplicaTemplate()
-                           .UseCommunicationListener(
-                                (
-                                    context,
-                                    s,
-                                    arg3) => new Mock<AspNetCoreCommunicationListener>(
-                                    Tools.StatefulContext,
-                                    new Mock<Func<string, AspNetCoreCommunicationListener, IWebHost>>().Object
-                                ).Object),
+                           .UseCommunicationListener(Tools.StatefulAspNetCoreCommunicationListenerFunc),
                         new Action<StatefulServiceHostAspNetCoreListenerReplicaTemplate>(
                             c => c.Activate(Tools.StatefulService).CreateCommunicationListener(Tools.StatefulContext))
                     };
@@ -68,14 +58,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators
                     yield return new object[]
                     {
                         new StatelessServiceHostAspNetCoreListenerReplicaTemplate()
-                           .UseCommunicationListener(
-                                (
-                                    context,
-                                    s,
-                                    arg3) => new Mock<AspNetCoreCommunicationListener>(
-                                    Tools.StatelessContext,
-                                    new Mock<Func<string, AspNetCoreCommunicationListener, IWebHost>>().Object
-                                ).Object),
+                           .UseCommunicationListener(Tools.StatelessAspNetCoreCommunicationListenerFunc),
                         new Action<StatelessServiceHostAspNetCoreListenerReplicaTemplate>(
                             c => c.Activate(Tools.StatelessService).CreateCommunicationListener(Tools.StatelessContext))
                     };

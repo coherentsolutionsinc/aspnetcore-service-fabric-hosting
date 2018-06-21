@@ -21,7 +21,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators
         {
         }
 
-        private static class ConfigurableObjectDependenciesConfiguratorDataSource
+        private static class DataSource
         {
             public static IEnumerable<object[]> Data
             {
@@ -30,63 +30,59 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators
                     yield return new object[]
                     {
                         new StatefulServiceHostBuilder(),
-                        new Action<IConfigurableObject<IConfigurableObjectDependenciesConfigurator>>(
+                        new Action<StatefulServiceHostBuilder>(
                             c =>
                             {
-                                ((StatefulServiceHostBuilder) c).Build();
+                                c.Build();
                             })
                     };
                     yield return new object[]
                     {
                         new StatefulServiceHostDelegateReplicaTemplate()
                            .UseDelegate(() => Task.CompletedTask),
-                        new Action<IConfigurableObject<IConfigurableObjectDependenciesConfigurator>>(
+                        new Action<StatefulServiceHostDelegateReplicaTemplate>(
                             c =>
                             {
-                                ((StatefulServiceHostDelegateReplicaTemplate) c).Activate(Tools.StatefulService);
+                                c.Activate(Tools.StatefulService);
                             })
                     };
                     yield return new object[]
                     {
                         new StatefulServiceHostRemotingListenerReplicaTemplate()
                            .UseImplementation(() => new Mock<IDependencyService>().Object),
-                        new Action<IConfigurableObject<IConfigurableObjectDependenciesConfigurator>>(
+                        new Action<StatefulServiceHostRemotingListenerReplicaTemplate>(
                             c =>
                             {
-                                ((StatefulServiceHostRemotingListenerReplicaTemplate) c)
-                                   .Activate(Tools.StatefulService)
-                                   .CreateCommunicationListener(Tools.StatefulContext);
+                                c.Activate(Tools.StatefulService).CreateCommunicationListener(Tools.StatefulContext);
                             })
                     };
                     yield return new object[]
                     {
                         new StatelessServiceHostBuilder(),
-                        new Action<IConfigurableObject<IConfigurableObjectDependenciesConfigurator>>(
+                        new Action<StatelessServiceHostBuilder>(
                             c =>
                             {
-                                ((StatelessServiceHostBuilder) c).Build();
+                                c.Build();
                             })
                     };
                     yield return new object[]
                     {
                         new StatelessServiceHostDelegateReplicaTemplate()
                            .UseDelegate(() => Task.CompletedTask),
-                        new Action<IConfigurableObject<IConfigurableObjectDependenciesConfigurator>>(
+                        new Action<StatelessServiceHostDelegateReplicaTemplate>(
                             c =>
                             {
-                                ((StatelessServiceHostDelegateReplicaTemplate) c).Activate(Tools.StatelessService);
+                                c.Activate(Tools.StatelessService);
                             })
                     };
                     yield return new object[]
                     {
                         new StatelessServiceHostRemotingListenerReplicaTemplate()
                            .UseImplementation(() => new Mock<IDependencyService>().Object),
-                        new Action<IConfigurableObject<IConfigurableObjectDependenciesConfigurator>>(
+                        new Action<StatelessServiceHostRemotingListenerReplicaTemplate>(
                             c =>
                             {
-                                ((StatelessServiceHostRemotingListenerReplicaTemplate) c)
-                                   .Activate(Tools.StatelessService)
-                                   .CreateCommunicationListener(Tools.StatelessContext);
+                                c.Activate(Tools.StatelessService).CreateCommunicationListener(Tools.StatelessContext);
                             })
                     };
                 }
@@ -94,12 +90,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators
         }
 
         [Theory]
-        [MemberData(
-            nameof(ConfigurableObjectDependenciesConfiguratorDataSource.Data),
-            MemberType = typeof(ConfigurableObjectDependenciesConfiguratorDataSource))]
-        public void Should_use_collection_provided_by_UseDependencies_When_configuring_dependencies_by_ConfigureDependencies(
-            IConfigurableObject<IConfigurableObjectDependenciesConfigurator> configurableObject,
-            Action<IConfigurableObject<IConfigurableObjectDependenciesConfigurator>> invoke)
+        [MemberData(nameof(DataSource.Data), MemberType = typeof(DataSource))]
+        public void Should_use_collection_provided_by_UseDependencies_When_configuring_dependencies_by_ConfigureDependencies<TBuilder>(
+            TBuilder configurableObject,
+            Action<TBuilder> invoke)
+            where TBuilder : IConfigurableObject<IConfigurableObjectDependenciesConfigurator>
         {
             // Arrange
             var descriptor = new ServiceDescriptor(typeof(ConfigurableObjectDependenciesConfiguratorTests), this);

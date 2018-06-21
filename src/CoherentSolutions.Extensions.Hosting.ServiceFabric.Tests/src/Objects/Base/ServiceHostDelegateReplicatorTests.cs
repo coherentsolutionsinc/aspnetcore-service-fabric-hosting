@@ -4,7 +4,7 @@ using Moq;
 
 using Xunit;
 
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects.Base
 {
     public abstract class ServiceHostDelegateReplicatorTests<TReplicableTemplate, TService, TDelegate>
         where TReplicableTemplate : class, IServiceHostDelegateReplicableTemplate<TService, TDelegate>
@@ -16,15 +16,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
 
         [Fact]
         public void
-            Should_activate_replicable_template_with_service_When_replicating_delegates_for_service()
+            Should_activate_replicable_template_When_replicating()
         {
             // Arrange
             var service = new Mock<TService>();
 
             var replicableTemplate = new Mock<TReplicableTemplate>();
-            replicableTemplate
-               .Setup(instance => instance.Activate(service.Object))
-               .Returns<TDelegate>(null);
+            replicableTemplate.Setup(instance => instance.Activate(service.Object));
 
             // Act
             var replicator = this.CreateInstance(replicableTemplate.Object);

@@ -1,21 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Fabric;
-using System.Threading.Tasks;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
 
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.ServiceFabric.Data;
 
 using Moq;
 
-using ServiceFabric.Mocks;
-
 using Xunit;
 
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects.Base
 {
     public abstract class ServiceHostDelegateReplicaTemplateTests<TService, TParameters, TConfigurator, TDelegate>
         where TService : IService
@@ -33,10 +27,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
             // Arrange
             var service = this.CreateService();
 
-            var serviceCollection = new Mock<IServiceCollection>();
+            var serviceCollection = new Mock<ServiceCollection>
+            {
+                CallBase = true
+            };
             serviceCollection
-               .Setup(instance => instance.GetEnumerator())
-               .Returns(new Mock<IEnumerator<ServiceDescriptor>>().Object);
+               .As<IServiceCollection>()
+               .Setup(instance => instance.Add(It.IsAny<ServiceDescriptor>()));
 
             // Act
             var replicaTemplate = this.CreateInstance();
@@ -44,18 +41,22 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
                 config =>
                 {
                     config.UseDependencies(() => serviceCollection.Object);
-                    config.UseDelegate(new Func<Task>(() => Task.CompletedTask));
+                    config.UseDelegate(
+                        new Action(
+                            () =>
+                            {
+                            }));
                 });
 
             replicaTemplate.Activate(service);
 
             // Assert
-            serviceCollection.Verify(
-                instance => instance.Add(It.Is<ServiceDescriptor>(v => typeof(ServiceContext) == v.ServiceType)),
-                Times.Once());
-            serviceCollection.Verify(
-                instance => instance.Add(It.Is<ServiceDescriptor>(v => typeof(IServicePartition) == v.ServiceType)),
-                Times.Once());
+            serviceCollection
+               .As<IServiceCollection>()
+               .Verify(instance => instance.Add(It.Is<ServiceDescriptor>(v => typeof(ServiceContext) == v.ServiceType)), Times.Once());
+            serviceCollection
+               .As<IServiceCollection>()
+               .Verify(instance => instance.Add(It.Is<ServiceDescriptor>(v => typeof(IServicePartition) == v.ServiceType)), Times.Once());
         }
     }
 
@@ -68,14 +69,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
     {
         protected override IStatefulService CreateService()
         {
-            var setup = new Mock<IStatefulService>();
-
-            setup.Setup(instance => instance.GetContext()).Returns(MockStatefulServiceContextFactory.Default);
-            setup.Setup(instance => instance.GetPartition()).Returns(new Mock<IStatefulServicePartition>().Object);
-            setup.Setup(instance => instance.GetEventSource()).Returns(new Mock<IServiceEventSource>().Object);
-            setup.Setup(instance => instance.GetReliableStateManager()).Returns(new Mock<IReliableStateManager>().Object);
-
-            return setup.Object;
+            return Tools.StatefulService;
         }
 
         protected override ServiceHostDelegateReplicaTemplate<

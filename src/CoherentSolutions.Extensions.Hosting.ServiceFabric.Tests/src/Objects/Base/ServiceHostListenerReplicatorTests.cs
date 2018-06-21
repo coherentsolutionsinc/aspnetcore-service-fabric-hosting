@@ -4,7 +4,7 @@ using Moq;
 
 using Xunit;
 
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects.Base
 {
     public abstract class ServiceHostListenerReplicatorTests<TReplicableTemplate, TService, TListener>
         where TReplicableTemplate : class, IServiceHostListenerReplicableTemplate<TService, TListener>
@@ -22,9 +22,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
             var service = new Mock<TService>();
 
             var replicableTemplate = new Mock<TReplicableTemplate>();
-            replicableTemplate
-               .Setup(instance => instance.Activate(service.Object))
-               .Returns<TListener>(null);
+            replicableTemplate.Setup(instance => instance.Activate(service.Object));
 
             // Act
             var listenerReplicator = this.CreateInstance(replicableTemplate.Object);
