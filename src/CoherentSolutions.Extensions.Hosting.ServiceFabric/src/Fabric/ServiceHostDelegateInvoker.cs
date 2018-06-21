@@ -9,13 +9,13 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public class ServiceHostDelegate : IServiceHostDelegate
+    public class ServiceHostDelegateInvoker : IServiceHostDelegateInvoker
     {
         private readonly IServiceProvider services;
 
         private readonly Func<IServiceProvider, CancellationToken, Task> invocation;
 
-        public ServiceHostDelegate(
+        public ServiceHostDelegateInvoker(
             Delegate @delegate,
             IServiceProvider services)
         {

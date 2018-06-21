@@ -4,9 +4,9 @@ using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects.Base;
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
 {
     public class StatelessServiceHostDelegateReplicatorTests
-        : ServiceHostDelegateReplicatorTests<IStatelessServiceHostDelegateReplicableTemplate, IStatelessService, IServiceHostDelegate>
+        : ServiceHostDelegateReplicatorTests<IStatelessServiceHostDelegateReplicableTemplate, IStatelessService, IServiceHostDelegateInvoker>
     {
-        protected override ServiceHostDelegateReplicator<IStatelessServiceHostDelegateReplicableTemplate, IStatelessService, IServiceHostDelegate>
+        protected override ServiceHostDelegateReplicator<IStatelessServiceHostDelegateReplicableTemplate, IStatelessService, IServiceHostDelegateInvoker>
             CreateInstance(
                 IStatelessServiceHostDelegateReplicableTemplate replicableTemplate)
         {

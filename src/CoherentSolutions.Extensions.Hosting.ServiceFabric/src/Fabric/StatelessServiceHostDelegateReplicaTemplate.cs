@@ -5,7 +5,7 @@
               IStatelessService,
               IStatelessServiceHostDelegateReplicaTemplateParameters,
               IStatelessServiceHostDelegateReplicaTemplateConfigurator,
-              IServiceHostDelegate>,
+              IServiceHostDelegateInvoker>,
           IStatelessServiceHostDelegateReplicaTemplate
     {
         private class StatelessAsyncDelegateParameters
@@ -15,7 +15,7 @@
         {
         }
 
-        public override IServiceHostDelegate Activate(
+        public override IServiceHostDelegateInvoker Activate(
             IStatelessService service)
         {
             var parameters = new StatelessAsyncDelegateParameters();
