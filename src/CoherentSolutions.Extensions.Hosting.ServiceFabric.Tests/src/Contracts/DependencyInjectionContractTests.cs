@@ -25,8 +25,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Contracts
             }
 
             private class MyRemotingImplementation : IMyRemotingImplementation
-            { }
-
+            {
+            }
 
             public static IEnumerable<object[]> Data
             {

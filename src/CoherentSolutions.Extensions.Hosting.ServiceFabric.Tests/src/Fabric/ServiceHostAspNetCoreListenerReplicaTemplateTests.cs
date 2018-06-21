@@ -90,7 +90,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
 
         [Fact]
         public void
-            Should_configure_aspnetcore_listener_logger_provider_When_activating_replica_template()
+            Should_configure_aspnetcore_listener_information_with_endpoint_name_and_url_suffix_When_activating_replica_template()
         {
             // Arrange
             var service = this.CreateService();
@@ -131,7 +131,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
 
         [Fact]
         public void
-            Should_configure_aspnetcore_listener_information_with_endpoint_name_and_url_suffix_When_activating_replica_template()
+            Should_configure_aspnetcore_listener_logger_provider_When_activating_replica_template()
         {
             // Arrange
             var service = this.CreateService();
@@ -169,7 +169,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
                 instance => instance.Add(It.Is<ServiceDescriptor>(v => typeof(ILoggerProvider) == v.ServiceType)),
                 Times.Once());
         }
-        
+
         [Fact]
         public void
             Should_configure_service_partition_as_singleton_When_activating_replica_template()
