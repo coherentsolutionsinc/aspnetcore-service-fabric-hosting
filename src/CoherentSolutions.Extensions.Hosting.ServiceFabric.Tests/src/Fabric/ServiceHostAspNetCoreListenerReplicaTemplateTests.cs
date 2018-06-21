@@ -155,20 +155,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
 
         [Fact]
         public void
-            Should_throw_InvalidOperationException_When_aspnetcore_communication_listener_func_isnot_configured()
-        {
-            // Arrange
-            var service = this.CreateService();
-
-            Assert.Throws<InvalidOperationException>(
-                () =>
-                {
-                    this.CreateInstance().Activate(service);
-                });
-        }
-
-        [Fact]
-        public void
             Should_use_custom_aspnetcore_communication_listener_func_When_aspnetcore_communication_listener_func_is_configured()
         {
             // Arrange
