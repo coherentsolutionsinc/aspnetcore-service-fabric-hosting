@@ -10,11 +10,5 @@
             : base(listenerInformation, eventSource, eventCategoryName, options)
         {
         }
-
-        protected override void FillEventData<TState>(
-            TState state,
-            ServiceListenerEventSourceData eventData)
-        {
-        }
     }
 }
