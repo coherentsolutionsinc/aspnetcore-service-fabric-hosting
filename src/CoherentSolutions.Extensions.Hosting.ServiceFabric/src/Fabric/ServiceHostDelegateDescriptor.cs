@@ -9,7 +9,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         public ServiceHostDelegateDescriptor(
             Action<IServiceHostDelegateReplicaTemplate<IServiceHostDelegateReplicaTemplateConfigurator>> configAction)
         {
-            this.ConfigAction = configAction 
+            this.ConfigAction = configAction
              ?? throw new ArgumentNullException(nameof(configAction));
         }
     }

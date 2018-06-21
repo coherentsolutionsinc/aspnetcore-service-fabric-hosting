@@ -90,47 +90,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
 
         [Fact]
         public void
-            Should_configure_aspnetcore_listener_logger_provider_When_activating_replica_template()
-        {
-            // Arrange
-            var service = this.CreateService();
-
-            var serviceCollection = new Mock<IServiceCollection>();
-            serviceCollection
-               .Setup(instance => instance.GetEnumerator())
-               .Returns(new Mock<IEnumerator<ServiceDescriptor>>().Object);
-
-            var builder = new Mock<IWebHostBuilder>(MockBehavior.Loose);
-            builder
-               .Setup(instance => instance.Build())
-               .Returns(new Mock<IWebHost>().Object);
-            builder
-               .Setup(instance => instance.ConfigureServices(It.IsAny<Action<IServiceCollection>>()))
-               .Callback<Action<IServiceCollection>>(action => action(serviceCollection.Object))
-               .Returns(builder.Object);
-
-            // Act
-            var replicaTemplate = this.CreateInstance();
-            replicaTemplate.ConfigureObject(
-                config =>
-                {
-                    config.UseCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
-                    config.UseWebHostBuilder(() => builder.Object);
-                });
-
-            var listener = replicaTemplate.Activate(service);
-
-            var invoker = this.CreateInvoker(listener);
-            invoker.Invoke();
-
-            // Assert
-            serviceCollection.Verify(
-                instance => instance.Add(It.Is<ServiceDescriptor>(v => typeof(ILoggerProvider) == v.ServiceType)),
-                Times.Once());
-        }
-
-        [Fact]
-        public void
             Should_configure_aspnetcore_listener_information_with_endpoint_name_and_url_suffix_When_activating_replica_template()
         {
             // Arrange
@@ -180,6 +139,47 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
                          && ((IServiceHostAspNetCoreListenerInformation) v.ImplementationInstance).EndpointName == EndpointName
                          && ((IServiceHostAspNetCoreListenerInformation) v.ImplementationInstance).UrlSuffix != string.Empty
                     )),
+                Times.Once());
+        }
+
+        [Fact]
+        public void
+            Should_configure_aspnetcore_listener_logger_provider_When_activating_replica_template()
+        {
+            // Arrange
+            var service = this.CreateService();
+
+            var serviceCollection = new Mock<IServiceCollection>();
+            serviceCollection
+               .Setup(instance => instance.GetEnumerator())
+               .Returns(new Mock<IEnumerator<ServiceDescriptor>>().Object);
+
+            var builder = new Mock<IWebHostBuilder>(MockBehavior.Loose);
+            builder
+               .Setup(instance => instance.Build())
+               .Returns(new Mock<IWebHost>().Object);
+            builder
+               .Setup(instance => instance.ConfigureServices(It.IsAny<Action<IServiceCollection>>()))
+               .Callback<Action<IServiceCollection>>(action => action(serviceCollection.Object))
+               .Returns(builder.Object);
+
+            // Act
+            var replicaTemplate = this.CreateInstance();
+            replicaTemplate.ConfigureObject(
+                config =>
+                {
+                    config.UseCommunicationListener(AspNetCoreCommunicationListenerStub.Func);
+                    config.UseWebHostBuilder(() => builder.Object);
+                });
+
+            var listener = replicaTemplate.Activate(service);
+
+            var invoker = this.CreateInvoker(listener);
+            invoker.Invoke();
+
+            // Assert
+            serviceCollection.Verify(
+                instance => instance.Add(It.Is<ServiceDescriptor>(v => typeof(ILoggerProvider) == v.ServiceType)),
                 Times.Once());
         }
 

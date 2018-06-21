@@ -9,71 +9,78 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public class ServiceHostDelegate
-        : IServiceHostDelegate
+    public class ServiceHostDelegate : IServiceHostDelegate
     {
-        private readonly Delegate @delegate;
+        private readonly IServiceProvider services;
 
-        private readonly object[] arguments;
-
-        private readonly CancellationTokenSource cancellationTokenSource;
-
-        public ServiceLifecycleEvent LifecycleEvent { get; }
+        private readonly Func<IServiceProvider, CancellationToken, Task> invocation;
 
         public ServiceHostDelegate(
             Delegate @delegate,
-            ServiceLifecycleEvent lifecycleEvent,
             IServiceProvider services)
         {
-            this.LifecycleEvent = lifecycleEvent;
+            if (@delegate == null)
+            {
+                throw new ArgumentNullException(nameof(@delegate));
+            }
 
-            this.@delegate = @delegate
-             ?? throw new ArgumentNullException(nameof(@delegate));
+            this.services = services
+             ?? throw new ArgumentNullException(nameof(services));
 
-            this.cancellationTokenSource = new CancellationTokenSource();
+            this.invocation =
+                (
+                    dependencies,
+                    cancellationToken) =>
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
 
-            this.arguments = this.@delegate
-               .GetMethodInfo()
-               .GetParameters()
-               .Select(
-                    (
-                        pi,
-                        index) =>
+                    var arguments = @delegate
+                       .GetMethodInfo()
+                       .GetParameters()
+                       .Select(
+                            (
+                                pi,
+                                index) =>
+                            {
+                                if (pi.ParameterType == typeof(CancellationToken))
+                                {
+                                    return cancellationToken;
+                                }
+
+                                return dependencies.GetRequiredService(pi.ParameterType);
+                            })
+                       .ToArray();
+
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    try
                     {
-                        if (pi.ParameterType == typeof(CancellationToken))
+                        var result = @delegate.DynamicInvoke(arguments);
+                        if (result is Task returnTask)
                         {
-                            return this.cancellationTokenSource.Token;
+                            return returnTask;
                         }
 
-                        return services.GetRequiredService(pi.ParameterType);
-                    })
-               .ToArray();
+                        return Task.CompletedTask;
+                    }
+                    catch (TargetInvocationException e)
+                    {
+                        if (e.InnerException != null)
+                        {
+                            ExceptionDispatchInfo.Capture(e.InnerException).Throw();
+                        }
 
-            var mi = @delegate.GetMethodInfo();
-            if (typeof(Task) != mi.ReturnType)
-            {
-                throw new ArgumentException($"The return type of delegate should be {typeof(Task)}");
-            }
+                        throw;
+                    }
+                };
         }
 
         public async Task InvokeAsync(
             CancellationToken cancellationToken)
         {
-            using (cancellationToken.Register(() => this.cancellationTokenSource.Cancel()))
-            {
-                try
-                {
-                    await (Task) this.@delegate.DynamicInvoke(this.arguments);
-                }
-                catch (TargetInvocationException e)
-                {
-                    if (e.InnerException != null)
-                    {
-                        ExceptionDispatchInfo.Capture(e.InnerException).Throw();
-                    }
-                    throw;
-                }
-            }
+            cancellationToken.ThrowIfCancellationRequested();
+
+            await this.invocation(this.services, cancellationToken);
         }
     }
 }

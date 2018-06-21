@@ -15,7 +15,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
         public HostingService(
             IServiceHost host)
         {
-            this.host = host 
+            this.host = host
              ?? throw new ArgumentNullException(nameof(host));
         }
 
