@@ -27,4 +27,8 @@
     <ProjectReference Include="..\CoherentSolutions.Extensions.Hosting.ServiceFabric\CoherentSolutions.Extensions.Hosting.ServiceFabric.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="src\Fabric\Tools\" />
+  </ItemGroup>
+
 </Project>

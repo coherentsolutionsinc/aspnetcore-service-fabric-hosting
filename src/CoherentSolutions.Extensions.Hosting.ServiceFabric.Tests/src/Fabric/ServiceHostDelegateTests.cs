@@ -51,8 +51,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
 
             // Assert
             Assert.Same(originalValue, expectedValue);
-
-            provider.Verify(instance => instance.GetService(typeof(ArgumentException)), Times.Once);
         }
 
         [Fact]

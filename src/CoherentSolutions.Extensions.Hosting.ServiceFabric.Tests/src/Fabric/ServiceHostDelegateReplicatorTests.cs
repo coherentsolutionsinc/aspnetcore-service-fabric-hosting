@@ -16,7 +16,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
 
         [Fact]
         public void
-            Should_activate_replicable_template_with_service_When_replicating_delegatesfor_service()
+            Should_activate_replicable_template_with_service_When_replicating_delegates_for_service()
         {
             // Arrange
             var service = new Mock<TService>();
@@ -27,8 +27,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
                .Returns<TDelegate>(null);
 
             // Act
-            var listenerReplicator = this.CreateInstance(replicableTemplate.Object);
-            listenerReplicator.ReplicateFor(service.Object);
+            var replicator = this.CreateInstance(replicableTemplate.Object);
+            replicator.ReplicateFor(service.Object);
 
             // Assert
             replicableTemplate.Verify(instance => instance.Activate(service.Object), Times.Once);

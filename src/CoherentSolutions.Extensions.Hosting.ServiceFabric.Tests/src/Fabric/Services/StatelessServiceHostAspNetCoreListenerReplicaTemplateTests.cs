@@ -43,14 +43,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric.Servic
 
             private static StatelessServiceContext CreateContext()
             {
-                return new StatelessServiceContext(
-                    new NodeContext("default-node", new NodeId(0, int.MaxValue), 0, "default-node-type", "127.0.0.1"),
-                    new Mock<ICodePackageActivationContext>().Object,
-                    "",
-                    new Uri("fabric:/stateless-service", UriKind.Absolute),
-                    null,
-                    Guid.Empty,
-                    0);
+                return MockStatelessServiceContextFactory.Default;
             }
         }
 
