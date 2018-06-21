@@ -4,7 +4,7 @@ using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public interface IServiceHostListenerReplicaTemplateConfigurator : IConfigurableObjectDependenciesConfigurator
+    public interface IServiceHostListenerReplicaTemplateConfigurator
     {
         void UseEndpointName(
             string endpointName);

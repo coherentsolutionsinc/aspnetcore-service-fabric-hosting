@@ -8,7 +8,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
               IStatefulService,
               IStatefulServiceHostDelegateReplicaTemplateParameters,
               IStatefulServiceHostDelegateReplicaTemplateConfigurator,
-              IServiceHostDelegate>,
+              IServiceHostDelegateInvoker>,
           IStatefulServiceHostDelegateReplicaTemplate
     {
         private class StatefulAsyncDelegateParameters
@@ -18,7 +18,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         {
         }
 
-        public override IServiceHostDelegate Activate(
+        public override IServiceHostDelegateInvoker Activate(
             IStatefulService service)
         {
             var parameters = new StatefulAsyncDelegateParameters();
@@ -31,9 +31,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             this.UpstreamConfiguration(parameters);
 
-            var func = this.CreateFunc(service, parameters);
+            var factory = this.CreateFunc(service, parameters);
 
-            return func();
+            return factory();
         }
     }
 }

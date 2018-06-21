@@ -10,7 +10,7 @@ using Xunit;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
 {
-    public class ServiceHostDelegateTests
+    public class ServiceHostDelegateInvokerTests
     {
         private interface IMyDependency
         {
@@ -35,7 +35,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             var actualHash = 0;
 
             var services = new Mock<IServiceProvider>();
-            var @delegate = new ServiceHostDelegate(
+            var @delegate = new ServiceHostDelegateInvoker(
                 new Action<CancellationToken>(cancellationToken => actualHash = cancellationToken.GetHashCode()),
                 services.Object);
 
@@ -55,7 +55,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             // Arrange
             var services = new Mock<IServiceProvider>();
 
-            var @delegate = new ServiceHostDelegate(
+            var @delegate = new ServiceHostDelegateInvoker(
                 new Action(() => throw new MyException()),
                 services.Object);
 
@@ -85,7 +85,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             services.Setup(instance => instance.GetService(typeof(MyDependency))).Returns(root).Verifiable();
             services.Setup(instance => instance.GetService(typeof(IMyDependency))).Returns(root).Verifiable();
 
-            var @delegate = new ServiceHostDelegate(
+            var @delegate = new ServiceHostDelegateInvoker(
                 new Action<MyDependency, IMyDependency>(
                     (
                         @object,
@@ -117,7 +117,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             object actualTask = null;
 
             var services = new Mock<IServiceProvider>();
-            var @delegate = new ServiceHostDelegate(
+            var @delegate = new ServiceHostDelegateInvoker(
                 new Func<Task>(() => root),
                 services.Object);
 

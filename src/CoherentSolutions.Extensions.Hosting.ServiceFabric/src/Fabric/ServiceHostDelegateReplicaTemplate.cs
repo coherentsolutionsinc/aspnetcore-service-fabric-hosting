@@ -1,5 +1,6 @@
 ﻿using System;
 
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Exceptions;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
@@ -17,14 +18,27 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             : IServiceHostDelegateReplicaTemplateParameters,
               IServiceHostDelegateReplicaTemplateConfigurator
         {
+            public Func<Delegate, IServiceProvider, IServiceHostDelegateInvoker> DelegateInvokerFunc { get; private set; }
+
             public Delegate Delegate { get; private set; }
+
+            public Func<IServiceCollection> DependenciesFunc { get; private set; }
 
             public Action<IServiceCollection> DependenciesConfigAction { get; private set; }
 
             protected DelegateParameters()
             {
+                this.DelegateInvokerFunc = DefaulDelegateInvokerFunc;
                 this.Delegate = null;
+                this.DependenciesFunc = DefaulDependenciesFunc;
                 this.DependenciesConfigAction = null;
+            }
+
+            public void UseDelegateInvoker(
+                Func<Delegate, IServiceProvider, IServiceHostDelegateInvoker> factoryFunc)
+            {
+                this.DelegateInvokerFunc = factoryFunc
+                 ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
 
             public void UseDelegate(
@@ -32,6 +46,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 this.Delegate = @delegate
                  ?? throw new ArgumentNullException(nameof(@delegate));
+            }
+
+            public void UseDependencies(
+                Func<IServiceCollection> factoryFunc)
+            {
+                this.DependenciesFunc = factoryFunc
+                 ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
 
             public void ConfigureDependencies(
@@ -44,12 +65,34 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
                 this.DependenciesConfigAction = this.DependenciesConfigAction.Chain(configAction);
             }
+
+            private static IServiceHostDelegateInvoker DefaulDelegateInvokerFunc(
+                Delegate @delegate,
+                IServiceProvider services)
+            {
+                if (@delegate == null)
+                {
+                    throw new ArgumentNullException(nameof(@delegate));
+                }
+
+                if (services == null)
+                {
+                    throw new ArgumentNullException(nameof(services));
+                }
+
+                return new ServiceHostDelegateInvoker(@delegate, services);
+            }
+
+            private static IServiceCollection DefaulDependenciesFunc()
+            {
+                return new ServiceCollection();
+            }
         }
 
         public abstract TDelegate Activate(
             TService service);
 
-        protected Func<IServiceHostDelegate> CreateFunc(
+        protected Func<IServiceHostDelegateInvoker> CreateFunc(
             TService service,
             TParameters parameters)
         {
@@ -63,21 +106,40 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 throw new ArgumentNullException(nameof(parameters));
             }
 
+            var delegateInvokerFunc = parameters.DelegateInvokerFunc;
+            if (delegateInvokerFunc == null)
+            {
+                throw new InvalidOperationException(
+                    $"No {parameters.DelegateInvokerFunc} was configured.");
+            }
+
             var serviceContext = service.GetContext();
             var servicePartition = service.GetPartition();
             var serviceEventSource = service.GetEventSource();
 
-            var services = new ServiceCollection();
+            var dependenciesCollection = parameters.DependenciesFunc();
+            if (dependenciesCollection == null)
+            {
+                throw new FactoryProducesNullInstanceException<IServiceCollection>();
+            }
 
-            DependencyRegistrant.Register(services, serviceContext);
-            DependencyRegistrant.Register(services, servicePartition);
-            DependencyRegistrant.Register(services, serviceEventSource);
+            DependencyRegistrant.Register(dependenciesCollection, serviceContext);
+            DependencyRegistrant.Register(dependenciesCollection, servicePartition);
+            DependencyRegistrant.Register(dependenciesCollection, serviceEventSource);
 
-            parameters.DependenciesConfigAction?.Invoke(services);
+            parameters.DependenciesConfigAction?.Invoke(dependenciesCollection);
 
-            var provider = new DefaultServiceProviderFactory().CreateServiceProvider(services);
+            var provider = dependenciesCollection.BuildServiceProvider();
 
-            return () => new ServiceHostDelegate(parameters.Delegate, provider);
+            return () =>
+            {
+                var invoker = delegateInvokerFunc(parameters.Delegate, provider);
+                if (invoker == null)
+                {
+                    throw new FactoryProducesNullInstanceException<IServiceHostDelegateInvoker>();
+                }
+                return invoker;
+            };
         }
     }
 }

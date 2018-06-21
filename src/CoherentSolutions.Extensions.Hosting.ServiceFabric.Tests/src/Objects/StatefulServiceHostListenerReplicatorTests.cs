@@ -1,8 +1,9 @@
 ﻿using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects.Base;
 
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric.Services
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
 {
     public class StatefulServiceHostListenerReplicatorTests
         : ServiceHostListenerReplicatorTests<IStatefulServiceHostListenerReplicableTemplate, IStatefulService, ServiceReplicaListener>

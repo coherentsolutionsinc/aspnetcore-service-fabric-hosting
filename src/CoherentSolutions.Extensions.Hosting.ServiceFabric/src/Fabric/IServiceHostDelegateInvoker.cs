@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public interface IServiceHostDelegate
+    public interface IServiceHostDelegateInvoker
     {
         Task InvokeAsync(
             CancellationToken cancellationToken);

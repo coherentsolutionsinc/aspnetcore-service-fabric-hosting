@@ -77,6 +77,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             public Func<TListenerReplicableTemplate, TListenerReplicator> ListenerReplicatorFunc { get; private set; }
 
+            public Func<IServiceCollection> DependenciesFunc { get; private set; }
+
             public Action<IServiceCollection> DependenciesConfigAction { get; private set; }
 
             protected Parameters()
@@ -89,6 +91,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.AspNetCoreListenerReplicaTemplateFunc = null;
                 this.RemotingListenerReplicaTemplateFunc = null;
                 this.ListenerReplicatorFunc = null;
+                this.DependenciesFunc = DefaultDependenciesFunc;
                 this.DependenciesConfigAction = null;
             }
 
@@ -131,6 +134,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 Func<TListenerReplicableTemplate, TListenerReplicator> factoryFunc)
             {
                 this.ListenerReplicatorFunc = factoryFunc
+                 ?? throw new ArgumentNullException(nameof(factoryFunc));
+            }
+
+            public void UseDependencies(
+                Func<IServiceCollection> factoryFunc)
+            {
+                this.DependenciesFunc = factoryFunc
                  ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
 
@@ -200,6 +210,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                         ServiceHostListenerType.Remoting,
                         replicaTemplate => defineAction((TListenerRemotingReplicaTemplate) replicaTemplate)));
             }
+
+            private static IServiceCollection DefaultDependenciesFunc()
+            {
+                return new ServiceCollection();
+            }
         }
 
         protected class Compilation
@@ -237,7 +252,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             }
 
             // Initialize service dependencies
-            var dependenciesCollection = new ServiceCollection();
+            var dependenciesCollection = parameters.DependenciesFunc();
+            if (dependenciesCollection == null)
+            {
+                throw new FactoryProducesNullInstanceException<IServiceCollection>();
+            }
 
             parameters.DependenciesConfigAction?.Invoke(dependenciesCollection);
 
@@ -309,10 +328,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                         template.ConfigureObject(
                                             c =>
                                             {
-                                                c.ConfigureDependencies(
-                                                    services =>
+                                                c.ConfigureWebHost(
+                                                    builder =>
                                                     {
-                                                        DependencyRegistrant.Register(services, dependenciesCollection, dependencies);
+                                                        builder.ConfigureServices(
+                                                            services =>
+                                                            {
+                                                                DependencyRegistrant.Register(services, dependenciesCollection, dependencies);
+                                                            });
                                                     });
                                             });
 
