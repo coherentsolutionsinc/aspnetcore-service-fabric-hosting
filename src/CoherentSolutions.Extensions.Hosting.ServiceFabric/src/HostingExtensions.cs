@@ -16,13 +16,30 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             typeof(IHostedService) // For a reason see https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/issues/30
         };
 
+        public static IHostBuilder ConfigureStatefulService(
+            this IHostBuilder @this,
+            Action<IStatefulServiceHostBuilder> configAction)
+        {
+            var key = HostingDefaults.STATEFUL_BUILDER;
+            var factoryFunc = new Func<IStatefulServiceHostBuilder>(() => new StatefulServiceHostBuilder());
+            return @this.ConfigureReliableService(key, factoryFunc, configAction);
+        }
+
+        public static IHostBuilder ConfigureStatelessService(
+            this IHostBuilder @this,
+            Action<IStatelessServiceHostBuilder> configAction)
+        {
+            var key = HostingDefaults.STATELESS_BUILDER;
+            var factoryFunc = new Func<IStatelessServiceHostBuilder>(() => new StatelessServiceHostBuilder());
+            return @this.ConfigureReliableService(key, factoryFunc, configAction);
+        }
+
         private static IHostBuilder ConfigureReliableService<TBuilder>(
             this IHostBuilder @this,
             string buildersKey,
             Func<TBuilder> buildersFactory,
             Action<TBuilder> buildersConfigAction)
-
-        where TBuilder : IServiceHostBuilder<IServiceHost, IServiceHostBuilderConfigurator>
+            where TBuilder : IServiceHostBuilder<IServiceHost, IServiceHostBuilderConfigurator>
         {
             if (@this == null)
             {
@@ -60,25 +77,26 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
                     services =>
                     {
                         // services variable would get captured in a closure below.
-                        services.AddSingleton(provider =>
-                        {
-                            builder.ConfigureObject(
-                                configurator =>
-                                {
-                                    configurator.ConfigureDependencies(
-                                        dependencies =>
-                                        {
-                                            // We should ignore certain types.
-                                            DependencyRegistrant.Register(
-                                                dependencies, 
-                                                services, 
-                                                provider,
-                                                type => !dontPropagateTypes.Contains(type));
-                                        });
-                                });
+                        services.AddSingleton(
+                            provider =>
+                            {
+                                builder.ConfigureObject(
+                                    configurator =>
+                                    {
+                                        configurator.ConfigureDependencies(
+                                            dependencies =>
+                                            {
+                                                // We should ignore certain types.
+                                                DependencyRegistrant.Register(
+                                                    dependencies,
+                                                    services,
+                                                    provider,
+                                                    type => !dontPropagateTypes.Contains(type));
+                                            });
+                                    });
 
-                            return builder.Build();
-                        });
+                                return builder.Build();
+                            });
                         services.AddSingleton<IHostedService, HostingService>();
                     });
             }
@@ -86,24 +104,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             buildersConfigAction(builder);
 
             return @this;
-        }
-
-        public static IHostBuilder ConfigureStatefulService(
-            this IHostBuilder @this,
-            Action<IStatefulServiceHostBuilder> configAction)
-        {
-            var key = HostingDefaults.STATEFUL_BUILDER;
-            var factoryFunc = new Func<IStatefulServiceHostBuilder>(() => new StatefulServiceHostBuilder());
-            return @this.ConfigureReliableService(key, factoryFunc, configAction);
-        }
-
-        public static IHostBuilder ConfigureStatelessService(
-            this IHostBuilder @this,
-            Action<IStatelessServiceHostBuilder> configAction)
-        {
-            var key = HostingDefaults.STATELESS_BUILDER;
-            var factoryFunc = new Func<IStatelessServiceHostBuilder>(() => new StatelessServiceHostBuilder());
-            return @this.ConfigureReliableService(key, factoryFunc, configAction);
         }
     }
 }

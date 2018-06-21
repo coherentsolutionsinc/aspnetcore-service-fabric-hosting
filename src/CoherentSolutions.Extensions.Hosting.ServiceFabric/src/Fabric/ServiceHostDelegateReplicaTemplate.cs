@@ -20,8 +20,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         {
             public Delegate Delegate { get; private set; }
 
-            public ServiceLifecycleEvent LifecycleEvent { get; private set; }
-
             public Func<IServiceCollection> DependenciesFunc { get; private set; }
 
             public Action<IServiceCollection> DependenciesConfigAction { get; private set; }
@@ -29,7 +27,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             protected DelegateParameters()
             {
                 this.Delegate = null;
-                this.LifecycleEvent = ServiceLifecycleEvent.Unknown;
                 this.DependenciesFunc = DefaulDependenciesFunc;
                 this.DependenciesConfigAction = null;
             }
@@ -39,12 +36,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 this.Delegate = @delegate
                  ?? throw new ArgumentNullException(nameof(@delegate));
-            }
-
-            public void UseLifecycleEvent(
-                ServiceLifecycleEvent lifecycleEvent)
-            {
-                this.LifecycleEvent = lifecycleEvent;
             }
 
             public void UseDependencies(
@@ -88,11 +79,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 throw new ArgumentNullException(nameof(parameters));
             }
 
-            if (parameters.LifecycleEvent == ServiceLifecycleEvent.Unknown)
-            {
-                throw new ArgumentException("No service life-cycle event set for delegate.");
-            }
-
             var serviceContext = service.GetContext();
             var servicePartition = service.GetPartition();
             var serviceEventSource = service.GetEventSource();
@@ -111,7 +97,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             var provider = dependenciesCollection.BuildServiceProvider();
 
-            return () => new ServiceHostDelegate(parameters.Delegate, parameters.LifecycleEvent, provider);
+            return () => new ServiceHostDelegate(parameters.Delegate, provider);
         }
     }
 }

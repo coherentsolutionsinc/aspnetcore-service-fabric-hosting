@@ -5,8 +5,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public interface IServiceHostDelegate
     {
-        ServiceLifecycleEvent LifecycleEvent { get; }
-
         Task InvokeAsync(
             CancellationToken cancellationToken);
     }
