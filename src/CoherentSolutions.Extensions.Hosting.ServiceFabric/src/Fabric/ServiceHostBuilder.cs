@@ -91,7 +91,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.AspNetCoreListenerReplicaTemplateFunc = null;
                 this.RemotingListenerReplicaTemplateFunc = null;
                 this.ListenerReplicatorFunc = null;
-                this.DependenciesFunc = DefaulDependenciesFunc;
+                this.DependenciesFunc = DefaultDependenciesFunc;
                 this.DependenciesConfigAction = null;
             }
 
@@ -210,6 +210,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                         ServiceHostListenerType.Remoting,
                         replicaTemplate => defineAction((TListenerRemotingReplicaTemplate) replicaTemplate)));
             }
+
+            private static IServiceCollection DefaultDependenciesFunc()
+            {
+                return new ServiceCollection();
+            }
         }
 
         protected class Compilation
@@ -250,7 +255,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             var dependenciesCollection = parameters.DependenciesFunc();
             if (dependenciesCollection == null)
             {
-                throw new FactoryProducesNullInstanceException<IServiceHostDelegateInvoker>();
+                throw new FactoryProducesNullInstanceException<IServiceCollection>();
             }
 
             parameters.DependenciesConfigAction?.Invoke(dependenciesCollection);

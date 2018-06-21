@@ -19,7 +19,7 @@ using Xunit;
 
 using IService = Microsoft.ServiceFabric.Services.Remoting.IService;
 
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators
 {
     public class ConfigurableObjectDependenciesConfiguratorTests
     {
@@ -54,7 +54,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
                     yield return new object[]
                     {
                         new StatefulServiceHostDelegateReplicaTemplate()
-                           .UseLifecycleEvent(ServiceLifecycleEvent.OnRunAsyncWhenAllListenersOpened)
                            .UseDelegate(() => Task.CompletedTask),
                         new Action<IConfigurableObject<IConfigurableObjectDependenciesConfigurator>>(
                             c =>
@@ -86,7 +85,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
                     yield return new object[]
                     {
                         new StatelessServiceHostDelegateReplicaTemplate()
-                           .UseLifecycleEvent(ServiceLifecycleEvent.OnRunAsyncWhenAllListenersOpened)
                            .UseDelegate(() => Task.CompletedTask),
                         new Action<IConfigurableObject<IConfigurableObjectDependenciesConfigurator>>(
                             c =>
@@ -189,7 +187,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
         [MemberData(nameof(ConfigurableObjectDependenciesConfiguratorDataSource.Data), MemberType = typeof(ConfigurableObjectDependenciesConfiguratorDataSource))]
         public void Should_use_collection_provided_by_UseDependencies_When_configuring_dependencies_by_ConfigureDependencies(
             IConfigurableObject<IConfigurableObjectDependenciesConfigurator> configurableObject,
-            Action<IConfigurableObject<IConfigurableObjectDependenciesConfigurator>> upstreamConfiguration)
+            Action<IConfigurableObject<IConfigurableObjectDependenciesConfigurator>> invoke)
         {
             // Arrange
             var descriptor = new ServiceDescriptor(typeof(ConfigurableObjectDependenciesConfiguratorTests), this);
@@ -198,7 +196,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
             {
                 CallBase = true
             };
-            collection.As<IServiceCollection>().Setup(instance => instance.Add(descriptor));
+            collection
+               .As<IServiceCollection>()
+               .Setup(instance => instance.Add(descriptor))
+               .Verifiable();
 
             // Act
             configurableObject.ConfigureObject(
@@ -212,17 +213,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
                         });
                 });
 
-            upstreamConfiguration(configurableObject);
+            invoke(configurableObject);
 
             // Assert
-            collection
-               .As<IServiceCollection>()
-               .Verify(instance => instance.Add(descriptor), Times.Once);
-        }
-
-        public void Should_configure_IService_services_When_configuring_service_related_instances()
-        {
-
+            collection.Verify();
         }
     }
 }

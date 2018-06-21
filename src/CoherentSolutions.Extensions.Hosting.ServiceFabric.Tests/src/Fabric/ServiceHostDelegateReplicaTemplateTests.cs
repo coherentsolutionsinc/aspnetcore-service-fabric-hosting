@@ -44,7 +44,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric
                 config =>
                 {
                     config.UseDependencies(() => serviceCollection.Object);
-                    config.UseLifecycleEvent(ServiceLifecycleEvent.OnRunAsyncWhenAllListenersOpened);
                     config.UseDelegate(new Func<Task>(() => Task.CompletedTask));
                 });
 

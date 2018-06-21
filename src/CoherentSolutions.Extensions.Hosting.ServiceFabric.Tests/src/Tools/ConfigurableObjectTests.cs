@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
@@ -29,7 +30,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Tools
                     yield return new object[]
                     {
                         new StatefulServiceHostDelegateReplicaTemplate()
-                           .UseLifecycleEvent(ServiceLifecycleEvent.OnRunAsyncWhenAllListenersOpened)
                            .UseDelegate(() => Task.CompletedTask),
                         new Mock<IStatefulServiceHostDelegateReplicaTemplateConfigurator>().Object
                     };
@@ -56,7 +56,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Tools
                     yield return new object[]
                     {
                         new StatelessServiceHostDelegateReplicaTemplate()
-                           .UseLifecycleEvent(ServiceLifecycleEvent.OnRunAsyncWhenAllListenersOpened)
                            .UseDelegate(() => Task.CompletedTask),
                         new Mock<IStatelessServiceHostDelegateReplicaTemplateConfigurator>().Object
                     };
