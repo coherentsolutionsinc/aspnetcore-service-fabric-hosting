@@ -75,12 +75,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 };
         }
 
-        public async Task InvokeAsync(
+        public Task InvokeAsync(
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            await this.invocation(this.services, cancellationToken);
+            return this.invocation(this.services, cancellationToken);
         }
     }
 }
