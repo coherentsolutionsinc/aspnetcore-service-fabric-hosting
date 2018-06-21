@@ -79,14 +79,18 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                     var servicePartition = service.GetPartition();
                     var serviceEventSource = service.GetEventSource();
 
-                    var services = new ServiceCollection();
+                    var dependenciesCollection = parameters.DependenciesFunc();
+                    if (dependenciesCollection == null)
+                    {
+                        throw new FactoryProducesNullInstanceException<IServiceCollection>();
+                    }
 
-                    DependencyRegistrant.Register(services, serviceContext);
-                    DependencyRegistrant.Register(services, servicePartition);
-                    DependencyRegistrant.Register(services, serviceEventSource);
-                    DependencyRegistrant.Register(services, listenerInformation);
+                    DependencyRegistrant.Register(dependenciesCollection, serviceContext);
+                    DependencyRegistrant.Register(dependenciesCollection, servicePartition);
+                    DependencyRegistrant.Register(dependenciesCollection, serviceEventSource);
+                    DependencyRegistrant.Register(dependenciesCollection, listenerInformation);
 
-                    parameters.DependenciesConfigAction?.Invoke(services);
+                    parameters.DependenciesConfigAction?.Invoke(dependenciesCollection);
 
                     var loggerOptions = parameters.LoggerOptionsFunc();
                     if (loggerOptions == null)
@@ -94,13 +98,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                         throw new FactoryProducesNullInstanceException<IServiceHostListenerLoggerOptions>();
                     }
 
-                    services.AddLogging(
+                    dependenciesCollection.AddLogging(
                         builder =>
                         {
                             builder.AddProvider(new ServiceHostRemotingListenerLoggerProvider(listenerInformation, loggerOptions, serviceEventSource));
                         });
 
-                    var provider = new DefaultServiceProviderFactory().CreateServiceProvider(services);
+                    var provider = dependenciesCollection.BuildServiceProvider();
 
                     var implementation = parameters.RemotingImplementationFunc(provider);
                     if (implementation == null)

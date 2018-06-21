@@ -31,9 +31,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             this.UpstreamConfiguration(parameters);
 
-            var func = this.CreateFunc(service, parameters);
+            var factory = this.CreateFunc(service, parameters);
 
-            return func();
+            return factory();
         }
     }
 }

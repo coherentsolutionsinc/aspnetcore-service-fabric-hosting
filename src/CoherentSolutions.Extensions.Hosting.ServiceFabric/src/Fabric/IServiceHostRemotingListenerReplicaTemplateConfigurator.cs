@@ -1,5 +1,7 @@
 ﻿using System;
 
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
+
 using Microsoft.ServiceFabric.Services.Remoting.V2;
 
 using IRemotingImplementation = Microsoft.ServiceFabric.Services.Remoting.IService;
@@ -7,7 +9,8 @@ using IRemotingImplementation = Microsoft.ServiceFabric.Services.Remoting.IServi
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public interface IServiceHostRemotingListenerReplicaTemplateConfigurator
-        : IServiceHostListenerReplicaTemplateConfigurator
+        : IServiceHostListenerReplicaTemplateConfigurator,
+          IConfigurableObjectDependenciesConfigurator
     {
         void UseImplementation<TImplementation>(
             Func<TImplementation> factoryFunc)
