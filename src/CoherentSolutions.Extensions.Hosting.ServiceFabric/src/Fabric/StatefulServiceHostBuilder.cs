@@ -65,8 +65,7 @@
             var compilation = this.CompileParameters(parameters);
 
             return new StatefulServiceHost(
-                parameters.ServiceTypeName, 
-                compilation.DelegateInvoker,
+                parameters.ServiceTypeName,
                 compilation.DelegateReplicators,
                 compilation.ListenerReplicators);
         }

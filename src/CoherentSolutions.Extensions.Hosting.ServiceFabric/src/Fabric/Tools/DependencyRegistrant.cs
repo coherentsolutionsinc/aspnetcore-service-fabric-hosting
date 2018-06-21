@@ -147,8 +147,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
                 switch (descriptor.Lifetime)
                 {
                     case ServiceLifetime.Singleton:
-                        if (descriptor.ImplementationInstance != null ||
-                            descriptor.ImplementationFactory != null)
+                        if (descriptor.ImplementationInstance != null || descriptor.ImplementationFactory != null)
                         {
                             destination.Add(descriptor);
                         }
@@ -163,11 +162,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
                             {
                                 destination.Add(
                                     new ServiceDescriptor(
-                                        descriptor.ServiceType, 
+                                        descriptor.ServiceType,
                                         provider => services.GetService(descriptor.ServiceType),
                                         ServiceLifetime.Singleton));
                             }
                         }
+
                         break;
                     case ServiceLifetime.Scoped:
                     case ServiceLifetime.Transient:

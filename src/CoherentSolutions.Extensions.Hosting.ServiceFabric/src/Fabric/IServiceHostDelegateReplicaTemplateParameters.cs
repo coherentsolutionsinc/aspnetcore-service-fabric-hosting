@@ -7,7 +7,5 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
     public interface IServiceHostDelegateReplicaTemplateParameters : IConfigurableObjectDependenciesParameters
     {
         Delegate Delegate { get; }
-
-        ServiceLifecycleEvent LifecycleEvent { get; }
     }
 }
