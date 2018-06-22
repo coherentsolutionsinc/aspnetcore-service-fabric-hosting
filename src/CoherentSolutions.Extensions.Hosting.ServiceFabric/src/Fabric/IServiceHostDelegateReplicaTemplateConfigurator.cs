@@ -11,5 +11,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
         void UseDelegate(
             Delegate @delegate);
+
+        void UseLoggerOptions(
+            Func<IServiceHostLoggerOptions> factoryFunc);
     }
 }

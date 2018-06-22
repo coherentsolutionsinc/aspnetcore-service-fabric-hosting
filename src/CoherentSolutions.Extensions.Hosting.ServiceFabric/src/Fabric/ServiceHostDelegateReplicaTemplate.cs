@@ -5,6 +5,7 @@ using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
@@ -22,12 +23,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             public Delegate Delegate { get; private set; }
 
+            public Func<IServiceHostLoggerOptions> LoggerOptionsFunc { get; private set; }
+
             public Func<IServiceCollection> DependenciesFunc { get; private set; }
 
             public Action<IServiceCollection> DependenciesConfigAction { get; private set; }
 
             protected DelegateParameters()
             {
+                this.LoggerOptionsFunc = DefaultLoggerOptionsFunc;
                 this.DelegateInvokerFunc = DefaulDelegateInvokerFunc;
                 this.Delegate = null;
                 this.DependenciesFunc = DefaulDependenciesFunc;
@@ -46,6 +50,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 this.Delegate = @delegate
                  ?? throw new ArgumentNullException(nameof(@delegate));
+            }
+
+            public void UseLoggerOptions(
+                Func<IServiceHostLoggerOptions> factoryFunc)
+            {
+                this.LoggerOptionsFunc = factoryFunc
+                 ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
 
             public void UseDependencies(
@@ -81,6 +92,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 }
 
                 return new ServiceHostDelegateInvoker(@delegate, services);
+            }
+
+            private static IServiceHostLoggerOptions DefaultLoggerOptionsFunc()
+            {
+                return ServiceHostLoggerOptions.Disabled;
             }
 
             private static IServiceCollection DefaulDependenciesFunc()
@@ -128,6 +144,18 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             DependencyRegistrant.Register(dependenciesCollection, serviceEventSource);
 
             parameters.DependenciesConfigAction?.Invoke(dependenciesCollection);
+
+            var loggerOptions = parameters.LoggerOptionsFunc();
+            if (loggerOptions == null)
+            {
+                throw new FactoryProducesNullInstanceException<IServiceHostLoggerOptions>();
+            }
+
+            dependenciesCollection.AddLogging(
+                builder =>
+                {
+                    builder.AddProvider(new ServiceHostDelegateLoggerProvider(loggerOptions, serviceEventSource));
+                });
 
             var provider = dependenciesCollection.BuildServiceProvider();
 

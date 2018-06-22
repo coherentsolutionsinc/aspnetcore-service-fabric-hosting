@@ -9,5 +9,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         Func<Delegate, IServiceProvider, IServiceHostDelegateInvoker> DelegateInvokerFunc { get; }
 
         Delegate Delegate { get; }
+
+        Func<IServiceHostLoggerOptions> LoggerOptionsFunc { get; }
     }
 }
