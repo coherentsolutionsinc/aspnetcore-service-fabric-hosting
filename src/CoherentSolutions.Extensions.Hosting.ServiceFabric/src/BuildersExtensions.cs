@@ -62,7 +62,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
         public static TCaller UseLoggerOptions<TCaller>(
             this TCaller @this,
             Func<IServiceHostLoggerOptions> factoryFunc)
-            where TCaller : IConfigurableObject<IServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
+            where TCaller : IConfigurableObject<IServiceHostLoggerConfigurator>
         {
             @this.ConfigureObject(
                 configurator => configurator.UseLoggerOptions(factoryFunc));
@@ -77,6 +77,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
         {
             @this.ConfigureObject(
                 configurator => configurator.UseServiceType(serviceName));
+
+            return @this;
+        }
+
+        public static TCaller UseDelegateInvoker<TCaller>(
+            this TCaller @this,
+            Func<Delegate, IServiceProvider, IServiceHostDelegateInvoker> factoryFunc)
+            where TCaller : IConfigurableObject<IServiceHostDelegateReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegateInvoker(factoryFunc));
 
             return @this;
         }
