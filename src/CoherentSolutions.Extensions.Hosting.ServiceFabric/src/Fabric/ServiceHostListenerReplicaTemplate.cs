@@ -20,7 +20,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         {
             public string EndpointName { get; private set; }
 
-            public Func<IServiceHostListenerLoggerOptions> LoggerOptionsFunc { get; private set; }
+            public Func<IServiceHostLoggerOptions> LoggerOptionsFunc { get; private set; }
 
             public Func<IServiceCollection> DependenciesFunc { get; private set; }
 
@@ -42,7 +42,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             }
 
             public void UseLoggerOptions(
-                Func<IServiceHostListenerLoggerOptions> factoryFunc)
+                Func<IServiceHostLoggerOptions> factoryFunc)
             {
                 this.LoggerOptionsFunc = factoryFunc
                  ?? throw new ArgumentNullException(nameof(factoryFunc));
@@ -66,9 +66,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.DependenciesConfigAction = this.DependenciesConfigAction.Chain(configAction);
             }
 
-            private static IServiceHostListenerLoggerOptions DefaultLoggerOptionsFunc()
+            private static IServiceHostLoggerOptions DefaultLoggerOptionsFunc()
             {
-                return ServiceHostListenerLoggerOptions.Disabled;
+                return ServiceHostLoggerOptions.Disabled;
             }
 
             private static IServiceCollection DefaultDependenciesFunc()

@@ -4,22 +4,22 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public class ServiceHostRemotingListenerLoggerMessageState
     {
-        public int MethodId { get; }
+        private readonly int methodId;
 
-        public int InterfaceId { get; }
+        private readonly int interfaceId;
 
         public ServiceHostRemotingListenerLoggerMessageState(
             IServiceRemotingRequestMessage requestMessage)
         {
             var headers = requestMessage.GetHeader();
 
-            this.MethodId = headers.MethodId;
-            this.InterfaceId = headers.InterfaceId;
+            this.methodId = headers.MethodId;
+            this.interfaceId = headers.InterfaceId;
         }
 
         public override string ToString()
         {
-            return $"InterfaceId: {this.InterfaceId} MethodId: {this.MethodId}";
+            return $"InterfaceId: {this.interfaceId} MethodId: {this.methodId}";
         }
     }
 }

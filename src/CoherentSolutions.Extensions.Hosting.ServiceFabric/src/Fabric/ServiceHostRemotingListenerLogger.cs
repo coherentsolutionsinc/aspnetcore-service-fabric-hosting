@@ -6,14 +6,8 @@
             IServiceHostRemotingListenerInformation listenerInformation,
             IServiceEventSource eventSource,
             string eventCategoryName,
-            IServiceHostListenerLoggerOptions options)
+            IServiceHostLoggerOptions options)
             : base(listenerInformation, eventSource, eventCategoryName, options)
-        {
-        }
-
-        protected override void FillEventData<TState>(
-            TState state,
-            ServiceListenerEventSourceData eventData)
         {
         }
     }

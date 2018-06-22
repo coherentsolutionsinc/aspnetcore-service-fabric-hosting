@@ -1,13 +1,11 @@
-﻿using System;
-
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
+﻿using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public interface IServiceHostListenerReplicaTemplateParameters : IConfigurableObjectDependenciesParameters
+    public interface IServiceHostListenerReplicaTemplateParameters 
+        : IConfigurableObjectDependenciesParameters,
+          IServiceHostLoggerParameters
     {
         string EndpointName { get; }
-
-        Func<IServiceHostListenerLoggerOptions> LoggerOptionsFunc { get; }
     }
 }

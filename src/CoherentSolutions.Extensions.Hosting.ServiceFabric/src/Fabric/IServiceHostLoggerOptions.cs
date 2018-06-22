@@ -2,7 +2,7 @@
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public interface IServiceHostListenerLoggerOptions
+    public interface IServiceHostLoggerOptions
     {
         LogLevel LogLevel { get; }
 

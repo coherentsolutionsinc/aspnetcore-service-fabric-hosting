@@ -4,22 +4,16 @@ using Microsoft.Extensions.Logging;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public class ServiceHostAspNetCoreListenerLoggerProvider : ServiceHostLoggerProvider
+    public class ServiceHostDelegateLoggerProvider : ServiceHostLoggerProvider
     {
-        private readonly IServiceHostAspNetCoreListenerInformation listenerInformation;
-
         private readonly IServiceHostLoggerOptions loggerOptions;
 
         private readonly IServiceEventSource eventSource;
 
-        public ServiceHostAspNetCoreListenerLoggerProvider(
-            IServiceHostAspNetCoreListenerInformation listenerInformation,
+        public ServiceHostDelegateLoggerProvider(
             IServiceHostLoggerOptions loggerOptions,
             IServiceEventSource eventSource)
         {
-            this.listenerInformation = listenerInformation
-             ?? throw new ArgumentNullException(nameof(listenerInformation));
-
             this.loggerOptions = loggerOptions
              ?? throw new ArgumentNullException(nameof(loggerOptions));
 
@@ -30,7 +24,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         protected override ILogger CreateLoggerInstance(
             string categoryName)
         {
-            return new ServiceHostAspNetCoreListenerLogger(this.listenerInformation, this.eventSource, categoryName, this.loggerOptions);
+            return new ServiceHostDelegateLogger(this.eventSource, categoryName, this.loggerOptions);
         }
     }
 }

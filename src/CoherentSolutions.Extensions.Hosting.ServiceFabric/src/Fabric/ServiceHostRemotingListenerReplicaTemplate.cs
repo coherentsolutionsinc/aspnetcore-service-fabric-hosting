@@ -95,7 +95,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                     var loggerOptions = parameters.LoggerOptionsFunc();
                     if (loggerOptions == null)
                     {
-                        throw new FactoryProducesNullInstanceException<IServiceHostListenerLoggerOptions>();
+                        throw new FactoryProducesNullInstanceException<IServiceHostLoggerOptions>();
                     }
 
                     dependenciesCollection.AddLogging(

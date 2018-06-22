@@ -8,6 +8,7 @@ using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.ServiceFabric.Data;
 
 using Moq;
@@ -217,7 +218,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Contracts
             {
                 typeof(ServiceContext),
                 typeof(IServicePartition),
-                typeof(IServiceEventSource)
+                typeof(IServiceEventSource),
+                typeof(ILoggerProvider)
             };
             var services = new Mock<ServiceCollection>
             {
