@@ -15,7 +15,7 @@ The **CoherentSolutions.Extensions.Hosting.ServiceFabric** supports:
 * Configure a service
     ``` csharp
     new HostBuilder()
-        .ConfigureStatefulService(
+        .DefineStatefulService(
             serviceBuilder =>
             {
                 // Configure stateful service
