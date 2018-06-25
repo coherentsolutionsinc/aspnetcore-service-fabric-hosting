@@ -1,13 +1,17 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using System.Linq;
+
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Service
+namespace Services
 {
-    public class Startup
+    public class StatelessStartup
     {
-        public Startup(IConfiguration configuration)
+        public StatelessStartup(IConfiguration configuration)
         {
             this.Configuration = configuration;
         }
@@ -17,7 +21,13 @@ namespace Service
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            services
+                .AddMvc()
+                .ConfigureApplicationPartManager(
+                    manager =>
+                {
+                    manager.FeatureProviders.Add(new StatelessControllersFeature());
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

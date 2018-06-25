@@ -1,14 +1,14 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace Service.Controllers
+namespace Services.Controllers
 {
     [Route("api/me")]
-    public class MeController : Controller
+    public class StatelessController : Controller
     {
         [HttpGet]
         public string Get()
         {
-            return $"Hello! I am running inside Service Fabric!";
+            return $"I am Stateless Service!";
         }
     }
 }
