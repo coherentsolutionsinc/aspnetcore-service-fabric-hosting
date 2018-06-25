@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ServiceManifest Name="StatefulServicePkg"
+
+<ServiceManifest Name="ServicePkg"
                  Version="1.0.0"
                  xmlns="http://schemas.microsoft.com/2011/01/fabric"
                  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
@@ -7,14 +8,14 @@
   <ServiceTypes>
     <!-- This is the name of your ServiceType. 
          This name must match the string used in RegisterServiceType call in Program.cs. -->
-    <StatefulServiceType ServiceTypeName="StatefulServiceType"  HasPersistedState="true" />
+    <StatefulServiceType ServiceTypeName="ServiceType" HasPersistedState="true" />
   </ServiceTypes>
 
   <!-- Code package is your service executable. -->
   <CodePackage Name="Code" Version="1.0.0">
     <EntryPoint>
       <ExeHost>
-        <Program>StatefulService.exe</Program>
+        <Program>Service.exe</Program>
         <WorkingFolder>CodePackage</WorkingFolder>
       </ExeHost>
     </EntryPoint>
@@ -26,8 +27,8 @@
 
   <Resources>
     <Endpoints>
-      <Endpoint Name="ServiceEndpoint" Protocol="http" UriScheme="http" CodePackageRef="Code" Type="Input" />
-      <Endpoint Name="ServiceEndpoint2" />
+      <Endpoint Name="FirstEndpoint" Protocol="http" UriScheme="http" CodePackageRef="Code" Type="Input" />
+      <Endpoint Name="SecondEndpoint" Protocol="http" UriScheme="http" CodePackageRef="Code" Type="Input" />
     </Endpoints>
   </Resources>
 </ServiceManifest>
