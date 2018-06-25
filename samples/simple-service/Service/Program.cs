@@ -3,21 +3,21 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace WebService
+namespace Service
 {
     public class Program
     {
         public static void Main(string[] args)
         {
             new HostBuilder()
-                .ConfigureStatefulService(
+                .DefineStatefulService(
                     serviceBuilder =>
                     {
                         serviceBuilder
                             /*
                                 Set name of service type defined in PackageRoot/ServiceManifest.xml
                             */
-                            .UseServiceType("WebServiceType")
+                            .UseServiceType("ServiceType")
                             .DefineAspNetCoreListener(
                                 listenerBuilder =>
                                 {
@@ -26,7 +26,7 @@ namespace WebService
                                         /*
                                             Set name of the endpoint defined in PackageRoot/ServiceManifest.xml
                                         */
-                                        .UseEndpointName("WebServiceEndpoint")
+                                        .UseEndpointName("ServiceEndpoint")
                                         .UseUniqueServiceUrlIntegration()
                                         .ConfigureWebHost(
                                             webHostBuilder => 

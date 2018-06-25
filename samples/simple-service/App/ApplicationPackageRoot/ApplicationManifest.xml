@@ -6,12 +6,12 @@
     <Parameter Name="StatefulService_TargetReplicaSetSize" DefaultValue="3" />
   </Parameters>
   <ServiceManifestImport>
-    <ServiceManifestRef ServiceManifestName="WebServicePkg" ServiceManifestVersion="1.0.0" />
+    <ServiceManifestRef ServiceManifestName="ServicePkg" ServiceManifestVersion="1.0.0" />
     <ConfigOverrides />
   </ServiceManifestImport>
   <DefaultServices>
-    <Service Name="WebService" ServicePackageActivationMode="ExclusiveProcess">
-      <StatefulService ServiceTypeName="WebServiceType" TargetReplicaSetSize="[StatefulService_TargetReplicaSetSize]" MinReplicaSetSize="[StatefulService_MinReplicaSetSize]">
+    <Service Name="Service" ServicePackageActivationMode="ExclusiveProcess">
+      <StatefulService ServiceTypeName="ServiceType" TargetReplicaSetSize="[StatefulService_TargetReplicaSetSize]" MinReplicaSetSize="[StatefulService_MinReplicaSetSize]">
         <UniformInt64Partition PartitionCount="[StatefulService_PartitionCount]" LowKey="-9223372036854775808" HighKey="9223372036854775807" />
       </StatefulService>
     </Service>

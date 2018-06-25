@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 
-namespace WebService.Controllers
+namespace Service.Controllers
 {
     [Route("api/me")]
     public class MeController : Controller
