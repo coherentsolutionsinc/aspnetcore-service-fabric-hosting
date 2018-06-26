@@ -6,6 +6,7 @@ namespace Service.Controllers
     public class ApiController : Controller
     {
         [HttpGet]
+        [Route("value")]
         public string GetValue()
         {
             return $"Value from {nameof(ApiController)}";

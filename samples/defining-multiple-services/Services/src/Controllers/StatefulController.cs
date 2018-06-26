@@ -6,6 +6,7 @@ namespace Services.Controllers
     public class StatefulController : Controller
     {
         [HttpGet]
+        [Route("value")]
         public string Get()
         {
             return $"I am Stateful Service!";

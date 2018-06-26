@@ -1,6 +1,6 @@
 # Hierarchical Services Registration
 
-This sample demonstrated how to register services for multiple downstream `builders` without violating objects lifetime constraints.
+This sample demonstrates how to register services for multiple downstream `builders` without violating objects lifetime constraints.
 
 ## What is inside?
 
@@ -9,7 +9,7 @@ There are two projects inside:
 * **App** - this is a application project
 * **Service** - this is a service project
 
-The application is configured to have stateful service with only primary replica with singleton partitioning schema. 
+The application is configured to have stateful service without partitioning with one replica. 
 
 The service is configured to have two **aspnetcore** listeners bound to two SF endpoints - `FirstEndpoint` and `SecondEndpoint` correspondingly. 
 
