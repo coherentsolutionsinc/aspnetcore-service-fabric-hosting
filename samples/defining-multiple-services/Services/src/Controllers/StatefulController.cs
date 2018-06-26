@@ -2,7 +2,7 @@
 
 namespace Services.Controllers
 {
-    [Route("api/me")]
+    [Route("api")]
     public class StatefulController : Controller
     {
         [HttpGet]

@@ -22,10 +22,7 @@ namespace Services
                                         .UseEndpointName("StatefulServiceEndpoint")
                                         .UseUniqueServiceUrlIntegration()
                                         .ConfigureWebHost(
-                                            webHostBuilder => 
-                                            {
-                                                webHostBuilder.UseStartup<StatefulStartup>();
-                                            });
+                                            webHostBuilder => { webHostBuilder.UseStartup<StatefulStartup>(); });
                                 });
                     })
                 .DefineStatelessService(
@@ -40,10 +37,7 @@ namespace Services
                                         .UseEndpointName("StatelessServiceEndpoint")
                                         .UseUniqueServiceUrlIntegration()
                                         .ConfigureWebHost(
-                                            webHostBuilder =>
-                                            {
-                                                webHostBuilder.UseStartup<StatelessStartup>();
-                                            });
+                                            webHostBuilder => { webHostBuilder.UseStartup<StatelessStartup>(); });
                                 });
                     })
                 .Build()

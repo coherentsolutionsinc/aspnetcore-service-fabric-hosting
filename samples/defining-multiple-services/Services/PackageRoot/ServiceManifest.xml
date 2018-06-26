@@ -1,4 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+
 <ServiceManifest Name="ServicePkg"
                  Version="1.0.0"
                  xmlns="http://schemas.microsoft.com/2011/01/fabric"
@@ -6,7 +7,7 @@
                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <ServiceTypes>
     <!-- This is the name of service type. It should match the name in .UseServiceName() call in Program.cs -->
-    <StatefulServiceType ServiceTypeName="StatefulServiceType"  HasPersistedState="true" />
+    <StatefulServiceType ServiceTypeName="StatefulServiceType" HasPersistedState="true" />
     <StatelessServiceType ServiceTypeName="StatelessServiceType" />
   </ServiceTypes>
 

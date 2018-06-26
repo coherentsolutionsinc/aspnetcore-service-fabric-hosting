@@ -3,11 +3,11 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Services
+namespace Service
 {
-    public class StatefulStartup
+    public class Startup
     {
-        public StatefulStartup(IConfiguration configuration)
+        public Startup(IConfiguration configuration)
         {
             this.Configuration = configuration;
         }
@@ -17,22 +17,13 @@ namespace Services
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services
-                .AddMvc()
-                .ConfigureApplicationPartManager(
-                    manager =>
-                    {
-                        manager.FeatureProviders.Add(new StatefulControllersFeature());
-                    });
+            services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
+            if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
 
             app.UseMvc();
         }

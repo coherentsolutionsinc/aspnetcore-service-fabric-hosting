@@ -6,10 +6,11 @@ using Service.Common;
 
 namespace Service.Web.Controllers
 {
+    [Route("api")]
     public class ApiController : ControllerBase
     {
-        private readonly ISharedService sharedService;
         private readonly IPersonalService personalService;
+        private readonly ISharedService sharedService;
 
         public ApiController(
             ISharedService sharedService,

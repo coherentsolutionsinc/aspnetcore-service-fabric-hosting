@@ -22,17 +22,13 @@ namespace Service
                                 listenerBuilder =>
                                 {
                                     listenerBuilder
-                                        .UseKestrel()
                                         /*
                                             Set name of the endpoint defined in PackageRoot/ServiceManifest.xml
                                         */
                                         .UseEndpointName("ServiceEndpoint")
                                         .UseUniqueServiceUrlIntegration()
                                         .ConfigureWebHost(
-                                            webHostBuilder => 
-                                            {
-                                                webHostBuilder.UseStartup<Startup>();
-                                            });
+                                            webHostBuilder => { webHostBuilder.UseStartup<Startup>(); });
                                 });
                     })
                 .Build()
