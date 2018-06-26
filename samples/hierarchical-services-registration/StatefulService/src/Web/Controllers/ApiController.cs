@@ -21,7 +21,8 @@ namespace Service.Web.Controllers
         }
 
         [HttpGet]
-        public Task<string> GetImportantValue()
+        [Route("value")]
+        public Task<string> GetValue()
         {
             return Task.FromResult(
                 $"Shared: {this.sharedService.GetSharedValue()}; Personal: {this.personalService.GetPersonalValue()}");
