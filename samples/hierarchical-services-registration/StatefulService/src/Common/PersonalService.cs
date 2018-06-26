@@ -1,8 +1,8 @@
 ﻿namespace Service.Common
 {
-    public class ManagementService : IManagementService
+    public class PersonalService : IPersonalService
     {
-        public string GetImportantValue()
+        public string GetPersonalValue()
         {
             return $"Hash: {this.GetHashCode()}";
         }

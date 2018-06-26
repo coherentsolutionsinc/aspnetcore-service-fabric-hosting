@@ -17,8 +17,11 @@ namespace Service
                 .ConfigureServices(
                     services =>
                     {
-                        // Register singleton.
-                        services.AddSingleton<IManagementService, ManagementService>();
+                        // Singleton
+                        services.AddSingleton<ISharedService, SharedService>();
+
+                        // Transient
+                        services.AddTransient<IPersonalService, PersonalService>();
                     })
                 .DefineStatefulService(
                     serviceHostBuilder =>
