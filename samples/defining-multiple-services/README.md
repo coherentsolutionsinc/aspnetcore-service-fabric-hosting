@@ -15,12 +15,7 @@ Each service is configured to have one **aspnetcore** listener bound to SF endpo
 
 ## How to use?
 
-1. Deploy the application
-2. Navigate to SFE (by default is: http://localhost:19080)
-3. Navigate to replica: `Cluster -> Applications -> AppType -> fabric:/App -> fabric:/App/StatefulService -> (GUID) -> (INTEGER)`
-4. Navigate to `StatefulServiceEndpoint` appending `/api/value` at the end
-3. Navigate to replica: `Cluster -> Applications -> AppType -> fabric:/App -> fabric:/App/StatelessService -> (GUID) -> (INTEGER)`
-4. Navigate to `StatelessServiceEndpoint` appending `/api/value` at the end
+When application is deployed on the cluster navigate to `StatefulServiceEndpoint` and `StatelessServiceEndpoint` appending `/api/value` at the end.
 
 The result output should be:
 

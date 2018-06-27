@@ -15,12 +15,13 @@ The service is configured to have one **aspnetcore** listener bound to SF endpoi
 
 ## How to use?
 
-1. Deploy the application
-2. Navigate to SFE (by default is: http://localhost:19080)
-3. Navigate down to primary replica: `Cluster -> Applications -> AppType -> fabric:/App -> fabric:/App/Service -> (GUID) -> (INTEGER)`
-4. Navigate to URL's of `ServiceEndpoint` appending `/api/value` at the end
+When application is deployed on the cluster navigate to `ServiceEndpoint` appending `/api/value` at the end.
 
-The result output should be - **Value from ApiController**
+The result output should be:
+
+Service Endpoint |
+--- | ---
+Value from ApiController |
 
 ## Conclusion
 

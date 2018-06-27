@@ -66,16 +66,16 @@ This project is owned and maintained by [Coherent Solutions][13].
 
 This project is licensed under the MS-PL License - see the [LICENSE.md][14] for details.
 
-[1]:  https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-2.1 "docs.microsoft.com HostBuilder"
-[2]:  https://www.nuget.org/packages/CoherentSolutions.Extensions.Hosting.ServiceFabric "NuGet package"
-[3]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Services
-[4]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Delegates
-[5]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Listeners
-[6]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Logging
-[7]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Dependency-Injection
-[8]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/tree/master/samples/defining-service
-[9]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/tree/master/samples/defining-multiple-services
-[10]: https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/tree/master/samples/hierarchical-services-registration
+[1]:   https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-2.1 "docs.microsoft.com HostBuilder"
+[2]:   https://www.nuget.org/packages/CoherentSolutions.Extensions.Hosting.ServiceFabric "NuGet package"
+[3]:   https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Services
+[4]:   https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Delegates
+[5]:   https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Listeners
+[6]:   https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Logging
+[7]:   https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Dependency-Injection
+[8]:   https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/tree/master/samples/defining-service
+[9]:   https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/tree/master/samples/defining-multiple-services
+[10]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/tree/master/samples/hierarchical-services-registration
 [11]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/VersionHistory "wiki: Version History"
 [12]:  CONTRIBUTING.md "Contributing"
 [13]:  https://www.coherentsolutions.com/ "Coherent Solutions Inc."

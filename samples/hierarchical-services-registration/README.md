@@ -21,18 +21,17 @@ The transient registration is done in order to be shared between listeners on co
 
 ## How to use?
 
-1. Deploy the application
-2. Navigate to SFE (by default is: http://localhost:19080)
-3. Navigate down to primary replica: `Cluster -> Applications -> AppType -> fabric:/App -> fabric:/App/Service -> (GUID) -> (INTEGER)`
-4. Navigate to URL's of `FirstEndpoint` and `SecondsEndpoint` appending `/api/value` at the end
+When application is deployed on the cluster navigate to `FirstEndpoint` and `SecondsEndpoint` appending `/api/value` at the end.
 
-The result output should be something similar to:
+The result output should look like:
 
 First Endpoint | Second Endpoint
 --- | ---
 Shared: Hash: **45937921**; Personal: Hash: 15599987 | Shared: Hash: **45937921**; Personal: Hash: 3649268
 
-The important part is that **Shared: Hash:** value should be equal but **Personal: Hash:** shouldn't.
+> **Developer's comment:**
+>
+> It is important that "Shared: Hash:" values should **be equal** but "Personal: Hash:" **shouldn't**.
 
 ## Conclusion
 
