@@ -4,142 +4,82 @@
 
 ## Getting Started
 
-To understand it right let's compare how things done with and without **CoherentSolutions.Extensions.Hosting.ServiceFabric**. 
+The easiest way to get started with **CoherentSolutions.Extensions.Hosting.ServiceFabric** is to setup **Reliable Service**!
 
 > **NOTE**
 >
 > Please note that current section doesn't contain explanation of all the aspects of the **CoherentSolutions.Extensions.Hosting.ServiceFabric** package. The full information can be found on [project wiki][1].
 
-### Setting up Reliable Service **without** CoherentSolutions.Extensions.Hosting.ServiceFabric
+In the **Getting Started** section we would setup entry point for Stateful Service with one **aspnetcore listener** and one **remoting listener**. The service should also execute background job and use shared services in all the listed components.
 
-#### Initial Setup
+### Initial Setup
 
-When a new Service Fabric project is created. Visual Studio automatically creates a few things:
+The setup process always starts with the usage of [HostBuilder](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-2.1) in the entry point.
 
-1. A class that is inherited from `StatefulService` or `StatelessService`.
-    ``` csharp
-    internal sealed class Service : StatefulService
-    {
-        public Service(StatefulServiceContext context) : base(context) { }
+``` csharp
+private static void Main(string[] args)
+{
+    new HostBuilder()
+        .Build()
+        .Run();
+}
+```
 
-        protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
-        {
-            return new ServiceReplicaListener[]
+The configuration of any services starts with the call to `DefineStatefulService(...)` or `DefineStatelessService(...)` method. The method access a delegate with single argument: `serviceBuilder`.
+
+``` csharp
+private static void Main(string[] args)
+{
+    new HostBuilder()
+        .DefineStatefulService(serviceBuilder => { })
+        .Build()
+        .Run();
+}
+```
+
+> Starting from this point all configuration of the service is done through `serviceBuilder`.
+
+Now service configuration has to be bound to one of the `ServiceType`'s defined in the `ServiceManifest.xml`. This can be done by calling `.UseServiceType(...)` method with the name of `ServiceType`.
+
+``` csharp
+private static void Main(string[] args)
+{
+    new HostBuilder()
+        .DefineStatefulService(
+            serviceBuilder =>
             {
-                new ServiceReplicaListener(serviceContext =>
-                    new KestrelCommunicationListener(serviceContext, (url, listener) =>
-                    {
-                        ServiceEventSource.Current.ServiceMessage(serviceContext, $"Starting Kestrel on {url}");
-
-                        return new WebHostBuilder()
-                                    .UseKestrel()
-                                    .ConfigureServices(
-                                        services => services
-                                            .AddSingleton<StatefulServiceContext>(serviceContext)
-                                            .AddSingleton<IReliableStateManager>(this.StateManager))
-                                    .UseContentRoot(Directory.GetCurrentDirectory())
-                                    .UseStartup<Startup>()
-                                    .UseServiceFabricIntegration(listener, ServiceFabricIntegrationOptions.UseUniqueServiceUrl)
-                                    .UseUrls(url)
-                                    .Build();
-                    }))
-            };
-        }
-    }
-    ```
-2. A class that represents an ETW event source.
-    ``` csharp
-    [EventSource(Name = "MyCompany-App-Service")]
-    internal sealed class ServiceEventSource : EventSource
-    {
-        ... /* skip the body here */
-    }
-    ```
-3. The program entry point is the following:
-    ``` csharp
-    private static void Main()
-    {
-        try
-        {
-            ServiceRuntime.RegisterServiceAsync("ServiceType", context => new Service(context)).GetAwaiter().GetResult();
-
-            ServiceEventSource.Current.ServiceTypeRegistered(Process.GetCurrentProcess().Id, typeof(Service).Name);
-
-            Thread.Sleep(Timeout.Infinite);
-        }
-        catch (Exception e)
-        {
-            ServiceEventSource.Current.ServiceHostInitializationFailed(e.ToString());
-            throw;
-        }
-    }
-    ```
-
-#### What if we introduce additional **remoting** listener?
-
-Define the interface:
-
-``` csharp
-internal interface IServiceRemoting : IService
-{
-    Task<string> GetVersion();
+                serviceBuilder.UseServiceType("ServiceType");
+            })
+        .Build()
+        .Run();
 }
 ```
 
-Implement it by `Service` class and add new `FabricTransportServiceRemotingListener` to list of listeners.
+The initial service setup is done.
+
+### Setting up **aspnetcore listener**
+
+The process of setting up **aspnetcore listener** is very similar to service setup. The configuration of **aspnetcore listener** starts with a call to `.DefineAspNetCoreListener(...)` method. This method access a delegate with single argument: `listenerBuilder`.
 
 ``` csharp
-internal sealed class Service : StatefulService, IServiceRemoting
+private static void Main(string[] args)
 {
-    public Service(StatefulServiceContext context) : base(context) { ... }
-
-    protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
-    {
-        return return new ServiceReplicaListener[]
+    new HostBuilder()
+        .DefineStatefulService(
+            serviceBuilder =>
             {
-                ...
-                new ServiceReplicaListener(serviceContext =>
-                    new FabricTransportServiceRemotingListener(serviceContext, this))
-            };
-    }
-
-    public Task<string> GetVersion()
-    {
-        return Task.FromResult(string.Empty);
-    }
+                serviceBuilder
+                    .UseServiceType("ServiceType")
+                    .DefineAspNetCoreListener(listenerBuilder => { });
+            })
+        .Build()
+        .Run();
 }
 ```
 
-#### What if we introduce background job?
+> Starting from this point all configuration of the **aspnetcore listener** is done through `listenerBuilder`.
 
-``` csharp
-internal sealed class Service : StatefulService, IServiceRemoting
-{
-    public Service(StatefulServiceContext context) : base(context) { ... }
-
-    protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners() { ... }
-
-    protected override Task RunAsync(
-        CancellationToken cancellationToken)
-    {
-        return Task.FromResult(string.Empty);
-    }
-
-    public Task<string> GetVersion() { ... }
-}
-```
-
-#### What if we need to share some common objects or dependencies between all of these things?
-
-This should be implemented by hand. There is no build-in support for such things.
-
-### Setting up Reliable Service **with** CoherentSolutions.Extensions.Hosting.ServiceFabric
-
-#### Initial Setup
-
-The first thing to notice is that there is no need to `Service` and `ServiceEventSource` classes anymore.
-
-All initial setup can be replaced with the following code in the entry point:
+Now listener configuration has to be bound to one of the endpoint resources's defined in the `ServiceManifest.xml`. This can be done by calling `.UseEndpointName(...)` method with the name of `ServiceType`.
 
 ``` csharp
 private static void Main(string[] args)
