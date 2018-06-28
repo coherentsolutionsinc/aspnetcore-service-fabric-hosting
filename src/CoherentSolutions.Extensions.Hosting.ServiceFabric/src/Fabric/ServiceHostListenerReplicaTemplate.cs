@@ -34,7 +34,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.DependenciesConfigAction = null;
             }
 
-            public void UseEndpointName(
+            public void UseEndpoint(
                 string endpointName)
             {
                 this.EndpointName = endpointName

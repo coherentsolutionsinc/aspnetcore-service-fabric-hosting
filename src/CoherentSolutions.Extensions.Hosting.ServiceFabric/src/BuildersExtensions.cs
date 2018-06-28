@@ -444,13 +444,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
-        public static TCaller UseEndpointName<TCaller>(
+        public static TCaller UseEndpoint<TCaller>(
             this TCaller @this,
             string endpointName)
             where TCaller : IConfigurableObject<IServiceHostListenerReplicaTemplateConfigurator>
         {
             @this.ConfigureObject(
-                configurator => configurator.UseEndpointName(endpointName));
+                configurator => configurator.UseEndpoint(endpointName));
 
             return @this;
         }

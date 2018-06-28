@@ -83,7 +83,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric.Servic
             var listener = new StatelessServiceHostAspNetCoreListenerReplicaTemplate()
                .UseCommunicationListener(AspNetCoreCommunicationListenerStub.Func)
                .UseWebHostBuilder(WebHostBuilderStub.Func)
-               .UseEndpointName(endpoint)
+               .UseEndpoint(endpoint)
                .Activate(service.Object);
 
             // Assert
