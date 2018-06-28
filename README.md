@@ -1,6 +1,6 @@
 ## About the Project
 
-**CoherentSolutions.Extensions.Hosting.ServiceFabric** changes a way how you setup entry point for your **Reliable Services**. The main idea was to remove unnecessary code, improve separation of concern and make the process much easier and convenient. 
+**CoherentSolutions.Extensions.Hosting.ServiceFabric** changes a way how you setup entry point for your **Reliable Services**. The main idea is to remove unnecessary code, improve separation of concern and make the process much easier and convenient. 
 
 ## Getting Started
 
