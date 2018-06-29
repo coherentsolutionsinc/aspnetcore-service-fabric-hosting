@@ -2,7 +2,7 @@
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public interface IServiceHostListenerReplicaTemplateParameters 
+    public interface IServiceHostListenerReplicaTemplateParameters
         : IConfigurableObjectDependenciesParameters,
           IServiceHostLoggerParameters
     {

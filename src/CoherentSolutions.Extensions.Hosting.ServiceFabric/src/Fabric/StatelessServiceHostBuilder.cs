@@ -1,4 +1,8 @@
-﻿namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
+﻿using System;
+
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Exceptions;
+
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public class StatelessServiceHostBuilder
         : ServiceHostBuilder<
@@ -19,21 +23,37 @@
               IStatelessServiceHostBuilderParameters,
               IStatelessServiceHostBuilderConfigurator
         {
+            public Func<IStatelessServiceRuntimeRegistrant> RuntimeRegistrantFunc { get; private set; }
+
             public StatelessParameters()
             {
-                this.UseDelegateReplicaTemplate(DefaultAsyncDelegateReplicaTemplate);
-                this.UseDelegateReplicator(DefaultAsyncDelegateReplicatorFactory);
+                this.RuntimeRegistrantFunc = DefaultRuntimeRegistrant;
+
+                this.UseDelegateReplicaTemplate(DefaultDelegateReplicaTemplate);
+                this.UseDelegateReplicator(DefaultDelegateReplicatorFactory);
                 this.UseAspNetCoreListenerReplicaTemplate(DefaultAspNetCoreListenerReplicaTemplate);
                 this.UseRemotingListenerReplicaTemplate(DefaultRemotingListenerReplicaTemplate);
                 this.UseListenerReplicator(DefaultListenerReplicatorFactory);
             }
 
-            private static IStatelessServiceHostDelegateReplicaTemplate DefaultAsyncDelegateReplicaTemplate()
+            public void UseRuntimeRegistrant(
+                Func<IStatelessServiceRuntimeRegistrant> factoryFunc)
+            {
+                this.RuntimeRegistrantFunc = factoryFunc
+                 ?? throw new ArgumentNullException(nameof(factoryFunc));
+            }
+
+            private static IStatelessServiceRuntimeRegistrant DefaultRuntimeRegistrant()
+            {
+                return new StatelessServiceRuntimeRegistrant();
+            }
+
+            private static IStatelessServiceHostDelegateReplicaTemplate DefaultDelegateReplicaTemplate()
             {
                 return new StatelessServiceHostDelegateReplicaTemplate();
             }
 
-            private static IStatelessServiceHostDelegateReplicator DefaultAsyncDelegateReplicatorFactory(
+            private static IStatelessServiceHostDelegateReplicator DefaultDelegateReplicatorFactory(
                 IStatelessServiceHostDelegateReplicableTemplate template)
             {
                 return new StatelessServiceHostDelegateReplicator(template);
@@ -62,10 +82,17 @@
 
             this.UpstreamConfiguration(parameters);
 
+            var registrant = parameters.RuntimeRegistrantFunc();
+            if (registrant == null)
+            {
+                throw new FactoryProducesNullInstanceException<IStatefulServiceRuntimeRegistrant>();
+            }
+
             var compilation = this.CompileParameters(parameters);
 
             return new StatelessServiceHost(
                 parameters.ServiceTypeName,
+                registrant,
                 compilation.DelegateReplicators,
                 compilation.ListenerReplicators);
         }

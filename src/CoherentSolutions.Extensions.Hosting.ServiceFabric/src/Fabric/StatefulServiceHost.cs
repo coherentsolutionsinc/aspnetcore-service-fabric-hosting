@@ -3,25 +3,29 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Microsoft.ServiceFabric.Services.Runtime;
-
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public class StatefulServiceHost : IStatefulServiceHost
     {
-        private readonly string serviceName;
+        private readonly string serviceTypeName;
+
+        private readonly IStatefulServiceRuntimeRegistrant serviceRuntimeRegistrant;
 
         private readonly IReadOnlyList<IStatefulServiceHostDelegateReplicator> serviceDelegateReplicators;
 
         private readonly IReadOnlyList<IStatefulServiceHostListenerReplicator> serviceListenerReplicators;
 
         public StatefulServiceHost(
-            string serviceName,
+            string serviceTypeName,
+            IStatefulServiceRuntimeRegistrant serviceRuntimeRegistrant,
             IReadOnlyList<IStatefulServiceHostDelegateReplicator> serviceDelegateReplicators,
             IReadOnlyList<IStatefulServiceHostListenerReplicator> serviceListenerReplicators)
         {
-            this.serviceName = serviceName
-             ?? throw new ArgumentNullException(nameof(serviceName));
+            this.serviceTypeName = serviceTypeName
+             ?? throw new ArgumentNullException(nameof(serviceTypeName));
+
+            this.serviceRuntimeRegistrant = serviceRuntimeRegistrant
+             ?? throw new ArgumentNullException(nameof(serviceRuntimeRegistrant));
 
             this.serviceDelegateReplicators = serviceDelegateReplicators
              ?? throw new ArgumentNullException(nameof(serviceDelegateReplicators));
@@ -33,13 +37,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         public async Task StartAsync(
             CancellationToken cancellationToken)
         {
-            await ServiceRuntime.RegisterServiceAsync(
-                this.serviceName,
+            await this.serviceRuntimeRegistrant.RegisterAsync(
+                this.serviceTypeName,
                 serviceContext => new StatefulService(
                     serviceContext,
                     this.serviceDelegateReplicators,
                     this.serviceListenerReplicators),
-                cancellationToken: cancellationToken);
+                cancellationToken);
         }
 
         public Task StopAsync(

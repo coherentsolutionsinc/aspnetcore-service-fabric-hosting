@@ -9,9 +9,9 @@ using Moq;
 
 using Xunit;
 
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Behaviors
 {
-    public class ServiceHostDelegateReplicaTemplateConfiguratorTests
+    public class ImplOfIServiceHostDelegateReplicaTemplateConfiguratorTests
     {
         private static class DataSource
         {
@@ -43,7 +43,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators
 
         [Theory]
         [MemberData(nameof(DataSource.Data), MemberType = typeof(DataSource))]
-        public void Should_use_delegate_invoker_by_UseDelegateInvoker_with_delegate_from_UseDelegate_When_configuring_delegate<TBuilder>(
+        public void Should_use_delegate_invoker_from_UseDelegateInvoker_When_invoking_delegate_from_UseDelegate<TBuilder>(
             TBuilder configurableObject,
             Action<TBuilder> invoke)
             where TBuilder : IConfigurableObject<IServiceHostDelegateReplicaTemplateConfigurator>

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Fabric;
 using System.Threading.Tasks;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
@@ -464,15 +463,29 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
                     (
                         context,
                         endpoint,
-                        factory) => new KestrelCommunicationListener(context, endpoint, factory)));
+                        factory) =>
+                    {
+                        return new KestrelCommunicationListener(context, endpoint, factory);
+                    }));
 
             return @this;
         }
 
         public static TCaller UseCommunicationListener<TCaller>(
             this TCaller @this,
-            Func<ServiceContext, string, Func<string, AspNetCoreCommunicationListener, IWebHost>, AspNetCoreCommunicationListener> factoryFunc)
+            ServiceHostAspNetCoreCommunicationListenerFactory factoryFunc)
             where TCaller : IConfigurableObject<IServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseCommunicationListener(factoryFunc));
+
+            return @this;
+        }
+
+        public static TCaller UseCommunicationListener<TCaller>(
+            this TCaller @this,
+            ServiceHostRemotingCommunicationListenerFactory factoryFunc)
+            where TCaller : IConfigurableObject<IServiceHostRemotingListenerReplicaTemplateConfigurator>
         {
             @this.ConfigureObject(
                 configurator => configurator.UseCommunicationListener(factoryFunc));
@@ -512,22 +525,42 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
-        public static IStatefulServiceHostBuilder UseDelegateReplicaTemplate(
+        public static IStatefulServiceHostBuilder UseRuntimeRegistrant(
             this IStatefulServiceHostBuilder @this,
-            Func<IStatefulServiceHostDelegateReplicaTemplate> configAction)
+            Func<IStatefulServiceRuntimeRegistrant> factoryFunc)
         {
             @this.ConfigureObject(
-                configurator => configurator.UseDelegateReplicaTemplate(configAction));
+                configurator => configurator.UseRuntimeRegistrant(factoryFunc));
+
+            return @this;
+        }
+
+        public static IStatelessServiceHostBuilder UseRuntimeRegistrant(
+            this IStatelessServiceHostBuilder @this,
+            Func<IStatelessServiceRuntimeRegistrant> factoryFunc)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseRuntimeRegistrant(factoryFunc));
+
+            return @this;
+        }
+
+        public static IStatefulServiceHostBuilder UseDelegateReplicaTemplate(
+            this IStatefulServiceHostBuilder @this,
+            Func<IStatefulServiceHostDelegateReplicaTemplate> factoryFunc)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegateReplicaTemplate(factoryFunc));
 
             return @this;
         }
 
         public static IStatelessServiceHostBuilder UseDelegateReplicaTemplate(
             this IStatelessServiceHostBuilder @this,
-            Func<IStatelessServiceHostDelegateReplicaTemplate> configAction)
+            Func<IStatelessServiceHostDelegateReplicaTemplate> factoryFunc)
         {
             @this.ConfigureObject(
-                configurator => configurator.UseDelegateReplicaTemplate(configAction));
+                configurator => configurator.UseDelegateReplicaTemplate(factoryFunc));
 
             return @this;
         }
@@ -554,40 +587,40 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
 
         public static IStatefulServiceHostBuilder UseAspNetCoreListenerReplicaTemplate(
             this IStatefulServiceHostBuilder @this,
-            Func<IStatefulServiceHostAspNetCoreListenerReplicaTemplate> configAction)
+            Func<IStatefulServiceHostAspNetCoreListenerReplicaTemplate> factoryFunc)
         {
             @this.ConfigureObject(
-                configurator => configurator.UseAspNetCoreListenerReplicaTemplate(configAction));
+                configurator => configurator.UseAspNetCoreListenerReplicaTemplate(factoryFunc));
 
             return @this;
         }
 
         public static IStatelessServiceHostBuilder UseAspNetCoreListenerReplicaTemplate(
             this IStatelessServiceHostBuilder @this,
-            Func<IStatelessServiceHostAspNetCoreListenerReplicaTemplate> configAction)
+            Func<IStatelessServiceHostAspNetCoreListenerReplicaTemplate> factoryFunc)
         {
             @this.ConfigureObject(
-                configurator => configurator.UseAspNetCoreListenerReplicaTemplate(configAction));
+                configurator => configurator.UseAspNetCoreListenerReplicaTemplate(factoryFunc));
 
             return @this;
         }
 
         public static IStatefulServiceHostBuilder UseRemotingListenerReplicaTemplate(
             this IStatefulServiceHostBuilder @this,
-            Func<IStatefulServiceHostRemotingListenerReplicaTemplate> configAction)
+            Func<IStatefulServiceHostRemotingListenerReplicaTemplate> factoryFunc)
         {
             @this.ConfigureObject(
-                configurator => configurator.UseRemotingListenerReplicaTemplate(configAction));
+                configurator => configurator.UseRemotingListenerReplicaTemplate(factoryFunc));
 
             return @this;
         }
 
         public static IStatelessServiceHostBuilder UseRemotingListenerReplicaTemplate(
             this IStatelessServiceHostBuilder @this,
-            Func<IStatelessServiceHostRemotingListenerReplicaTemplate> configAction)
+            Func<IStatelessServiceHostRemotingListenerReplicaTemplate> factoryFunc)
         {
             @this.ConfigureObject(
-                configurator => configurator.UseRemotingListenerReplicaTemplate(configAction));
+                configurator => configurator.UseRemotingListenerReplicaTemplate(factoryFunc));
 
             return @this;
         }

@@ -166,6 +166,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 {
                     throw new FactoryProducesNullInstanceException<IServiceHostDelegateInvoker>();
                 }
+
                 return invoker;
             };
         }

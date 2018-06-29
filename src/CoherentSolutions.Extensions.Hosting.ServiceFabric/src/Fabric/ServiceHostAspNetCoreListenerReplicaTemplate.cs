@@ -3,7 +3,6 @@ using System.Fabric;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Exceptions;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools;
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Web;
 
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
@@ -26,12 +25,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         {
             public ServiceFabricIntegrationOptions IntegrationOptions { get; private set; }
 
-            public Func<ServiceContext, string, Func<string, AspNetCoreCommunicationListener, IWebHost>, AspNetCoreCommunicationListener>
-                AspNetCoreCommunicationListenerFunc { get; private set; }
-
-            public Func<IWebHostBuilderExtensionsImpl> WebHostBuilderExtensionsImplFunc { get; private set; }
-
-            public Func<IWebHostExtensionsImpl> WebHostExtensionsImplFunc { get; private set; }
+            public ServiceHostAspNetCoreCommunicationListenerFactory AspNetCoreCommunicationListenerFunc { get; private set; }
 
             public Func<IWebHostBuilder> WebHostBuilderFunc { get; private set; }
 
@@ -41,8 +35,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 this.IntegrationOptions = ServiceFabricIntegrationOptions.None;
                 this.AspNetCoreCommunicationListenerFunc = DefaultAspNetCoreCommunicationListenerFunc;
-                this.WebHostBuilderExtensionsImplFunc = DefaultWebHostBuilderExtensionsImplFunc;
-                this.WebHostExtensionsImplFunc = DefaultWebHostExtensionsImplFunc;
                 this.WebHostBuilderFunc = DefaultWebHostBuilderFunc;
                 this.WebHostConfigAction = DefaultWebHostConfigAction;
             }
@@ -53,20 +45,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.IntegrationOptions = integrationOptions;
             }
 
-            public void UseWebHostBuilderExtensionsImpl(
-                Func<IWebHostBuilderExtensionsImpl> factoryFunc)
-            {
-                this.WebHostBuilderExtensionsImplFunc = factoryFunc
-                 ?? throw new ArgumentNullException(nameof(factoryFunc));
-            }
-
-            public void UseWebHostExtensionsImpl(
-                Func<IWebHostExtensionsImpl> factoryFunc)
-            {
-                this.WebHostExtensionsImplFunc = factoryFunc
-                 ?? throw new ArgumentNullException(nameof(factoryFunc));
-            }
-
             public void UseWebHostBuilder(
                 Func<IWebHostBuilder> factoryFunc)
             {
@@ -75,7 +53,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             }
 
             public void UseCommunicationListener(
-                Func<ServiceContext, string, Func<string, AspNetCoreCommunicationListener, IWebHost>, AspNetCoreCommunicationListener> factoryFunc)
+                ServiceHostAspNetCoreCommunicationListenerFactory factoryFunc)
             {
                 this.AspNetCoreCommunicationListenerFunc = factoryFunc
                  ?? throw new ArgumentNullException(nameof(factoryFunc));
@@ -97,17 +75,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 string endpointName,
                 Func<string, AspNetCoreCommunicationListener, IWebHost> build)
             {
-                return new KestrelCommunicationListener(serviceContext, endpointName, build);
-            }
-
-            private static IWebHostBuilderExtensionsImpl DefaultWebHostBuilderExtensionsImplFunc()
-            {
-                return new WebHostBuilderExtensionsImpl();
-            }
-
-            private static IWebHostExtensionsImpl DefaultWebHostExtensionsImplFunc()
-            {
-                return new WebHostExtensionsImpl();
+                var @delegate = new Func<string, AspNetCoreCommunicationListener, IWebHost>(build);
+                return new KestrelCommunicationListener(serviceContext, endpointName, @delegate);
             }
 
             private static IWebHostBuilder DefaultWebHostBuilderFunc()
@@ -152,14 +121,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
                     parameters.WebHostConfigAction(builder);
 
-                    var extensionsImpl = parameters.WebHostBuilderExtensionsImplFunc();
-                    if (extensionsImpl == null)
-                    {
-                        throw new FactoryProducesNullInstanceException<IWebHostBuilderExtensionsImpl>();
-                    }
-
-                    extensionsImpl.UseServiceFabricIntegration(builder, listener, parameters.IntegrationOptions);
-                    extensionsImpl.UseUrls(builder, url);
+                    builder.UseServiceFabricIntegration(listener, parameters.IntegrationOptions);
+                    builder.UseUrls(url);
 
                     // This is important to let UseServiceFabricIntegration execute first - otherwise listener.UrlSuffix would be an empty string.
                     var listenerInformation = new ServiceHostAspNetCoreListenerInformation(

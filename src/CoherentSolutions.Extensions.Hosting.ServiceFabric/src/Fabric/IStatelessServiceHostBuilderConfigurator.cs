@@ -1,4 +1,6 @@
-﻿namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
+﻿using System;
+
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public interface IStatelessServiceHostBuilderConfigurator
         : IServiceHostBuilderConfigurator,
@@ -9,5 +11,7 @@
           IServiceHostBuilderListenerReplicationConfigurator<IStatelessServiceHostListenerReplicableTemplate, IStatelessServiceHostListenerReplicator>
 
     {
+        void UseRuntimeRegistrant(
+            Func<IStatelessServiceRuntimeRegistrant> factoryFunc);
     }
 }
