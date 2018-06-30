@@ -111,7 +111,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Behaviors
             instance.ConfigureObject(
                 c =>
                 {
-                    c.UseEndpointName("ServiceEndpoint");
+                    c.UseEndpoint("ServiceEndpoint");
                 });
 
             // Act
@@ -136,7 +136,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Behaviors
             instance.ConfigureObject(
                 c =>
                 {
-                    c.UseEndpointName("ServiceEndpoint");
+                    c.UseEndpoint("ServiceEndpoint");
                 });
 
             // Act
