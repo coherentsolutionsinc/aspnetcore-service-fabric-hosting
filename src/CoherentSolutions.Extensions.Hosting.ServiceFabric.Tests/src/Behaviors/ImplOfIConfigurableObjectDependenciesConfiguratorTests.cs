@@ -13,9 +13,9 @@ using Xunit;
 
 using IService = Microsoft.ServiceFabric.Services.Remoting.IService;
 
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Behaviors
 {
-    public class ConfigurableObjectDependenciesConfiguratorTests
+    public class ImplOfIConfigurableObjectDependenciesConfiguratorTests
     {
         public interface IDependencyService : IService
         {
@@ -38,21 +38,21 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators
                     };
                     yield return new object[]
                     {
-                        new StatefulServiceHostDelegateReplicaTemplate()
-                           .UseDelegate(() => Task.CompletedTask),
+                        new StatefulServiceHostDelegateReplicaTemplate(),
                         new Action<StatefulServiceHostDelegateReplicaTemplate>(
                             c =>
                             {
+                                c.UseDelegate(() => Task.CompletedTask);
                                 c.Activate(Tools.StatefulService);
                             })
                     };
                     yield return new object[]
                     {
-                        new StatefulServiceHostRemotingListenerReplicaTemplate()
-                           .UseImplementation(() => new Mock<IDependencyService>().Object),
+                        new StatefulServiceHostRemotingListenerReplicaTemplate(),
                         new Action<StatefulServiceHostRemotingListenerReplicaTemplate>(
                             c =>
                             {
+                                c.UseImplementation(() => new Mock<IDependencyService>().Object);
                                 c.Activate(Tools.StatefulService).CreateCommunicationListener(Tools.StatefulContext);
                             })
                     };
@@ -67,21 +67,21 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators
                     };
                     yield return new object[]
                     {
-                        new StatelessServiceHostDelegateReplicaTemplate()
-                           .UseDelegate(() => Task.CompletedTask),
+                        new StatelessServiceHostDelegateReplicaTemplate(),
                         new Action<StatelessServiceHostDelegateReplicaTemplate>(
                             c =>
                             {
+                                c.UseDelegate(() => Task.CompletedTask);
                                 c.Activate(Tools.StatelessService);
                             })
                     };
                     yield return new object[]
                     {
-                        new StatelessServiceHostRemotingListenerReplicaTemplate()
-                           .UseImplementation(() => new Mock<IDependencyService>().Object),
+                        new StatelessServiceHostRemotingListenerReplicaTemplate(),
                         new Action<StatelessServiceHostRemotingListenerReplicaTemplate>(
                             c =>
                             {
+                                c.UseImplementation(() => new Mock<IDependencyService>().Object);
                                 c.Activate(Tools.StatelessService).CreateCommunicationListener(Tools.StatelessContext);
                             })
                     };
@@ -91,13 +91,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators
 
         [Theory]
         [MemberData(nameof(DataSource.Data), MemberType = typeof(DataSource))]
-        public void Should_use_collection_provided_by_UseDependencies_When_configuring_dependencies_by_ConfigureDependencies<TBuilder>(
+        public void Should_use_collection_from_UseDependencies_When_configuring_dependencies_by_ConfigureDependencies<TBuilder>(
             TBuilder configurableObject,
             Action<TBuilder> invoke)
             where TBuilder : IConfigurableObject<IConfigurableObjectDependenciesConfigurator>
         {
             // Arrange
-            var descriptor = new ServiceDescriptor(typeof(ConfigurableObjectDependenciesConfiguratorTests), this);
+            var descriptor = new ServiceDescriptor(typeof(ImplOfIConfigurableObjectDependenciesConfiguratorTests), this);
 
             var collection = new Mock<ServiceCollection>
             {

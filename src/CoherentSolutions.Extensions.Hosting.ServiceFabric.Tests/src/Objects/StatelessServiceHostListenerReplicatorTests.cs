@@ -1,5 +1,4 @@
 ﻿using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Fabric;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects.Base;
 
 using Microsoft.ServiceFabric.Services.Communication.Runtime;

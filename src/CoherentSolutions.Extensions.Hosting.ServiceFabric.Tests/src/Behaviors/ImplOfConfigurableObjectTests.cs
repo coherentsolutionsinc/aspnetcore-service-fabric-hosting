@@ -9,10 +9,16 @@ using Moq;
 
 using Xunit;
 
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators
+using IService = Microsoft.ServiceFabric.Services.Remoting.IService;
+
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Behaviors
 {
-    public class ConfigurableObjectTests
+    public class ImplOfConfigurableObjectTests
     {
+        public interface IDependencyService : IService
+        {
+        }
+
         private static class DataSource
         {
             public static IEnumerable<object[]> Data
@@ -26,23 +32,33 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators
                     };
                     yield return new object[]
                     {
-                        new StatefulServiceHostDelegateReplicaTemplate()
-                           .UseDelegate(() => Task.CompletedTask),
-                        new Action<StatefulServiceHostDelegateReplicaTemplate>(c => c.Activate(Tools.StatefulService))
+                        new StatefulServiceHostDelegateReplicaTemplate(),
+                        new Action<StatefulServiceHostDelegateReplicaTemplate>(
+                            c =>
+                            {
+                                c.UseDelegate(() => Task.CompletedTask);
+                                c.Activate(Tools.StatefulService);
+                            })
                     };
                     yield return new object[]
                     {
-                        new StatefulServiceHostAspNetCoreListenerReplicaTemplate()
-                           .UseCommunicationListener(Tools.StatefulAspNetCoreCommunicationListenerFunc),
+                        new StatefulServiceHostAspNetCoreListenerReplicaTemplate(),
                         new Action<StatefulServiceHostAspNetCoreListenerReplicaTemplate>(
-                            c => c.Activate(Tools.StatefulService).CreateCommunicationListener(Tools.StatefulContext))
+                            c =>
+                            {
+                                c.UseCommunicationListener(Tools.AspNetCoreCommunicationListenerFunc);
+                                c.Activate(Tools.StatefulService).CreateCommunicationListener(Tools.StatefulContext);
+                            })
                     };
                     yield return new object[]
                     {
-                        new StatefulServiceHostRemotingListenerReplicaTemplate()
-                           .UseImplementation(() => new Mock<ConfigurableObjectDependenciesConfiguratorTests.IDependencyService>().Object),
+                        new StatefulServiceHostRemotingListenerReplicaTemplate(),
                         new Action<StatefulServiceHostRemotingListenerReplicaTemplate>(
-                            c => c.Activate(Tools.StatefulService).CreateCommunicationListener(Tools.StatefulContext))
+                            c =>
+                            {
+                                c.UseImplementation(() => new Mock<IDependencyService>().Object);
+                                c.Activate(Tools.StatefulService).CreateCommunicationListener(Tools.StatefulContext);
+                            })
                     };
                     yield return new object[]
                     {
@@ -51,23 +67,33 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Configurators
                     };
                     yield return new object[]
                     {
-                        new StatelessServiceHostDelegateReplicaTemplate()
-                           .UseDelegate(() => Task.CompletedTask),
-                        new Action<StatelessServiceHostDelegateReplicaTemplate>(c => c.Activate(Tools.StatelessService))
+                        new StatelessServiceHostDelegateReplicaTemplate(),
+                        new Action<StatelessServiceHostDelegateReplicaTemplate>(
+                            c =>
+                            {
+                                c.UseDelegate(() => Task.CompletedTask);
+                                c.Activate(Tools.StatelessService);
+                            })
                     };
                     yield return new object[]
                     {
-                        new StatelessServiceHostAspNetCoreListenerReplicaTemplate()
-                           .UseCommunicationListener(Tools.StatelessAspNetCoreCommunicationListenerFunc),
+                        new StatelessServiceHostAspNetCoreListenerReplicaTemplate(),
                         new Action<StatelessServiceHostAspNetCoreListenerReplicaTemplate>(
-                            c => c.Activate(Tools.StatelessService).CreateCommunicationListener(Tools.StatelessContext))
+                            c =>
+                            {
+                                c.UseCommunicationListener(Tools.AspNetCoreCommunicationListenerFunc);
+                                c.Activate(Tools.StatelessService).CreateCommunicationListener(Tools.StatelessContext);
+                            })
                     };
                     yield return new object[]
                     {
-                        new StatelessServiceHostRemotingListenerReplicaTemplate()
-                           .UseImplementation(() => new Mock<ConfigurableObjectDependenciesConfiguratorTests.IDependencyService>().Object),
+                        new StatelessServiceHostRemotingListenerReplicaTemplate(),
                         new Action<StatelessServiceHostRemotingListenerReplicaTemplate>(
-                            c => c.Activate(Tools.StatelessService).CreateCommunicationListener(Tools.StatelessContext))
+                            c =>
+                            {
+                                c.UseImplementation(() => new Mock<IDependencyService>().Object);
+                                c.Activate(Tools.StatelessService).CreateCommunicationListener(Tools.StatelessContext);
+                            })
                     };
                 }
             }
