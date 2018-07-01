@@ -8,7 +8,7 @@
     <Company>Coherent Solutions, Inc</Company>
     <Authors>Coherent Solutions, Inc</Authors>
     <RootNamespace>CoherentSolutions.Extensions.Hosting.ServiceFabric</RootNamespace>
-    <Description>This package provides an extensions to HostBuilder class that simplifies development ofService Fabric Reliable Services.</Description>
+    <Description>This package provides an extensions to HostBuilder class that simplifies development of Service Fabric Reliable Services.</Description>
     <PackageTags>aspnetcore, servicefabric, hosting</PackageTags>
     <RepositoryType>Git</RepositoryType>
     <Version>1.0.0</Version>
