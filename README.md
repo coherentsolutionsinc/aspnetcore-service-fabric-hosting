@@ -1,23 +1,20 @@
 ## About the Project
 
-**CoherentSolutions.Extensions.Hosting.ServiceFabric** changes a way how you setup entry point for your **Reliable Services**. The main idea is to remove unnecessary code, improve separation of concern and make the process much easier and convenient. 
+**CoherentSolutions.Extensions.Hosting.ServiceFabric** changes a way how you develop **Reliable Services**. The main idea is simplify development process as much as possible by removing unnecessary code, improving separation of concern and making the whole process much easier and convenient by introducing set of friendly builders. 
 
 ## Getting Started
 
-The easiest way to get started with **CoherentSolutions.Extensions.Hosting.ServiceFabric** is to setup **Reliable Service**!
+As usual the easiest way to get started is to code something. Let's create a new **reliable service**!
 
 > **NOTE**
 >
-> Please note that current section doesn't contain explanation of all the aspects of the **CoherentSolutions.Extensions.Hosting.ServiceFabric** package. The full information can be found on [project wiki][1].
+> Please note that current section doesn't contain explanation of all the aspects of the **CoherentSolutions.Extensions.Hosting.ServiceFabric**. The full documentation can be found on [project wiki][1].
 
-In the **Getting Started** section we would setup entry point for Stateful Service that has:
-* One **aspnetcore listener** (Kestrel)
-* One **remoting listener**
-* One background job
+In the **Getting Started** section we would develop Stateful Service with one **aspnetcore listener** (Kestrel), one **remoting listener** and one background job.
 
-### Initial Setup
+Let's go!
 
-The setup process always starts with the usage of [HostBuilder](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-2.1) in the entry point.
+All programs start with the entry point so the development of **reliable service** does too. When using **CoherentSolutions.Extensions.Hosting.ServiceFabric** the entry point setup starts from new instance of the [HostBuilder](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-2.1) class and default calls to `Build()` and `Run()`.
 
 ``` csharp
 private static void Main(string[] args)
@@ -28,7 +25,7 @@ private static void Main(string[] args)
 }
 ```
 
-The configuration of any service starts by calling `DefineStatefulService(...)` or `DefineStatelessService(...)` method. The method accepts a delegate with single argument: `serviceBuilder`.
+Configuration of any service starts by calling `DefineStatefulService(...)` or `DefineStatelessService(...)` method. This method creates a new **service** building block ...
 
 ``` csharp
 private static void Main(string[] args)
@@ -40,9 +37,7 @@ private static void Main(string[] args)
 }
 ```
 
-> Starting from this point all configuration of the service is done through `serviceBuilder`.
-
-Now service configuration has to be bound to one of the service type's defined in the `ServiceManifest.xml`. This can be done by calling `.UseServiceType(...)` method with the name of service type.
+... that should be bound to the service type from the `ServiceManifest.xml`. This can be done by calling `.UseServiceType(...)` method with the name of service type.
 
 ``` csharp
 private static void Main(string[] args)
@@ -58,11 +53,7 @@ private static void Main(string[] args)
 }
 ```
 
-The initial service setup is done.
-
-### Setting up **aspnetcore listener**
-
-The process of setting up **aspnetcore listener** is very similar to service setup. The configuration of **aspnetcore listener** starts by calling `.DefineAspNetCoreListener(...)` method. This method accepts a delegate with single argument: `listenerBuilder`.
+Now when the initial setup is done we can start continue configuring **aspnetcore listener**. This is done by calling `.DefineAspNetCoreListener(...)` method. 
 
 ``` csharp
 private static void Main(string[] args)
@@ -80,9 +71,7 @@ private static void Main(string[] args)
 }
 ```
 
-> Starting from this point all configuration of the **aspnetcore listener** is done through `listenerBuilder`.
-
-Now listener configuration has to be bound to one of the endpoint resources's defined in the `ServiceManifest.xml`. This can be done by calling `.UseEndpoint(...)` method with the name of endpoint resource.
+This method creates new **listener** building block that gets bound to endpoint resource from `ServiceManifest.xml` by calling `.UseEndpoint(...)` method with the name of endpoint resource.
 
 ``` csharp
 private static void Main(string[] args)
@@ -104,7 +93,7 @@ private static void Main(string[] args)
 }
 ```
 
-The configuration of underlying `IWebHost` is done using `.ConfigureWebHost(...)` method.
+Using `.ConfigureWebHost(...)` method we can configure underlying `IWebHost`.
 
 ``` csharp
 private static void Main(string[] args)
@@ -128,11 +117,10 @@ private static void Main(string[] args)
 }
 ```
 
-### Setting up **remoting listener**
+Configuration of **remoting listener** requires _implementation interface_ that defines remoting methods accessible to client and _implementation class_ that implements the logic behind _implementation interface_.
 
-Usage of **remoting listener** requires _implementation interface_ that defines remoting methods accessible to client and _implementation class_ that implements the logic behind _implementation interface_.
 
-Example of _implementation interface_
+Simple _implementation interface_ ...
 
 ``` csharp
 public interface IApiService : IService
@@ -141,7 +129,7 @@ public interface IApiService : IService
 }
 ```
 
-Example of _implementation class_
+... and its _implementation class_
 
 ``` csharp
 public class ApiServiceImpl : IApiService
@@ -153,7 +141,7 @@ public class ApiServiceImpl : IApiService
 }
 ```
 
-The configuration of **remoting listener** starts by calling `.DefineRemotingListener(...)` method. This method accepts a delegate with single argument: `listenerBuilder`. Similarly to **aspnetcore listener** configuration **remoting listener** configuration has to be bound to one of the endpoint resources's defined in the `ServiceManifest.xml`. This can be done by calling `.UseEndpoint(...)` method with the name of endpoint resource.
+Configuration of **remoting listener** is done by `.DefineRemotingListener(...)` method where listener is bound to endpoint resource ... 
 
 ``` csharp
 private static void Main(string[] args)
@@ -176,7 +164,7 @@ private static void Main(string[] args)
 }
 ```
 
-Remoting implementation is configured by calling `.UseImplementation<T>(...)` method.
+... and remoting implementation is set by calling `.UseImplementation<T>(...)` method.
 
 ``` csharp
 private static void Main(string[] args)
@@ -201,11 +189,10 @@ private static void Main(string[] args)
 }
 ```
 
-### Setting up background job
+The listeners are successfully configured. All is left is a background job.
 
-Background jobs in **CoherentSolutions.Extensions.Hosting.ServiceFabric** are represented as **delegates**. The configuration of **delegate** starts by calling `.DefineDefine(...)` method. This method accepts a delegate with single argument: `delegateBuilder`. 
 
-The background job is configured by calling `.UseDelegate(...)` method that accepts any `Action<...>` or `Func<..., Task>`.
+Background jobs in **CoherentSolutions.Extensions.Hosting.ServiceFabric** are represented as **delegates** which are configured by calling `.DefineDefine(...)` where using `.UseDelegate(...)` method we can set any `Action<...>` or `Func<..., Task>` to be executed as background job.
 
 ``` csharp
 private static void Main(string[] args)
@@ -228,8 +215,6 @@ private static void Main(string[] args)
         .Run();
 }
 ```
-
-### Conclusion
 
 That is it :)
 
