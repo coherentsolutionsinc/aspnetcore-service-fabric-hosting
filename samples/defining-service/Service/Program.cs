@@ -31,7 +31,7 @@ namespace Service
                                         /*
                                             Set name of the endpoint defined in PackageRoot/ServiceManifest.xml
                                         */
-                                        .UseEndpointName("ServiceEndpoint")
+                                        .UseEndpoint("ServiceEndpoint")
                                         /*
                                             Use unique service URL integration
                                         */

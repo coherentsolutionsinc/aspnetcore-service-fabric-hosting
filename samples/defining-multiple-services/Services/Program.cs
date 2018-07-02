@@ -19,7 +19,7 @@ namespace Services
                                 listenerBuilder =>
                                 {
                                     listenerBuilder
-                                        .UseEndpointName("StatefulServiceEndpoint")
+                                        .UseEndpoint("StatefulServiceEndpoint")
                                         .UseUniqueServiceUrlIntegration()
                                         .ConfigureWebHost(
                                             webHostBuilder => { webHostBuilder.UseStartup<StatefulStartup>(); });
@@ -34,7 +34,7 @@ namespace Services
                                 listenerBuilder =>
                                 {
                                     listenerBuilder
-                                        .UseEndpointName("StatelessServiceEndpoint")
+                                        .UseEndpoint("StatelessServiceEndpoint")
                                         .UseUniqueServiceUrlIntegration()
                                         .ConfigureWebHost(
                                             webHostBuilder => { webHostBuilder.UseStartup<StatelessStartup>(); });

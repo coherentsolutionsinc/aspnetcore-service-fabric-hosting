@@ -32,7 +32,7 @@ namespace Service
                                 listenerBuilder =>
                                 {
                                     listenerBuilder
-                                        .UseEndpointName("FirstEndpoint")
+                                        .UseEndpoint("FirstEndpoint")
                                         .UseUniqueServiceUrlIntegration()
                                         .ConfigureWebHost(webHostBuilder => { webHostBuilder.UseStartup<Startup>(); });
                                 })
@@ -40,7 +40,7 @@ namespace Service
                                 listenerBuilder =>
                                 {
                                     listenerBuilder
-                                        .UseEndpointName("SecondEndpoint")
+                                        .UseEndpoint("SecondEndpoint")
                                         .UseUniqueServiceUrlIntegration()
                                         .ConfigureWebHost(webHostBuilder => { webHostBuilder.UseStartup<Startup>(); });
                                 });
