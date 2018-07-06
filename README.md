@@ -8,7 +8,7 @@ As usual the easiest way to get started is to code something. Let's create a new
 
 > **NOTE**
 >
-> Please note that current section doesn't contain explanation of all the aspects of the **CoherentSolutions.Extensions.Hosting.ServiceFabric**. The full documentation can be found on [project wiki][1].
+> Please note that current section doesn't contain explanation of all the aspects of the **CoherentSolutions.Extensions.Hosting.ServiceFabric**. The full documentation can be found on [project wiki][1]. The package can be downloaded from [nuget.org](https://www.nuget.org/packages/CoherentSolutions.Extensions.Hosting.ServiceFabric).
 
 In the **Getting Started** section we would develop Stateful Service with one **aspnetcore listener** (Kestrel), one **remoting listener** and one background job.
 
