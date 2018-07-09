@@ -12,15 +12,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
 {
     public class ServiceHostDelegateInvokerTests
     {
-        private interface IMyDependency
+        private interface ITestDependency
         {
         }
 
-        private class MyDependency : IMyDependency
+        private class TestDependency : ITestDependency
         {
         }
 
-        private class MyException : Exception
+        private class TestException : Exception
         {
         }
 
@@ -56,11 +56,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             var services = new Mock<IServiceProvider>();
 
             var @delegate = new ServiceHostDelegateInvoker(
-                new Action(() => throw new MyException()),
+                new Action(() => throw new TestException()),
                 services.Object);
 
             // Act, Assert
-            Assert.Throws<MyException>(
+            Assert.Throws<TestException>(
                 () =>
                 {
                     @delegate.InvokeAsync(CancellationToken.None).GetAwaiter().GetResult();
@@ -74,7 +74,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             Should_resolve_arguments_using_services_When_invoking()
         {
             // Arrange
-            var root = new MyDependency();
+            var root = new TestDependency();
 
             object expectedObject = root;
             object expectedInterface = root;
@@ -82,11 +82,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             object actualInterface = null;
 
             var services = new Mock<IServiceProvider>();
-            services.Setup(instance => instance.GetService(typeof(MyDependency))).Returns(root).Verifiable();
-            services.Setup(instance => instance.GetService(typeof(IMyDependency))).Returns(root).Verifiable();
+            services.Setup(instance => instance.GetService(typeof(TestDependency))).Returns(root).Verifiable();
+            services.Setup(instance => instance.GetService(typeof(ITestDependency))).Returns(root).Verifiable();
 
             var @delegate = new ServiceHostDelegateInvoker(
-                new Action<MyDependency, IMyDependency>(
+                new Action<TestDependency, ITestDependency>(
                     (
                         @object,
                         @interface) =>

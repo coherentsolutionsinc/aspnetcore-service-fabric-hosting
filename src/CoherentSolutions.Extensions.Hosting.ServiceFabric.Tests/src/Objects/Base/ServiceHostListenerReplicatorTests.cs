@@ -25,8 +25,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects.Base
             replicableTemplate.Setup(instance => instance.Activate(service.Object));
 
             // Act
-            var listenerReplicator = this.CreateInstance(replicableTemplate.Object);
-            listenerReplicator.ReplicateFor(service.Object);
+            var replicator = this.CreateInstance(replicableTemplate.Object);
+            replicator.ReplicateFor(service.Object);
 
             // Assert
             replicableTemplate.Verify(instance => instance.Activate(service.Object), Times.Once);

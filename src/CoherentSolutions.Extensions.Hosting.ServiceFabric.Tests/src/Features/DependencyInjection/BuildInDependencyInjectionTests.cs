@@ -15,22 +15,12 @@ using Moq;
 
 using Xunit;
 
-using IService = Microsoft.ServiceFabric.Services.Remoting.IService;
-
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features.DependencyInjection
 {
     public class BuildInDependencyInjectionTests
     {
         private static class DataSource
         {
-            private interface IDependency : IService
-            {
-            }
-
-            private class Dependency : IDependency
-            {
-            }
-
             public static IEnumerable<object[]> Data
             {
                 get
@@ -120,7 +110,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                                                     {
                                                         listenerBuilder
                                                            .UseCommunicationListener(Tools.RemotingCommunicationListenerFunc)
-                                                           .UseImplementation<Dependency>()
+                                                           .UseImplementation<Tools.TestRemoting>()
                                                            .UseDependencies(() => collection);
                                                     });
                                         });
@@ -217,7 +207,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                                                     {
                                                         listenerBuilder
                                                            .UseCommunicationListener(Tools.RemotingCommunicationListenerFunc)
-                                                           .UseImplementation<Dependency>()
+                                                           .UseImplementation<Tools.TestRemoting>()
                                                            .UseDependencies(() => collection);
                                                     });
                                         });

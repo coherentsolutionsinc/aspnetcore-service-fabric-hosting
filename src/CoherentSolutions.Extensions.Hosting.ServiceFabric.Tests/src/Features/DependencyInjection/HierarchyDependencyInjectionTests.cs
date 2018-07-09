@@ -4,34 +4,17 @@ using System.Collections.Generic;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.ServiceFabric.Services.Remoting;
 
 using Moq;
 
 using Xunit;
 
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features.DependencyInjection
 {
     public class HierarchyDependencyInjectionTests
     {
-        public interface IDependency : IService
-        {
-        }
-
-        public class Dependency : IDependency
-        {
-        }
-
         private static class DataSource
         {
-            private interface IMyRemotingImplementation : IService
-            {
-            }
-
-            private class MyRemotingImplementation : IMyRemotingImplementation
-            {
-            }
-
             public static IEnumerable<object[]> Data
             {
                 get
@@ -120,7 +103,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                                                 {
                                                     listenerBuilder
                                                        .UseCommunicationListener(Tools.RemotingCommunicationListenerFunc)
-                                                       .UseImplementation<Dependency>()
+                                                       .UseImplementation<Tools.TestRemoting>()
                                                        .UseDependencies(() => collection);
                                                 });
                                     });
@@ -210,7 +193,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                                                 {
                                                     listenerBuilder
                                                        .UseCommunicationListener(Tools.RemotingCommunicationListenerFunc)
-                                                       .UseImplementation<Dependency>()
+                                                       .UseImplementation<Tools.TestRemoting>()
                                                        .UseDependencies(() => collection);
                                                 });
                                     });
@@ -228,7 +211,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         {
             // Arrange
             var singleton = new ServiceDescriptor(typeof(HierarchyDependencyInjectionTests), this);
-            var transient = new ServiceDescriptor(typeof(IDependency), typeof(Dependency), ServiceLifetime.Transient);
+            var transient = new ServiceDescriptor(typeof(Tools.ITestDependency), typeof(Tools.TestDependency), ServiceLifetime.Transient);
 
             var collection = new Mock<ServiceCollection>
             {
@@ -244,7 +227,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                .Setup(
                     instance =>
                         instance
-                           .Add(It.Is<ServiceDescriptor>(v => v.ServiceType == typeof(IDependency) && v.ImplementationType == typeof(Dependency))))
+                           .Add(
+                                It.Is<ServiceDescriptor>(
+                                    v => v.ServiceType == typeof(Tools.ITestDependency) && v.ImplementationType == typeof(Tools.TestDependency))))
                .Verifiable();
 
             // Act

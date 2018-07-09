@@ -160,7 +160,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                     }
 
                     var settings = parameters.RemotingSettingsFunc();
-                    if (serializer == null)
+                    if (settings == null)
                     {
                         throw new FactoryProducesNullInstanceException<FabricTransportRemotingListenerSettings>();
                     }
