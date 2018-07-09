@@ -30,12 +30,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             public Func<IServiceProvider, IRemotingImplementation> RemotingImplementationFunc { get; private set; }
 
+            public Func<FabricTransportRemotingListenerSettings> RemotingSettingsFunc { get; private set; }
+
             public Func<IServiceProvider, IServiceRemotingMessageSerializationProvider> RemotingSerializerFunc { get; private set; }
 
             protected RemotingListenerParameters()
             {
                 this.RemotingCommunicationListenerFunc = DefaultRemotingCommunicationListenerFunc;
                 this.RemotingImplementationFunc = null;
+                this.RemotingSettingsFunc = DefaultRemotingSettingsFunc;
                 this.RemotingSerializerFunc = null;
             }
 
@@ -53,6 +56,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.RemotingImplementationFunc = factoryFunc == null
                     ? provider => ActivatorUtilities.CreateInstance<TImplementation>(provider)
                     : (Func<IServiceProvider, IRemotingImplementation>) (provider => factoryFunc());
+            }
+
+            public void UseSettings(
+                Func<FabricTransportRemotingListenerSettings> factoryFunc)
+            {
+                this.RemotingSettingsFunc = factoryFunc
+                 ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
 
             public void UseSerializer<TSerializer>(
@@ -74,6 +84,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                     components.MessageDispatcher,
                     components.ListenerSettings,
                     components.MessageSerializationProvider);
+            }
+
+            private static FabricTransportRemotingListenerSettings DefaultRemotingSettingsFunc()
+            {
+                return new FabricTransportRemotingListenerSettings();
             }
         }
 
@@ -144,10 +159,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                         }
                     }
 
-                    var settings = new FabricTransportRemotingListenerSettings
+                    var settings = parameters.RemotingSettingsFunc();
+                    if (settings == null)
                     {
-                        EndpointResourceName = parameters.EndpointName
-                    };
+                        throw new FactoryProducesNullInstanceException<FabricTransportRemotingListenerSettings>();
+                    }
+
+                    settings.EndpointResourceName = parameters.EndpointName;
 
                     var logger = (ILogger) provider.GetService(typeof(ILogger<>).MakeGenericType(implementation.GetType()));
                     var handler = new ServiceHostRemotingListenerLoggerMessageHandler(serviceContext, implementation, logger);

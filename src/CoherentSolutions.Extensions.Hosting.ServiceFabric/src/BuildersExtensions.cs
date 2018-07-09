@@ -7,6 +7,7 @@ using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
+using Microsoft.ServiceFabric.Services.Remoting.FabricTransport.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting.V2;
 
 using IService = Microsoft.ServiceFabric.Services.Remoting.IService;
@@ -489,6 +490,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
         {
             @this.ConfigureObject(
                 configurator => configurator.UseCommunicationListener(factoryFunc));
+
+            return @this;
+        }
+
+        public static TCaller UseSettings<TCaller>(
+            this TCaller @this,
+            Func<FabricTransportRemotingListenerSettings> factoryFunc)
+            where TCaller : IConfigurableObject<IServiceHostRemotingListenerReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseSettings(factoryFunc));
 
             return @this;
         }

@@ -19,12 +19,29 @@ using Moq;
 
 using ServiceFabric.Mocks;
 
+using IService = Microsoft.ServiceFabric.Services.Remoting.IService;
 using StatelessService = CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.StatelessService;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
 {
     public static class Tools
     {
+        public interface ITestDependency
+        {
+        }
+
+        public interface ITestRemoting : IService
+        {
+        }
+
+        public class TestRemoting : ITestRemoting
+        {
+        }
+
+        public class TestDependency : ITestDependency
+        {
+        }
+
         private class EndpointResourceDescriptionCollection : KeyedCollection<string, EndpointResourceDescription>
         {
             protected override string GetKeyForItem(
