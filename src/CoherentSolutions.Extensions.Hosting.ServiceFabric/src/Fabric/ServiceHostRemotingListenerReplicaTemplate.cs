@@ -9,7 +9,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting.FabricTransport.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting.V2;
-using Microsoft.ServiceFabric.Services.Remoting.V2.FabricTransport.Runtime;
 
 using IRemotingImplementation = Microsoft.ServiceFabric.Services.Remoting.IService;
 
@@ -36,9 +35,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             protected RemotingListenerParameters()
             {
-                this.RemotingCommunicationListenerFunc = DefaultRemotingCommunicationListenerFunc;
+                this.RemotingCommunicationListenerFunc = HostingDefaults.DefaultRemotingCommunicationListenerFunc;
                 this.RemotingImplementationFunc = null;
-                this.RemotingSettingsFunc = DefaultRemotingSettingsFunc;
+                this.RemotingSettingsFunc = HostingDefaults.DefaultRemotingSettingsFunc;
                 this.RemotingSerializerFunc = null;
             }
 
@@ -50,12 +49,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             }
 
             public void UseImplementation<TImplementation>(
-                Func<TImplementation> factoryFunc)
+                Func<IServiceProvider, TImplementation> factoryFunc)
                 where TImplementation : IRemotingImplementation
             {
                 this.RemotingImplementationFunc = factoryFunc == null
-                    ? provider => ActivatorUtilities.CreateInstance<TImplementation>(provider)
-                    : (Func<IServiceProvider, IRemotingImplementation>) (provider => factoryFunc());
+                    ? HostingDefaults.DefaultRemotingImplementationFunc<TImplementation>
+                    : (Func<IServiceProvider, IRemotingImplementation>) (provider => factoryFunc(provider));
             }
 
             public void UseSettings(
@@ -66,29 +65,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             }
 
             public void UseSerializer<TSerializer>(
-                Func<TSerializer> factoryFunc)
+                Func<IServiceProvider, TSerializer> factoryFunc)
                 where TSerializer : IServiceRemotingMessageSerializationProvider
             {
                 this.RemotingSerializerFunc = factoryFunc == null
-                    ? provider => ActivatorUtilities.CreateInstance<TSerializer>(provider)
-                    : (Func<IServiceProvider, IServiceRemotingMessageSerializationProvider>) (provider => factoryFunc());
-            }
-
-            private static FabricTransportServiceRemotingListener DefaultRemotingCommunicationListenerFunc(
-                ServiceContext serviceContext,
-                ServiceHostRemotingCommunicationListenerComponentsFactory build)
-            {
-                var components = build(serviceContext);
-                return new FabricTransportServiceRemotingListener(
-                    serviceContext,
-                    components.MessageDispatcher,
-                    components.ListenerSettings,
-                    components.MessageSerializationProvider);
-            }
-
-            private static FabricTransportRemotingListenerSettings DefaultRemotingSettingsFunc()
-            {
-                return new FabricTransportRemotingListenerSettings();
+                    ? HostingDefaults.DefaultRemotingSerializerFunc<TSerializer>
+                    : (Func<IServiceProvider, IServiceRemotingMessageSerializationProvider>) (provider => factoryFunc(provider));
             }
         }
 

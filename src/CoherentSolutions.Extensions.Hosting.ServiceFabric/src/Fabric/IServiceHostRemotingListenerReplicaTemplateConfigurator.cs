@@ -17,14 +17,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             ServiceHostRemotingCommunicationListenerFactory factoryFunc);
 
         void UseImplementation<TImplementation>(
-            Func<TImplementation> factoryFunc)
+            Func<IServiceProvider, TImplementation> factoryFunc)
             where TImplementation : IRemotingImplementation;
 
         void UseSettings(
             Func<FabricTransportRemotingListenerSettings> factoryFunc);
 
         void UseSerializer<TSerializer>(
-            Func<TSerializer> factoryFunc)
+            Func<IServiceProvider, TSerializer> factoryFunc)
             where TSerializer : IServiceRemotingMessageSerializationProvider;
     }
 }
