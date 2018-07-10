@@ -109,8 +109,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features.Defi
                                     return Tools.RemotingCommunicationListenerFunc(context, build);
                                 });
                             c.UseEndpoint(arrangeEndpoint);
-                            c.UseSerializer(() => arrangeSerializer);
-                            c.UseImplementation(() => arrangeImplementation);
+                            c.UseSerializer(provider => arrangeSerializer);
+                            c.UseImplementation(provider => arrangeImplementation);
                             c.UseSettings(() => arrangeSettings);
                         });
                 });

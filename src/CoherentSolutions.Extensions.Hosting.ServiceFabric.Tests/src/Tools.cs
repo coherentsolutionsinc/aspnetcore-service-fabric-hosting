@@ -30,6 +30,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
         {
         }
 
+        public interface ITestGenericDependency<T>
+        {
+            
+        }
+
         public interface ITestRemoting : IService
         {
         }
@@ -39,6 +44,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
         }
 
         public class TestDependency : ITestDependency
+        {
+        }
+
+        public class TestGenericDependency<T> : ITestGenericDependency<T>
         {
         }
 
