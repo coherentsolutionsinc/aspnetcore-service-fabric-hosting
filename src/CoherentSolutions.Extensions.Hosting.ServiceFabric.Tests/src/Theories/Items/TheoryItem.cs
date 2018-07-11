@@ -28,8 +28,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             this.extensions = new Dictionary<Type, ITheoryExtension>();
             this.configActions = new LinkedList<Action<HostBuilder>>();
             this.checkActions = new LinkedList<Action<IHost>>();
-
-            this.initializingExtensions = false;
         }
 
         public override string ToString()
@@ -52,6 +50,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
 
             return obj is TheoryItem other && this.name.Equals(other.name);
         }
+
+        protected abstract void InitializeExtensions();
 
         public void SetupExtension<T>(
             T extension)
@@ -118,14 +118,19 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             host.StopAsync().GetAwaiter().GetResult();
         }
 
-        protected void StartExtensionsSetup()
+        public TheoryItem Initialize()
         {
             this.initializingExtensions = true;
-        }
+            try
+            {
+                this.InitializeExtensions();
+            }
+            finally
+            {
+                this.initializingExtensions = false;
+            }
 
-        protected void StopExtensionsSetup()
-        {
-            this.initializingExtensions = false;
+            return this;
         }
 
         protected T GetExtension<T>()

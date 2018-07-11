@@ -14,7 +14,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
           IUseDelegateTheoryExtensionSupported,
           IUseDelegateInvokerTheoryExtensionSupported,
           IUseDependenciesTheoryExtensionSupported,
-          IResolveDependencyTheoryExtensionSupported
+          IPickDependencyTheoryExtensionSupported
         where T : IServiceHostDelegateReplicaTemplateConfigurator
     {
         private class DelegateInvokerProxy : IServiceHostDelegateInvoker
@@ -51,14 +51,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             string name)
             : base(name)
         {
-            this.StartExtensionsSetup();
+        }
 
+        protected override void InitializeExtensions()
+        {
             this.SetupExtension(new UseDelegateTheoryExtension());
             this.SetupExtension(new UseDelegateInvokerTheoryExtension());
             this.SetupExtension(new UseDependenciesTheoryExtension());
-            this.SetupExtension(new ResolveDependencyTheoryExtension());
-
-            this.StopExtensionsSetup();
+            this.SetupExtension(new PickDependencyTheoryExtension());
         }
 
         protected virtual void ConfigureExtensions(
@@ -67,7 +67,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             var useDelegateExtension = this.GetExtension<IUseDelegateTheoryExtension>();
             var useDelegateInvokerExtension = this.GetExtension<IUseDelegateInvokerTheoryExtension>();
             var useDependenciesExtension = this.GetExtension<IUseDependenciesTheoryExtension>();
-            var resolveDependenciesExtension = this.GetExtension<IResolveDependencyTheoryExtension>();
+            var pickDependenciesExtension = this.GetExtension<IPickDependencyTheoryExtension>();
 
             configurator.UseDependencies(useDependenciesExtension.Factory);
             configurator.UseDelegate(useDelegateExtension.Delegate);
@@ -79,7 +79,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                     return new DelegateInvokerProxy(
                         useDelegateInvokerExtension.Factory(@delegate, provider),
                         provider,
-                        resolveDependenciesExtension.ServiceResolveDelegates);
+                        pickDependenciesExtension.PickActions);
                 });
         }
     }

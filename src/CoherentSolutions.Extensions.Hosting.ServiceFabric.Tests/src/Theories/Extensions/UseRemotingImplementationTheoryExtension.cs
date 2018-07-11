@@ -18,21 +18,22 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Exte
 
         public UseRemotingImplementationTheoryExtension()
         {
-            this.Factory = provider => new RemotingImplementation();
+            this.Factory = Tools.GetRemotingImplementationFunc<RemotingImplementation>();
         }
 
-        public UseRemotingImplementationTheoryExtension SetupImplementation<T>()
+        public UseRemotingImplementationTheoryExtension Setup<T>()
             where T : IService
         {
-            this.Factory = HostingDefaults.DefaultRemotingImplementationFunc<T>;
+            this.Factory = Tools.GetRemotingImplementationFunc<T>();
 
             return this;
         }
 
-        public UseRemotingImplementationTheoryExtension SetupImplementation<T>(
+        public UseRemotingImplementationTheoryExtension Setup(
             Func<IServiceProvider, IService> factory)
         {
-            this.Factory = factory ?? throw new ArgumentNullException(nameof(factory));
+            this.Factory = factory
+             ?? throw new ArgumentNullException(nameof(factory));
 
             return this;
         }

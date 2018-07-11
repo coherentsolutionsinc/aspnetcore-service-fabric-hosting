@@ -3,18 +3,18 @@ using System.Collections.Generic;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Extensions
 {
-    public sealed class ResolveDependencyTheoryExtension : IResolveDependencyTheoryExtension
+    public class PickDependencyTheoryExtension : IPickDependencyTheoryExtension
     {
         private readonly LinkedList<Action<IServiceProvider>> delegates;
 
-        public IEnumerable<Action<IServiceProvider>> ServiceResolveDelegates => this.delegates;
+        public IEnumerable<Action<IServiceProvider>> PickActions => this.delegates;
 
-        public ResolveDependencyTheoryExtension()
+        public PickDependencyTheoryExtension()
         {
             this.delegates = new LinkedList<Action<IServiceProvider>>();
         }
 
-        public ResolveDependencyTheoryExtension Setup(
+        public PickDependencyTheoryExtension Setup(
             Type type,
             Action<object> action)
         {

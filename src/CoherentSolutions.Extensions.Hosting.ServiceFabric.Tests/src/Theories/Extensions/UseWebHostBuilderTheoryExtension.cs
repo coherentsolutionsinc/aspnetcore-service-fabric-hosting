@@ -26,7 +26,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Exte
 
         public UseWebHostBuilderTheoryExtension()
         {
-            this.Factory = () => HostingDefaults.DefaultWebHostBuilderFunc().UseStartup<Startup>();
+            this.Factory = Tools.GetWebHostBuilderFunc();
         }
 
         public UseWebHostBuilderTheoryExtension Setup(

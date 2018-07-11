@@ -29,8 +29,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             protected ListenerParameters()
             {
                 this.EndpointName = string.Empty;
-                this.LoggerOptionsFunc = HostingDefaults.DefaultLoggerOptionsFunc;
-                this.DependenciesFunc = HostingDefaults.DefaultDependenciesFunc;
+                this.LoggerOptionsFunc = DefaultLoggerOptionsFunc;
+                this.DependenciesFunc = DefaultDependenciesFunc;
                 this.DependenciesConfigAction = null;
             }
 
@@ -64,6 +64,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 }
 
                 this.DependenciesConfigAction = this.DependenciesConfigAction.Chain(configAction);
+            }
+
+            private static IServiceHostLoggerOptions DefaultLoggerOptionsFunc()
+            {
+                return ServiceHostLoggerOptions.Disabled;
+            }
+
+            private static IServiceCollection DefaultDependenciesFunc()
+            {
+                return new ServiceCollection();
             }
         }
 

@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Extensions
 {
-    public interface IResolveDependencyTheoryExtension : ITheoryExtension
+    public interface IPickDependencyTheoryExtension : ITheoryExtension
     {
-        IEnumerable<Action<IServiceProvider>> ServiceResolveDelegates { get; }
+        IEnumerable<Action<IServiceProvider>> PickActions { get; }
     }
 }

@@ -18,7 +18,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                             serviceBuilder.ConfigureObject(
                                 c =>
                                 {
-                                    c.UseRuntimeRegistrant(Tools.StatefulRuntimeRegistrant);
+                                    c.UseRuntimeRegistrant(Tools.GetStatefulRuntimeRegistrantFunc());
                                     c.DefineDelegate(
                                         delegateBuilder =>
                                         {

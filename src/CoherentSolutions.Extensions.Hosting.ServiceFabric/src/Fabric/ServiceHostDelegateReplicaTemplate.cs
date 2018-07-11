@@ -31,10 +31,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             protected DelegateParameters()
             {
-                this.LoggerOptionsFunc = HostingDefaults.DefaultLoggerOptionsFunc;
-                this.DelegateInvokerFunc = HostingDefaults.DefaulDelegateInvokerFunc;
+                this.LoggerOptionsFunc = DefaultLoggerOptionsFunc;
+                this.DelegateInvokerFunc = DefaulDelegateInvokerFunc;
                 this.Delegate = null;
-                this.DependenciesFunc = HostingDefaults.DefaultDependenciesFunc;
+                this.DependenciesFunc = DefaultDependenciesFunc;
                 this.DependenciesConfigAction = null;
             }
 
@@ -75,6 +75,33 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 }
 
                 this.DependenciesConfigAction = this.DependenciesConfigAction.Chain(configAction);
+            }
+
+            private static IServiceHostDelegateInvoker DefaulDelegateInvokerFunc(
+                Delegate @delegate,
+                IServiceProvider services)
+            {
+                if (@delegate == null)
+                {
+                    throw new ArgumentNullException(nameof(@delegate));
+                }
+
+                if (services == null)
+                {
+                    throw new ArgumentNullException(nameof(services));
+                }
+
+                return new ServiceHostDelegateInvoker(@delegate, services);
+            }
+
+            private static IServiceHostLoggerOptions DefaultLoggerOptionsFunc()
+            {
+                return ServiceHostLoggerOptions.Disabled;
+            }
+
+            private static IServiceCollection DefaultDependenciesFunc()
+            {
+                return new ServiceCollection();
             }
         }
 

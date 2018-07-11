@@ -10,7 +10,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Exte
 
         public UseDelegateInvokerTheoryExtension()
         {
-            this.Factory = HostingDefaults.DefaulDelegateInvokerFunc;
+            this.Factory = Tools.GetDelegateInvokerFunc();
         }
 
         public UseDelegateInvokerTheoryExtension Setup(

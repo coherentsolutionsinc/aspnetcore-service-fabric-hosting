@@ -9,9 +9,11 @@ using System.Threading.Tasks;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
 
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
+using Microsoft.ServiceFabric.Services.Remoting.V2;
 using Microsoft.ServiceFabric.Services.Remoting.V2.FabricTransport.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 
@@ -32,7 +34,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
 
         public interface ITestGenericDependency<T>
         {
-            
         }
 
         public interface ITestRemoting : IService
@@ -41,6 +42,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
 
         public class TestRemoting : ITestRemoting
         {
+        }
+
+        public class TestRemotingWithDependency : ITestRemoting
+        {
+            public ITestDependency Dependency { get; }
+
+            public TestRemotingWithDependency(
+                ITestDependency dependency)
+            {
+                this.Dependency = dependency;
+            }
         }
 
         public class TestDependency : ITestDependency
@@ -61,8 +73,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
         }
 
         private const string LOCALHOST = "localhost";
-
-        private const string ENDPOINT_NAME = "ServiceEndpoint";
 
         private static readonly Mock<ICodePackageActivationContext> package;
 
@@ -107,49 +117,38 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
             }
         }
 
-        public static AspNetCoreCommunicationListener DefaultStatefulAspNetCoreCommunicationListener
+        static Tools()
         {
-            get
-            {
-                return AspNetCoreCommunicationListenerFunc(
-                    StatefulContext,
-                    ENDPOINT_NAME,
-                    (
-                        s,
-                        listener) => null);
-            }
+            package = new Mock<ICodePackageActivationContext>();
+            package
+               .Setup(instance => instance.GetEndpoints())
+               .Returns(
+                    new EndpointResourceDescriptionCollection
+                    {
+                        new EndpointResourceDescription
+                        {
+                            Name = "ServiceEndpoint"
+                        }
+                    });
         }
 
-        public static AspNetCoreCommunicationListener DefaultStatelessAspNetCoreCommunicationListener
+        public static Func<IStatefulServiceRuntimeRegistrant> GetStatefulRuntimeRegistrantFunc()
         {
-            get
-            {
-                return AspNetCoreCommunicationListenerFunc(
-                    StatelessContext,
-                    ENDPOINT_NAME,
+            var completionSource = new TaskCompletionSource<int>();
+            var registrant = new Mock<IStatefulServiceRuntimeRegistrant>();
+            registrant
+               .Setup(
+                    instance => instance.RegisterAsync(
+                        It.IsAny<string>(),
+                        It.IsAny<Func<StatefulServiceContext, StatefulServiceBase>>(),
+                        It.IsAny<CancellationToken>()))
+               .Callback<string, Func<StatefulServiceContext, StatefulServiceBase>, CancellationToken>(
                     (
                         s,
-                        listener) => null);
-            }
-        }
-
-        public static Func<IStatefulServiceRuntimeRegistrant> StatefulRuntimeRegistrant
-        {
-            get
-            {
-                var completionSource = new TaskCompletionSource<int>();
-                var registrant = new Mock<IStatefulServiceRuntimeRegistrant>();
-                registrant
-                   .Setup(
-                        instance => instance.RegisterAsync(
-                            It.IsAny<string>(),
-                            It.IsAny<Func<StatefulServiceContext, StatefulServiceBase>>(),
-                            It.IsAny<CancellationToken>()))
-                   .Callback<string, Func<StatefulServiceContext, StatefulServiceBase>, CancellationToken>(
-                        (
-                            s,
-                            f,
-                            c) =>
+                        f,
+                        c) =>
+                    {
+                        try
                         {
                             var service = f(StatefulContext);
                             var partition = new Mock<IStatefulServicePartition>();
@@ -159,7 +158,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
                             service.InvokeOnOpenAsync(ReplicaOpenMode.New, c).GetAwaiter().GetResult();
 
                             var listeners = service.InvokeCreateServiceReplicaListeners()
-                               .Select(listener => listener.CreateCommunicationListener(StatefulContext));
+                               .Select(listener => listener.CreateCommunicationListener(StatefulContext))
+                               .ToArray();
 
                             var openListenersTask = Task.Run(
                                 () =>
@@ -178,30 +178,34 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
                             Task.WhenAll(runTask, changeRoleTask).GetAwaiter().GetResult();
 
                             completionSource.SetResult(0);
-                        })
-                   .Returns(completionSource.Task);
+                        }
+                        catch (Exception e)
+                        {
+                            completionSource.SetException(e);
+                        }
+                    })
+               .Returns(completionSource.Task);
 
-                return () => registrant.Object;
-            }
+            return () => registrant.Object;
         }
 
-        public static Func<IStatelessServiceRuntimeRegistrant> StatelessRuntimeRegistrant
+        public static Func<IStatelessServiceRuntimeRegistrant> GetStatelessRuntimeRegistrantFunc()
         {
-            get
-            {
-                var completionSource = new TaskCompletionSource<int>();
-                var registrant = new Mock<IStatelessServiceRuntimeRegistrant>();
-                registrant
-                   .Setup(
-                        instance => instance.RegisterAsync(
-                            It.IsAny<string>(),
-                            It.IsAny<Func<StatelessServiceContext, StatelessService>>(),
-                            It.IsAny<CancellationToken>()))
-                   .Callback<string, Func<StatelessServiceContext, StatelessService>, CancellationToken>(
-                        (
-                            s,
-                            f,
-                            c) =>
+            var completionSource = new TaskCompletionSource<int>();
+            var registrant = new Mock<IStatelessServiceRuntimeRegistrant>();
+            registrant
+               .Setup(
+                    instance => instance.RegisterAsync(
+                        It.IsAny<string>(),
+                        It.IsAny<Func<StatelessServiceContext, StatelessService>>(),
+                        It.IsAny<CancellationToken>()))
+               .Callback<string, Func<StatelessServiceContext, StatelessService>, CancellationToken>(
+                    (
+                        s,
+                        f,
+                        c) =>
+                    {
+                        try
                         {
                             var service = f(StatelessContext);
                             var partition = new Mock<IStatelessServicePartition>();
@@ -209,7 +213,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
                             Injector.InjectProperty(service, "Partition", partition.Object, true);
 
                             var listeners = service.InvokeCreateServiceInstanceListeners()
-                               .Select(listener => listener.CreateCommunicationListener(StatelessContext));
+                               .Select(listener => listener.CreateCommunicationListener(StatelessContext))
+                               .ToArray();
 
                             Task.WhenAll(
                                     Task.Run(
@@ -227,73 +232,123 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
                             service.InvokeOnOpenAsync(c).GetAwaiter().GetResult();
 
                             completionSource.SetResult(0);
-                        })
-                   .Returns(completionSource.Task);
-
-                return () => registrant.Object;
-            }
-        }
-
-        public static ServiceHostAspNetCoreCommunicationListenerFactory AspNetCoreCommunicationListenerFunc
-        {
-            get
-            {
-                return (
-                    context,
-                    s,
-                    arg3) =>
-                {
-                    var action = new Mock<Func<string, AspNetCoreCommunicationListener, IWebHost>>();
-                    var listener = new Mock<AspNetCoreCommunicationListener>(context, action.Object);
-
-                    listener
-                       .Setup(instance => instance.OpenAsync(It.IsAny<CancellationToken>()))
-                       .Callback(() => arg3(LOCALHOST, listener.Object))
-                       .Returns(Task.FromResult(string.Empty));
-
-                    return listener.Object;
-                };
-            }
-        }
-
-        public static ServiceHostRemotingCommunicationListenerFactory RemotingCommunicationListenerFunc
-        {
-            get
-            {
-                return (
-                    context,
-                    build) =>
-                {
-                    var options = build(context);
-                    var listener = new Mock<FabricTransportServiceRemotingListener>(
-                        context,
-                        options.MessageDispatcher,
-                        options.ListenerSettings,
-                        options.MessageSerializationProvider);
-
-                    listener
-                       .As<ICommunicationListener>()
-                       .Setup(instance => instance.OpenAsync(It.IsAny<CancellationToken>()))
-                       .Returns(Task.FromResult(string.Empty));
-
-                    return listener.Object;
-                };
-            }
-        }
-
-        static Tools()
-        {
-            package = new Mock<ICodePackageActivationContext>();
-            package
-               .Setup(instance => instance.GetEndpoints())
-               .Returns(
-                    new EndpointResourceDescriptionCollection
-                    {
-                        new EndpointResourceDescription
-                        {
-                            Name = "ServiceEndpoint"
                         }
-                    });
+                        catch (Exception e)
+                        {
+                            completionSource.SetException(e);
+                        }
+                    })
+               .Returns(completionSource.Task);
+
+            return () => registrant.Object;
+        }
+
+        public static Func<IServiceCollection> GetDependenciesFunc()
+        {
+            return () => new ServiceCollection();
+        }
+
+        public static Func<Delegate, IServiceProvider, IServiceHostDelegateInvoker> GetDelegateInvokerFunc()
+        {
+            return (
+                @delegate,
+                provider) =>
+            {
+                var invoker = new Mock<IServiceHostDelegateInvoker>();
+
+                invoker
+                   .Setup(instance => instance.InvokeAsync(It.IsAny<CancellationToken>()))
+                   .Callback<CancellationToken>(
+                        cancellationToken =>
+                        {
+                            @delegate.DynamicInvoke();
+                        })
+                   .Returns(Task.CompletedTask);
+
+                return invoker.Object;
+            };
+        }
+
+        public static ServiceHostAspNetCoreCommunicationListenerFactory GetAspNetCoreCommunicationListenerFunc()
+        {
+            return (
+                context,
+                s,
+                arg3) =>
+            {
+                var action = new Mock<Func<string, AspNetCoreCommunicationListener, IWebHost>>();
+                var listener = new Mock<AspNetCoreCommunicationListener>(context, action.Object);
+
+                listener
+                   .Setup(instance => instance.OpenAsync(It.IsAny<CancellationToken>()))
+                   .Callback(() => arg3(LOCALHOST, listener.Object))
+                   .Returns(Task.FromResult(string.Empty));
+
+                return listener.Object;
+            };
+        }
+
+        public static Func<IWebHostBuilder> GetWebHostBuilderFunc()
+        {
+            return () =>
+            {
+                var host = new Mock<IWebHost>();
+                var builder = new Mock<IWebHostBuilder>();
+                var collection = new ServiceCollection();
+
+                host
+                   .Setup(instance => instance.Services)
+                   .Returns(() => collection.BuildServiceProvider());
+
+                builder
+                   .Setup(instance => instance.ConfigureServices(It.IsAny<Action<IServiceCollection>>()))
+                   .Callback<Action<IServiceCollection>>(
+                        action =>
+                        {
+                            action(collection);
+                        })
+                   .Returns(builder.Object);
+
+                builder
+                   .Setup(instance => instance.Build())
+                   .Returns(host.Object);
+
+                return builder.Object;
+            };
+        }
+
+        public static ServiceHostRemotingCommunicationListenerFactory GetRemotingCommunicationListenerFunc()
+        {
+            return (
+                context,
+                build) =>
+            {
+                var options = build(context);
+                var listener = new Mock<FabricTransportServiceRemotingListener>(
+                    context,
+                    options.MessageHandler,
+                    options.ListenerSettings,
+                    options.MessageSerializationProvider);
+
+                listener
+                   .As<ICommunicationListener>()
+                   .Setup(instance => instance.OpenAsync(It.IsAny<CancellationToken>()))
+                   .Returns(Task.FromResult(string.Empty));
+
+                return listener.Object;
+            };
+        }
+
+        public static Func<IServiceProvider, IService> GetRemotingImplementationFunc<T>()
+            where T : IService
+        {
+            return provider => ActivatorUtilities.CreateInstance<T>(provider);
+        }
+
+        public static Func<IServiceProvider, IServiceRemotingMessageSerializationProvider> GetRemotingSerializerFunc<T>()
+            where T : IServiceRemotingMessageSerializationProvider
+        {
+            return provider => ActivatorUtilities.CreateInstance<T>(provider);
         }
     }
 }

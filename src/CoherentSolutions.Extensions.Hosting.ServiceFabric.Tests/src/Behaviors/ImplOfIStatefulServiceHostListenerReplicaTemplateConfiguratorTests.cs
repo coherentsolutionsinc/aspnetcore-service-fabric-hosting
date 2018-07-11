@@ -33,7 +33,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Behaviors
                         new Action<StatefulServiceHostAspNetCoreListenerReplicaTemplate>(
                             c =>
                             {
-                                c.UseCommunicationListener(Tools.AspNetCoreCommunicationListenerFunc);
+                                c.UseCommunicationListener(Tools.GetAspNetCoreCommunicationListenerFunc());
                                 c.UseWebHostBuilder(() => new Mock<IWebHostBuilder>().Object);
                             }),
                         new Func<StatefulServiceHostAspNetCoreListenerReplicaTemplate, ServiceReplicaListener>(

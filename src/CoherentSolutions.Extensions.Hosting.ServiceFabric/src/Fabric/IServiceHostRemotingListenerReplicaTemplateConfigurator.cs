@@ -4,6 +4,7 @@ using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 using Microsoft.ServiceFabric.Services.Remoting.FabricTransport.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting.V2;
+using Microsoft.ServiceFabric.Services.Remoting.V2.Runtime;
 
 using IRemotingImplementation = Microsoft.ServiceFabric.Services.Remoting.IService;
 
@@ -26,5 +27,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         void UseSerializer<TSerializer>(
             Func<IServiceProvider, TSerializer> factoryFunc)
             where TSerializer : IServiceRemotingMessageSerializationProvider;
+
+        void UseHandler<THandler>(
+            Func<IServiceProvider, THandler> factoryFunc)
+            where THandler : IServiceRemotingMessageHandler;
     }
 }

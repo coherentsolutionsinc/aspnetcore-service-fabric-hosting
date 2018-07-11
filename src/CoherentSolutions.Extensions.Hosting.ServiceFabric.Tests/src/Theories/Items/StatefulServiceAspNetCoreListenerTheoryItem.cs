@@ -18,11 +18,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                             serviceBuilder.ConfigureObject(
                                 c =>
                                 {
-                                    c.UseRuntimeRegistrant(Tools.StatefulRuntimeRegistrant);
+                                    c.UseRuntimeRegistrant(Tools.GetStatefulRuntimeRegistrantFunc());
                                     c.DefineAspNetCoreListener(
                                         listenerBuilder =>
                                         {
-                                            listenerBuilder.UseCommunicationListener(Tools.AspNetCoreCommunicationListenerFunc);
                                             listenerBuilder.ConfigureObject(this.ConfigureExtensions);
                                         });
                                 });

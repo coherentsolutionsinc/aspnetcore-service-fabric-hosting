@@ -18,11 +18,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                             serviceBuilder.ConfigureObject(
                                 c =>
                                 {
-                                    c.UseRuntimeRegistrant(Tools.StatefulRuntimeRegistrant);
+                                    c.UseRuntimeRegistrant(Tools.GetStatefulRuntimeRegistrantFunc());
                                     c.DefineRemotingListener(
                                         listenerBuilder =>
                                         {
-                                            listenerBuilder.UseCommunicationListener(Tools.RemotingCommunicationListenerFunc);
+                                            listenerBuilder.UseCommunicationListener(Tools.GetRemotingCommunicationListenerFunc());
                                             listenerBuilder.ConfigureObject(this.ConfigureExtensions);
                                         });
                                 });

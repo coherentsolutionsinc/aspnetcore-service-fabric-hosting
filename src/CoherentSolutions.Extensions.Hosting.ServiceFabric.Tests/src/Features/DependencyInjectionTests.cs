@@ -196,16 +196,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             UseDependencies.Case @case)
         {
             // Arrange
-            var mockCollection = new Mock<ServiceCollection>
-            {
-                CallBase = true
-            };
-            mockCollection
-               .As<IServiceCollection>()
-               .Setup(instance => instance.Add(It.IsAny<ServiceDescriptor>()))
-               .Verifiable();
-
-            var arrangeCollection = mockCollection.Object;
+            var arrangeCollection = new ServiceCollection();
 
             var theoryItem = @case.TheoryItem;
 
@@ -214,7 +205,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             theoryItem.Try();
 
             // Assert
-            mockCollection.Verify();
+            Assert.NotEmpty(arrangeCollection);
         }
 
         [Theory]
@@ -229,7 +220,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             object actualObject = null;
 
             // Act
-            theoryItem.SetupExtension(new ResolveDependencyTheoryExtension().Setup(requiredType, o => actualObject = o));
+            theoryItem.SetupExtension(new PickDependencyTheoryExtension().Setup(requiredType, o => actualObject = o));
             theoryItem.Try();
 
             // Assert
@@ -253,12 +244,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             theoryItem.SetupConfig(
                 builder =>
                 {
-                    builder.ConfigureServices((
-                        context,
-                        collection) =>
-                    {
-                        collection.Add(arrangeDescriptor);
-                    });
+                    builder.ConfigureServices(
+                        (
+                            context,
+                            collection) =>
+                        {
+                            collection.Add(arrangeDescriptor);
+                        });
                 });
             theoryItem.SetupCheck(
                 host =>
@@ -266,7 +258,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                     expectedObject = host.Services.GetService<Tools.ITestDependency>();
                 });
 
-            theoryItem.SetupExtension(new ResolveDependencyTheoryExtension().Setup(typeof(Tools.ITestDependency), o => actualObject = o));
+            theoryItem.SetupExtension(new PickDependencyTheoryExtension().Setup(typeof(Tools.ITestDependency), o => actualObject = o));
             theoryItem.Try();
 
             // Assert
@@ -290,12 +282,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             theoryItem.SetupConfig(
                 builder =>
                 {
-                    builder.ConfigureServices((
-                        context,
-                        collection) =>
-                    {
-                        collection.Add(arrangeDescriptor);
-                    });
+                    builder.ConfigureServices(
+                        (
+                            context,
+                            collection) =>
+                        {
+                            collection.Add(arrangeDescriptor);
+                        });
                 });
             theoryItem.SetupCheck(
                 host =>
@@ -303,7 +296,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                     expectedObject = host.Services.GetService<Tools.ITestDependency>();
                 });
 
-            theoryItem.SetupExtension(new ResolveDependencyTheoryExtension().Setup(typeof(Tools.ITestDependency), o => actualObject = o));
+            theoryItem.SetupExtension(new PickDependencyTheoryExtension().Setup(typeof(Tools.ITestDependency), o => actualObject = o));
             theoryItem.Try();
 
             // Assert
@@ -318,7 +311,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             // Arrange
             var theoryItem = @case.TheoryItem;
 
-            var arrangeDescriptor = new ServiceDescriptor(typeof(Tools.ITestGenericDependency<>), typeof(Tools.TestGenericDependency<>), ServiceLifetime.Singleton);
+            var arrangeDescriptor = new ServiceDescriptor(
+                typeof(Tools.ITestGenericDependency<>),
+                typeof(Tools.TestGenericDependency<>),
+                ServiceLifetime.Singleton);
 
             object expectedObject = null;
             object actualObject = null;
@@ -327,12 +323,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             theoryItem.SetupConfig(
                 builder =>
                 {
-                    builder.ConfigureServices((
-                        context,
-                        collection) =>
-                    {
-                        collection.Add(arrangeDescriptor);
-                    });
+                    builder.ConfigureServices(
+                        (
+                            context,
+                            collection) =>
+                        {
+                            collection.Add(arrangeDescriptor);
+                        });
                 });
             theoryItem.SetupCheck(
                 host =>
@@ -340,7 +337,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                     expectedObject = host.Services.GetService<Tools.ITestGenericDependency<int>>();
                 });
 
-            theoryItem.SetupExtension(new ResolveDependencyTheoryExtension().Setup(typeof(Tools.ITestGenericDependency<int>), o => actualObject = o));
+            theoryItem.SetupExtension(new PickDependencyTheoryExtension().Setup(typeof(Tools.ITestGenericDependency<int>), o => actualObject = o));
             theoryItem.Try();
 
             // Assert
@@ -364,12 +361,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             theoryItem.SetupConfig(
                 builder =>
                 {
-                    builder.ConfigureServices((
-                        context,
-                        collection) =>
-                    {
-                        collection.Add(arrangeDescriptor);
-                    });
+                    builder.ConfigureServices(
+                        (
+                            context,
+                            collection) =>
+                        {
+                            collection.Add(arrangeDescriptor);
+                        });
                 });
             theoryItem.SetupCheck(
                 host =>
@@ -377,7 +375,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                     expectedObject = host.Services.GetService<Tools.ITestDependency>();
                 });
 
-            theoryItem.SetupExtension(new ResolveDependencyTheoryExtension().Setup(typeof(Tools.ITestDependency), o => actualObject = o));
+            theoryItem.SetupExtension(new PickDependencyTheoryExtension().Setup(typeof(Tools.ITestDependency), o => actualObject = o));
             theoryItem.Try();
 
             // Assert
@@ -392,7 +390,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             // Arrange
             var theoryItem = @case.TheoryItem;
 
-            var arrangeDescriptor = new ServiceDescriptor(typeof(Tools.ITestGenericDependency<>), typeof(Tools.TestGenericDependency<>), ServiceLifetime.Transient);
+            var arrangeDescriptor = new ServiceDescriptor(
+                typeof(Tools.ITestGenericDependency<>),
+                typeof(Tools.TestGenericDependency<>),
+                ServiceLifetime.Transient);
 
             object expectedObject = null;
             object actualObject = null;
@@ -401,12 +402,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             theoryItem.SetupConfig(
                 builder =>
                 {
-                    builder.ConfigureServices((
-                        context,
-                        collection) =>
-                    {
-                        collection.Add(arrangeDescriptor);
-                    });
+                    builder.ConfigureServices(
+                        (
+                            context,
+                            collection) =>
+                        {
+                            collection.Add(arrangeDescriptor);
+                        });
                 });
             theoryItem.SetupCheck(
                 host =>
@@ -414,7 +416,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                     expectedObject = host.Services.GetService<Tools.ITestGenericDependency<int>>();
                 });
 
-            theoryItem.SetupExtension(new ResolveDependencyTheoryExtension().Setup(typeof(Tools.ITestGenericDependency<int>), o => actualObject = o));
+            theoryItem.SetupExtension(new PickDependencyTheoryExtension().Setup(typeof(Tools.ITestGenericDependency<int>), o => actualObject = o));
             theoryItem.Try();
 
             // Assert

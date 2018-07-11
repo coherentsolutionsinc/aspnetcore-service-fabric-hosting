@@ -7,17 +7,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories
 {
     public static class TheoryItemsSet
     {
-        public static TheoryItem StatefulServiceDelegate => new StatefulServiceDelegateTheoryItem();
+        public static TheoryItem StatefulServiceDelegate => new StatefulServiceDelegateTheoryItem().Initialize();
 
-        public static TheoryItem StatefulServiceAspNetCoreListener => new StatefulServiceAspNetCoreListenerTheoryItem();
+        public static TheoryItem StatefulServiceAspNetCoreListener => new StatefulServiceAspNetCoreListenerTheoryItem().Initialize();
 
-        public static TheoryItem StatefulServiceRemotingListener => new StatefulServiceRemotingListenerTheoryItem();
+        public static TheoryItem StatefulServiceRemotingListener => new StatefulServiceRemotingListenerTheoryItem().Initialize();
 
-        public static TheoryItem StatelessServiceDelegate => new StatelessServiceDelegateTheoryItem();
+        public static TheoryItem StatelessServiceDelegate => new StatelessServiceDelegateTheoryItem().Initialize();
 
-        public static TheoryItem StatelessServiceAspNetCoreListener => new StatelessServiceAspNetCoreListenerTheoryItem();
+        public static TheoryItem StatelessServiceAspNetCoreListener => new StatelessServiceAspNetCoreListenerTheoryItem().Initialize();
 
-        public static TheoryItem StatelessServiceRemotingListener => new StatelessServiceRemotingListenerTheoryItem();
+        public static TheoryItem StatelessServiceRemotingListener => new StatelessServiceRemotingListenerTheoryItem().Initialize();
 
         public static IEnumerable<TheoryItem> StatefulItems
         {
@@ -38,6 +38,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories
                 yield return StatelessServiceRemotingListener;
             }
         }
+
+        public static IEnumerable<TheoryItem> DelegateItems
+            => new[]
+            {
+                StatefulServiceDelegate,
+                StatelessServiceDelegate
+            };
 
         public static IEnumerable<TheoryItem> AspNetCoreListenerItems
             => new[]

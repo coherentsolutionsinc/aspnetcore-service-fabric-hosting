@@ -12,9 +12,10 @@ using Microsoft.Extensions.DependencyInjection;
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Items.Base
 {
     public abstract class ServiceAspNetCoreListenerTheoryItem<T>
-        : TheoryItem,
+        : ServiceListenerTheoryItem<T>,
+          IUseListenerEndpointTheoryExtensionSupported,
           IUseWebHostBuilderTheoryExtensionSupported,
-          IResolveDependencyTheoryExtensionSupported
+          IPickDependencyTheoryExtensionSupported
         where T : IServiceHostAspNetCoreListenerReplicaTemplateConfigurator
     {
         private class WebHostBuilderProxy : IWebHostBuilder
@@ -78,26 +79,44 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             string name)
             : base(name)
         {
-            this.StartExtensionsSetup();
-
-            this.SetupExtension(new UseWebHostBuilderTheoryExtension());
-            this.SetupExtension(new ResolveDependencyTheoryExtension());
-
-            this.StopExtensionsSetup();
         }
 
-        protected virtual void ConfigureExtensions(
+        protected override void InitializeExtensions()
+        {
+            base.InitializeExtensions();
+
+            this.SetupExtension(new UseAspNetCoreCommunicationListenerTheoryExtension());
+            this.SetupExtension(new UseWebHostBuilderTheoryExtension());
+            this.SetupExtension(new PickDependencyTheoryExtension());
+            this.SetupExtension(new PickListenerEndpointTheoryExtension());
+        }
+
+        protected override void ConfigureExtensions(
             T configurator)
         {
-            var useWebHostBuilderExtension = this.GetExtension<IUseWebHostBuilderTheoryExtension>();
-            var resolveDependenciesExtension = this.GetExtension<IResolveDependencyTheoryExtension>();
+            base.ConfigureExtensions(configurator);
 
+            var useAspNetCoreCommunicationListenerExtension = this.GetExtension<IUseAspNetCoreCommunicationListenerTheoryExtension>();
+            var useWebHostBuilderExtension = this.GetExtension<IUseWebHostBuilderTheoryExtension>();
+            var pickDependenciesExtension = this.GetExtension<IPickDependencyTheoryExtension>();
+            var pickListenerEndpointExtensions = this.GetExtension<IPickListenerEndpointTheoryExtension>();
+
+            configurator.UseCommunicationListener(
+                (
+                    context,
+                    endpointName,
+                    factory) =>
+                {
+                    pickListenerEndpointExtensions.PickAction(endpointName);
+
+                    return useAspNetCoreCommunicationListenerExtension.Factory(context, endpointName, factory);
+                });
             configurator.UseWebHostBuilder(
                 () =>
                 {
                     return new WebHostBuilderProxy(
                         useWebHostBuilderExtension.Factory(),
-                        resolveDependenciesExtension.ServiceResolveDelegates);
+                        pickDependenciesExtension.PickActions);
                 });
         }
     }
