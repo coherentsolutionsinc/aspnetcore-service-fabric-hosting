@@ -722,66 +722,66 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
-        public static IStatefulServiceHostRemotingListenerReplicaTemplate UseSerializer<TSerializer>(
+        public static IStatefulServiceHostRemotingListenerReplicaTemplate UseSerializationProvider<TSerializer>(
             this IStatefulServiceHostRemotingListenerReplicaTemplate @this)
             where TSerializer : IServiceRemotingMessageSerializationProvider
         {
             @this.ConfigureObject(
-                configurator => configurator.UseSerializer<TSerializer>(null));
+                configurator => configurator.UseSerializationProvider<TSerializer>(null));
 
             return @this;
         }
 
-        public static IStatelessServiceHostRemotingListenerReplicaTemplate UseSerializer<TSerializer>(
+        public static IStatelessServiceHostRemotingListenerReplicaTemplate UseSerializationProvider<TSerializer>(
             this IStatelessServiceHostRemotingListenerReplicaTemplate @this)
             where TSerializer : IServiceRemotingMessageSerializationProvider
         {
             @this.ConfigureObject(
-                configurator => configurator.UseSerializer<TSerializer>(null));
+                configurator => configurator.UseSerializationProvider<TSerializer>(null));
 
             return @this;
         }
 
-        public static IStatefulServiceHostRemotingListenerReplicaTemplate UseSerializer<TSerializer>(
+        public static IStatefulServiceHostRemotingListenerReplicaTemplate UseSerializationProvider<TSerializer>(
             this IStatefulServiceHostRemotingListenerReplicaTemplate @this,
             Func<TSerializer> factoryFunc)
             where TSerializer : IServiceRemotingMessageSerializationProvider
         {
             @this.ConfigureObject(
-                configurator => configurator.UseSerializer(provider => factoryFunc()));
+                configurator => configurator.UseSerializationProvider(provider => factoryFunc()));
 
             return @this;
         }
 
-        public static IStatelessServiceHostRemotingListenerReplicaTemplate UseSerializer<TSerializer>(
+        public static IStatelessServiceHostRemotingListenerReplicaTemplate UseSerializationProvider<TSerializer>(
             this IStatelessServiceHostRemotingListenerReplicaTemplate @this,
             Func<TSerializer> factoryFunc)
             where TSerializer : IServiceRemotingMessageSerializationProvider
         {
             @this.ConfigureObject(
-                configurator => configurator.UseSerializer(provider => factoryFunc()));
+                configurator => configurator.UseSerializationProvider(provider => factoryFunc()));
 
             return @this;
         }
 
-        public static IStatefulServiceHostRemotingListenerReplicaTemplate UseSerializer<TSerializer>(
+        public static IStatefulServiceHostRemotingListenerReplicaTemplate UseSerializationProvider<TSerializer>(
             this IStatefulServiceHostRemotingListenerReplicaTemplate @this,
             Func<IServiceProvider, TSerializer> factoryFunc)
             where TSerializer : IServiceRemotingMessageSerializationProvider
         {
             @this.ConfigureObject(
-                configurator => configurator.UseSerializer(factoryFunc));
+                configurator => configurator.UseSerializationProvider(factoryFunc));
 
             return @this;
         }
 
-        public static IStatelessServiceHostRemotingListenerReplicaTemplate UseSerializer<TSerializer>(
+        public static IStatelessServiceHostRemotingListenerReplicaTemplate UseSerializationProvider<TSerializer>(
             this IStatelessServiceHostRemotingListenerReplicaTemplate @this,
             Func<IServiceProvider, TSerializer> factoryFunc)
             where TSerializer : IServiceRemotingMessageSerializationProvider
         {
             @this.ConfigureObject(
-                configurator => configurator.UseSerializer(factoryFunc));
+                configurator => configurator.UseSerializationProvider(factoryFunc));
 
             return @this;
         }

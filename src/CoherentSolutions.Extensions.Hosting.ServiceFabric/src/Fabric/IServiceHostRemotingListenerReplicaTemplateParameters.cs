@@ -17,7 +17,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
         Func<FabricTransportRemotingListenerSettings> RemotingSettingsFunc { get; }
 
-        Func<IServiceProvider, IServiceRemotingMessageSerializationProvider> RemotingSerializerFunc { get; }
+        Func<IServiceProvider, IServiceRemotingMessageSerializationProvider> RemotingSerializationProviderFunc { get; }
 
         Func<IServiceProvider, IServiceRemotingMessageHandler> RemotingHandlerFunc { get; }
     }

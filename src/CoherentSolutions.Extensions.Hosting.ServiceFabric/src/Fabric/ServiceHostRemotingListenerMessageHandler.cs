@@ -17,10 +17,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             IServiceRemotingMessageHandler handler,
             ILogger logger)
         {
-            this.handler = handler 
+            this.handler = handler
              ?? throw new ArgumentNullException(nameof(handler));
 
-            this.logger = logger 
+            this.logger = logger
              ?? throw new ArgumentNullException(nameof(logger));
         }
 

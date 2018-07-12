@@ -35,7 +35,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             public Func<FabricTransportRemotingListenerSettings> RemotingSettingsFunc { get; private set; }
 
-            public Func<IServiceProvider, IServiceRemotingMessageSerializationProvider> RemotingSerializerFunc { get; private set; }
+            public Func<IServiceProvider, IServiceRemotingMessageSerializationProvider> RemotingSerializationProviderFunc { get; private set; }
 
             public Func<IServiceProvider, IServiceRemotingMessageHandler> RemotingHandlerFunc { get; private set; }
 
@@ -44,7 +44,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.RemotingCommunicationListenerFunc = DefaultRemotingCommunicationListenerFunc;
                 this.RemotingImplementationFunc = null;
                 this.RemotingSettingsFunc = DefaultRemotingSettingsFunc;
-                this.RemotingSerializerFunc = null;
+                this.RemotingSerializationProviderFunc = null;
                 this.RemotingHandlerFunc = DefaultRemotingHandlerFunc;
             }
 
@@ -71,11 +71,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                  ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
 
-            public void UseSerializer<TSerializer>(
+            public void UseSerializationProvider<TSerializer>(
                 Func<IServiceProvider, TSerializer> factoryFunc)
                 where TSerializer : IServiceRemotingMessageSerializationProvider
             {
-                this.RemotingSerializerFunc = factoryFunc == null
+                this.RemotingSerializationProviderFunc = factoryFunc == null
                     ? provider => ActivatorUtilities.CreateInstance<TSerializer>(provider)
                     : (Func<IServiceProvider, IServiceRemotingMessageSerializationProvider>) (provider => factoryFunc(provider));
             }
@@ -178,9 +178,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                     }
 
                     var serializer = (IServiceRemotingMessageSerializationProvider) null;
-                    if (parameters.RemotingSerializerFunc != null)
+                    if (parameters.RemotingSerializationProviderFunc != null)
                     {
-                        serializer = parameters.RemotingSerializerFunc(provider);
+                        serializer = parameters.RemotingSerializationProviderFunc(provider);
                         if (serializer == null)
                         {
                             throw new FactoryProducesNullInstanceException<IServiceRemotingMessageSerializationProvider>();
@@ -211,8 +211,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                     var handler = parameters.RemotingHandlerFunc(new OverridableServiceProvider(overrides, provider));
 
                     return new ServiceHostRemotingCommunicationListenerComponents(
-                        new ServiceHostRemotingListenerMessageHandler(handler, logger), 
-                        serializer, 
+                        new ServiceHostRemotingListenerMessageHandler(handler, logger),
+                        serializer,
                         settings);
                 });
 
