@@ -29,41 +29,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
 {
     public static class Tools
     {
-        public interface ITestDependency
-        {
-        }
-
-        public interface ITestGenericDependency<T>
-        {
-        }
-
-        public interface ITestRemoting : IService
-        {
-        }
-
-        public class TestRemoting : ITestRemoting
-        {
-        }
-
-        public class TestRemotingWithDependency : ITestRemoting
-        {
-            public ITestDependency Dependency { get; }
-
-            public TestRemotingWithDependency(
-                ITestDependency dependency)
-            {
-                this.Dependency = dependency;
-            }
-        }
-
-        public class TestDependency : ITestDependency
-        {
-        }
-
-        public class TestGenericDependency<T> : ITestGenericDependency<T>
-        {
-        }
-
         private class EndpointResourceDescriptionCollection : KeyedCollection<string, EndpointResourceDescription>
         {
             protected override string GetKeyForItem(
@@ -356,6 +321,24 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
             where T : IServiceRemotingMessageHandler
         {
             return provider => ActivatorUtilities.CreateInstance<T>(provider);
+        }
+
+        public static Func<IStatefulServiceHostListenerReplicableTemplate, IStatefulServiceHostListenerReplicator> GetStatefulListenerReplicatorFunc()
+        {
+            return template =>
+            {
+                var replicator = new Mock<IStatefulServiceHostListenerReplicator>();
+                return replicator.Object;
+            };
+        }
+
+        public static Func<IStatelessServiceHostListenerReplicableTemplate, IStatelessServiceHostListenerReplicator> GetStatelessListenerReplicatorFunc()
+        {
+            return template =>
+            {
+                var replicator = new Mock<IStatelessServiceHostListenerReplicator>();
+                return replicator.Object;
+            };
         }
     }
 }

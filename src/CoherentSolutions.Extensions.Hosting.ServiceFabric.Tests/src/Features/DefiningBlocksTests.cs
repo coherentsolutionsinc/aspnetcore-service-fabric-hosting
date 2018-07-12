@@ -100,7 +100,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                 }
             }
         }
-        
+
         [Theory]
         [MemberData(nameof(Theories.AllDelegatesCases), MemberType = typeof(Theories))]
         private static void Should_invoke_custom_delegate_From_delegate_definition(
@@ -194,7 +194,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             var theoryItem = @case.TheoryItem;
 
             // Act
-            theoryItem.SetupExtension(new UseWebHostBuilderTheoryExtension().Setup(() => arrangeWebHostBuilder));
+            theoryItem.SetupExtension(new UseAspNetCoreListenerWebHostBuilderTheoryExtension().Setup(() => arrangeWebHostBuilder));
             theoryItem.Try();
 
             // Assert
@@ -227,7 +227,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             var theoryItem = @case.TheoryItem;
 
             // Act
-            theoryItem.SetupExtension(new UseAspNetCoreCommunicationListenerTheoryExtension().Setup(ArrangeListenerFactory));
+            theoryItem.SetupExtension(new UseAspNetCoreListenerCommunicationListenerTheoryExtension().Setup(ArrangeListenerFactory));
             theoryItem.Try();
 
             // Assert
@@ -265,7 +265,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             var theoryItem = @case.TheoryItem;
 
             // Act
-            theoryItem.SetupExtension(new UseRemotingCommunicationListenerTheoryExtension().Setup(ArrangeListenerFactory));
+            theoryItem.SetupExtension(new UseRemotingListenerCommunicationListenerTheoryExtension().Setup(ArrangeListenerFactory));
             theoryItem.Try();
 
             // Assert
@@ -278,10 +278,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             Theories.Case @case)
         {
             // Arrange
-            var arrangeDependency = new Tools.TestDependency();
+            var arrangeDependency = new TestDependency();
 
             var arrangeCollection = new ServiceCollection();
-            arrangeCollection.AddSingleton<Tools.ITestDependency>(arrangeDependency);
+            arrangeCollection.AddSingleton<ITestDependency>(arrangeDependency);
 
             object expectedDependency = arrangeDependency;
             object actualDependency = null;
@@ -290,12 +290,76 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
             // Act
             theoryItem.SetupExtension(new UseDependenciesTheoryExtension().Setup(() => arrangeCollection));
-            theoryItem.SetupExtension(new UseRemotingImplementationTheoryExtension().Setup<Tools.TestRemotingWithDependency>());
+            theoryItem.SetupExtension(new UseRemotingListenerImplementationTheoryExtension().Setup<TestRemotingImplementationWithParameters>());
             theoryItem.SetupExtension(
-                new PickRemotingImplementationTheoryExtension().Setup(
+                new PickRemotingListenerImplementationTheoryExtension().Setup(
                     s =>
                     {
-                        var impl = (Tools.TestRemotingWithDependency) s;
+                        var impl = (TestRemotingImplementationWithParameters) s;
+                        actualDependency = impl.Dependency;
+                    }));
+            theoryItem.Try();
+
+            // Assert
+            Assert.Same(expectedDependency, actualDependency);
+        }
+
+        [Theory]
+        [MemberData(nameof(Theories.RemotingListenerCases), MemberType = typeof(Theories))]
+        private static void Should_inject_remoting_serialization_provider_dependencies_When_remoting_serialization_provider_type_is_set(
+            Theories.Case @case)
+        {
+            // Arrange
+            var arrangeDependency = new TestDependency();
+
+            var arrangeCollection = new ServiceCollection();
+            arrangeCollection.AddSingleton<ITestDependency>(arrangeDependency);
+
+            object expectedDependency = arrangeDependency;
+            object actualDependency = null;
+
+            var theoryItem = @case.TheoryItem;
+
+            // Act
+            theoryItem.SetupExtension(new UseDependenciesTheoryExtension().Setup(() => arrangeCollection));
+            theoryItem.SetupExtension(new UseRemotingListenerSerializationProviderTheoryExtension().Setup<TestRemotingSerializationProviderWithParameters>());
+            theoryItem.SetupExtension(
+                new PickRemotingListenerSerializationProviderTheoryExtension().Setup(
+                    s =>
+                    {
+                        var impl = (TestRemotingSerializationProviderWithParameters) s;
+                        actualDependency = impl.Dependency;
+                    }));
+            theoryItem.Try();
+
+            // Assert
+            Assert.Same(expectedDependency, actualDependency);
+        }
+
+        [Theory]
+        [MemberData(nameof(Theories.RemotingListenerCases), MemberType = typeof(Theories))]
+        private static void Should_inject_remoting_handler_dependencies_When_remoting_handler_type_is_set(
+            Theories.Case @case)
+        {
+            // Arrange
+            var arrangeDependency = new TestDependency();
+
+            var arrangeCollection = new ServiceCollection();
+            arrangeCollection.AddSingleton<ITestDependency>(arrangeDependency);
+
+            object expectedDependency = arrangeDependency;
+            object actualDependency = null;
+
+            var theoryItem = @case.TheoryItem;
+
+            // Act
+            theoryItem.SetupExtension(new UseDependenciesTheoryExtension().Setup(() => arrangeCollection));
+            theoryItem.SetupExtension(new UseRemotingListenerHandlerTheoryExtension().Setup<TestRemotingHandlerWithParameters>());
+            theoryItem.SetupExtension(
+                new PickRemotingListenerHandlerTheoryExtension().Setup(
+                    s =>
+                    {
+                        var impl = (TestRemotingHandlerWithParameters) s;
                         actualDependency = impl.Dependency;
                     }));
             theoryItem.Try();
@@ -310,7 +374,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             Theories.Case @case)
         {
             // Arrange
-            var arrangeImplementation = new Tools.TestRemoting();
+            var arrangeImplementation = new TestRemotingImplementation();
 
             object expectedImplementation = arrangeImplementation;
             object actualImplementation = null;
@@ -318,8 +382,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             var theoryItem = @case.TheoryItem;
 
             // Act
-            theoryItem.SetupExtension(new UseRemotingImplementationTheoryExtension().Setup(provider => arrangeImplementation));
-            theoryItem.SetupExtension(new PickRemotingImplementationTheoryExtension().Setup(s => actualImplementation = s));
+            theoryItem.SetupExtension(new UseRemotingListenerImplementationTheoryExtension().Setup(provider => arrangeImplementation));
+            theoryItem.SetupExtension(new PickRemotingListenerImplementationTheoryExtension().Setup(s => actualImplementation = s));
             theoryItem.Try();
 
             // Assert
@@ -340,8 +404,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             var theoryItem = @case.TheoryItem;
 
             // Act
-            theoryItem.SetupExtension(new UseRemotingSettingsTheoryExtension().Setup(() => arrangeSettings));
-            theoryItem.SetupExtension(new PickRemotingSettingsTheoryExtension().Setup(s => actualSettings = s));
+            theoryItem.SetupExtension(new UseRemotingListenerSettingsTheoryExtension().Setup(() => arrangeSettings));
+            theoryItem.SetupExtension(new PickRemotingListenerSettingsTheoryExtension().Setup(s => actualSettings = s));
             theoryItem.Try();
 
             // Assert
@@ -350,7 +414,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(Theories.RemotingListenerCases), MemberType = typeof(Theories))]
-        private static void Should_use_custom_remoting_serializer_For_communication_listener(
+        private static void Should_use_custom_remoting_serialization_provider_For_communication_listener(
             Theories.Case @case)
         {
             // Arrange
@@ -364,8 +428,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             var theoryItem = @case.TheoryItem;
 
             // Act
-            theoryItem.SetupExtension(new UseRemotingSerializerTheoryExtension().Setup(provider => arrangeSerializer));
-            theoryItem.SetupExtension(new PickRemotingSerializerTheoryExtension().Setup(s => actualSerializer = s));
+            theoryItem.SetupExtension(new UseRemotingListenerSerializationProviderTheoryExtension().Setup(provider => arrangeSerializer));
+            theoryItem.SetupExtension(new PickRemotingListenerSerializationProviderTheoryExtension().Setup(s => actualSerializer = s));
             theoryItem.Try();
 
             // Assert
@@ -388,8 +452,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             var theoryItem = @case.TheoryItem;
 
             // Act
-            theoryItem.SetupExtension(new UseRemotingHandlerTheoryExtension().Setup(provider => arrangeHandler));
-            theoryItem.SetupExtension(new PickRemotingHandlerTheoryExtension().Setup(s => actualHandler = s));
+            theoryItem.SetupExtension(new UseRemotingListenerHandlerTheoryExtension().Setup(provider => arrangeHandler));
+            theoryItem.SetupExtension(new PickRemotingListenerHandlerTheoryExtension().Setup(s => actualHandler = s));
             theoryItem.Try();
 
             // Assert

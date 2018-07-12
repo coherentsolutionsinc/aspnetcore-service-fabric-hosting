@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Fabric;
-using System.Linq;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Extensions;
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Extensions.Support;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Items;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.ServiceFabric.Data;
-
-using Moq;
 
 using Xunit;
 
@@ -43,9 +39,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             {
                 get
                 {
-                    foreach (var item in TheoryItemsSet
-                       .AllItems
-                       .Where(i => i is IUseDependenciesTheoryExtensionSupported))
+                    foreach (var item in TheoryItemsSet.SupportDependencyInjection)
                     {
                         yield return new object[]
                         {
@@ -235,14 +229,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             // Arrange
             var theoryItem = @case.TheoryItem;
 
-            var arrangeDescriptor = new ServiceDescriptor(typeof(Tools.ITestDependency), new Tools.TestDependency());
+            var arrangeDescriptor = new ServiceDescriptor(typeof(ITestDependency), new TestDependency());
 
             object expectedObject = null;
             object actualObject = null;
 
             // Act
             theoryItem.SetupConfig(
-                builder =>
+                (
+                    builder,
+                    provider) =>
                 {
                     builder.ConfigureServices(
                         (
@@ -255,10 +251,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             theoryItem.SetupCheck(
                 host =>
                 {
-                    expectedObject = host.Services.GetService<Tools.ITestDependency>();
+                    expectedObject = host.Services.GetService<ITestDependency>();
                 });
 
-            theoryItem.SetupExtension(new PickDependencyTheoryExtension().Setup(typeof(Tools.ITestDependency), o => actualObject = o));
+            theoryItem.SetupExtension(new PickDependencyTheoryExtension().Setup(typeof(ITestDependency), o => actualObject = o));
             theoryItem.Try();
 
             // Assert
@@ -273,14 +269,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             // Arrange
             var theoryItem = @case.TheoryItem;
 
-            var arrangeDescriptor = new ServiceDescriptor(typeof(Tools.ITestDependency), typeof(Tools.TestDependency), ServiceLifetime.Singleton);
+            var arrangeDescriptor = new ServiceDescriptor(typeof(ITestDependency), typeof(TestDependency), ServiceLifetime.Singleton);
 
             object expectedObject = null;
             object actualObject = null;
 
             // Act
             theoryItem.SetupConfig(
-                builder =>
+                (
+                    builder,
+                    provider) =>
                 {
                     builder.ConfigureServices(
                         (
@@ -293,10 +291,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             theoryItem.SetupCheck(
                 host =>
                 {
-                    expectedObject = host.Services.GetService<Tools.ITestDependency>();
+                    expectedObject = host.Services.GetService<ITestDependency>();
                 });
 
-            theoryItem.SetupExtension(new PickDependencyTheoryExtension().Setup(typeof(Tools.ITestDependency), o => actualObject = o));
+            theoryItem.SetupExtension(new PickDependencyTheoryExtension().Setup(typeof(ITestDependency), o => actualObject = o));
             theoryItem.Try();
 
             // Assert
@@ -312,8 +310,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             var theoryItem = @case.TheoryItem;
 
             var arrangeDescriptor = new ServiceDescriptor(
-                typeof(Tools.ITestGenericDependency<>),
-                typeof(Tools.TestGenericDependency<>),
+                typeof(ITestOpenGenericDependency<>),
+                typeof(TestOpenGenericDependency<>),
                 ServiceLifetime.Singleton);
 
             object expectedObject = null;
@@ -321,7 +319,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
             // Act
             theoryItem.SetupConfig(
-                builder =>
+                (
+                    builder,
+                    provider) =>
                 {
                     builder.ConfigureServices(
                         (
@@ -334,10 +334,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             theoryItem.SetupCheck(
                 host =>
                 {
-                    expectedObject = host.Services.GetService<Tools.ITestGenericDependency<int>>();
+                    expectedObject = host.Services.GetService<ITestOpenGenericDependency<int>>();
                 });
 
-            theoryItem.SetupExtension(new PickDependencyTheoryExtension().Setup(typeof(Tools.ITestGenericDependency<int>), o => actualObject = o));
+            theoryItem.SetupExtension(new PickDependencyTheoryExtension().Setup(typeof(ITestOpenGenericDependency<int>), o => actualObject = o));
             theoryItem.Try();
 
             // Assert
@@ -352,14 +352,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             // Arrange
             var theoryItem = @case.TheoryItem;
 
-            var arrangeDescriptor = new ServiceDescriptor(typeof(Tools.ITestDependency), typeof(Tools.TestDependency), ServiceLifetime.Transient);
+            var arrangeDescriptor = new ServiceDescriptor(typeof(ITestDependency), typeof(TestDependency), ServiceLifetime.Transient);
 
             object expectedObject = null;
             object actualObject = null;
 
             // Act
             theoryItem.SetupConfig(
-                builder =>
+                (
+                    builder,
+                    provider) =>
                 {
                     builder.ConfigureServices(
                         (
@@ -372,10 +374,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             theoryItem.SetupCheck(
                 host =>
                 {
-                    expectedObject = host.Services.GetService<Tools.ITestDependency>();
+                    expectedObject = host.Services.GetService<ITestDependency>();
                 });
 
-            theoryItem.SetupExtension(new PickDependencyTheoryExtension().Setup(typeof(Tools.ITestDependency), o => actualObject = o));
+            theoryItem.SetupExtension(new PickDependencyTheoryExtension().Setup(typeof(ITestDependency), o => actualObject = o));
             theoryItem.Try();
 
             // Assert
@@ -391,8 +393,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             var theoryItem = @case.TheoryItem;
 
             var arrangeDescriptor = new ServiceDescriptor(
-                typeof(Tools.ITestGenericDependency<>),
-                typeof(Tools.TestGenericDependency<>),
+                typeof(ITestOpenGenericDependency<>),
+                typeof(TestOpenGenericDependency<>),
                 ServiceLifetime.Transient);
 
             object expectedObject = null;
@@ -400,7 +402,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
             // Act
             theoryItem.SetupConfig(
-                builder =>
+                (
+                    builder,
+                    provider) =>
                 {
                     builder.ConfigureServices(
                         (
@@ -413,10 +417,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             theoryItem.SetupCheck(
                 host =>
                 {
-                    expectedObject = host.Services.GetService<Tools.ITestGenericDependency<int>>();
+                    expectedObject = host.Services.GetService<ITestOpenGenericDependency<int>>();
                 });
 
-            theoryItem.SetupExtension(new PickDependencyTheoryExtension().Setup(typeof(Tools.ITestGenericDependency<int>), o => actualObject = o));
+            theoryItem.SetupExtension(new PickDependencyTheoryExtension().Setup(typeof(ITestOpenGenericDependency<int>), o => actualObject = o));
             theoryItem.Try();
 
             // Assert

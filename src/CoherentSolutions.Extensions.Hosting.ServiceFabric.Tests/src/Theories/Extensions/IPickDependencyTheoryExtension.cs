@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Extensions
 {
-    public interface IPickDependencyTheoryExtension : ITheoryExtension
+    public interface IPickDependencyTheoryExtension
     {
         IEnumerable<Action<IServiceProvider>> PickActions { get; }
     }

@@ -1,32 +1,47 @@
 ﻿using System;
 using System.Collections.Generic;
 
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Extensions;
-
 using Microsoft.Extensions.Hosting;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Items
 {
-    public abstract class TheoryItem
+    public sealed class TheoryItem
     {
+        public sealed class TheoryItemExtensionProvider
+        {
+            private readonly TheoryItem item;
+
+            public TheoryItemExtensionProvider(
+                TheoryItem item)
+            {
+                this.item = item;
+            }
+
+            public T GetExtension<T>()
+                where T : class
+            {
+                return this.item.extensions.TryGetValue(typeof(T), out var extension)
+                    ? (T) extension
+                    : null;
+            }
+        }
+
         private readonly string name;
 
-        private readonly Dictionary<Type, ITheoryExtension> extensions;
+        private readonly Dictionary<Type, object> extensions;
 
-        private readonly LinkedList<Action<HostBuilder>> configActions;
+        private readonly LinkedList<Action<HostBuilder, TheoryItemExtensionProvider>> configActions;
 
         private readonly LinkedList<Action<IHost>> checkActions;
 
-        private bool initializingExtensions;
-
-        protected TheoryItem(
+        public TheoryItem(
             string name)
         {
             this.name = name
              ?? throw new ArgumentNullException(nameof(name));
 
-            this.extensions = new Dictionary<Type, ITheoryExtension>();
-            this.configActions = new LinkedList<Action<HostBuilder>>();
+            this.extensions = new Dictionary<Type, object>();
+            this.configActions = new LinkedList<Action<HostBuilder, TheoryItemExtensionProvider>>();
             this.checkActions = new LinkedList<Action<IHost>>();
         }
 
@@ -51,33 +66,20 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             return obj is TheoryItem other && this.name.Equals(other.name);
         }
 
-        protected abstract void InitializeExtensions();
-
-        public void SetupExtension<T>(
+        public TheoryItem SetupExtension<T>(
             T extension)
-            where T : class, ITheoryExtension
+            where T : class
         {
             foreach (var @interface in typeof(T).GetInterfaces())
             {
-                if (typeof(ITheoryExtension) == @interface)
-                {
-                    continue;
-                }
-
-                if (typeof(ITheoryExtension).IsAssignableFrom(@interface))
-                {
-                    if (!this.initializingExtensions && !this.extensions.ContainsKey(@interface))
-                    {
-                        throw new InvalidOperationException($"{@interface.Name} isn't supported by current {nameof(TheoryItem)}.");
-                    }
-
-                    this.extensions[@interface] = extension;
-                }
+                this.extensions[@interface] = extension;
             }
+
+            return this;
         }
 
-        public void SetupConfig(
-            Action<HostBuilder> configAction)
+        public TheoryItem SetupConfig(
+            Action<HostBuilder, TheoryItemExtensionProvider> configAction)
         {
             if (configAction == null)
             {
@@ -85,9 +87,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             }
 
             this.configActions.AddLast(configAction);
+
+            return this;
         }
 
-        public void SetupCheck(
+        public TheoryItem SetupCheck(
             Action<IHost> checkAction)
         {
             if (checkAction == null)
@@ -96,15 +100,19 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             }
 
             this.checkActions.AddLast(checkAction);
+
+            return this;
         }
 
         public void Try()
         {
+            var provider = new TheoryItemExtensionProvider(this);
+
             var builder = new HostBuilder();
 
             foreach (var configAction in this.configActions)
             {
-                configAction(builder);
+                configAction(builder, provider);
             }
 
             var host = builder.Build();
@@ -116,29 +124,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
 
             host.StartAsync().GetAwaiter().GetResult();
             host.StopAsync().GetAwaiter().GetResult();
-        }
-
-        public TheoryItem Initialize()
-        {
-            this.initializingExtensions = true;
-            try
-            {
-                this.InitializeExtensions();
-            }
-            finally
-            {
-                this.initializingExtensions = false;
-            }
-
-            return this;
-        }
-
-        protected T GetExtension<T>()
-            where T : class, ITheoryExtension
-        {
-            return this.extensions.TryGetValue(typeof(T), out var extension)
-                ? (T) extension
-                : null;
         }
     }
 }
