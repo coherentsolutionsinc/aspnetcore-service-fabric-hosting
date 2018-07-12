@@ -15,6 +15,7 @@ using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting.V2;
 using Microsoft.ServiceFabric.Services.Remoting.V2.FabricTransport.Runtime;
+using Microsoft.ServiceFabric.Services.Remoting.V2.Runtime;
 using Microsoft.ServiceFabric.Services.Runtime;
 
 using Moq;
@@ -347,6 +348,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
 
         public static Func<IServiceProvider, IServiceRemotingMessageSerializationProvider> GetRemotingSerializerFunc<T>()
             where T : IServiceRemotingMessageSerializationProvider
+        {
+            return provider => ActivatorUtilities.CreateInstance<T>(provider);
+        }
+
+        public static Func<IServiceProvider, IServiceRemotingMessageHandler> GetRemotingHandlerFunc<T>()
+            where T : IServiceRemotingMessageHandler
         {
             return provider => ActivatorUtilities.CreateInstance<T>(provider);
         }

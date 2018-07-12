@@ -16,11 +16,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
           IUseRemotingCommunicationListenerTheoryExtensionSupported,
           IUseRemotingImplementationTheoryExtensionSupported,
           IUseRemotingSerializerTheoryExtensionSupported,
+          IUseRemotingHandlerTheoryExtensionSupported,
           IUseRemotingSettingsTheoryExtensionSupported,
           IUseDependenciesTheoryExtensionSupported,
           IPickDependencyTheoryExtensionSupported,
           IPickRemotingImplementationTheoryExtensionSupported,
           IPickRemotingSerializerTheoryExtensionSupported,
+          IPickRemotingHandlerTheoryExtensionSupported,
           IPickRemotingSettingsTheoryExtensionSupported
         where T : IServiceHostRemotingListenerReplicaTemplateConfigurator
     {
@@ -37,12 +39,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             this.SetupExtension(new UseRemotingCommunicationListenerTheoryExtension());
             this.SetupExtension(new UseRemotingImplementationTheoryExtension());
             this.SetupExtension(new UseRemotingSerializerTheoryExtension());
+            this.SetupExtension(new UseRemotingHandlerTheoryExtension());
             this.SetupExtension(new UseRemotingSettingsTheoryExtension());
             this.SetupExtension(new UseDependenciesTheoryExtension());
             this.SetupExtension(new PickDependencyTheoryExtension());
             this.SetupExtension(new PickListenerEndpointTheoryExtension());
             this.SetupExtension(new PickRemotingImplementationTheoryExtension());
             this.SetupExtension(new PickRemotingSerializerTheoryExtension());
+            this.SetupExtension(new PickRemotingHandlerTheoryExtension());
             this.SetupExtension(new PickRemotingSettingsTheoryExtension());
         }
 
@@ -54,12 +58,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             var useRemotingCommunicationListenerExtension = this.GetExtension<IUseRemotingCommunicationListenerTheoryExtension>();
             var useRemotingImplementationExtension = this.GetExtension<IUseRemotingImplementationTheoryExtension>();
             var useRemotingSerializerExtension = this.GetExtension<IUseRemotingSerializerTheoryExtension>();
+            var useRemotingHandlerExtension = this.GetExtension<IUseRemotingHandlerTheoryExtension>();
             var useRemotingSettingsExtension = this.GetExtension<IUseRemotingSettingsTheoryExtension>();
             var useDependenciesExtension = this.GetExtension<IUseDependenciesTheoryExtension>();
             var pickDependenciesExtension = this.GetExtension<IPickDependencyTheoryExtension>();
             var pickListenerEndpointExtension = this.GetExtension<IPickListenerEndpointTheoryExtension>();
             var pickRemotingImplementation = this.GetExtension<IPickRemotingImplementationTheoryExtension>();
             var pickRemotingSerializerExtension = this.GetExtension<IPickRemotingSerializerTheoryExtension>();
+            var pickRemotingHandlerExtension = this.GetExtension<IPickRemotingHandlerTheoryExtension>();
             var pickRemotingSettingsExtension = this.GetExtension<IPickRemotingSettingsTheoryExtension>();
 
             configurator.UseDependencies(useDependenciesExtension.Factory);
@@ -68,7 +74,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                 {
                     pickRemotingImplementation.PickAction(provider.GetService<IRemotingService>());
 
-                    return new Mock<IServiceRemotingMessageHandler>().Object;
+                    var handler = useRemotingHandlerExtension.Factory(provider);
+
+                    pickRemotingHandlerExtension.PickAction(handler);
+
+                    return handler;
                 });
             configurator.UseCommunicationListener(
                 (

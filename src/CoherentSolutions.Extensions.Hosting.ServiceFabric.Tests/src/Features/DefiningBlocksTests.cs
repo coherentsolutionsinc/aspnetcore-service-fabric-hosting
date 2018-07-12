@@ -16,6 +16,7 @@ using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting.FabricTransport.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting.V2;
 using Microsoft.ServiceFabric.Services.Remoting.V2.FabricTransport.Runtime;
+using Microsoft.ServiceFabric.Services.Remoting.V2.Runtime;
 
 using Moq;
 
@@ -369,6 +370,30 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
             // Assert
             Assert.Same(expectedSerializer, actualSerializer);
+        }
+
+        [Theory]
+        [MemberData(nameof(Theories.RemotingListenerCases), MemberType = typeof(Theories))]
+        private static void Should_use_custom_remoting_handler_For_communication_listener(
+            Theories.Case @case)
+        {
+            // Arrange
+            var mockHandler = new Mock<IServiceRemotingMessageHandler>();
+
+            var arrangeHandler = mockHandler.Object;
+
+            object expectedHandler = arrangeHandler;
+            object actualHandler = null;
+
+            var theoryItem = @case.TheoryItem;
+
+            // Act
+            theoryItem.SetupExtension(new UseRemotingHandlerTheoryExtension().Setup(provider => arrangeHandler));
+            theoryItem.SetupExtension(new PickRemotingHandlerTheoryExtension().Setup(s => actualHandler = s));
+            theoryItem.Try();
+
+            // Assert
+            Assert.Same(expectedHandler, actualHandler);
         }
     }
 }
