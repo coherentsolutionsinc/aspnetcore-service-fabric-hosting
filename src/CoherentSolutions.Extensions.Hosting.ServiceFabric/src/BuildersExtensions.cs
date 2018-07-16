@@ -722,30 +722,30 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
-        public static IStatefulServiceHostRemotingListenerReplicaTemplate UseSerializationProvider<TSerializer>(
+        public static IStatefulServiceHostRemotingListenerReplicaTemplate UseSerializationProvider<TSerializationProvider>(
             this IStatefulServiceHostRemotingListenerReplicaTemplate @this)
-            where TSerializer : IServiceRemotingMessageSerializationProvider
+            where TSerializationProvider : IServiceRemotingMessageSerializationProvider
         {
             @this.ConfigureObject(
-                configurator => configurator.UseSerializationProvider<TSerializer>(null));
+                configurator => configurator.UseSerializationProvider<TSerializationProvider>(null));
 
             return @this;
         }
 
-        public static IStatelessServiceHostRemotingListenerReplicaTemplate UseSerializationProvider<TSerializer>(
+        public static IStatelessServiceHostRemotingListenerReplicaTemplate UseSerializationProvider<TSerializationProvider>(
             this IStatelessServiceHostRemotingListenerReplicaTemplate @this)
-            where TSerializer : IServiceRemotingMessageSerializationProvider
+            where TSerializationProvider : IServiceRemotingMessageSerializationProvider
         {
             @this.ConfigureObject(
-                configurator => configurator.UseSerializationProvider<TSerializer>(null));
+                configurator => configurator.UseSerializationProvider<TSerializationProvider>(null));
 
             return @this;
         }
 
-        public static IStatefulServiceHostRemotingListenerReplicaTemplate UseSerializationProvider<TSerializer>(
+        public static IStatefulServiceHostRemotingListenerReplicaTemplate UseSerializationProvider<TSerializationProvider>(
             this IStatefulServiceHostRemotingListenerReplicaTemplate @this,
-            Func<TSerializer> factoryFunc)
-            where TSerializer : IServiceRemotingMessageSerializationProvider
+            Func<TSerializationProvider> factoryFunc)
+            where TSerializationProvider : IServiceRemotingMessageSerializationProvider
         {
             @this.ConfigureObject(
                 configurator => configurator.UseSerializationProvider(provider => factoryFunc()));
@@ -753,10 +753,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
-        public static IStatelessServiceHostRemotingListenerReplicaTemplate UseSerializationProvider<TSerializer>(
+        public static IStatelessServiceHostRemotingListenerReplicaTemplate UseSerializationProvider<TSerializationProvider>(
             this IStatelessServiceHostRemotingListenerReplicaTemplate @this,
-            Func<TSerializer> factoryFunc)
-            where TSerializer : IServiceRemotingMessageSerializationProvider
+            Func<TSerializationProvider> factoryFunc)
+            where TSerializationProvider : IServiceRemotingMessageSerializationProvider
         {
             @this.ConfigureObject(
                 configurator => configurator.UseSerializationProvider(provider => factoryFunc()));
@@ -764,10 +764,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
-        public static IStatefulServiceHostRemotingListenerReplicaTemplate UseSerializationProvider<TSerializer>(
+        public static IStatefulServiceHostRemotingListenerReplicaTemplate UseSerializationProvider<TSerializationProvider>(
             this IStatefulServiceHostRemotingListenerReplicaTemplate @this,
-            Func<IServiceProvider, TSerializer> factoryFunc)
-            where TSerializer : IServiceRemotingMessageSerializationProvider
+            Func<IServiceProvider, TSerializationProvider> factoryFunc)
+            where TSerializationProvider : IServiceRemotingMessageSerializationProvider
         {
             @this.ConfigureObject(
                 configurator => configurator.UseSerializationProvider(factoryFunc));
@@ -775,10 +775,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
-        public static IStatelessServiceHostRemotingListenerReplicaTemplate UseSerializationProvider<TSerializer>(
+        public static IStatelessServiceHostRemotingListenerReplicaTemplate UseSerializationProvider<TSerializationProvider>(
             this IStatelessServiceHostRemotingListenerReplicaTemplate @this,
-            Func<IServiceProvider, TSerializer> factoryFunc)
-            where TSerializer : IServiceRemotingMessageSerializationProvider
+            Func<IServiceProvider, TSerializationProvider> factoryFunc)
+            where TSerializationProvider : IServiceRemotingMessageSerializationProvider
         {
             @this.ConfigureObject(
                 configurator => configurator.UseSerializationProvider(factoryFunc));

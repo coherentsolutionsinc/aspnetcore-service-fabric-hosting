@@ -71,12 +71,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                  ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
 
-            public void UseSerializationProvider<TSerializer>(
-                Func<IServiceProvider, TSerializer> factoryFunc)
-                where TSerializer : IServiceRemotingMessageSerializationProvider
+            public void UseSerializationProvider<TSerializationProvider>(
+                Func<IServiceProvider, TSerializationProvider> factoryFunc)
+                where TSerializationProvider : IServiceRemotingMessageSerializationProvider
             {
                 this.RemotingSerializationProviderFunc = factoryFunc == null
-                    ? provider => ActivatorUtilities.CreateInstance<TSerializer>(provider)
+                    ? provider => ActivatorUtilities.CreateInstance<TSerializationProvider>(provider)
                     : (Func<IServiceProvider, IServiceRemotingMessageSerializationProvider>) (provider => factoryFunc(provider));
             }
 
@@ -198,14 +198,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                     var implementationType = implementation.GetType();
                     var overrides = new Dictionary<Type, object>
                     {
-                        [implementationType] = implementation
+                        [implementationType] = implementation,
+                        [typeof(IRemotingImplementation)] = implementation
                     };
-                    foreach (var @interface in implementationType
-                       .GetInterfaces()
-                       .Where(i => typeof(IRemotingImplementation).IsAssignableFrom(i)))
-                    {
-                        overrides[@interface] = implementation;
-                    }
 
                     var logger = (ILogger) provider.GetService(typeof(ILogger<>).MakeGenericType(implementation.GetType()));
                     var handler = parameters.RemotingHandlerFunc(new OverridableServiceProvider(overrides, provider));

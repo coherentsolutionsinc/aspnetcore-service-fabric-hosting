@@ -24,9 +24,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         void UseSettings(
             Func<FabricTransportRemotingListenerSettings> factoryFunc);
 
-        void UseSerializationProvider<TSerializer>(
-            Func<IServiceProvider, TSerializer> factoryFunc)
-            where TSerializer : IServiceRemotingMessageSerializationProvider;
+        void UseSerializationProvider<TSerializationProvider>(
+            Func<IServiceProvider, TSerializationProvider> factoryFunc)
+            where TSerializationProvider : IServiceRemotingMessageSerializationProvider;
 
         void UseHandler<THandler>(
             Func<IServiceProvider, THandler> factoryFunc)
