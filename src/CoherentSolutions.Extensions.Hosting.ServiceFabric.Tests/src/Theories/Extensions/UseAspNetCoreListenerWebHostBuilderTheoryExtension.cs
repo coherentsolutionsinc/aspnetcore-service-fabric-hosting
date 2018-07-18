@@ -26,7 +26,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Exte
 
         public UseAspNetCoreListenerWebHostBuilderTheoryExtension()
         {
-            this.Factory = Tools.GetWebHostBuilderFunc();
+            this.Factory = () =>
+            {
+                var builder = Tools.GetWebHostBuilderFunc()();
+                builder.UseStartup<Startup>();
+
+                return builder;
+            };
         }
 
         public UseAspNetCoreListenerWebHostBuilderTheoryExtension Setup(

@@ -14,8 +14,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
 
             private TypeBuilder proxyType;
 
-            private GenericTypeParameterBuilder[] proxyGenericTypeParameters;
-
             private Type proxyGenericType;
 
             private FieldBuilder proxyTargetField;
@@ -57,13 +55,21 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
             {
                 var shapeGenericArguments = this.shapeType.GetGenericArguments();
 
-                this.proxyGenericTypeParameters = this.proxyType.DefineGenericParameters(
+                var proxyGenericParameters = this.proxyType.DefineGenericParameters(
                         Enumerable.Range(0, shapeGenericArguments.Length)
                            .Select(i => $"_{i}")
                            .ToArray())
                    .ToArray();
 
-                this.proxyGenericType = this.shapeType.MakeGenericType(this.proxyGenericTypeParameters);
+                for (var i = 0; i < shapeGenericArguments.Length; ++i)
+                {
+                    var shapeGenericArgument = shapeGenericArguments[i];
+                    var proxyGenericParameter = proxyGenericParameters[i];
+
+                    proxyGenericParameter.SetGenericParameterAttributes(shapeGenericArgument.GenericParameterAttributes);
+                }
+
+                this.proxyGenericType = this.shapeType.MakeGenericType(proxyGenericParameters);
             }
 
             private void EmitProxyTargetField()

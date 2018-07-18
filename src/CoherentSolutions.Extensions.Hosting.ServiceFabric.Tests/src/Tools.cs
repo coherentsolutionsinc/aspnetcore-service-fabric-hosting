@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
 
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ServiceFabric.Data;
@@ -258,28 +259,29 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
         {
             return () =>
             {
-                var host = new Mock<IWebHost>();
-                var builder = new Mock<IWebHostBuilder>();
-                var collection = new ServiceCollection();
+                return WebHost.CreateDefaultBuilder();
+                //var host = new Mock<IWebHost>();
+                //var builder = new Mock<IWebHostBuilder>();
+                //var collection = new ServiceCollection();
 
-                host
-                   .Setup(instance => instance.Services)
-                   .Returns(() => collection.BuildServiceProvider());
+                //host
+                //   .Setup(instance => instance.Services)
+                //   .Returns(() => collection.BuildServiceProvider());
 
-                builder
-                   .Setup(instance => instance.ConfigureServices(It.IsAny<Action<IServiceCollection>>()))
-                   .Callback<Action<IServiceCollection>>(
-                        action =>
-                        {
-                            action(collection);
-                        })
-                   .Returns(builder.Object);
+                //builder
+                //   .Setup(instance => instance.ConfigureServices(It.IsAny<Action<IServiceCollection>>()))
+                //   .Callback<Action<IServiceCollection>>(
+                //        action =>
+                //        {
+                //            action(collection);
+                //        })
+                //   .Returns(builder.Object);
 
-                builder
-                   .Setup(instance => instance.Build())
-                   .Returns(host.Object);
+                //builder
+                //   .Setup(instance => instance.Build())
+                //   .Returns(host.Object);
 
-                return builder.Object;
+                //return builder.Object;
             };
         }
 
