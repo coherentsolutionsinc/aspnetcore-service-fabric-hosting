@@ -45,6 +45,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         {
         }
 
+        public interface ITestOpenGenericWithBaseTypeConstraints<T>
+            where T : TestOpenGeneric
+        { }
+
+
         public interface ITestOpenGenericWithInterfaceConstraints<T>
             where T : ITestOpenGeneric
         {
@@ -53,6 +58,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         public interface ITestOpenGenericWithGenericInterfaceConstraint<T, K>
             where T : ITestOpenGeneric<K>
         {
+        }
+
+        public class TestOpenGeneric
+        {
+
         }
 
         public class TestOpenGeneric<T> : ITestOpenGeneric<T>
@@ -77,6 +87,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         public class TestOpenGenericWithStructConstraints<T> : ITestOpenGenericWithStructConstraints<T>
             where T : struct
         {
+        }
+
+        public class TestOpenGenericWithBaseClassConstraints<T> : ITestOpenGenericWithBaseTypeConstraints<T>
+            where T : TestOpenGeneric
+        {
+
         }
 
         public class TestOpenGenericWithInterfaceConstraints<T> : ITestOpenGenericWithInterfaceConstraints<T>
@@ -327,6 +343,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                                 typeof(ITestOpenGenericWithStructConstraints<>),
                                 typeof(TestOpenGenericWithStructConstraints<>),
                                 typeof(ITestOpenGenericWithStructConstraints<int>))
+                        };
+                        yield return new object[]
+                        {
+                            new OpenGenericCase(
+                                item,
+                                typeof(ITestOpenGenericWithBaseTypeConstraints<>),
+                                typeof(TestOpenGenericWithBaseClassConstraints<>),
+                                typeof(ITestOpenGenericWithBaseTypeConstraints<TestOpenGeneric>))
                         };
                         yield return new object[]
                         {
