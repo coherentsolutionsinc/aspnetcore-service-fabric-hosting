@@ -25,6 +25,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         {
         }
 
+        public interface ITestOpenGenericWithMultipleParameters<T, K>
+        {
+        }
+
+        public interface ITestOpenGenericWithMultipleParametersAndDifferentConstraints<T, K>
+            where T : class
+            where K : struct
+        {
+        }
+
         public interface ITestOpenGenericWithClassConstraints<T>
             where T : class
         {
@@ -40,7 +50,22 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         {
         }
 
+        public interface ITestOpenGenericWithGenericInterfaceConstraint<T, K>
+            where T : ITestOpenGeneric<K>
+        {
+        }
+
         public class TestOpenGeneric<T> : ITestOpenGeneric<T>
+        {
+        }
+
+        public class TestOpenGenericWithMultipleParameters<T, K> : ITestOpenGenericWithMultipleParameters<T, K>
+        {
+        }
+
+        public class TestOpenGenericWithMultipleParametersAndDifferentConstraints<T, K> : ITestOpenGenericWithMultipleParametersAndDifferentConstraints<T, K>
+            where T : class
+            where K : struct
         {
         }
 
@@ -56,6 +81,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         public class TestOpenGenericWithInterfaceConstraints<T> : ITestOpenGenericWithInterfaceConstraints<T>
             where T : ITestOpenGeneric
+        {
+        }
+
+        public class TestOpenGenericWithGenericInterfaceConstraint<T, K> : ITestOpenGenericWithGenericInterfaceConstraint<T, K>
+            where T : ITestOpenGeneric<K>
         {
         }
 
@@ -270,6 +300,22 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                         {
                             new OpenGenericCase(
                                 item,
+                                typeof(ITestOpenGenericWithMultipleParameters<,>),
+                                typeof(TestOpenGenericWithMultipleParameters<,>),
+                                typeof(ITestOpenGenericWithMultipleParameters<int, int>))
+                        };
+                        yield return new object[]
+                        {
+                            new OpenGenericCase(
+                                item,
+                                typeof(ITestOpenGenericWithMultipleParametersAndDifferentConstraints<,>),
+                                typeof(TestOpenGenericWithMultipleParametersAndDifferentConstraints<,>),
+                                typeof(ITestOpenGenericWithMultipleParametersAndDifferentConstraints<object, int>))
+                        };
+                        yield return new object[]
+                        {
+                            new OpenGenericCase(
+                                item,
                                 typeof(ITestOpenGenericWithClassConstraints<>),
                                 typeof(TestOpenGenericWithClassConstraints<>),
                                 typeof(ITestOpenGenericWithClassConstraints<object>))
@@ -289,6 +335,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                                 typeof(ITestOpenGenericWithInterfaceConstraints<>),
                                 typeof(TestOpenGenericWithInterfaceConstraints<>),
                                 typeof(ITestOpenGenericWithInterfaceConstraints<ITestOpenGeneric>))
+                        };
+                        yield return new object[]
+                        {
+                            new OpenGenericCase(
+                                item,
+                                typeof(ITestOpenGenericWithGenericInterfaceConstraint<,>),
+                                typeof(TestOpenGenericWithGenericInterfaceConstraint<,>),
+                                typeof(ITestOpenGenericWithGenericInterfaceConstraint<ITestOpenGeneric<int>, int>))
                         };
                     }
                 }
