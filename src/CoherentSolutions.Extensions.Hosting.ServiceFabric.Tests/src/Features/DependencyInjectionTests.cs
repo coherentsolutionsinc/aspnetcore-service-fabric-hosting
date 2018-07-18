@@ -17,6 +17,48 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 {
     public static class DependencyInjectionTests
     {
+        public interface ITestOpenGeneric
+        {
+        }
+
+        public interface ITestOpenGeneric<T>
+        {
+        }
+
+        public interface ITestOpenGenericWithClassConstraints<T>
+            where T : class
+        {
+        }
+
+        public interface ITestOpenGenericWithStructConstraints<T>
+            where T : struct
+        {
+        }
+
+        public interface ITestOpenGenericWithInterfaceConstraints<T>
+            where T : ITestOpenGeneric
+        {
+        }
+
+        public class TestOpenGeneric<T> : ITestOpenGeneric<T>
+        {
+        }
+
+        public class TestOpenGenericWithClassConstraints<T> : ITestOpenGenericWithClassConstraints<T>
+            where T : class
+        {
+        }
+
+        public class TestOpenGenericWithStructConstraints<T> : ITestOpenGenericWithStructConstraints<T>
+            where T : struct
+        {
+        }
+
+        public class TestOpenGenericWithInterfaceConstraints<T> : ITestOpenGenericWithInterfaceConstraints<T>
+            where T : ITestOpenGeneric
+        {
+        }
+
         private static class UseDependencies
         {
             public class Case
@@ -169,7 +211,34 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                 }
             }
 
-            public static IEnumerable<object[]> SingletonInstanceCases
+            public class OpenGenericCase
+            {
+                public TheoryItem TheoryItem { get; }
+
+                public Type ServiceType { get; }
+
+                public Type ImplementationType { get; }
+                public Type RequestType { get; }
+
+                public OpenGenericCase(
+                    TheoryItem theoryItem,
+                    Type serviceType,
+                    Type implementationType,
+                    Type requestType)
+                {
+                    this.TheoryItem = theoryItem;
+                    this.ServiceType = serviceType;
+                    this.ImplementationType = implementationType;
+                    this.RequestType = requestType;
+                }
+
+                public override string ToString()
+                {
+                    return $"{this.TheoryItem}-{this.ImplementationType.Name}";
+                }
+            }
+
+            public static IEnumerable<object[]> GeneralCases
             {
                 get
                 {
@@ -178,6 +247,48 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                         yield return new object[]
                         {
                             new Case(item)
+                        };
+                    }
+                }
+            }
+
+            public static IEnumerable<object[]> OpenGenericCases
+            {
+                get
+                {
+                    foreach (var item in TheoryItemsSet.AllItems)
+                    {
+                        yield return new object[]
+                        {
+                            new OpenGenericCase(
+                                item,
+                                typeof(ITestOpenGeneric<>),
+                                typeof(TestOpenGeneric<>),
+                                typeof(ITestOpenGeneric<int>))
+                        };
+                        yield return new object[]
+                        {
+                            new OpenGenericCase(
+                                item,
+                                typeof(ITestOpenGenericWithClassConstraints<>),
+                                typeof(TestOpenGenericWithClassConstraints<>),
+                                typeof(ITestOpenGenericWithClassConstraints<object>))
+                        };
+                        yield return new object[]
+                        {
+                            new OpenGenericCase(
+                                item,
+                                typeof(ITestOpenGenericWithStructConstraints<>),
+                                typeof(TestOpenGenericWithStructConstraints<>),
+                                typeof(ITestOpenGenericWithStructConstraints<int>))
+                        };
+                        yield return new object[]
+                        {
+                            new OpenGenericCase(
+                                item,
+                                typeof(ITestOpenGenericWithInterfaceConstraints<>),
+                                typeof(TestOpenGenericWithInterfaceConstraints<>),
+                                typeof(ITestOpenGenericWithInterfaceConstraints<ITestOpenGeneric>))
                         };
                     }
                 }
@@ -222,7 +333,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         }
 
         [Theory]
-        [MemberData(nameof(HierarchyServiceRegistration.SingletonInstanceCases), MemberType = typeof(HierarchyServiceRegistration))]
+        [MemberData(nameof(HierarchyServiceRegistration.GeneralCases), MemberType = typeof(HierarchyServiceRegistration))]
         private static void Should_resolve_same_singleton_instance_From_hierarchy_singleton_instance_registration(
             HierarchyServiceRegistration.Case @case)
         {
@@ -262,7 +373,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         }
 
         [Theory]
-        [MemberData(nameof(HierarchyServiceRegistration.SingletonInstanceCases), MemberType = typeof(HierarchyServiceRegistration))]
+        [MemberData(nameof(HierarchyServiceRegistration.GeneralCases), MemberType = typeof(HierarchyServiceRegistration))]
         private static void Should_resolve_same_singleton_instance_From_hierarchy_singleton_type_registration(
             HierarchyServiceRegistration.Case @case)
         {
@@ -302,50 +413,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         }
 
         [Theory]
-        [MemberData(nameof(HierarchyServiceRegistration.SingletonInstanceCases), MemberType = typeof(HierarchyServiceRegistration))]
-        private static void Should_resolve_same_open_generic_singleton_instance_From_hierarchy_open_generic_singleton_type_registration(
-            HierarchyServiceRegistration.Case @case)
-        {
-            // Arrange
-            var theoryItem = @case.TheoryItem;
-
-            var arrangeDescriptor = new ServiceDescriptor(
-                typeof(ITestOpenGenericDependency<>),
-                typeof(TestOpenGenericDependency<>),
-                ServiceLifetime.Singleton);
-
-            object expectedObject = null;
-            object actualObject = null;
-
-            // Act
-            theoryItem.SetupConfig(
-                (
-                    builder,
-                    provider) =>
-                {
-                    builder.ConfigureServices(
-                        (
-                            context,
-                            collection) =>
-                        {
-                            collection.Add(arrangeDescriptor);
-                        });
-                });
-            theoryItem.SetupCheck(
-                host =>
-                {
-                    expectedObject = host.Services.GetService<ITestOpenGenericDependency<int>>();
-                });
-
-            theoryItem.SetupExtension(new PickDependencyTheoryExtension().Setup(typeof(ITestOpenGenericDependency<int>), o => actualObject = o));
-            theoryItem.Try();
-
-            // Assert
-            Assert.Same(expectedObject, actualObject);
-        }
-
-        [Theory]
-        [MemberData(nameof(HierarchyServiceRegistration.SingletonInstanceCases), MemberType = typeof(HierarchyServiceRegistration))]
+        [MemberData(nameof(HierarchyServiceRegistration.GeneralCases), MemberType = typeof(HierarchyServiceRegistration))]
         private static void Should_resolve_different_transient_instance_From_hierarchy_transient_type_registration(
             HierarchyServiceRegistration.Case @case)
         {
@@ -385,17 +453,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         }
 
         [Theory]
-        [MemberData(nameof(HierarchyServiceRegistration.SingletonInstanceCases), MemberType = typeof(HierarchyServiceRegistration))]
-        private static void Should_resolve_different_open_generic_transient_instance_From_hierarchy_open_generic_transient_type_registration(
-            HierarchyServiceRegistration.Case @case)
+        [MemberData(nameof(HierarchyServiceRegistration.OpenGenericCases), MemberType = typeof(HierarchyServiceRegistration))]
+        private static void Should_resolve_same_open_generic_singleton_instance_From_hierarchy_open_generic_singleton_type_registration(
+            HierarchyServiceRegistration.OpenGenericCase @case)
         {
             // Arrange
             var theoryItem = @case.TheoryItem;
 
             var arrangeDescriptor = new ServiceDescriptor(
-                typeof(ITestOpenGenericDependency<>),
-                typeof(TestOpenGenericDependency<>),
-                ServiceLifetime.Transient);
+                @case.ServiceType,
+                @case.ImplementationType,
+                ServiceLifetime.Singleton);
 
             object expectedObject = null;
             object actualObject = null;
@@ -417,10 +485,54 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             theoryItem.SetupCheck(
                 host =>
                 {
-                    expectedObject = host.Services.GetService<ITestOpenGenericDependency<int>>();
+                    expectedObject = host.Services.GetService(@case.RequestType);
                 });
 
-            theoryItem.SetupExtension(new PickDependencyTheoryExtension().Setup(typeof(ITestOpenGenericDependency<int>), o => actualObject = o));
+            theoryItem.SetupExtension(new PickDependencyTheoryExtension().Setup(@case.RequestType, o => actualObject = o));
+            theoryItem.Try();
+
+            // Assert
+            Assert.Same(expectedObject, actualObject);
+        }
+
+        [Theory]
+        [MemberData(nameof(HierarchyServiceRegistration.OpenGenericCases), MemberType = typeof(HierarchyServiceRegistration))]
+        private static void Should_resolve_different_open_generic_transient_instance_From_hierarchy_open_generic_transient_type_registration(
+            HierarchyServiceRegistration.OpenGenericCase @case)
+        {
+            // Arrange
+            var theoryItem = @case.TheoryItem;
+
+            var arrangeDescriptor = new ServiceDescriptor(
+                @case.ServiceType,
+                @case.ImplementationType,
+                ServiceLifetime.Transient);
+            ;
+
+            object expectedObject = null;
+            object actualObject = null;
+
+            // Act
+            theoryItem.SetupConfig(
+                (
+                    builder,
+                    provider) =>
+                {
+                    builder.ConfigureServices(
+                        (
+                            context,
+                            collection) =>
+                        {
+                            collection.Add(arrangeDescriptor);
+                        });
+                });
+            theoryItem.SetupCheck(
+                host =>
+                {
+                    expectedObject = host.Services.GetService(@case.RequestType);
+                });
+
+            theoryItem.SetupExtension(new PickDependencyTheoryExtension().Setup(@case.RequestType, o => actualObject = o));
             theoryItem.Try();
 
             // Assert

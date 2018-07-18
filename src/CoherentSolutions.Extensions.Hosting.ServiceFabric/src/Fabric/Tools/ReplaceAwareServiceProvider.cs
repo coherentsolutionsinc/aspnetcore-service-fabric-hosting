@@ -3,24 +3,24 @@ using System.Collections.Generic;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
 {
-    public class OverridableServiceProvider : IServiceProvider
+    public class ReplaceAwareServiceProvider : IServiceProvider
     {
-        private readonly Dictionary<Type, object> overrides;
+        private readonly Dictionary<Type, object> replacements;
 
         private readonly IServiceProvider impl;
 
-        public OverridableServiceProvider(
-            Dictionary<Type, object> overrides,
+        public ReplaceAwareServiceProvider(
+            Dictionary<Type, object> replacements,
             IServiceProvider impl)
         {
-            this.overrides = overrides;
+            this.replacements = replacements;
             this.impl = impl;
         }
 
         public object GetService(
             Type serviceType)
         {
-            if (this.overrides.TryGetValue(serviceType, out var instance))
+            if (this.replacements.TryGetValue(serviceType, out var instance))
             {
                 return instance;
             }

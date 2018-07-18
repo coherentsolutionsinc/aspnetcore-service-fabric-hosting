@@ -157,7 +157,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                     builder.AddProvider(new ServiceHostDelegateLoggerProvider(loggerOptions, serviceEventSource));
                 });
 
-            var provider = dependenciesCollection.BuildServiceProvider();
+            // Adding support for open-generics
+            var provider = new OpenGenericAwareServiceProvider(dependenciesCollection.BuildServiceProvider());
 
             return () =>
             {

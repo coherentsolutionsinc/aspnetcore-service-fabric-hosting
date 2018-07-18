@@ -2,6 +2,7 @@
 using System.Fabric;
 using System.Linq;
 using System.Reflection;
+using System.Reflection.Emit;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -142,6 +143,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
                 predicate = type => true;
             }
 
+            destination.Add(new ServiceDescriptor(typeof(IOpenGenericTargetServiceProvider), new OpenGenericTargetServiceProvider(services)));
+
             foreach (var descriptor in source.Where(i => predicate(i.ServiceType)))
             {
                 switch (descriptor.Lifetime)
@@ -155,8 +158,19 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
                         {
                             if (descriptor.ServiceType.GetTypeInfo().IsGenericTypeDefinition)
                             {
-                                // We have open generic here. Register as-is.
-                                destination.Add(descriptor);
+                                if (OpenGenericProxyEmitter.CanProxy(descriptor.ServiceType))
+                                {
+                                    destination.Add(
+                                        new ServiceDescriptor(
+                                            descriptor.ServiceType,
+                                            OpenGenericProxyEmitter.Emit(descriptor.ServiceType),
+                                            ServiceLifetime.Singleton));
+                                }
+                                else
+                                {
+                                    // We have open generic here. Register as-is.
+                                    destination.Add(descriptor);
+                                }
                             }
                             else
                             {
@@ -167,7 +181,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
                                         ServiceLifetime.Singleton));
                             }
                         }
-
                         break;
                     case ServiceLifetime.Scoped:
                     case ServiceLifetime.Transient:

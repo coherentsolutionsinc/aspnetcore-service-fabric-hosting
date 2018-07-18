@@ -169,13 +169,24 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                             builder.AddProvider(new ServiceHostRemotingListenerLoggerProvider(listenerInformation, loggerOptions, serviceEventSource));
                         });
 
-                    var provider = dependenciesCollection.BuildServiceProvider();
+                    // Adding open-generic proxies
+                    IServiceProvider provider = new OpenGenericAwareServiceProvider(dependenciesCollection.BuildServiceProvider());
 
                     var implementation = parameters.RemotingImplementationFunc(provider);
                     if (implementation == null)
                     {
                         throw new FactoryProducesNullInstanceException<IRemotingImplementation>();
                     }
+
+                    var implementationType = implementation.GetType();
+                    var replacements = new Dictionary<Type, object>
+                    {
+                        [implementationType] = implementation,
+                        [typeof(IRemotingImplementation)] = implementation
+                    };
+
+                    // Adding implementation as singleton
+                    provider = new ReplaceAwareServiceProvider(replacements, provider);
 
                     var serializer = (IServiceRemotingMessageSerializationProvider) null;
                     if (parameters.RemotingSerializationProviderFunc != null)
@@ -195,15 +206,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
                     settings.EndpointResourceName = parameters.EndpointName;
 
-                    var implementationType = implementation.GetType();
-                    var overrides = new Dictionary<Type, object>
-                    {
-                        [implementationType] = implementation,
-                        [typeof(IRemotingImplementation)] = implementation
-                    };
-
                     var logger = (ILogger) provider.GetService(typeof(ILogger<>).MakeGenericType(implementation.GetType()));
-                    var handler = parameters.RemotingHandlerFunc(new OverridableServiceProvider(overrides, provider));
+                    var handler = parameters.RemotingHandlerFunc(provider);
 
                     return new ServiceHostRemotingCommunicationListenerComponents(
                         new ServiceHostRemotingListenerMessageHandler(handler, logger),

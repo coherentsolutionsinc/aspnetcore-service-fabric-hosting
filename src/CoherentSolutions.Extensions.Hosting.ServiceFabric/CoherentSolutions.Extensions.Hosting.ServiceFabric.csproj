@@ -33,5 +33,7 @@
     <PackageReference Include="Microsoft.ServiceFabric.FabricTransport.Internal" Version="3.0.480" />
     <PackageReference Include="Microsoft.ServiceFabric.Services" Version="3.0.480" />
     <PackageReference Include="Microsoft.ServiceFabric.Services.Remoting" Version="3.0.480" />
+    <PackageReference Include="System.Reflection.Emit" Version="4.3.0" />
+    <PackageReference Include="System.Reflection.Emit.ILGeneration" Version="4.3.0" />
   </ItemGroup>
 </Project>
