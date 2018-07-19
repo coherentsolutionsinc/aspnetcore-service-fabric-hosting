@@ -156,21 +156,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
                         }
                         else
                         {
-                            if (descriptor.ServiceType.GetTypeInfo().IsGenericTypeDefinition)
+                            if (descriptor.ServiceType.GetTypeInfo().IsGenericTypeDefinition && descriptor.ServiceType.IsInterface)
                             {
-                                if (OpenGenericProxyEmitter.CanProxy(descriptor.ServiceType))
-                                {
-                                    destination.Add(
-                                        new ServiceDescriptor(
-                                            descriptor.ServiceType,
-                                            OpenGenericProxyEmitter.Emit(descriptor.ServiceType),
-                                            ServiceLifetime.Singleton));
-                                }
-                                else
-                                {
-                                    // We have open generic here. Register as-is.
-                                    destination.Add(descriptor);
-                                }
+                                destination.Add(
+                                    new ServiceDescriptor(
+                                        descriptor.ServiceType,
+                                        OpenGenericProxyEmitter.Emit(descriptor.ServiceType),
+                                        ServiceLifetime.Singleton));
                             }
                             else
                             {

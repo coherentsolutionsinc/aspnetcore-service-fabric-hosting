@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Fabric;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Extensions;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Items;
@@ -17,94 +18,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 {
     public static class DependencyInjectionTests
     {
-        public interface ITestOpenGeneric
-        {
-        }
-
-        public interface ITestOpenGeneric<T>
-        {
-        }
-
-        public interface ITestOpenGenericWithMultipleParameters<T, K>
-        {
-        }
-
-        public interface ITestOpenGenericWithMultipleParametersAndDifferentConstraints<T, K>
-            where T : class
-            where K : struct
-        {
-        }
-
-        public interface ITestOpenGenericWithClassConstraints<T>
-            where T : class
-        {
-        }
-
-        public interface ITestOpenGenericWithStructConstraints<T>
-            where T : struct
-        {
-        }
-
-        public interface ITestOpenGenericWithBaseTypeConstraints<T>
-            where T : TestOpenGeneric
-        { }
-
-
-        public interface ITestOpenGenericWithInterfaceConstraints<T>
-            where T : ITestOpenGeneric
-        {
-        }
-
-        public interface ITestOpenGenericWithGenericInterfaceConstraint<T, K>
-            where T : ITestOpenGeneric<K>
-        {
-        }
-
-        public class TestOpenGeneric
-        {
-
-        }
-
-        public class TestOpenGeneric<T> : ITestOpenGeneric<T>
-        {
-        }
-
-        public class TestOpenGenericWithMultipleParameters<T, K> : ITestOpenGenericWithMultipleParameters<T, K>
-        {
-        }
-
-        public class TestOpenGenericWithMultipleParametersAndDifferentConstraints<T, K> : ITestOpenGenericWithMultipleParametersAndDifferentConstraints<T, K>
-            where T : class
-            where K : struct
-        {
-        }
-
-        public class TestOpenGenericWithClassConstraints<T> : ITestOpenGenericWithClassConstraints<T>
-            where T : class
-        {
-        }
-
-        public class TestOpenGenericWithStructConstraints<T> : ITestOpenGenericWithStructConstraints<T>
-            where T : struct
-        {
-        }
-
-        public class TestOpenGenericWithBaseClassConstraints<T> : ITestOpenGenericWithBaseTypeConstraints<T>
-            where T : TestOpenGeneric
-        {
-
-        }
-
-        public class TestOpenGenericWithInterfaceConstraints<T> : ITestOpenGenericWithInterfaceConstraints<T>
-            where T : ITestOpenGeneric
-        {
-        }
-
-        public class TestOpenGenericWithGenericInterfaceConstraint<T, K> : ITestOpenGenericWithGenericInterfaceConstraint<T, K>
-            where T : ITestOpenGeneric<K>
-        {
-        }
-
         private static class UseDependencies
         {
             public class Case
@@ -308,65 +221,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                         {
                             new OpenGenericCase(
                                 item,
-                                typeof(ITestOpenGeneric<>),
-                                typeof(TestOpenGeneric<>),
-                                typeof(ITestOpenGeneric<int>))
-                        };
-                        yield return new object[]
-                        {
-                            new OpenGenericCase(
-                                item,
-                                typeof(ITestOpenGenericWithMultipleParameters<,>),
-                                typeof(TestOpenGenericWithMultipleParameters<,>),
-                                typeof(ITestOpenGenericWithMultipleParameters<int, int>))
-                        };
-                        yield return new object[]
-                        {
-                            new OpenGenericCase(
-                                item,
-                                typeof(ITestOpenGenericWithMultipleParametersAndDifferentConstraints<,>),
-                                typeof(TestOpenGenericWithMultipleParametersAndDifferentConstraints<,>),
-                                typeof(ITestOpenGenericWithMultipleParametersAndDifferentConstraints<object, int>))
-                        };
-                        yield return new object[]
-                        {
-                            new OpenGenericCase(
-                                item,
-                                typeof(ITestOpenGenericWithClassConstraints<>),
-                                typeof(TestOpenGenericWithClassConstraints<>),
-                                typeof(ITestOpenGenericWithClassConstraints<object>))
-                        };
-                        yield return new object[]
-                        {
-                            new OpenGenericCase(
-                                item,
-                                typeof(ITestOpenGenericWithStructConstraints<>),
-                                typeof(TestOpenGenericWithStructConstraints<>),
-                                typeof(ITestOpenGenericWithStructConstraints<int>))
-                        };
-                        yield return new object[]
-                        {
-                            new OpenGenericCase(
-                                item,
-                                typeof(ITestOpenGenericWithBaseTypeConstraints<>),
-                                typeof(TestOpenGenericWithBaseClassConstraints<>),
-                                typeof(ITestOpenGenericWithBaseTypeConstraints<TestOpenGeneric>))
-                        };
-                        yield return new object[]
-                        {
-                            new OpenGenericCase(
-                                item,
-                                typeof(ITestOpenGenericWithInterfaceConstraints<>),
-                                typeof(TestOpenGenericWithInterfaceConstraints<>),
-                                typeof(ITestOpenGenericWithInterfaceConstraints<ITestOpenGeneric>))
-                        };
-                        yield return new object[]
-                        {
-                            new OpenGenericCase(
-                                item,
-                                typeof(ITestOpenGenericWithGenericInterfaceConstraint<,>),
-                                typeof(TestOpenGenericWithGenericInterfaceConstraint<,>),
-                                typeof(ITestOpenGenericWithGenericInterfaceConstraint<ITestOpenGeneric<int>, int>))
+                                typeof(ITestOpenGenericDependency<>),
+                                typeof(TestOpenGenericDependency<>),
+                                typeof(ITestOpenGenericDependency<int>))
                         };
                     }
                 }

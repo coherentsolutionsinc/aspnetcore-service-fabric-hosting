@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
 {
@@ -31,6 +35,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
                 this.EmitProxyTargetField();
                 this.EmitProxyConstructor();
                 this.EmitProxyTargetProperty();
+                this.EmitProxyMethods();
                 this.EmitProxyEquals();
                 this.EmitProxyGetHashCode();
                 this.EmitProxyToString();
@@ -51,22 +56,37 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
                 this.proxyType = module.DefineType($"_{Guid.NewGuid():N}", TypeAttributes.Class, null, interfaces);
             }
 
+            private static void ConfigureAs(
+                GenericTypeParameterBuilder proxy,
+                Type shape)
+            {
+                const GenericParameterAttributes AttributesMask = ~(GenericParameterAttributes.Contravariant | GenericParameterAttributes.Covariant);
+                proxy.SetGenericParameterAttributes(shape.GenericParameterAttributes & AttributesMask);
+
+                var shapeGenericArgumentConstraints = shape.GetGenericParameterConstraints();
+                var shapeGenericArgumentBaseTypeConstraint = shapeGenericArgumentConstraints.SingleOrDefault(t => t.IsClass);
+                var shapeGenericArgumentInterfaceConstraint = shapeGenericArgumentConstraints.Where(t => t.IsInterface).ToArray();
+                if (shapeGenericArgumentBaseTypeConstraint != null)
+                {
+                    proxy.SetBaseTypeConstraint(shapeGenericArgumentBaseTypeConstraint);
+                }
+
+                if (shapeGenericArgumentInterfaceConstraint.Length != 0)
+                {
+                    proxy.SetInterfaceConstraints(shapeGenericArgumentInterfaceConstraint);
+                }
+            }
+
             private void EmitProxyGenericTypeParameters()
             {
                 var shapeGenericArguments = this.shapeType.GetGenericArguments();
-
                 var proxyGenericParameters = this.proxyType.DefineGenericParameters(
-                        Enumerable.Range(0, shapeGenericArguments.Length)
-                           .Select(i => $"_{i}")
-                           .ToArray())
+                        shapeGenericArguments.Select(i => i.Name).ToArray())
                    .ToArray();
 
                 for (var i = 0; i < shapeGenericArguments.Length; ++i)
                 {
-                    var shapeGenericArgument = shapeGenericArguments[i];
-                    var proxyGenericParameter = proxyGenericParameters[i];
-
-                    proxyGenericParameter.SetGenericParameterAttributes(shapeGenericArgument.GenericParameterAttributes);
+                    ConfigureAs(proxyGenericParameters[i], shapeGenericArguments[i]);
                 }
 
                 this.proxyGenericType = this.shapeType.MakeGenericType(proxyGenericParameters);
@@ -130,6 +150,100 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
                     null);
 
                 property.SetGetMethod(method);
+            }
+
+            private void EmitProxyMethods()
+            {
+                var interfaces = new Stack<Type>();
+                interfaces.Push(this.shapeType);
+
+                var shapeMethods = new List<MethodInfo>();
+                var shapeProperties = new List<PropertyInfo>();
+
+                var methodsMap = new Dictionary<MethodInfo, MethodBuilder>();
+                do
+                {
+                    var @interface = interfaces.Pop();
+
+                    foreach (var implInterface in @interface.GetInterfaces())
+                    {
+                        interfaces.Push(implInterface);
+                    }
+
+                    shapeMethods.AddRange(@interface.GetMethods(BindingFlags.Public | BindingFlags.Instance));
+                    shapeProperties.AddRange(@interface.GetProperties(BindingFlags.Public | BindingFlags.Instance));
+                }
+                while (interfaces.Count > 0);
+
+                foreach (var shapeMethod in shapeMethods)
+                {
+                    var shapeMethodParameters = shapeMethod.GetParameters();
+                    var proxyMethod = this.proxyType.DefineMethod(
+                        shapeMethod.Name,
+                        shapeMethod.Attributes & ~MethodAttributes.Abstract,
+                        CallingConventions.Standard,
+                        shapeMethod.ReturnType,
+                        shapeMethod.ReturnParameter?.GetRequiredCustomModifiers(),
+                        shapeMethod.ReturnParameter?.GetOptionalCustomModifiers(),
+                        shapeMethodParameters.Select(pi => pi.ParameterType).ToArray(),
+                        shapeMethodParameters.Select(pi => pi.GetRequiredCustomModifiers()).ToArray(),
+                        shapeMethodParameters.Select(pi => pi.GetOptionalCustomModifiers()).ToArray());
+
+                    if (shapeMethod.IsGenericMethod)
+                    {
+                        var shapeGenericArguments = shapeMethod.GetGenericArguments();
+                        var proxyGenericParameters = proxyMethod.DefineGenericParameters(
+                                shapeGenericArguments.Select(i => i.Name).ToArray())
+                           .ToArray();
+
+                        for (var i = 0; i < shapeGenericArguments.Length; ++i)
+                        {
+                            ConfigureAs(proxyGenericParameters[i], shapeGenericArguments[i]);
+                        }
+                    }
+
+                    var il = proxyMethod.GetILGenerator();
+
+                    il.Emit(OpCodes.Ldarg_0);
+                    il.Emit(OpCodes.Ldfld, this.proxyTargetField);
+
+                    for (var i = 0; i < shapeMethodParameters.Length; ++i)
+                    {
+                        il.Emit(OpCodes.Ldarg, i + 1);
+                    }
+
+                    il.Emit(OpCodes.Callvirt, shapeMethod);
+                    il.Emit(OpCodes.Ret);
+
+                    methodsMap[shapeMethod] = proxyMethod;
+                }
+
+                foreach (var shapeProperty in shapeProperties)
+                {
+                    var shapePropertyParameters = shapeProperty.GetIndexParameters();
+                    var proxyProperty = this.proxyType.DefineProperty(
+                        shapeProperty.Name,
+                        shapeProperty.Attributes,
+                        CallingConventions.Standard,
+                        shapeProperty.PropertyType,
+                        shapeProperty.GetRequiredCustomModifiers(),
+                        shapeProperty.GetOptionalCustomModifiers(),
+                        shapePropertyParameters.Select(pi => pi.ParameterType).ToArray(),
+                        shapePropertyParameters.Select(pi => pi.GetRequiredCustomModifiers()).ToArray(),
+                        shapePropertyParameters.Select(pi => pi.GetOptionalCustomModifiers()).ToArray());
+
+                    var getMethod = shapeProperty.GetGetMethod();
+                    if (getMethod != null)
+                    {
+                        proxyProperty.SetGetMethod(methodsMap[getMethod]);
+                    }
+
+                    var setMethod = shapeProperty.GetSetMethod();
+                    if (setMethod != null)
+                    {
+                        proxyProperty.SetSetMethod(methodsMap[setMethod]);
+                    }
+                }
             }
 
             private void EmitProxyEquals()
@@ -200,17 +314,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
             module = assembly.DefineDynamicModule("Root");
 
             types = new ConcurrentDictionary<Type, Lazy<Type>>();
-        }
-
-        public static bool CanProxy(
-            Type t)
-        {
-            return t.IsInterface
-             && (t.IsPublic || t.IsNestedPublic)
-             && t.GetMethods().Length == 0
-             && t.GetInterfaces().All(i => i.GetMethods().Length == 0)
-             && t.GetProperties().All(p => p.GetIndexParameters().Length == 0 && !p.CanWrite)
-             && t.GetGenericArguments().All(a => a.GetGenericParameterConstraints().Length == 0);
         }
 
         public static Type Emit(
