@@ -6,18 +6,18 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public class ServiceHostRemotingCommunicationListenerComponents
     {
-        public ServiceRemotingMessageDispatcher MessageDispatcher { get; }
+        public IServiceRemotingMessageHandler MessageHandler { get; }
 
         public IServiceRemotingMessageSerializationProvider MessageSerializationProvider { get; }
 
         public FabricTransportRemotingListenerSettings ListenerSettings { get; }
 
         public ServiceHostRemotingCommunicationListenerComponents(
-            ServiceRemotingMessageDispatcher messageDispatcher,
+            IServiceRemotingMessageHandler messageDispatcher,
             IServiceRemotingMessageSerializationProvider messageSerializationProvider,
             FabricTransportRemotingListenerSettings listenerSettings)
         {
-            this.MessageDispatcher = messageDispatcher;
+            this.MessageHandler = messageDispatcher;
             this.ListenerSettings = listenerSettings;
             this.MessageSerializationProvider = messageSerializationProvider;
         }

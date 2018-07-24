@@ -34,7 +34,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.LoggerOptionsFunc = DefaultLoggerOptionsFunc;
                 this.DelegateInvokerFunc = DefaulDelegateInvokerFunc;
                 this.Delegate = null;
-                this.DependenciesFunc = DefaulDependenciesFunc;
+                this.DependenciesFunc = DefaultDependenciesFunc;
                 this.DependenciesConfigAction = null;
             }
 
@@ -99,7 +99,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 return ServiceHostLoggerOptions.Disabled;
             }
 
-            private static IServiceCollection DefaulDependenciesFunc()
+            private static IServiceCollection DefaultDependenciesFunc()
             {
                 return new ServiceCollection();
             }
@@ -139,9 +139,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 throw new FactoryProducesNullInstanceException<IServiceCollection>();
             }
 
-            DependencyRegistrant.Register(dependenciesCollection, serviceContext);
-            DependencyRegistrant.Register(dependenciesCollection, servicePartition);
-            DependencyRegistrant.Register(dependenciesCollection, serviceEventSource);
+            dependenciesCollection.Add(serviceContext);
+            dependenciesCollection.Add(servicePartition);
+            dependenciesCollection.Add(serviceEventSource);
 
             parameters.DependenciesConfigAction?.Invoke(dependenciesCollection);
 
@@ -157,7 +157,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                     builder.AddProvider(new ServiceHostDelegateLoggerProvider(loggerOptions, serviceEventSource));
                 });
 
-            var provider = dependenciesCollection.BuildServiceProvider();
+            // Adding support for open-generics
+            var provider = new ProxynatorAwareServiceProvider(dependenciesCollection.BuildServiceProvider());
 
             return () =>
             {

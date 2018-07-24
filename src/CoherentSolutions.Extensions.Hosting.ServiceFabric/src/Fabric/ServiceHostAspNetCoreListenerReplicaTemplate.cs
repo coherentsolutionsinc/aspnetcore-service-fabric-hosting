@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Fabric;
+using System.Linq;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Exceptions;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools;
 
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
@@ -132,12 +135,51 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                     builder.ConfigureServices(
                         services =>
                         {
-                            DependencyRegistrant.Register(services, serviceContext);
-                            DependencyRegistrant.Register(services, servicePartition);
-                            DependencyRegistrant.Register(services, serviceEventSource);
-                            DependencyRegistrant.Register(services, listenerInformation);
+                            services.Add(serviceContext);
+                            services.Add(servicePartition);
+                            services.Add(serviceEventSource);
+                            services.Add(listenerInformation);
 
                             parameters.DependenciesConfigAction?.Invoke(services);
+
+                            var descriptor = services.FirstOrDefault(s => s.ServiceType == typeof(IStartup));
+                            if (descriptor != null)
+                            {
+                                ServiceDescriptor replacement;
+                                if (descriptor.ImplementationFactory != null)
+                                {
+                                    replacement =
+                                        new ServiceDescriptor(
+                                            typeof(IStartup),
+                                            provider =>
+                                            {
+                                                var impl = descriptor.ImplementationFactory(provider);
+                                                return new ProxynatorAwareStartup((IStartup) impl);
+                                            },
+                                            ServiceLifetime.Singleton);
+                                }
+                                else if (descriptor.ImplementationInstance != null)
+                                {
+                                    replacement =
+                                        new ServiceDescriptor(
+                                            typeof(IStartup),
+                                            new ProxynatorAwareStartup((IStartup) descriptor.ImplementationInstance));
+                                }
+                                else
+                                {
+                                    replacement =
+                                        new ServiceDescriptor(
+                                            typeof(IStartup),
+                                            provider =>
+                                            {
+                                                var impl = ActivatorUtilities.CreateInstance(provider, descriptor.ImplementationType);
+                                                return new ProxynatorAwareStartup((IStartup) impl);
+                                            },
+                                            ServiceLifetime.Singleton);
+                                }
+
+                                services.Replace(replacement);
+                            }
                         });
 
                     var loggerOptions = parameters.LoggerOptionsFunc();

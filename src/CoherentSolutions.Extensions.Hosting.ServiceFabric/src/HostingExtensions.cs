@@ -68,11 +68,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
                                         dependencies =>
                                         {
                                             // We should ignore certain types.
-                                            DependencyRegistrant.Register(
-                                                dependencies,
-                                                services,
-                                                provider,
-                                                type => !dontPropagateTypes.Contains(type));
+                                            dependencies.Proxinate(services, provider, type => !dontPropagateTypes.Contains(type));
                                         });
                                 });
 
