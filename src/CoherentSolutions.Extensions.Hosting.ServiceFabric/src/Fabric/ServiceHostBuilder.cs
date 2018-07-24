@@ -286,7 +286,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                     c.ConfigureDependencies(
                                         services =>
                                         {
-                                            DependencyRegistrant.Register(services, dependenciesCollection, dependencies);
+                                            services.Proxinate(dependenciesCollection, dependencies);
                                         });
                                 });
 
@@ -334,7 +334,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                                         builder.ConfigureServices(
                                                             services =>
                                                             {
-                                                                DependencyRegistrant.Register(services, dependenciesCollection, dependencies);
+                                                                services.Proxinate(dependenciesCollection, dependencies);
                                                             });
                                                     });
                                             });
@@ -364,7 +364,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                                 c.ConfigureDependencies(
                                                     services =>
                                                     {
-                                                        DependencyRegistrant.Register(services, dependenciesCollection, dependencies);
+                                                        services.Proxinate(dependenciesCollection, dependencies);
                                                     });
                                             });
 

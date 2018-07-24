@@ -139,9 +139,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 throw new FactoryProducesNullInstanceException<IServiceCollection>();
             }
 
-            DependencyRegistrant.Register(dependenciesCollection, serviceContext);
-            DependencyRegistrant.Register(dependenciesCollection, servicePartition);
-            DependencyRegistrant.Register(dependenciesCollection, serviceEventSource);
+            dependenciesCollection.Add(serviceContext);
+            dependenciesCollection.Add(servicePartition);
+            dependenciesCollection.Add(serviceEventSource);
 
             parameters.DependenciesConfigAction?.Invoke(dependenciesCollection);
 
@@ -158,7 +158,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 });
 
             // Adding support for open-generics
-            var provider = new OpenGenericAwareServiceProvider(dependenciesCollection.BuildServiceProvider());
+            var provider = new ProxynatorAwareServiceProvider(dependenciesCollection.BuildServiceProvider());
 
             return () =>
             {

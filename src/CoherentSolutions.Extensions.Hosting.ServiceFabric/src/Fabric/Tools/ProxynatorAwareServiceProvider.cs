@@ -2,11 +2,11 @@
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
 {
-    public class OpenGenericAwareServiceProvider : IServiceProvider
+    public class ProxynatorAwareServiceProvider : IServiceProvider
     {
         private readonly IServiceProvider impl;
 
-        public OpenGenericAwareServiceProvider(
+        public ProxynatorAwareServiceProvider(
             IServiceProvider impl)
         {
             this.impl = impl ?? throw new ArgumentNullException(nameof(impl));
@@ -16,7 +16,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
             Type serviceType)
         {
             var service = this.impl.GetService(serviceType);
-            if (service is IOpenGenericProxy proxy)
+            if (service is IProxynatorProxy proxy)
             {
                 return proxy.Target;
             }

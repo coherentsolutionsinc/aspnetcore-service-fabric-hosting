@@ -2,21 +2,20 @@
 using System.Fabric;
 using System.Linq;
 using System.Reflection;
-using System.Reflection.Emit;
 
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
 {
-    public static class DependencyRegistrant
+    internal static class ServiceCollectionExtensions
     {
-        public static void Register(
-            IServiceCollection serviceCollection,
+        public static void Add(
+            this IServiceCollection @this,
             ServiceContext serviceContext)
         {
-            if (serviceCollection == null)
+            if (@this == null)
             {
-                throw new ArgumentNullException(nameof(serviceCollection));
+                throw new ArgumentNullException(nameof(@this));
             }
 
             if (serviceContext == null)
@@ -24,26 +23,26 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
                 throw new ArgumentNullException(nameof(serviceContext));
             }
 
-            serviceCollection.Add(new ServiceDescriptor(typeof(ServiceContext), serviceContext));
+            @this.Add(new ServiceDescriptor(typeof(ServiceContext), serviceContext));
 
             switch (serviceContext)
             {
                 case StatefulServiceContext _:
-                    serviceCollection.Add(new ServiceDescriptor(typeof(StatefulServiceContext), serviceContext));
+                    @this.Add(new ServiceDescriptor(typeof(StatefulServiceContext), serviceContext));
                     break;
                 case StatelessServiceContext _:
-                    serviceCollection.Add(new ServiceDescriptor(typeof(StatelessServiceContext), serviceContext));
+                    @this.Add(new ServiceDescriptor(typeof(StatelessServiceContext), serviceContext));
                     break;
             }
         }
 
-        public static void Register(
-            IServiceCollection serviceCollection,
+        public static void Add(
+            this IServiceCollection @this,
             IServicePartition servicePartition)
         {
-            if (serviceCollection == null)
+            if (@this == null)
             {
-                throw new ArgumentNullException(nameof(serviceCollection));
+                throw new ArgumentNullException(nameof(@this));
             }
 
             if (servicePartition == null)
@@ -51,26 +50,26 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
                 throw new ArgumentNullException(nameof(servicePartition));
             }
 
-            serviceCollection.Add(new ServiceDescriptor(typeof(IServicePartition), servicePartition));
+            @this.Add(new ServiceDescriptor(typeof(IServicePartition), servicePartition));
 
             switch (servicePartition)
             {
                 case IStatefulServicePartition _:
-                    serviceCollection.Add(new ServiceDescriptor(typeof(IStatefulServicePartition), servicePartition));
+                    @this.Add(new ServiceDescriptor(typeof(IStatefulServicePartition), servicePartition));
                     break;
                 case IStatelessServicePartition _:
-                    serviceCollection.Add(new ServiceDescriptor(typeof(IStatelessServicePartition), servicePartition));
+                    @this.Add(new ServiceDescriptor(typeof(IStatelessServicePartition), servicePartition));
                     break;
             }
         }
 
-        public static void Register(
-            IServiceCollection serviceCollection,
+        public static void Add(
+            this IServiceCollection @this,
             IServiceEventSource serviceEventSource)
         {
-            if (serviceCollection == null)
+            if (@this == null)
             {
-                throw new ArgumentNullException(nameof(serviceCollection));
+                throw new ArgumentNullException(nameof(@this));
             }
 
             if (serviceEventSource == null)
@@ -78,16 +77,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
                 throw new ArgumentNullException(nameof(serviceEventSource));
             }
 
-            serviceCollection.Add(new ServiceDescriptor(typeof(IServiceEventSource), serviceEventSource));
+            @this.Add(new ServiceDescriptor(typeof(IServiceEventSource), serviceEventSource));
         }
 
-        public static void Register(
-            IServiceCollection serviceCollection,
+        public static void Add(
+            this IServiceCollection @this,
             IServiceHostAspNetCoreListenerInformation aspNetCoreListenerInformation)
         {
-            if (serviceCollection == null)
+            if (@this == null)
             {
-                throw new ArgumentNullException(nameof(serviceCollection));
+                throw new ArgumentNullException(nameof(@this));
             }
 
             if (aspNetCoreListenerInformation == null)
@@ -95,17 +94,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
                 throw new ArgumentNullException(nameof(aspNetCoreListenerInformation));
             }
 
-            serviceCollection.Add(new ServiceDescriptor(typeof(IServiceHostListenerInformation), aspNetCoreListenerInformation));
-            serviceCollection.Add(new ServiceDescriptor(typeof(IServiceHostAspNetCoreListenerInformation), aspNetCoreListenerInformation));
+            @this.Add(new ServiceDescriptor(typeof(IServiceHostListenerInformation), aspNetCoreListenerInformation));
+            @this.Add(new ServiceDescriptor(typeof(IServiceHostAspNetCoreListenerInformation), aspNetCoreListenerInformation));
         }
 
-        public static void Register(
-            IServiceCollection serviceCollection,
+        public static void Add(
+            this IServiceCollection @this,
             IServiceHostRemotingListenerInformation remotingListenerInformation)
         {
-            if (serviceCollection == null)
+            if (@this == null)
             {
-                throw new ArgumentNullException(nameof(serviceCollection));
+                throw new ArgumentNullException(nameof(@this));
             }
 
             if (remotingListenerInformation == null)
@@ -113,24 +112,24 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
                 throw new ArgumentNullException(nameof(remotingListenerInformation));
             }
 
-            serviceCollection.Add(new ServiceDescriptor(typeof(IServiceHostListenerInformation), remotingListenerInformation));
-            serviceCollection.Add(new ServiceDescriptor(typeof(IServiceHostRemotingListenerInformation), remotingListenerInformation));
+            @this.Add(new ServiceDescriptor(typeof(IServiceHostListenerInformation), remotingListenerInformation));
+            @this.Add(new ServiceDescriptor(typeof(IServiceHostRemotingListenerInformation), remotingListenerInformation));
         }
 
-        public static void Register(
-            IServiceCollection destination,
-            IServiceCollection source,
+        public static void Proxinate(
+            this IServiceCollection @this,
+            IServiceCollection collection,
             IServiceProvider services,
             Func<Type, bool> predicate = null)
         {
-            if (destination == null)
+            if (@this == null)
             {
-                throw new ArgumentNullException(nameof(destination));
+                throw new ArgumentNullException(nameof(@this));
             }
 
-            if (source == null)
+            if (collection == null)
             {
-                throw new ArgumentNullException(nameof(source));
+                throw new ArgumentNullException(nameof(collection));
             }
 
             if (services == null)
@@ -143,43 +142,50 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
                 predicate = type => true;
             }
 
-            destination.Add(new ServiceDescriptor(typeof(IOpenGenericTargetServiceProvider), new OpenGenericTargetServiceProvider(services)));
+            var providerType = Proxynator.CreateInstanceProxy(typeof(IServiceProvider));
 
-            foreach (var descriptor in source.Where(i => predicate(i.ServiceType)))
+            @this.Add(
+                new ServiceDescriptor(
+                    providerType,
+                    provider => Activator.CreateInstance(providerType, new ProxynatorAwareServiceProvider(services)),
+                    ServiceLifetime.Singleton));
+
+            foreach (var descriptor in collection.Where(i => predicate(i.ServiceType)))
             {
                 switch (descriptor.Lifetime)
                 {
                     case ServiceLifetime.Singleton:
                         if (descriptor.ImplementationInstance != null || descriptor.ImplementationFactory != null)
                         {
-                            destination.Add(descriptor);
+                            @this.Add(descriptor);
                         }
                         else
                         {
                             if (descriptor.ServiceType.GetTypeInfo().IsGenericTypeDefinition && descriptor.ServiceType.IsInterface)
                             {
-                                destination.Add(
+                                @this.Add(
                                     new ServiceDescriptor(
                                         descriptor.ServiceType,
-                                        OpenGenericProxyEmitter.Emit(descriptor.ServiceType),
+                                        Proxynator.CreateDependencyInjectionProxy(providerType, descriptor.ServiceType),
                                         ServiceLifetime.Singleton));
                             }
                             else
                             {
-                                destination.Add(
+                                @this.Add(
                                     new ServiceDescriptor(
                                         descriptor.ServiceType,
                                         provider => services.GetService(descriptor.ServiceType),
                                         ServiceLifetime.Singleton));
                             }
                         }
+
                         break;
                     case ServiceLifetime.Scoped:
                     case ServiceLifetime.Transient:
-                        destination.Add(descriptor);
+                        @this.Add(descriptor);
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException(nameof(source), descriptor.Lifetime, typeof(ServiceLifetime).FullName);
+                        throw new ArgumentOutOfRangeException(nameof(@this), descriptor.Lifetime, typeof(ServiceLifetime).FullName);
                 }
             }
         }

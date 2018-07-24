@@ -135,10 +135,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                     builder.ConfigureServices(
                         services =>
                         {
-                            DependencyRegistrant.Register(services, serviceContext);
-                            DependencyRegistrant.Register(services, servicePartition);
-                            DependencyRegistrant.Register(services, serviceEventSource);
-                            DependencyRegistrant.Register(services, listenerInformation);
+                            services.Add(serviceContext);
+                            services.Add(servicePartition);
+                            services.Add(serviceEventSource);
+                            services.Add(listenerInformation);
 
                             parameters.DependenciesConfigAction?.Invoke(services);
 
@@ -148,32 +148,32 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                 ServiceDescriptor replacement;
                                 if (descriptor.ImplementationFactory != null)
                                 {
-                                    replacement = 
+                                    replacement =
                                         new ServiceDescriptor(
                                             typeof(IStartup),
                                             provider =>
                                             {
                                                 var impl = descriptor.ImplementationFactory(provider);
-                                                return new OpenGenericAwareStartup((IStartup) impl);
+                                                return new ProxynatorAwareStartup((IStartup) impl);
                                             },
                                             ServiceLifetime.Singleton);
                                 }
                                 else if (descriptor.ImplementationInstance != null)
                                 {
-                                    replacement = 
+                                    replacement =
                                         new ServiceDescriptor(
                                             typeof(IStartup),
-                                            new OpenGenericAwareStartup((IStartup)descriptor.ImplementationInstance));
+                                            new ProxynatorAwareStartup((IStartup) descriptor.ImplementationInstance));
                                 }
                                 else
                                 {
-                                    replacement = 
+                                    replacement =
                                         new ServiceDescriptor(
                                             typeof(IStartup),
                                             provider =>
                                             {
                                                 var impl = ActivatorUtilities.CreateInstance(provider, descriptor.ImplementationType);
-                                                return new OpenGenericAwareStartup((IStartup) impl);
+                                                return new ProxynatorAwareStartup((IStartup) impl);
                                             },
                                             ServiceLifetime.Singleton);
                                 }

@@ -6,11 +6,11 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
 {
-    internal class OpenGenericAwareStartup : IStartup
+    internal class ProxynatorAwareStartup : IStartup
     {
         private readonly IStartup impl;
 
-        public OpenGenericAwareStartup(
+        public ProxynatorAwareStartup(
             IStartup impl)
         {
             this.impl = impl;
@@ -19,7 +19,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
         public IServiceProvider ConfigureServices(
             IServiceCollection services)
         {
-            return new OpenGenericAwareServiceProvider(this.impl.ConfigureServices(services));
+            return new ProxynatorAwareServiceProvider(this.impl.ConfigureServices(services));
         }
 
         public void Configure(

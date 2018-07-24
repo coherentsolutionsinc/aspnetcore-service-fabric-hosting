@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools;
 
@@ -12,7 +11,7 @@ using Xunit;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
 {
-    public static class OpenGenericEmitTests
+    public static class ProxynatorTests
     {
         public interface ITestOpenGeneric
         {
@@ -43,6 +42,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         public interface ITestOpenGenericWithGetSetProperty<T>
         {
             int Value { get; set; }
+        }
+
+        public interface ITestOpenGenericWithEvent<T>
+        {
+            event EventHandler<EventArgs> Event;
         }
 
         public interface ITestOpenGenericWithNonVoidMethodVoidParameters<T>
@@ -262,6 +266,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             {
                 get => throw new NotImplementedException();
                 set => throw new NotImplementedException();
+            }
+        }
+
+        private class TestOpenGenericWithEvent<T> : ITestOpenGenericWithEvent<T>
+        {
+            public event EventHandler<EventArgs> Event
+            {
+                add => throw new NotImplementedException();
+                remove => throw new NotImplementedException();
             }
         }
 
@@ -518,6 +531,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
                     yield return new object[]
                     {
                         new Case(
+                            typeof(ITestOpenGenericWithEvent<>),
+                            typeof(TestOpenGenericWithEvent<>),
+                            typeof(ITestOpenGenericWithEvent<int>))
+                    };
+                    yield return new object[]
+                    {
+                        new Case(
                             typeof(ITestOpenGenericWithVoidMethodVoidParameters<>),
                             typeof(TestOpenGenericWithVoidMethodVoidParameters<>),
                             typeof(ITestOpenGenericWithVoidMethodVoidParameters<int>))
@@ -706,8 +726,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             var arrangeRootServices = arrangeRootCollection.BuildServiceProvider();
 
             var arrangeCollection = (IServiceCollection) new ServiceCollection();
-            arrangeCollection.Add(new ServiceDescriptor(typeof(IOpenGenericTargetServiceProvider), new OpenGenericTargetServiceProvider(arrangeRootServices)));
-            arrangeCollection.Add(new ServiceDescriptor(@case.ServiceType, OpenGenericProxyEmitter.Emit(@case.ServiceType), ServiceLifetime.Singleton));
+
+            var providerType = Proxynator.CreateInstanceProxy(typeof(IServiceProvider));
+
+            arrangeCollection.Add(new ServiceDescriptor(providerType, Activator.CreateInstance(providerType, arrangeRootServices)));
+            arrangeCollection.Add(
+                new ServiceDescriptor(
+                    @case.ServiceType,
+                    Proxynator.CreateDependencyInjectionProxy(providerType, @case.ServiceType),
+                    ServiceLifetime.Singleton));
 
             var arrangeServices = arrangeCollection.BuildServiceProvider();
 
@@ -739,6 +766,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
                             {
                                 t = t.GetElementType();
                             }
+
                             return t.IsValueType
                                 ? Activator.CreateInstance(t)
                                 : null;
@@ -762,6 +790,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
                                             {
                                                 t = t.GetElementType();
                                             }
+
                                             return Expression.Convert(Expression.Constant(v), t);
                                         })))
                            .Compile();

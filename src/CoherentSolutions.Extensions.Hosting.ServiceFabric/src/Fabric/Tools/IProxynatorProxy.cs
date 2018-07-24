@@ -1,6 +1,6 @@
 ﻿namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
 {
-    public interface IOpenGenericProxy
+    public interface IProxynatorProxy
     {
         object Target { get; }
     }

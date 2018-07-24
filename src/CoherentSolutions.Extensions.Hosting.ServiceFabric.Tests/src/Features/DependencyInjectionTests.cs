@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Fabric;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Extensions;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Items;
@@ -177,6 +176,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                 public Type ServiceType { get; }
 
                 public Type ImplementationType { get; }
+
                 public Type RequestType { get; }
 
                 public OpenGenericCase(

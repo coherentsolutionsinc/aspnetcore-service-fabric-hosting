@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Fabric;
-using System.Linq;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Exceptions;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools;
@@ -150,10 +149,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                         throw new FactoryProducesNullInstanceException<IServiceCollection>();
                     }
 
-                    DependencyRegistrant.Register(dependenciesCollection, serviceContext);
-                    DependencyRegistrant.Register(dependenciesCollection, servicePartition);
-                    DependencyRegistrant.Register(dependenciesCollection, serviceEventSource);
-                    DependencyRegistrant.Register(dependenciesCollection, listenerInformation);
+                    dependenciesCollection.Add(serviceContext);
+                    dependenciesCollection.Add(servicePartition);
+                    dependenciesCollection.Add(serviceEventSource);
+                    dependenciesCollection.Add(listenerInformation);
 
                     parameters.DependenciesConfigAction?.Invoke(dependenciesCollection);
 
@@ -170,7 +169,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                         });
 
                     // Adding open-generic proxies
-                    IServiceProvider provider = new OpenGenericAwareServiceProvider(dependenciesCollection.BuildServiceProvider());
+                    IServiceProvider provider = new ProxynatorAwareServiceProvider(dependenciesCollection.BuildServiceProvider());
 
                     var implementation = parameters.RemotingImplementationFunc(provider);
                     if (implementation == null)
