@@ -102,6 +102,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             private static void DefaultWebHostCommunicationListenerConfigAction(
                 IWebHostBuilder builder)
             {
+                WebHostBuilderKestrelExtensions.UseKestrel(builder);
             }
         }
 
