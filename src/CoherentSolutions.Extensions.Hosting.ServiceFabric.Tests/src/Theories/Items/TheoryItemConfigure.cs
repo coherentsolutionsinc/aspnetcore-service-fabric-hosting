@@ -232,6 +232,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                     pickListenerEndpoint.PickAction(endpointName);
 
                     return useAspNetCoreListenerCommunicationListener.Factory(context, endpointName, factory);
+                },
+                builder =>
+                {
                 });
         }
 

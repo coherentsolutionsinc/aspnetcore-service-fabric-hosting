@@ -34,12 +34,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             public Action<IWebHostBuilder> WebHostConfigAction { get; private set; }
 
+            public Action<IWebHostBuilder> WebHostCommunicationListenerConfigAction { get; private set; }
+
             protected AspNetCoreListenerParameters()
             {
                 this.IntegrationOptions = ServiceFabricIntegrationOptions.None;
                 this.AspNetCoreCommunicationListenerFunc = DefaultAspNetCoreCommunicationListenerFunc;
                 this.WebHostBuilderFunc = DefaultWebHostBuilderFunc;
                 this.WebHostConfigAction = DefaultWebHostConfigAction;
+                this.WebHostCommunicationListenerConfigAction = DefaultWebHostCommunicationListenerConfigAction;
             }
 
             public void UseIntegrationOptions(
@@ -56,10 +59,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             }
 
             public void UseCommunicationListener(
-                ServiceHostAspNetCoreCommunicationListenerFactory factoryFunc)
+                ServiceHostAspNetCoreCommunicationListenerFactory factoryFunc,
+                Action<IWebHostBuilder> configAction)
             {
                 this.AspNetCoreCommunicationListenerFunc = factoryFunc
                  ?? throw new ArgumentNullException(nameof(factoryFunc));
+
+                this.WebHostCommunicationListenerConfigAction = configAction
+                 ?? throw new ArgumentNullException(nameof(configAction));
             }
 
             public void ConfigureWebHost(
@@ -88,6 +95,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             }
 
             private static void DefaultWebHostConfigAction(
+                IWebHostBuilder builder)
+            {
+            }
+
+            private static void DefaultWebHostCommunicationListenerConfigAction(
                 IWebHostBuilder builder)
             {
             }
@@ -123,6 +135,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                     }
 
                     parameters.WebHostConfigAction(builder);
+                    parameters.WebHostCommunicationListenerConfigAction(builder);
 
                     builder.UseServiceFabricIntegration(listener, parameters.IntegrationOptions);
                     builder.UseUrls(url);

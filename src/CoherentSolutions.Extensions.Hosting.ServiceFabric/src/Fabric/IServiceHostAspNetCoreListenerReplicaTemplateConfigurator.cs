@@ -12,7 +12,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             ServiceFabricIntegrationOptions integrationOptions);
 
         void UseCommunicationListener(
-            ServiceHostAspNetCoreCommunicationListenerFactory factoryFunc);
+            ServiceHostAspNetCoreCommunicationListenerFactory factoryFunc,
+            Action<IWebHostBuilder> configAction);
 
         void UseWebHostBuilder(
             Func<IWebHostBuilder> factoryFunc);
