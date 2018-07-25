@@ -5,6 +5,8 @@ using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Server.HttpSys;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 using Microsoft.ServiceFabric.Services.Remoting.FabricTransport.Runtime;
@@ -457,29 +459,63 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
         }
 
         public static TCaller UseKestrel<TCaller>(
-            this TCaller @this)
+            this TCaller @this,
+            Action<KestrelServerOptions> configAction = null)
             where TCaller : IConfigurableObject<IServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
         {
             @this.ConfigureObject(
-                configurator => configurator.UseCommunicationListener(
-                    (
-                        context,
-                        endpoint,
-                        factory) =>
-                    {
-                        return new KestrelCommunicationListener(context, endpoint, factory);
-                    }));
+                configurator =>
+                {
+                    configurator.UseCommunicationListener(
+                        (
+                            context,
+                            endpoint,
+                            factory) =>
+                        {
+                            return new KestrelCommunicationListener(context, endpoint, factory);
+                        },
+                        webHostBuilder =>
+                        {
+                            WebHostBuilderKestrelExtensions.UseKestrel(webHostBuilder, options => configAction?.Invoke(options));
+                        });
+                });
+
+            return @this;
+        }
+
+        public static TCaller UseHttpSys<TCaller>(
+            this TCaller @this,
+            Action<HttpSysOptions> configAction = null)
+            where TCaller : IConfigurableObject<IServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator =>
+                {
+                    configurator.UseCommunicationListener(
+                        (
+                            context,
+                            endpoint,
+                            factory) =>
+                        {
+                            return new HttpSysCommunicationListener(context, endpoint, factory);
+                        },
+                        webHostBuilder =>
+                        {
+                            WebHostBuilderHttpSysExtensions.UseHttpSys(webHostBuilder, options => configAction?.Invoke(options));
+                        });
+                });
 
             return @this;
         }
 
         public static TCaller UseCommunicationListener<TCaller>(
             this TCaller @this,
-            ServiceHostAspNetCoreCommunicationListenerFactory factoryFunc)
+            ServiceHostAspNetCoreCommunicationListenerFactory factoryFunc,
+            Action<IWebHostBuilder> configAction)
             where TCaller : IConfigurableObject<IServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
         {
             @this.ConfigureObject(
-                configurator => configurator.UseCommunicationListener(factoryFunc));
+                configurator => configurator.UseCommunicationListener(factoryFunc, configAction));
 
             return @this;
         }
