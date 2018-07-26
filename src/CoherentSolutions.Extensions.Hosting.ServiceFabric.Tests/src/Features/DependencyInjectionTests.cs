@@ -269,6 +269,52 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(HierarchyServiceRegistration.GeneralCases), MemberType = typeof(HierarchyServiceRegistration))]
+        private static void Should_resolve_lower_level_container_registration_When_lower_level_container_has_same_registration_as_upper_container(
+            HierarchyServiceRegistration.Case @case)
+        {
+            // Arrange
+            var theoryItem = @case.TheoryItem;
+
+            var arrangeUpperLevelObject = new TestDependency();
+            var arrangeLowerLevelObject = new TestDependency();
+
+            object expectedUpperLevelObject = arrangeUpperLevelObject;
+            object actualUpperLevelObject = null;
+
+            object expectedLowerLevelObject = arrangeLowerLevelObject;
+            object actualLowerLevelObject = null;
+
+            // Act
+            theoryItem.SetupConfig(
+                (
+                    builder,
+                    provider) =>
+                {
+                    builder.ConfigureServices(
+                        (
+                            context,
+                            collection) =>
+                        {
+                            collection.AddSingleton<ITestDependency>(arrangeUpperLevelObject);
+                        });
+                });
+            theoryItem.SetupCheck(
+                host =>
+                {
+                    actualUpperLevelObject = host.Services.GetService<ITestDependency>();
+                });
+
+            theoryItem.SetupExtension(new ConfigureDependenciesTheoryExtension().Setup(s => s.AddSingleton<ITestDependency>(arrangeLowerLevelObject)));
+            theoryItem.SetupExtension(new PickDependencyTheoryExtension().Setup(typeof(ITestDependency), o => actualLowerLevelObject = o));
+            theoryItem.Try();
+
+            // Assert
+            Assert.Same(expectedUpperLevelObject, actualUpperLevelObject);
+            Assert.Same(expectedLowerLevelObject, actualLowerLevelObject);
+        }
+
+        [Theory]
+        [MemberData(nameof(HierarchyServiceRegistration.GeneralCases), MemberType = typeof(HierarchyServiceRegistration))]
         private static void Should_resolve_same_singleton_instance_From_hierarchy_singleton_instance_registration(
             HierarchyServiceRegistration.Case @case)
         {

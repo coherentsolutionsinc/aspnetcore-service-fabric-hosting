@@ -14,6 +14,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                .SetupExtension(new UseDelegateTheoryExtension())
                .SetupExtension(new UseDelegateInvokerTheoryExtension())
                .SetupExtension(new UseDependenciesTheoryExtension())
+               .SetupExtension(new ConfigureDependenciesTheoryExtension())
                .SetupExtension(new PickDependencyTheoryExtension());
         }
 
@@ -24,6 +25,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                .SetupExtension(new UseListenerEndpointTheoryExtension())
                .SetupExtension(new UseAspNetCoreListenerCommunicationListenerTheoryExtension())
                .SetupExtension(new UseAspNetCoreListenerWebHostBuilderTheoryExtension())
+               .SetupExtension(new ConfigureDependenciesTheoryExtension())
                .SetupExtension(new PickDependencyTheoryExtension())
                .SetupExtension(new PickListenerEndpointTheoryExtension());
         }
@@ -39,6 +41,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                .SetupExtension(new UseRemotingListenerSerializationProviderTheoryExtension())
                .SetupExtension(new UseRemotingListenerHandlerTheoryExtension())
                .SetupExtension(new UseDependenciesTheoryExtension())
+               .SetupExtension(new ConfigureDependenciesTheoryExtension())
                .SetupExtension(new PickDependencyTheoryExtension())
                .SetupExtension(new PickListenerEndpointTheoryExtension())
                .SetupExtension(new PickRemotingListenerImplementationTheoryExtension())

@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Fabric;
 using System.Linq;
-using System.Reflection;
 
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
 {
-    internal static class ServiceCollectionExtensions
+    public static class ServiceCollectionExtensions
     {
         public static void Add(
             this IServiceCollection @this,
@@ -142,51 +141,79 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
                 predicate = type => true;
             }
 
-            var providerType = Proxynator.CreateInstanceProxy(typeof(IServiceProvider));
+            if (collection.Count == 0)
+            {
+                return;
+            }
 
-            @this.Add(
-                new ServiceDescriptor(
-                    providerType,
-                    provider => Activator.CreateInstance(providerType, new ProxynatorAwareServiceProvider(services)),
-                    ServiceLifetime.Singleton));
+            Type providerType = null;
 
             foreach (var descriptor in collection.Where(i => predicate(i.ServiceType)))
             {
+                // Create provider only when there are new open-generics
+                if (providerType == null
+                 && descriptor.Lifetime == ServiceLifetime.Singleton
+                 && descriptor.ServiceType.IsInterface
+                 && descriptor.ImplementationType != null
+                 && typeof(IProxynatorProxy).IsAssignableFrom(descriptor.ImplementationType) == false)
+                {
+                    providerType = Proxynator.CreateInstanceProxy(typeof(IServiceProvider));
+                }
+
+                ServiceDescriptor updateDescriptor;
                 switch (descriptor.Lifetime)
                 {
                     case ServiceLifetime.Singleton:
                         if (descriptor.ImplementationInstance != null || descriptor.ImplementationFactory != null)
                         {
-                            @this.Add(descriptor);
+                            updateDescriptor = descriptor;
                         }
                         else
                         {
-                            if (descriptor.ServiceType.GetTypeInfo().IsGenericTypeDefinition && descriptor.ServiceType.IsInterface)
+                            if (descriptor.ServiceType.IsInterface)
                             {
-                                @this.Add(
-                                    new ServiceDescriptor(
-                                        descriptor.ServiceType,
-                                        Proxynator.CreateDependencyInjectionProxy(providerType, descriptor.ServiceType),
-                                        ServiceLifetime.Singleton));
+                                // Reuse same descriptor for proxy registrations
+                                if (typeof(IProxynatorProxy).IsAssignableFrom(descriptor.ImplementationType))
+                                {
+                                    updateDescriptor = descriptor;
+                                }
+                                else
+                                {
+                                    updateDescriptor =
+                                        new ServiceDescriptor(
+                                            descriptor.ServiceType,
+                                            Proxynator.CreateDependencyInjectionProxy(
+                                                providerType,
+                                                descriptor.ServiceType,
+                                                descriptor.ImplementationType),
+                                            ServiceLifetime.Singleton);
+                                }
                             }
                             else
                             {
-                                @this.Add(
-                                    new ServiceDescriptor(
-                                        descriptor.ServiceType,
-                                        provider => services.GetService(descriptor.ServiceType),
-                                        ServiceLifetime.Singleton));
+                                // Currently open-generics base classes aren't supported.
+                                updateDescriptor = descriptor;
                             }
                         }
 
                         break;
                     case ServiceLifetime.Scoped:
                     case ServiceLifetime.Transient:
-                        @this.Add(descriptor);
+                        updateDescriptor = descriptor;
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(@this), descriptor.Lifetime, typeof(ServiceLifetime).FullName);
                 }
+
+                @this.Add(updateDescriptor);
+            }
+
+            if (providerType != null)
+            {
+                @this.Add(
+                    new ServiceDescriptor(
+                        providerType,
+                        Activator.CreateInstance(providerType, new ProxynatorAwareServiceProvider(services))));
             }
         }
     }

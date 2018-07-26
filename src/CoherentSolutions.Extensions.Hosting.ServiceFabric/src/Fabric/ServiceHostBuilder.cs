@@ -280,17 +280,18 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                 throw new FactoryProducesNullInstanceException<TDelegateReplicaTemplate>();
                             }
 
+                            descriptor.ConfigAction(template);
+
                             template.ConfigureObject(
                                 c =>
                                 {
                                     c.ConfigureDependencies(
                                         services =>
                                         {
-                                            services.Proxinate(dependenciesCollection, dependencies);
+                                            var ignore = new HashSet<Type>(services.Select(i => i.ServiceType));
+                                            services.Proxinate(dependenciesCollection, dependencies, i => !ignore.Contains(i));
                                         });
                                 });
-
-                            descriptor.ConfigAction(template);
 
                             var replicator = parameters.DelegateReplicatorFunc(template);
                             if (replicator == null)
@@ -325,6 +326,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                             throw new FactoryProducesNullInstanceException<TListenerAspNetCoreReplicaTemplate>();
                                         }
 
+                                        descriptor.ConfigAction(template);
+
                                         template.ConfigureObject(
                                             c =>
                                             {
@@ -334,12 +337,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                                         builder.ConfigureServices(
                                                             services =>
                                                             {
-                                                                services.Proxinate(dependenciesCollection, dependencies);
+                                                                var ignore = new HashSet<Type>(services.Select(i => i.ServiceType));
+                                                                services.Proxinate(dependenciesCollection, dependencies, i => !ignore.Contains(i));
                                                             });
                                                     });
                                             });
-
-                                        descriptor.ConfigAction(template);
 
                                         replicableTemplate = template;
                                     }
@@ -358,17 +360,18 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                             throw new FactoryProducesNullInstanceException<TListenerRemotingReplicaTemplate>();
                                         }
 
+                                        descriptor.ConfigAction(template);
+
                                         template.ConfigureObject(
                                             c =>
                                             {
                                                 c.ConfigureDependencies(
                                                     services =>
                                                     {
-                                                        services.Proxinate(dependenciesCollection, dependencies);
+                                                        var ignore = new HashSet<Type>(services.Select(i => i.ServiceType));
+                                                        services.Proxinate(dependenciesCollection, dependencies, i => !ignore.Contains(i));
                                                     });
                                             });
-
-                                        descriptor.ConfigAction(template);
 
                                         replicableTemplate = template;
                                     }
