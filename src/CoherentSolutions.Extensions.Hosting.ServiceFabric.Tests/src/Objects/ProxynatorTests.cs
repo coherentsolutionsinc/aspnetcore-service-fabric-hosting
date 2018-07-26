@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools;
 
@@ -13,254 +14,251 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
 {
     public static class ProxynatorTests
     {
-        public interface ITestOpenGeneric
+        public interface ITestServiceProvider : IServiceProvider
         {
         }
 
-        public interface ITestOpenGeneric<T>
+        public class TestServiceProvider : ITestServiceProvider
+        {
+            private readonly IServiceProvider impl;
+
+            public TestServiceProvider(
+                IServiceProvider impl)
+            {
+                this.impl = impl;
+            }
+
+            public object GetService(
+                Type serviceType)
+            {
+                return this.impl.GetService(serviceType);
+            }
+        }
+
+        public interface ITestType
         {
         }
 
-        public interface ITestOpenGenericWithOutModifier<out T>
-        {
-        }
-
-        public interface ITestOpenGenericWithInModifier<in T>
-        {
-        }
-
-        public interface ITestOpenGenericWithGetProperty<T>
+        public interface ITestTypeWithGetProperty
         {
             int Value { get; }
         }
 
-        public interface ITestOpenGenericWithRefGetProperty<T>
+        public interface ITestTypeWithInheritedProperty : ITestTypeWithGetProperty
+        {
+        }
+
+        public interface ITestTypeWithRefGetProperty
         {
             ref int Value { get; }
         }
 
-        public interface ITestOpenGenericWithGetSetProperty<T>
+        public interface ITestTypeWithGetSetProperty
         {
             int Value { get; set; }
         }
 
-        public interface ITestOpenGenericWithEvent<T>
+        public interface ITestTypeWithEvent
         {
             event EventHandler<EventArgs> Event;
         }
 
-        public interface ITestOpenGenericWithNonVoidMethodVoidParameters<T>
+        public interface ITestTypeWithInheritedEvent : ITestTypeWithEvent
+        {
+        }
+
+        public interface ITestTypeWithNonVoidMethodVoidParameters
         {
             int Method();
         }
 
-        public interface ITestOpenGenericWithVoidMethodVoidParameters<T>
+        public interface ITestTypeWithInheritedNonVoidMethodVoidParameters : ITestTypeWithNonVoidMethodVoidParameters
+        {
+        }
+
+        public interface ITestTypeWithVoidMethodVoidParameters
         {
             void Method();
         }
 
-        public interface ITestOpenGenericWithVoidMethodWithParameters<T>
+        public interface ITestTypeWithVoidMethodWithParameters
         {
             void Method(
                 int parameter);
         }
 
-        public interface ITestOpenGenericWithVoidMethodWithRefParameters<T>
+        public interface ITestTypeWithVoidMethodWithRefParameters
         {
             void Method(
                 ref int parameter);
         }
 
-        public interface ITestOpenGenericWithVoidMethodWithOutParameters<T>
+        public interface ITestTypeWithVoidMethodWithOutParameters
         {
             void Method(
                 out int parameter);
         }
 
-        //TODO: Method parameter modifiers, in etc.
+        public interface ITestGenericType
+        {
+        }
 
-        public interface ITestOpenGenericWithGenericGetProperty<T>
+        public interface ITestGenericType<T>
+        {
+        }
+
+        public interface ITestGenericTypeWithOutModifier<out T>
+        {
+        }
+
+        public interface ITestGenericTypeWithInModifier<in T>
+        {
+        }
+
+        public interface ITestGenericTypeWithGenericGetProperty<T>
         {
             T Value { get; }
         }
 
-        public interface ITestOpenGenericWithGenericGetSetProperty<T>
+        public interface ITestGenericTypeWithGenericGetSetProperty<T>
         {
             T Value { get; set; }
         }
 
-        public interface ITestOpenGenericWithGenericReturnMethodVoidParameters<T>
+        public interface ITestGenericTypeWithGenericReturnMethodVoidParameters<T>
         {
             T Method();
         }
 
-        public interface ITestOpenGenericWithVoidMethodWithGenericParameters<T>
+        public interface ITestGenericTypeWithVoidMethodWithGenericParameters<T>
         {
             void Method(
                 T parameter);
         }
 
-        public interface ITestOpenGenericWithVoidMethodWithGenericGenericParameters<T>
+        public interface ITestGenericTypeWithVoidMethodWithGenericGenericParameters<T>
         {
             void Method(
                 Action<T> parameter);
         }
 
-        public interface ITestOpenGenericWithIndependentGenericReturnMethodVoidParameters<T>
+        public interface ITestGenericTypeWithIndependentGenericReturnMethodVoidParameters<T>
         {
             K Method<K>();
         }
 
-        public interface ITestOpenGenericWithVoidMethodWithIndependentGenericParameters<T>
+        public interface ITestGenericTypeWithVoidMethodWithIndependentGenericParameters<T>
         {
             void Method<K>(
                 K parameter);
         }
 
-        public interface ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithClassConstraints<T>
+        public interface ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithClassConstraints<T>
         {
             void Method<K>(
                 K parameter)
                 where K : class;
         }
 
-        public interface ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithStructConstraints<T>
+        public interface ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithStructConstraints<T>
         {
             void Method<K>(
                 K parameter)
                 where K : struct;
         }
 
-        public interface ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithNewConstraints<T>
+        public interface ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithNewConstraints<T>
         {
             void Method<K>(
                 K parameter)
                 where K : new();
         }
 
-        public interface ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithBaseTypeConstraints<T>
+        public interface ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithBaseTypeConstraints<T>
         {
             void Method<K>(
                 K parameter)
-                where K : TestOpenGeneric;
+                where K : TestGenericType;
         }
 
-        public interface ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithBaseInterfaceConstraints<T>
+        public interface ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithBaseInterfaceConstraints<T>
         {
             void Method<K>(
                 K parameter)
-                where K : ITestOpenGeneric;
+                where K : ITestGenericType;
         }
 
-        public interface ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithGenericInterfaceConstraints<T>
+        public interface ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithGenericInterfaceConstraints<T>
         {
             void Method<K, X>(
                 K parameter)
-                where K : ITestOpenGeneric<X>;
+                where K : ITestGenericType<X>;
         }
 
-        public interface ITestOpenGenericWithMultipleParameters<T, K>
+        public interface ITestGenericTypeWithMultipleParameters<T, K>
         {
         }
 
-        public interface ITestOpenGenericWithMultipleParametersAndDifferentConstraints<T, K>
+        public interface ITestGenericTypeWithMultipleParametersAndDifferentConstraints<T, K>
             where T : class
             where K : struct
         {
         }
 
-        public interface ITestOpenGenericWithClassConstraints<T>
+        public interface ITestGenericTypeWithClassConstraints<T>
             where T : class
         {
         }
 
-        public interface ITestOpenGenericWithStructConstraints<T>
+        public interface ITestGenericTypeWithStructConstraints<T>
             where T : struct
         {
         }
 
-        public interface ITestOpenGenericWithNewConstraints<T>
+        public interface ITestGenericTypeWithNewConstraints<T>
             where T : new()
         {
         }
 
-        public interface ITestOpenGenericWithBaseTypeConstraints<T>
-            where T : TestOpenGeneric
+        public interface ITestGenericTypeWithBaseTypeConstraints<T>
+            where T : TestGenericType
         {
         }
 
-        public interface ITestOpenGenericWithInterfaceConstraints<T>
-            where T : ITestOpenGeneric
+        public interface ITestGenericTypeWithInterfaceConstraints<T>
+            where T : ITestGenericType
         {
         }
 
-        public interface ITestOpenGenericWithGenericInterfaceConstraint<T, K>
-            where T : ITestOpenGeneric<K>
+        public interface ITestGenericTypeWithGenericInterfaceConstraint<T, K>
+            where T : ITestGenericType<K>
         {
         }
 
-        public class TestOpenGeneric
+        public class TestGenericType
         {
         }
 
-        public class TestOpenGeneric<T> : ITestOpenGeneric<T>
+        private class TestType : ITestType
         {
         }
 
-        public class TestOpenGenericWithMultipleParameters<T, K> : ITestOpenGenericWithMultipleParameters<T, K>
-        {
-        }
-
-        public class TestOpenGenericWithMultipleParametersAndDifferentConstraints<T, K> : ITestOpenGenericWithMultipleParametersAndDifferentConstraints<T, K>
-            where T : class
-            where K : struct
-        {
-        }
-
-        public class TestOpenGenericWithClassConstraints<T> : ITestOpenGenericWithClassConstraints<T>
-            where T : class
-        {
-        }
-
-        public class TestOpenGenericWithStructConstraints<T> : ITestOpenGenericWithStructConstraints<T>
-            where T : struct
-        {
-        }
-
-        public class TestOpenGenericWithBaseClassConstraints<T> : ITestOpenGenericWithBaseTypeConstraints<T>
-            where T : TestOpenGeneric
-        {
-        }
-
-        public class TestOpenGenericWithInterfaceConstraints<T> : ITestOpenGenericWithInterfaceConstraints<T>
-            where T : ITestOpenGeneric
-        {
-        }
-
-        public class TestOpenGenericWithGenericInterfaceConstraint<T, K> : ITestOpenGenericWithGenericInterfaceConstraint<T, K>
-            where T : ITestOpenGeneric<K>
-        {
-        }
-
-        private class TestOpenGenericWithOutModifier<T> : ITestOpenGenericWithOutModifier<T>
-        {
-        }
-
-        private class TestOpenGenericWithInModifier<T> : ITestOpenGenericWithInModifier<T>
-        {
-        }
-
-        private class TestOpenGenericWithGetProperty<T> : ITestOpenGenericWithGetProperty<T>
+        private class TestTypeWithGetProperty : ITestTypeWithGetProperty
         {
             public int Value => throw new NotImplementedException();
         }
 
-        private class TestOpenGenericWithRefGetProperty<T> : ITestOpenGenericWithRefGetProperty<T>
+        private class TestTypeWithInheritedProperty : ITestTypeWithInheritedProperty
+        {
+            public int Value => throw new NotImplementedException();
+        }
+
+        private class TestTypeWithRefGetProperty : ITestTypeWithRefGetProperty
         {
             public ref int Value => throw new NotImplementedException();
         }
 
-        private class TestOpenGenericWithGetSetProperty<T> : ITestOpenGenericWithGetSetProperty<T>
+        private class TestTypeWithGetSetProperty : ITestTypeWithGetSetProperty
         {
             public int Value
             {
@@ -269,7 +267,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             }
         }
 
-        private class TestOpenGenericWithEvent<T> : ITestOpenGenericWithEvent<T>
+        private class TestTypeWithEvent : ITestTypeWithEvent
         {
             public event EventHandler<EventArgs> Event
             {
@@ -278,7 +276,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             }
         }
 
-        private class TestOpenGenericWithNonVoidMethodVoidParameters<T> : ITestOpenGenericWithNonVoidMethodVoidParameters<T>
+        private class TestTypeWithInheritedEvent : ITestTypeWithInheritedEvent
+        {
+            public event EventHandler<EventArgs> Event
+            {
+                add => throw new NotImplementedException();
+                remove => throw new NotImplementedException();
+            }
+        }
+
+        private class TestTypeWithNonVoidMethodVoidParameters : ITestTypeWithNonVoidMethodVoidParameters
         {
             public int Method()
             {
@@ -286,7 +293,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             }
         }
 
-        private class TestOpenGenericWithVoidMethodVoidParameters<T> : ITestOpenGenericWithVoidMethodVoidParameters<T>
+        private class TestTypeWithInheritedNonVoidMethodVoidParameters : ITestTypeWithInheritedNonVoidMethodVoidParameters
+        {
+            public int Method()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class TestTypeWithVoidMethodVoidParameters : ITestTypeWithVoidMethodVoidParameters
         {
             public void Method()
             {
@@ -294,7 +309,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             }
         }
 
-        private class TestOpenGenericWithVoidMethodWithParameters<T> : ITestOpenGenericWithVoidMethodWithParameters<T>
+        private class TestTypeWithVoidMethodWithParameters : ITestTypeWithVoidMethodWithParameters
         {
             public void Method(
                 int parameter)
@@ -303,7 +318,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             }
         }
 
-        private class TestOpenGenericWithVoidMethodWithRefParameters<T> : ITestOpenGenericWithVoidMethodWithRefParameters<T>
+        private class TestTypeWithVoidMethodWithRefParameters : ITestTypeWithVoidMethodWithRefParameters
         {
             public void Method(
                 ref int parameter)
@@ -312,7 +327,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             }
         }
 
-        private class TestOpenGenericWithVoidMethodWithOutParameters<T> : ITestOpenGenericWithVoidMethodWithOutParameters<T>
+        private class TestTypeWithVoidMethodWithOutParameters : ITestTypeWithVoidMethodWithOutParameters
         {
             public void Method(
                 out int parameter)
@@ -321,12 +336,59 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             }
         }
 
-        private class TestOpenGenericWithGenericGetProperty<T> : ITestOpenGenericWithGenericGetProperty<T>
+        private class TestGenericType<T> : ITestGenericType<T>
+        {
+        }
+
+        private class TestGenericTypeWithMultipleParameters<T, K> : ITestGenericTypeWithMultipleParameters<T, K>
+        {
+        }
+
+        private class TestGenericTypeWithMultipleParametersAndDifferentConstraints<T, K> : ITestGenericTypeWithMultipleParametersAndDifferentConstraints<T, K>
+            where T : class
+            where K : struct
+        {
+        }
+
+        private class TestGenericTypeWithClassConstraints<T> : ITestGenericTypeWithClassConstraints<T>
+            where T : class
+        {
+        }
+
+        private class TestGenericTypeWithStructConstraints<T> : ITestGenericTypeWithStructConstraints<T>
+            where T : struct
+        {
+        }
+
+        private class TestGenericTypeWithBaseClassConstraints<T> : ITestGenericTypeWithBaseTypeConstraints<T>
+            where T : TestGenericType
+        {
+        }
+
+        private class TestGenericTypeWithInterfaceConstraints<T> : ITestGenericTypeWithInterfaceConstraints<T>
+            where T : ITestGenericType
+        {
+        }
+
+        private class TestGenericTypeWithGenericInterfaceConstraint<T, K> : ITestGenericTypeWithGenericInterfaceConstraint<T, K>
+            where T : ITestGenericType<K>
+        {
+        }
+
+        private class TestGenericTypeWithOutModifier<T> : ITestGenericTypeWithOutModifier<T>
+        {
+        }
+
+        private class TestGenericTypeWithInModifier<T> : ITestGenericTypeWithInModifier<T>
+        {
+        }
+
+        private class TestGenericTypeWithGenericGetProperty<T> : ITestGenericTypeWithGenericGetProperty<T>
         {
             public T Value => throw new NotImplementedException();
         }
 
-        private class TestOpenGenericWithGenericGetSetProperty<T> : ITestOpenGenericWithGenericGetSetProperty<T>
+        private class TestGenericTypeWithGenericGetSetProperty<T> : ITestGenericTypeWithGenericGetSetProperty<T>
         {
             public T Value
             {
@@ -335,7 +397,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             }
         }
 
-        private class TestOpenGenericWithVoidMethodWithGenericParameters<T> : ITestOpenGenericWithVoidMethodWithGenericParameters<T>
+        private class TestGenericTypeWithVoidMethodWithGenericParameters<T> : ITestGenericTypeWithVoidMethodWithGenericParameters<T>
         {
             public void Method(
                 T parameter)
@@ -344,7 +406,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             }
         }
 
-        private class TestOpenGenericWithVoidMethodWithGenericGenericParameters<T> : ITestOpenGenericWithVoidMethodWithGenericGenericParameters<T>
+        private class TestGenericTypeWithVoidMethodWithGenericGenericParameters<T> : ITestGenericTypeWithVoidMethodWithGenericGenericParameters<T>
         {
             public void Method(
                 Action<T> parameter)
@@ -353,7 +415,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             }
         }
 
-        private class TestOpenGenericWithGenericReturnMethodVoidParameters<T> : ITestOpenGenericWithGenericReturnMethodVoidParameters<T>
+        private class TestGenericTypeWithGenericReturnMethodVoidParameters<T> : ITestGenericTypeWithGenericReturnMethodVoidParameters<T>
         {
             public T Method()
             {
@@ -361,7 +423,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             }
         }
 
-        private class TestOpenGenericWithIndependentGenericReturnMethodVoidParameters<T> : ITestOpenGenericWithIndependentGenericReturnMethodVoidParameters<T>
+        private class TestGenericTypeWithIndependentGenericReturnMethodVoidParameters<T> : ITestGenericTypeWithIndependentGenericReturnMethodVoidParameters<T>
         {
             public K Method<K>()
             {
@@ -369,7 +431,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             }
         }
 
-        private class TestOpenGenericWithVoidMethodWithIndependentGenericParameters<T> : ITestOpenGenericWithVoidMethodWithIndependentGenericParameters<T>
+        private class TestGenericTypeWithVoidMethodWithIndependentGenericParameters<T> : ITestGenericTypeWithVoidMethodWithIndependentGenericParameters<T>
         {
             public void Method<K>(
                 K parameter)
@@ -378,8 +440,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             }
         }
 
-        private class TestOpenGenericWithVoidMethodWithIndependentGenericParametersWithClassConstraints<T>
-            : ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithClassConstraints<T>
+        private class TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithClassConstraints<T>
+            : ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithClassConstraints<T>
         {
             public void Method<K>(
                 K parameter)
@@ -389,8 +451,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             }
         }
 
-        private class TestOpenGenericWithVoidMethodWithIndependentGenericParametersWithStructConstraints<T>
-            : ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithStructConstraints<T>
+        private class TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithStructConstraints<T>
+            : ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithStructConstraints<T>
         {
             public void Method<K>(
                 K parameter)
@@ -400,8 +462,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             }
         }
 
-        private class TestOpenGenericWithVoidMethodWithIndependentGenericParametersWithNewConstraints<T>
-            : ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithNewConstraints<T>
+        private class TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithNewConstraints<T>
+            : ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithNewConstraints<T>
         {
             public void Method<K>(
                 K parameter)
@@ -411,40 +473,40 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             }
         }
 
-        private class TestOpenGenericWithVoidMethodWithIndependentGenericParametersWithBaseTypeConstraints<T>
-            : ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithBaseTypeConstraints<T>
+        private class TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithBaseTypeConstraints<T>
+            : ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithBaseTypeConstraints<T>
         {
             public void Method<K>(
                 K parameter)
-                where K : TestOpenGeneric
+                where K : TestGenericType
             {
                 throw new NotImplementedException();
             }
         }
 
-        private class TestOpenGenericWithVoidMethodWithIndependentGenericParametersWithBaseInterfaceConstraints<T>
-            : ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithBaseInterfaceConstraints<T>
+        private class TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithBaseInterfaceConstraints<T>
+            : ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithBaseInterfaceConstraints<T>
         {
             public void Method<K>(
                 K parameter)
-                where K : ITestOpenGeneric
+                where K : ITestGenericType
             {
                 throw new NotImplementedException();
             }
         }
 
-        private class TestOpenGenericWithVoidMethodWithIndependentGenericParametersWithGenericInterfaceConstraints<T>
-            : ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithGenericInterfaceConstraints<T>
+        private class TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithGenericInterfaceConstraints<T>
+            : ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithGenericInterfaceConstraints<T>
         {
             public void Method<K, X>(
                 K parameter)
-                where K : ITestOpenGeneric<X>
+                where K : ITestGenericType<X>
             {
                 throw new NotImplementedException();
             }
         }
 
-        private class TestOpenGenericWithNewConstraints<T> : ITestOpenGenericWithNewConstraints<T>
+        private class TestGenericTypeWithNewConstraints<T> : ITestGenericTypeWithNewConstraints<T>
             where T : new()
         {
         }
@@ -475,287 +537,322 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
                 }
             }
 
-            public static IEnumerable<object[]> EmitOpenGenericCases
+            public static IEnumerable<object[]> EmitTypeCases
             {
                 get
                 {
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGeneric<>),
-                            typeof(TestOpenGeneric<>),
-                            typeof(ITestOpenGeneric<int>))
+                            typeof(ITestType),
+                            typeof(TestType),
+                            typeof(ITestType))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithOutModifier<>),
-                            typeof(TestOpenGenericWithOutModifier<>),
-                            typeof(ITestOpenGenericWithOutModifier<int>))
+                            typeof(ITestTypeWithGetProperty),
+                            typeof(TestTypeWithGetProperty),
+                            typeof(ITestTypeWithGetProperty))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithInModifier<>),
-                            typeof(TestOpenGenericWithInModifier<>),
-                            typeof(ITestOpenGenericWithInModifier<int>))
+                            typeof(ITestTypeWithInheritedProperty),
+                            typeof(TestTypeWithInheritedProperty),
+                            typeof(ITestTypeWithInheritedProperty))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithGetProperty<>),
-                            typeof(TestOpenGenericWithGetProperty<>),
-                            typeof(ITestOpenGenericWithGetProperty<int>))
+                            typeof(ITestTypeWithRefGetProperty),
+                            typeof(TestTypeWithRefGetProperty),
+                            typeof(ITestTypeWithRefGetProperty))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithRefGetProperty<>),
-                            typeof(TestOpenGenericWithRefGetProperty<>),
-                            typeof(ITestOpenGenericWithRefGetProperty<int>))
+                            typeof(ITestTypeWithGetSetProperty),
+                            typeof(TestTypeWithGetSetProperty),
+                            typeof(ITestTypeWithGetSetProperty))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithGetSetProperty<>),
-                            typeof(TestOpenGenericWithGetSetProperty<>),
-                            typeof(ITestOpenGenericWithGetSetProperty<int>))
+                            typeof(ITestTypeWithEvent),
+                            typeof(TestTypeWithEvent),
+                            typeof(ITestTypeWithEvent))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithNonVoidMethodVoidParameters<>),
-                            typeof(TestOpenGenericWithNonVoidMethodVoidParameters<>),
-                            typeof(ITestOpenGenericWithNonVoidMethodVoidParameters<int>))
+                            typeof(ITestTypeWithInheritedEvent),
+                            typeof(TestTypeWithInheritedEvent),
+                            typeof(ITestTypeWithInheritedEvent))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithEvent<>),
-                            typeof(TestOpenGenericWithEvent<>),
-                            typeof(ITestOpenGenericWithEvent<int>))
+                            typeof(ITestTypeWithNonVoidMethodVoidParameters),
+                            typeof(TestTypeWithNonVoidMethodVoidParameters),
+                            typeof(ITestTypeWithNonVoidMethodVoidParameters))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithVoidMethodVoidParameters<>),
-                            typeof(TestOpenGenericWithVoidMethodVoidParameters<>),
-                            typeof(ITestOpenGenericWithVoidMethodVoidParameters<int>))
+                            typeof(ITestTypeWithInheritedNonVoidMethodVoidParameters),
+                            typeof(TestTypeWithInheritedNonVoidMethodVoidParameters),
+                            typeof(ITestTypeWithInheritedNonVoidMethodVoidParameters))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithVoidMethodWithParameters<>),
-                            typeof(TestOpenGenericWithVoidMethodWithParameters<>),
-                            typeof(ITestOpenGenericWithVoidMethodWithParameters<int>))
+                            typeof(ITestTypeWithVoidMethodVoidParameters),
+                            typeof(TestTypeWithVoidMethodVoidParameters),
+                            typeof(ITestTypeWithVoidMethodVoidParameters))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithVoidMethodWithRefParameters<>),
-                            typeof(TestOpenGenericWithVoidMethodWithRefParameters<>),
-                            typeof(ITestOpenGenericWithVoidMethodWithRefParameters<int>))
+                            typeof(ITestTypeWithVoidMethodWithParameters),
+                            typeof(TestTypeWithVoidMethodWithParameters),
+                            typeof(ITestTypeWithVoidMethodWithParameters))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithVoidMethodWithOutParameters<>),
-                            typeof(TestOpenGenericWithVoidMethodWithOutParameters<>),
-                            typeof(ITestOpenGenericWithVoidMethodWithOutParameters<int>))
+                            typeof(ITestTypeWithVoidMethodWithRefParameters),
+                            typeof(TestTypeWithVoidMethodWithRefParameters),
+                            typeof(ITestTypeWithVoidMethodWithRefParameters))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithGenericGetProperty<>),
-                            typeof(TestOpenGenericWithGenericGetProperty<>),
-                            typeof(ITestOpenGenericWithGenericGetProperty<int>))
+                            typeof(ITestTypeWithVoidMethodWithOutParameters),
+                            typeof(TestTypeWithVoidMethodWithOutParameters),
+                            typeof(ITestTypeWithVoidMethodWithOutParameters))
+                    };
+                }
+            }
+
+            public static IEnumerable<object[]> EmitGenericTypeCases
+            {
+                get
+                {
+                    yield return new object[]
+                    {
+                        new Case(
+                            typeof(ITestGenericType<>),
+                            typeof(TestGenericType<>),
+                            typeof(ITestGenericType<int>))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithGenericGetSetProperty<>),
-                            typeof(TestOpenGenericWithGenericGetSetProperty<>),
-                            typeof(ITestOpenGenericWithGenericGetSetProperty<int>))
+                            typeof(ITestGenericTypeWithOutModifier<>),
+                            typeof(TestGenericTypeWithOutModifier<>),
+                            typeof(ITestGenericTypeWithOutModifier<int>))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithVoidMethodWithGenericParameters<>),
-                            typeof(TestOpenGenericWithVoidMethodWithGenericParameters<>),
-                            typeof(ITestOpenGenericWithVoidMethodWithGenericParameters<int>))
+                            typeof(ITestGenericTypeWithInModifier<>),
+                            typeof(TestGenericTypeWithInModifier<>),
+                            typeof(ITestGenericTypeWithInModifier<int>))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithVoidMethodWithGenericGenericParameters<>),
-                            typeof(TestOpenGenericWithVoidMethodWithGenericGenericParameters<>),
-                            typeof(ITestOpenGenericWithVoidMethodWithGenericGenericParameters<int>))
+                            typeof(ITestGenericTypeWithGenericGetProperty<>),
+                            typeof(TestGenericTypeWithGenericGetProperty<>),
+                            typeof(ITestGenericTypeWithGenericGetProperty<int>))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithGenericReturnMethodVoidParameters<>),
-                            typeof(TestOpenGenericWithGenericReturnMethodVoidParameters<>),
-                            typeof(ITestOpenGenericWithGenericReturnMethodVoidParameters<int>))
+                            typeof(ITestGenericTypeWithGenericGetSetProperty<>),
+                            typeof(TestGenericTypeWithGenericGetSetProperty<>),
+                            typeof(ITestGenericTypeWithGenericGetSetProperty<int>))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithVoidMethodWithIndependentGenericParameters<>),
-                            typeof(TestOpenGenericWithVoidMethodWithIndependentGenericParameters<>),
-                            typeof(ITestOpenGenericWithVoidMethodWithIndependentGenericParameters<int>))
+                            typeof(ITestGenericTypeWithVoidMethodWithGenericParameters<>),
+                            typeof(TestGenericTypeWithVoidMethodWithGenericParameters<>),
+                            typeof(ITestGenericTypeWithVoidMethodWithGenericParameters<int>))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithIndependentGenericReturnMethodVoidParameters<>),
-                            typeof(TestOpenGenericWithIndependentGenericReturnMethodVoidParameters<>),
-                            typeof(ITestOpenGenericWithIndependentGenericReturnMethodVoidParameters<int>))
+                            typeof(ITestGenericTypeWithVoidMethodWithGenericGenericParameters<>),
+                            typeof(TestGenericTypeWithVoidMethodWithGenericGenericParameters<>),
+                            typeof(ITestGenericTypeWithVoidMethodWithGenericGenericParameters<int>))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithClassConstraints<>),
-                            typeof(TestOpenGenericWithVoidMethodWithIndependentGenericParametersWithClassConstraints<>),
-                            typeof(ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithClassConstraints<int>))
+                            typeof(ITestGenericTypeWithGenericReturnMethodVoidParameters<>),
+                            typeof(TestGenericTypeWithGenericReturnMethodVoidParameters<>),
+                            typeof(ITestGenericTypeWithGenericReturnMethodVoidParameters<int>))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithStructConstraints<>),
-                            typeof(TestOpenGenericWithVoidMethodWithIndependentGenericParametersWithStructConstraints<>),
-                            typeof(ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithStructConstraints<int>))
+                            typeof(ITestGenericTypeWithVoidMethodWithIndependentGenericParameters<>),
+                            typeof(TestGenericTypeWithVoidMethodWithIndependentGenericParameters<>),
+                            typeof(ITestGenericTypeWithVoidMethodWithIndependentGenericParameters<int>))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithNewConstraints<>),
-                            typeof(TestOpenGenericWithVoidMethodWithIndependentGenericParametersWithNewConstraints<>),
-                            typeof(ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithNewConstraints<int>))
+                            typeof(ITestGenericTypeWithIndependentGenericReturnMethodVoidParameters<>),
+                            typeof(TestGenericTypeWithIndependentGenericReturnMethodVoidParameters<>),
+                            typeof(ITestGenericTypeWithIndependentGenericReturnMethodVoidParameters<int>))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithBaseTypeConstraints<>),
-                            typeof(TestOpenGenericWithVoidMethodWithIndependentGenericParametersWithBaseTypeConstraints<>),
-                            typeof(ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithBaseTypeConstraints<int>))
+                            typeof(ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithClassConstraints<>),
+                            typeof(TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithClassConstraints<>),
+                            typeof(ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithClassConstraints<int>))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithBaseInterfaceConstraints<>),
-                            typeof(TestOpenGenericWithVoidMethodWithIndependentGenericParametersWithBaseInterfaceConstraints<>),
-                            typeof(ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithBaseInterfaceConstraints<int>))
+                            typeof(ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithStructConstraints<>),
+                            typeof(TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithStructConstraints<>),
+                            typeof(ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithStructConstraints<int>))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithGenericInterfaceConstraints<>),
-                            typeof(TestOpenGenericWithVoidMethodWithIndependentGenericParametersWithGenericInterfaceConstraints<>),
-                            typeof(ITestOpenGenericWithVoidMethodWithIndependentGenericParametersWithGenericInterfaceConstraints<int>))
+                            typeof(ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithNewConstraints<>),
+                            typeof(TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithNewConstraints<>),
+                            typeof(ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithNewConstraints<int>))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithMultipleParameters<,>),
-                            typeof(TestOpenGenericWithMultipleParameters<,>),
-                            typeof(ITestOpenGenericWithMultipleParameters<int, int>))
+                            typeof(ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithBaseTypeConstraints<>),
+                            typeof(TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithBaseTypeConstraints<>),
+                            typeof(ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithBaseTypeConstraints<int>))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithMultipleParametersAndDifferentConstraints<,>),
-                            typeof(TestOpenGenericWithMultipleParametersAndDifferentConstraints<,>),
-                            typeof(ITestOpenGenericWithMultipleParametersAndDifferentConstraints<object, int>))
+                            typeof(ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithBaseInterfaceConstraints<>),
+                            typeof(TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithBaseInterfaceConstraints<>),
+                            typeof(ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithBaseInterfaceConstraints<int>))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithClassConstraints<>),
-                            typeof(TestOpenGenericWithClassConstraints<>),
-                            typeof(ITestOpenGenericWithClassConstraints<object>))
+                            typeof(ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithGenericInterfaceConstraints<>),
+                            typeof(TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithGenericInterfaceConstraints<>),
+                            typeof(ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithGenericInterfaceConstraints<int>))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithStructConstraints<>),
-                            typeof(TestOpenGenericWithStructConstraints<>),
-                            typeof(ITestOpenGenericWithStructConstraints<int>))
+                            typeof(ITestGenericTypeWithMultipleParameters<,>),
+                            typeof(TestGenericTypeWithMultipleParameters<,>),
+                            typeof(ITestGenericTypeWithMultipleParameters<int, int>))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithNewConstraints<>),
-                            typeof(TestOpenGenericWithNewConstraints<>),
-                            typeof(ITestOpenGenericWithNewConstraints<int>))
+                            typeof(ITestGenericTypeWithMultipleParametersAndDifferentConstraints<,>),
+                            typeof(TestGenericTypeWithMultipleParametersAndDifferentConstraints<,>),
+                            typeof(ITestGenericTypeWithMultipleParametersAndDifferentConstraints<object, int>))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithBaseTypeConstraints<>),
-                            typeof(TestOpenGenericWithBaseClassConstraints<>),
-                            typeof(ITestOpenGenericWithBaseTypeConstraints<TestOpenGeneric>))
+                            typeof(ITestGenericTypeWithClassConstraints<>),
+                            typeof(TestGenericTypeWithClassConstraints<>),
+                            typeof(ITestGenericTypeWithClassConstraints<object>))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithInterfaceConstraints<>),
-                            typeof(TestOpenGenericWithInterfaceConstraints<>),
-                            typeof(ITestOpenGenericWithInterfaceConstraints<ITestOpenGeneric>))
+                            typeof(ITestGenericTypeWithStructConstraints<>),
+                            typeof(TestGenericTypeWithStructConstraints<>),
+                            typeof(ITestGenericTypeWithStructConstraints<int>))
                     };
                     yield return new object[]
                     {
                         new Case(
-                            typeof(ITestOpenGenericWithGenericInterfaceConstraint<,>),
-                            typeof(TestOpenGenericWithGenericInterfaceConstraint<,>),
-                            typeof(ITestOpenGenericWithGenericInterfaceConstraint<ITestOpenGeneric<int>, int>))
+                            typeof(ITestGenericTypeWithNewConstraints<>),
+                            typeof(TestGenericTypeWithNewConstraints<>),
+                            typeof(ITestGenericTypeWithNewConstraints<int>))
+                    };
+                    yield return new object[]
+                    {
+                        new Case(
+                            typeof(ITestGenericTypeWithBaseTypeConstraints<>),
+                            typeof(TestGenericTypeWithBaseClassConstraints<>),
+                            typeof(ITestGenericTypeWithBaseTypeConstraints<TestGenericType>))
+                    };
+                    yield return new object[]
+                    {
+                        new Case(
+                            typeof(ITestGenericTypeWithInterfaceConstraints<>),
+                            typeof(TestGenericTypeWithInterfaceConstraints<>),
+                            typeof(ITestGenericTypeWithInterfaceConstraints<ITestGenericType>))
+                    };
+                    yield return new object[]
+                    {
+                        new Case(
+                            typeof(ITestGenericTypeWithGenericInterfaceConstraint<,>),
+                            typeof(TestGenericTypeWithGenericInterfaceConstraint<,>),
+                            typeof(ITestGenericTypeWithGenericInterfaceConstraint<ITestGenericType<int>, int>))
                     };
                 }
             }
         }
 
         [Theory]
-        [MemberData(nameof(Cases.EmitOpenGenericCases), MemberType = typeof(Cases))]
-        private static void Should_generate_open_generic_proxy_with_dependency_injection_target_resolution_For_open_generic_type(
+        [MemberData(nameof(Cases.EmitTypeCases), MemberType = typeof(Cases))]
+        [MemberData(nameof(Cases.EmitGenericTypeCases), MemberType = typeof(Cases))]
+        private static void Should_generate_instance_proxy_with_dependency_injection_target_resolution_For_simple_type(
             Cases.Case @case)
         {
             // Arrange
-            var arrangeRootCollection = (IServiceCollection) new ServiceCollection();
-            arrangeRootCollection.Add(new ServiceDescriptor(@case.ServiceType, @case.ImplementationType, ServiceLifetime.Singleton));
+            var implType = @case.ImplementationType;
+            var proxyType = Proxynator.CreateInstanceProxy(@case.ServiceType);
 
-            var arrangeRootServices = arrangeRootCollection.BuildServiceProvider();
-
-            var arrangeCollection = (IServiceCollection) new ServiceCollection();
-
-            var providerType = Proxynator.CreateInstanceProxy(typeof(IServiceProvider));
-
-            arrangeCollection.Add(new ServiceDescriptor(providerType, Activator.CreateInstance(providerType, arrangeRootServices)));
-            arrangeCollection.Add(
-                new ServiceDescriptor(
-                    @case.ServiceType,
-                    Proxynator.CreateDependencyInjectionProxy(providerType, @case.ServiceType),
-                    ServiceLifetime.Singleton));
-
-            var arrangeServices = arrangeCollection.BuildServiceProvider();
+            if (@case.ServiceType.IsGenericTypeDefinition)
+            {
+                implType = @case.ImplementationType.MakeGenericType(@case.RequestType.GetGenericArguments());
+                proxyType = proxyType.MakeGenericType(@case.RequestType.GetGenericArguments());
+            }
 
             // Act
-            var obj = arrangeServices.GetService(@case.RequestType);
+            var source = Activator.CreateInstance(implType);
+
+            var ctor = proxyType.GetConstructor(
+                new[]
+                {
+                    @case.RequestType
+                });
+
+            var proxy = ctor.Invoke(
+                new object[]
+                {
+                    source
+                });
 
             // Assert
-            Assert.NotNull(obj);
-
-            var type = obj.GetType();
-
-            foreach (var mi in type.GetInterfaceMap(@case.RequestType).TargetMethods)
+            foreach (var mi in proxyType.GetInterfaceMap(@case.RequestType).TargetMethods)
             {
                 var method = mi;
-
-                if (method.IsGenericMethod)
+                
+                if (method.IsGenericMethodDefinition)
                 {
-                    // Skip generic method invocation.
+                    // TODO: Implement generic argument resolution mechanism
                     continue;
                 }
-
+                
                 var parameters = method.GetParameters();
                 var values = parameters
                    .Select(
@@ -778,7 +875,94 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
                     {
                         var action = Expression.Lambda<Action>(
                                 Expression.Call(
-                                    Expression.Constant(obj),
+                                    Expression.Constant(proxy),
+                                    method,
+                                    values.Select<object, Expression>(
+                                        (
+                                            v,
+                                            i) =>
+                                        {
+                                            var t = parameters[i].ParameterType;
+                                            if (t.IsByRef)
+                                            {
+                                                t = t.GetElementType();
+                                            }
+
+                                            return Expression.Convert(Expression.Constant(v), t);
+                                        })))
+                           .Compile();
+
+                        action();
+                    });
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(Cases.EmitTypeCases), MemberType = typeof(Cases))]
+        [MemberData(nameof(Cases.EmitGenericTypeCases), MemberType = typeof(Cases))]
+        private static void Should_generate_dependency_injection_proxy_with_dependency_injection_target_resolution_For_open_generic_type(
+            Cases.Case @case)
+        {
+            // Arrange
+            var arrangeCollection = (IServiceCollection) new ServiceCollection();
+            arrangeCollection.Add(new ServiceDescriptor(@case.ServiceType, @case.ImplementationType, ServiceLifetime.Singleton));
+
+            var arrangeServices = (IServiceProvider) arrangeCollection.BuildServiceProvider();
+            arrangeServices = new TestServiceProvider(arrangeServices);
+
+            var proxyType = Proxynator.CreateDependencyInjectionProxy(typeof(ITestServiceProvider), @case.ServiceType, @case.ImplementationType);
+            if (@case.ServiceType.IsGenericTypeDefinition)
+            {
+                proxyType = proxyType.MakeGenericType(@case.RequestType.GetGenericArguments());
+            }
+
+            // Act
+            var ctor = proxyType.GetConstructor(
+                new[]
+                {
+                    typeof(ITestServiceProvider)
+                });
+
+            var proxy = ctor.Invoke(
+                new object[]
+                {
+                    arrangeServices
+                });
+            
+            // Assert
+            foreach (var mi in proxyType.GetInterfaceMap(@case.RequestType).TargetMethods)
+            {
+                var method = mi;
+
+                if (method.IsGenericMethodDefinition)
+                {
+                    // TODO: Implement generic argument resolution mechanism
+                    continue;
+                }
+                
+                var parameters = method.GetParameters();
+                var values = parameters
+                   .Select(
+                        pi =>
+                        {
+                            var t = pi.ParameterType;
+                            if (t.IsByRef)
+                            {
+                                t = t.GetElementType();
+                            }
+
+                            return t.IsValueType
+                                ? Activator.CreateInstance(t)
+                                : null;
+                        })
+                   .ToArray();
+
+                Assert.Throws<NotImplementedException>(
+                    () =>
+                    {
+                        var action = Expression.Lambda<Action>(
+                                Expression.Call(
+                                    Expression.Constant(proxy),
                                     method,
                                     values.Select<object, Expression>(
                                         (

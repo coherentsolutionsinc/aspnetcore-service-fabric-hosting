@@ -17,11 +17,41 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
         {
         }
 
-        private static readonly ConcurrentDictionary<Type, Lazy<Type>> types;
+        private static readonly ConcurrentDictionary<Type, Type> providerTypes;
+
+        private static readonly ConcurrentDictionary<Type, Type> interfaceTypes;
+
+        private static readonly ConcurrentDictionary<Type, Type> implementationTypes;
 
         static Proxynator()
         {
-            types = new ConcurrentDictionary<Type, Lazy<Type>>();
+            providerTypes = new ConcurrentDictionary<Type, Type>();
+            interfaceTypes = new ConcurrentDictionary<Type, Type>();
+            implementationTypes = new ConcurrentDictionary<Type, Type>();
+        }
+
+        public static Type GetProxyProviderType(
+            Type proxyType)
+        {
+            return providerTypes.TryGetValue(proxyType, out var providerType)
+                ? providerType
+                : null;
+        }
+
+        public static Type GetProxyInterfaceType(
+            Type proxyType)
+        {
+            return interfaceTypes.TryGetValue(proxyType, out var interfaceType)
+                ? interfaceType
+                : null;
+        }
+
+        public static Type GetProxyImplementationType(
+            Type proxyType)
+        {
+            return implementationTypes.TryGetValue(proxyType, out var implementationType)
+                ? implementationType
+                : null;
         }
 
         public static Type CreateInstanceProxy(
@@ -37,12 +67,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
                 throw new ArgumentException($"{interfaceType.Name} isn't an interface.");
             }
 
-            return new InstanceProxyEmitter(interfaceType).Emit();
+            var proxyType = new InstanceProxyEmitter(interfaceType).Emit();
+
+            interfaceTypes.TryAdd(proxyType, interfaceType);
+
+            return proxyType;
         }
 
         public static Type CreateDependencyInjectionProxy(
             Type providerType,
-            Type interfaceType)
+            Type interfaceType,
+            Type implementationType)
         {
             if (providerType == null)
             {
@@ -52,6 +87,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
             if (interfaceType == null)
             {
                 throw new ArgumentNullException(nameof(interfaceType));
+            }
+
+            if (implementationType == null)
+            {
+                throw new ArgumentNullException(nameof(implementationType));
             }
 
             if (!typeof(IServiceProvider).IsAssignableFrom(providerType))
@@ -64,7 +104,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
                 throw new ArgumentException($"{interfaceType.Name} isn't an interface.");
             }
 
-            return new DependencyInjectionProxyEmitter(providerType, interfaceType).Emit();
+            var proxyType = new DependencyInjectionProxyEmitter(providerType, interfaceType, implementationType).Emit();
+
+            providerTypes.TryAdd(proxyType, providerType);
+            interfaceTypes.TryAdd(proxyType, interfaceType);
+            implementationTypes.TryAdd(proxyType, implementationType);
+
+            return proxyType;
         }
     }
 }

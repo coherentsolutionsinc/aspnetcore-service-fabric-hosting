@@ -180,6 +180,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             var useDelegate = extensions.GetExtension<IUseDelegateTheoryExtension>();
             var useDelegateInvoker = extensions.GetExtension<IUseDelegateInvokerTheoryExtension>();
             var useDependencies = extensions.GetExtension<IUseDependenciesTheoryExtension>();
+            var configureDependencies = extensions.GetExtension<IConfigureDependenciesTheoryExtension>();
             var pickDependency = extensions.GetExtension<IPickDependencyTheoryExtension>();
 
             configurator.UseDependencies(useDependencies.Factory);
@@ -200,6 +201,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                             }
                         });
                 });
+            configurator.ConfigureDependencies(
+                dependencies =>
+                {
+                    configureDependencies.ConfigAction(dependencies);
+                });
         }
 
         private static void ConfigureAspNetCoreListenerExtensions(
@@ -209,6 +215,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             var useListenerEndpoint = extensions.GetExtension<IUseListenerEndpointTheoryExtension>();
             var useAspNetCoreListenerCommunicationListener = extensions.GetExtension<IUseAspNetCoreListenerCommunicationListenerTheoryExtension>();
             var useAspNetCoreWebHostBuilder = extensions.GetExtension<IUseAspNetCoreListenerWebHostBuilderTheoryExtension>();
+            var configureDependencies = extensions.GetExtension<IConfigureDependenciesTheoryExtension>();
             var pickDependency = extensions.GetExtension<IPickDependencyTheoryExtension>();
             var pickListenerEndpoint = extensions.GetExtension<IPickListenerEndpointTheoryExtension>();
 
@@ -236,6 +243,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                 builder =>
                 {
                 });
+            configurator.ConfigureWebHost(
+                webHostBuilder =>
+                {
+                    webHostBuilder.ConfigureServices(
+                        dependencies =>
+                        {
+                            configureDependencies.ConfigAction(dependencies);
+                        });
+                });
         }
 
         private static void ConfigureRemotingListenerExtensions(
@@ -249,6 +265,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             var useRemotingSerializationProvider = extensions.GetExtension<IUseRemotingListenerSerializerTheoryExtension>();
             var useRemotingHandler = extensions.GetExtension<IUseRemotingListenerHandlerTheoryExtension>();
             var useDependencies = extensions.GetExtension<IUseDependenciesTheoryExtension>();
+            var configureDependencies = extensions.GetExtension<IConfigureDependenciesTheoryExtension>();
             var pickDependency = extensions.GetExtension<IPickDependencyTheoryExtension>();
             var pickListenerEndpoint = extensions.GetExtension<IPickListenerEndpointTheoryExtension>();
             var pickRemotingImplementation = extensions.GetExtension<IPickRemotingListenerImplementationTheoryExtension>();
@@ -294,6 +311,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                 });
             configurator.UseSerializationProvider(useRemotingSerializationProvider.Factory);
             configurator.UseSettings(useRemotingSettings.Factory);
+            configurator.ConfigureDependencies(
+                dependencies =>
+                {
+                    configureDependencies.ConfigAction(dependencies);
+                });
         }
     }
 }
