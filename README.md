@@ -180,7 +180,7 @@ private static void Main(string[] args)
                         listenerBuilder =>
                         {
                             listenerBuilder
-                                .UseEndpointName("ServiceEndpoint2")
+                                .UseEndpoint("ServiceEndpoint2")
                                 .UseImplementation<ApiServiceImpl>()
                         });
             })
