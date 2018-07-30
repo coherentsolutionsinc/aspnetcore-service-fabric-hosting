@@ -11,7 +11,7 @@
     <Description>This package provides an extensions to HostBuilder class that simplifies development of Service Fabric Reliable Services.</Description>
     <PackageTags>aspnetcore, servicefabric, hosting</PackageTags>
     <RepositoryType>Git</RepositoryType>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <PackageReleaseNotes>Please visit https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Version-History for details.</PackageReleaseNotes>
     <Product>CoherentSolutions.AspNetCore.ServiceFabric.Hosting</Product>
     <RepositoryUrl>https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting</RepositoryUrl>
