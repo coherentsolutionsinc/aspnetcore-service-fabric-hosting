@@ -6,10 +6,8 @@ using Xunit.Abstractions;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Items
 {
-    [Serializable]
-    public sealed class TheoryItem
+    public class TheoryItem
     {
-        [Serializable]
         public sealed class TheoryItemExtensionProvider
         {
             private readonly TheoryItem item;
@@ -29,17 +27,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             }
         }
 
-        private string name;
+        private readonly string name;
 
-        private Dictionary<Type, object> extensions;
+        private readonly Dictionary<Type, object> extensions;
 
-        private LinkedList<Action<HostBuilder, TheoryItemExtensionProvider>> configActions;
+        private readonly LinkedList<Action<HostBuilder, TheoryItemExtensionProvider>> configActions;
 
-        private LinkedList<Action<IHost>> checkActions;
-
-        public TheoryItem()
-        {
-        }
+        private readonly LinkedList<Action<IHost>> checkActions;
 
         public TheoryItem(
             string name)

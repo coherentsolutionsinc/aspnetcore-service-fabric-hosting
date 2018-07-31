@@ -75,7 +75,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                     });
         }
 
-        public static TheoryItem SetupAsConfigStatelessService(
+        public static TheoryItem SetupConfigAsStatelessService(
             this TheoryItem @this,
             Action<IStatelessServiceHostBuilderConfigurator, TheoryItem.TheoryItemExtensionProvider> configAction)
         {

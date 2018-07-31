@@ -29,33 +29,33 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
     {
         private static class Theories
         {
-            public class Case
+            public class Case : IXunitSerializable
             {
-                public TheoryItem TheoryItem { get; private set; }
+                public TheoryItemPromise Promise { get; private set; }
 
                 public Case()
                 {
                 }
 
                 public Case(
-                    TheoryItem theoryItem)
+                    TheoryItemPromise theoryItem)
                 {
-                    this.TheoryItem = theoryItem;
+                    this.Promise = theoryItem;
                 }
 
                 public override string ToString()
                 {
-                    return this.TheoryItem.ToString();
+                    return this.Promise.ToString();
                 }
 
                 public void Deserialize(IXunitSerializationInfo info)
                 {
-                    this.TheoryItem = info.GetValue<TheoryItem>(nameof(TheoryItem));
+                    this.Promise = info.GetValue<TheoryItemPromise>(nameof(Promise));
                 }
 
                 public void Serialize(IXunitSerializationInfo info)
                 {
-                    info.AddValue(nameof(TheoryItem), this.TheoryItem);
+                    info.AddValue(nameof(Promise), this.Promise);
                 }
             }
 
@@ -129,7 +129,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
             var arrangeDelegate = mockDelegate.Object;
 
-            var theoryItem = @case.TheoryItem;
+            var theoryItem = @case.Promise.Resolve();
 
             // Act
             theoryItem.SetupExtension(new UseDelegateTheoryExtension().Setup(arrangeDelegate));
@@ -153,7 +153,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
             var arrangeDelegateInvoker = mockDelegateInvoker.Object;
 
-            var theoryItem = @case.TheoryItem;
+            var theoryItem = @case.Promise.Resolve();
 
             // Act
             theoryItem.SetupExtension(
@@ -179,7 +179,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             object expectedEndpoint = ArrangeEndpoint;
             object actualEndpoint = null;
 
-            var theoryItem = @case.TheoryItem;
+            var theoryItem = @case.Promise.Resolve();
 
             // Act
             theoryItem.SetupExtension(new UseListenerEndpointTheoryExtension().Setup(ArrangeEndpoint));
@@ -206,7 +206,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
             var arrangeWebHostBuilder = mockWebHostBuilder.Object;
 
-            var theoryItem = @case.TheoryItem;
+            var theoryItem = @case.Promise.Resolve();
 
             // Act
             theoryItem.SetupExtension(new UseAspNetCoreListenerWebHostBuilderTheoryExtension().Setup(() => arrangeWebHostBuilder));
@@ -239,7 +239,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                 return mockListener.Object;
             }
 
-            var theoryItem = @case.TheoryItem;
+            var theoryItem = @case.Promise.Resolve();
 
             // Act
             theoryItem.SetupExtension(new UseAspNetCoreListenerCommunicationListenerTheoryExtension().Setup(ArrangeListenerFactory));
@@ -277,7 +277,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                 return mockListener.Object;
             }
 
-            var theoryItem = @case.TheoryItem;
+            var theoryItem = @case.Promise.Resolve();
 
             // Act
             theoryItem.SetupExtension(new UseRemotingListenerCommunicationListenerTheoryExtension().Setup(ArrangeListenerFactory));
@@ -301,7 +301,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             object expectedDependency = arrangeDependency;
             object actualDependency = null;
 
-            var theoryItem = @case.TheoryItem;
+            var theoryItem = @case.Promise.Resolve();
 
             // Act
             theoryItem.SetupExtension(new UseDependenciesTheoryExtension().Setup(() => arrangeCollection));
@@ -333,7 +333,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             object expectedDependency = arrangeDependency;
             object actualDependency = null;
 
-            var theoryItem = @case.TheoryItem;
+            var theoryItem = @case.Promise.Resolve();
 
             // Act
             theoryItem.SetupExtension(new UseDependenciesTheoryExtension().Setup(() => arrangeCollection));
@@ -365,7 +365,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             object expectedDependency = arrangeDependency;
             object actualDependency = null;
 
-            var theoryItem = @case.TheoryItem;
+            var theoryItem = @case.Promise.Resolve();
 
             // Act
             theoryItem.SetupExtension(new UseDependenciesTheoryExtension().Setup(() => arrangeCollection));
@@ -394,7 +394,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             object expectedImplementation = arrangeImplementation;
             object actualImplementation = null;
 
-            var theoryItem = @case.TheoryItem;
+            var theoryItem = @case.Promise.Resolve();
 
             // Act
             theoryItem.SetupExtension(new UseRemotingListenerImplementationTheoryExtension().Setup(provider => arrangeImplementation));
@@ -416,7 +416,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             object expectedSettings = arrangeSettings;
             object actualSettings = null;
 
-            var theoryItem = @case.TheoryItem;
+            var theoryItem = @case.Promise.Resolve();
 
             // Act
             theoryItem.SetupExtension(new UseRemotingListenerSettingsTheoryExtension().Setup(() => arrangeSettings));
@@ -440,7 +440,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             object expectedSerializer = arrangeSerializer;
             object actualSerializer = null;
 
-            var theoryItem = @case.TheoryItem;
+            var theoryItem = @case.Promise.Resolve();
 
             // Act
             theoryItem.SetupExtension(new UseRemotingListenerSerializationProviderTheoryExtension().Setup(provider => arrangeSerializer));
@@ -464,7 +464,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             object expectedHandler = arrangeHandler;
             object actualHandler = null;
 
-            var theoryItem = @case.TheoryItem;
+            var theoryItem = @case.Promise.Resolve();
 
             // Act
             theoryItem.SetupExtension(new UseRemotingListenerHandlerTheoryExtension().Setup(provider => arrangeHandler));

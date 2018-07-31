@@ -7,37 +7,25 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories
 {
     public static class TheoryItemsSet
     {
-        public static TheoryItem StatefulServiceDelegate
-            => new TheoryItem("Stateful-Delegate")
-               .SetupExtensionsAsDelegate()
-               .SetupConfigAsStatefulService(TheoryItemConfigure.ConfigureDelegateExtensions);
+        public static TheoryItemPromise StatefulServiceDelegate 
+            => new TheoryItemPromise("Stateful-Delegate", TheoryItemSetup.AsStatefulDelegate);
 
-        public static TheoryItem StatefulServiceAspNetCoreListener
-            => new TheoryItem("Stateful-AspNetCoreListener")
-               .SetupExtensionsAsAspNetCoreListener()
-               .SetupConfigAsStatefulService(TheoryItemConfigure.ConfigureAspNetCoreListenerExtensions);
+        public static TheoryItemPromise StatelessServiceDelegate 
+            => new TheoryItemPromise("Stateless-Delegate", TheoryItemSetup.AsStatelessDelegate);
 
-        public static TheoryItem StatefulServiceRemotingListener
-            => new TheoryItem("Stateful-RemotingListener")
-               .SetupExtensionsAsRemotingListener()
-               .SetupConfigAsStatefulService(TheoryItemConfigure.ConfigureRemotingListenerExtensions);
+        public static TheoryItemPromise StatefulServiceAspNetCoreListener 
+            => new TheoryItemPromise("Stateful-AspNetCoreListener", TheoryItemSetup.AsStatefulAspNetCoreListener);
 
-        public static TheoryItem StatelessServiceDelegate
-            => new TheoryItem("Stateless-Delegate")
-               .SetupExtensionsAsDelegate()
-               .SetupAsConfigStatelessService(TheoryItemConfigure.ConfigureDelegateExtensions);
+        public static TheoryItemPromise StatelessServiceAspNetCoreListener 
+            => new TheoryItemPromise("Stateless-AspNetCoreListener", TheoryItemSetup.AsStatelessAspNetCoreListener);
 
-        public static TheoryItem StatelessServiceAspNetCoreListener
-            => new TheoryItem("Stateless-AspNetCoreListener")
-               .SetupExtensionsAsAspNetCoreListener()
-               .SetupAsConfigStatelessService(TheoryItemConfigure.ConfigureAspNetCoreListenerExtensions);
+        public static TheoryItemPromise StatefulServiceRemotingListener 
+            => new TheoryItemPromise("Stateful-RemotingListener", TheoryItemSetup.AsStatefulRemotingListener);
 
-        public static TheoryItem StatelessServiceRemotingListener
-            => new TheoryItem("Stateless-RemotingListener")
-               .SetupExtensionsAsRemotingListener()
-               .SetupAsConfigStatelessService(TheoryItemConfigure.ConfigureRemotingListenerExtensions);
+        public static TheoryItemPromise StatelessServiceRemotingListener 
+            => new TheoryItemPromise("Stateless-RemotingListener", TheoryItemSetup.AsStatelessRemotingListener);
 
-        public static IEnumerable<TheoryItem> SupportDependencyInjection
+        public static IEnumerable<TheoryItemPromise> SupportDependencyInjection
         {
             get
             {
@@ -48,7 +36,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories
             }
         }
 
-        public static IEnumerable<TheoryItem> StatefulItems
+        public static IEnumerable<TheoryItemPromise> StatefulItems
         {
             get
             {
@@ -58,7 +46,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories
             }
         }
 
-        public static IEnumerable<TheoryItem> StatelessItems
+        public static IEnumerable<TheoryItemPromise> StatelessItems
         {
             get
             {
@@ -68,29 +56,29 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories
             }
         }
 
-        public static IEnumerable<TheoryItem> DelegateItems
+        public static IEnumerable<TheoryItemPromise> DelegateItems
             => new[]
             {
                 StatefulServiceDelegate,
                 StatelessServiceDelegate
             };
 
-        public static IEnumerable<TheoryItem> AspNetCoreListenerItems
+        public static IEnumerable<TheoryItemPromise> AspNetCoreListenerItems
             => new[]
             {
                 StatefulServiceAspNetCoreListener,
                 StatelessServiceAspNetCoreListener
             };
 
-        public static IEnumerable<TheoryItem> RemotingListenerItems
+        public static IEnumerable<TheoryItemPromise> RemotingListenerItems
             => new[]
             {
                 StatefulServiceRemotingListener,
                 StatelessServiceRemotingListener
             };
 
-        public static IEnumerable<TheoryItem> AllListenerItems => AspNetCoreListenerItems.Concat(RemotingListenerItems);
+        public static IEnumerable<TheoryItemPromise> AllListenerItems => AspNetCoreListenerItems.Concat(RemotingListenerItems);
 
-        public static IEnumerable<TheoryItem> AllItems => StatefulItems.Concat(StatelessItems);
+        public static IEnumerable<TheoryItemPromise> AllItems => StatefulItems.Concat(StatelessItems);
     }
 }
