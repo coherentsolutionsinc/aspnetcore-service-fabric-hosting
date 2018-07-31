@@ -9,6 +9,7 @@ using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools;
 using Microsoft.Extensions.DependencyInjection;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
 {
@@ -513,13 +514,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
 
         private static class Cases
         {
-            public class Case
+            public class Case : IXunitSerializable
             {
-                public Type ServiceType { get; }
+                public Type ServiceType { get; private set; }
 
-                public Type ImplementationType { get; }
+                public Type ImplementationType { get; private set; }
 
-                public Type RequestType { get; }
+                public Type RequestType { get; private set; }
+
+                public Case()
+                {
+                }
 
                 public Case(
                     Type serviceType,
@@ -533,7 +538,21 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
 
                 public override string ToString()
                 {
-                    return $"{this.ImplementationType.Name}";
+                    return this.ImplementationType.Name;
+                }
+
+                public void Deserialize(IXunitSerializationInfo info)
+                {
+                    this.ServiceType = info.GetValue<Type>(nameof(ServiceType));
+                    this.ImplementationType = info.GetValue<Type>(nameof(ImplementationType));
+                    this.RequestType = info.GetValue<Type>(nameof(RequestType));
+                }
+
+                public void Serialize(IXunitSerializationInfo info)
+                {
+                    info.AddValue(nameof(this.ServiceType), this.ServiceType);
+                    info.AddValue(nameof(this.ImplementationType), this.ImplementationType);
+                    info.AddValue(nameof(this.RequestType), this.RequestType);
                 }
             }
 

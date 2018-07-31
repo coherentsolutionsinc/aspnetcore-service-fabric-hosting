@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 
 using Microsoft.Extensions.Hosting;
+using Xunit.Abstractions;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Items
 {
+    [Serializable]
     public sealed class TheoryItem
     {
+        [Serializable]
         public sealed class TheoryItemExtensionProvider
         {
             private readonly TheoryItem item;
@@ -26,13 +29,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             }
         }
 
-        private readonly string name;
+        private string name;
 
-        private readonly Dictionary<Type, object> extensions;
+        private Dictionary<Type, object> extensions;
 
-        private readonly LinkedList<Action<HostBuilder, TheoryItemExtensionProvider>> configActions;
+        private LinkedList<Action<HostBuilder, TheoryItemExtensionProvider>> configActions;
 
-        private readonly LinkedList<Action<IHost>> checkActions;
+        private LinkedList<Action<IHost>> checkActions;
+
+        public TheoryItem()
+        {
+        }
 
         public TheoryItem(
             string name)

@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.ServiceFabric.Data;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 {
@@ -21,7 +22,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         {
             public class Case
             {
-                public TheoryItem TheoryItem { get; }
+                public TheoryItem TheoryItem { get; private set; }
+
+                public Case()
+                {
+                }
 
                 public Case(
                     TheoryItem theoryItem)
@@ -32,6 +37,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                 public override string ToString()
                 {
                     return this.TheoryItem.ToString();
+                }
+
+                public void Deserialize(IXunitSerializationInfo info)
+                {
+                    this.TheoryItem = info.GetValue<TheoryItem>(nameof(TheoryItem));
+                }
+
+                public void Serialize(IXunitSerializationInfo info)
+                {
+                    info.AddValue(nameof(TheoryItem), this.TheoryItem);
                 }
             }
 
@@ -54,9 +69,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         {
             public class Case
             {
-                public TheoryItem TheoryItem { get; }
+                public TheoryItem TheoryItem { get; private set; }
 
-                public Type RequiredType { get; }
+                public Type RequiredType { get; private set; }
+
+                public Case()
+                {
+                }
 
                 public Case(
                     TheoryItem theoryItem,
@@ -69,6 +88,18 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                 public override string ToString()
                 {
                     return $"{this.TheoryItem} & {this.RequiredType.Name}";
+                }
+
+                public void Deserialize(IXunitSerializationInfo info)
+                {
+                    this.TheoryItem = info.GetValue<TheoryItem>(nameof(TheoryItem));
+                    this.RequiredType = info.GetValue<Type>(nameof(RequiredType));
+                }
+
+                public void Serialize(IXunitSerializationInfo info)
+                {
+                    info.AddValue(nameof(TheoryItem), this.TheoryItem);
+                    info.AddValue(nameof(RequiredType), this.RequiredType);
                 }
             }
 

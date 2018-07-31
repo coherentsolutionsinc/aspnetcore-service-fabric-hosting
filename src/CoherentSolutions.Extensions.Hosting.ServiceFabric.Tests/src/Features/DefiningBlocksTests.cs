@@ -21,6 +21,7 @@ using Microsoft.ServiceFabric.Services.Remoting.V2.Runtime;
 using Moq;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 {
@@ -30,7 +31,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         {
             public class Case
             {
-                public TheoryItem TheoryItem { get; }
+                public TheoryItem TheoryItem { get; private set; }
+
+                public Case()
+                {
+                }
 
                 public Case(
                     TheoryItem theoryItem)
@@ -41,6 +46,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                 public override string ToString()
                 {
                     return this.TheoryItem.ToString();
+                }
+
+                public void Deserialize(IXunitSerializationInfo info)
+                {
+                    this.TheoryItem = info.GetValue<TheoryItem>(nameof(TheoryItem));
+                }
+
+                public void Serialize(IXunitSerializationInfo info)
+                {
+                    info.AddValue(nameof(TheoryItem), this.TheoryItem);
                 }
             }
 
