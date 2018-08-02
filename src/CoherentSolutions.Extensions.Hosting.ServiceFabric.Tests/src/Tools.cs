@@ -257,32 +257,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
 
         public static Func<IWebHostBuilder> GetWebHostBuilderFunc()
         {
-            return () =>
-            {
-                return WebHost.CreateDefaultBuilder();
-                //var host = new Mock<IWebHost>();
-                //var builder = new Mock<IWebHostBuilder>();
-                //var collection = new ServiceCollection();
-
-                //host
-                //   .Setup(instance => instance.Services)
-                //   .Returns(() => collection.BuildServiceProvider());
-
-                //builder
-                //   .Setup(instance => instance.ConfigureServices(It.IsAny<Action<IServiceCollection>>()))
-                //   .Callback<Action<IServiceCollection>>(
-                //        action =>
-                //        {
-                //            action(collection);
-                //        })
-                //   .Returns(builder.Object);
-
-                //builder
-                //   .Setup(instance => instance.Build())
-                //   .Returns(host.Object);
-
-                //return builder.Object;
-            };
+            return () => WebHost.CreateDefaultBuilder();
         }
 
         public static ServiceHostRemotingCommunicationListenerFactory GetRemotingCommunicationListenerFunc()
