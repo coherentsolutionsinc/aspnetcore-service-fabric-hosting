@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.ServiceFabric.Data;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 {
@@ -19,19 +20,33 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
     {
         private static class UseDependencies
         {
-            public class Case
+            public class Case : IXunitSerializable
             {
-                public TheoryItem TheoryItem { get; }
+                public TheoryItemPromise Promise { get; private set; }
+
+                public Case()
+                {
+                }
 
                 public Case(
-                    TheoryItem theoryItem)
+                    TheoryItemPromise theoryItem)
                 {
-                    this.TheoryItem = theoryItem;
+                    this.Promise = theoryItem;
                 }
 
                 public override string ToString()
                 {
-                    return this.TheoryItem.ToString();
+                    return this.Promise.ToString();
+                }
+
+                public void Deserialize(IXunitSerializationInfo info)
+                {
+                    this.Promise = info.GetValue<TheoryItemPromise>(nameof(Promise));
+                }
+
+                public void Serialize(IXunitSerializationInfo info)
+                {
+                    info.AddValue(nameof(Promise), this.Promise);
                 }
             }
 
@@ -52,23 +67,39 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         private static class AutomaticServicesRegistration
         {
-            public class Case
+            public class Case : IXunitSerializable
             {
-                public TheoryItem TheoryItem { get; }
+                public TheoryItemPromise Promise { get; private set; }
 
-                public Type RequiredType { get; }
+                public Type RequiredType { get; private set; }
+
+                public Case()
+                {
+                }
 
                 public Case(
-                    TheoryItem theoryItem,
+                    TheoryItemPromise theoryItem,
                     Type requiredType)
                 {
-                    this.TheoryItem = theoryItem;
+                    this.Promise = theoryItem;
                     this.RequiredType = requiredType;
                 }
 
                 public override string ToString()
                 {
-                    return $"{this.TheoryItem} & {this.RequiredType.Name}";
+                    return $"{this.Promise} & {this.RequiredType.Name}";
+                }
+
+                public void Deserialize(IXunitSerializationInfo info)
+                {
+                    this.Promise = info.GetValue<TheoryItemPromise>(nameof(Promise));
+                    this.RequiredType = info.GetValue<Type>(nameof(RequiredType));
+                }
+
+                public void Serialize(IXunitSerializationInfo info)
+                {
+                    info.AddValue(nameof(Promise), this.Promise);
+                    info.AddValue(nameof(RequiredType), this.RequiredType);
                 }
             }
 
@@ -153,39 +184,57 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         private static class HierarchyServiceRegistration
         {
-            public class Case
+            public class Case : IXunitSerializable
             {
-                public TheoryItem TheoryItem { get; }
+                public TheoryItemPromise Promise { get; private set; }
+
+                public Case()
+                {
+                }
 
                 public Case(
-                    TheoryItem theoryItem)
+                    TheoryItemPromise theoryItem)
                 {
-                    this.TheoryItem = theoryItem;
+                    this.Promise = theoryItem;
                 }
 
                 public override string ToString()
                 {
-                    return this.TheoryItem.ToString();
+                    return this.Promise.ToString();
+                }
+
+                public void Deserialize(IXunitSerializationInfo info)
+                {
+                    this.Promise = info.GetValue<TheoryItemPromise>(nameof(Promise));
+                }
+
+                public void Serialize(IXunitSerializationInfo info)
+                {
+                    info.AddValue(nameof(Promise), this.Promise);
                 }
             }
 
-            public class OpenGenericCase
+            public class OpenGenericCase : IXunitSerializable
             {
-                public TheoryItem TheoryItem { get; }
+                public TheoryItemPromise Promise { get; private set; }
 
-                public Type ServiceType { get; }
+                public Type ServiceType { get; private set; }
 
-                public Type ImplementationType { get; }
+                public Type ImplementationType { get; private set; }
 
-                public Type RequestType { get; }
+                public Type RequestType { get; private set; }
+
+                public OpenGenericCase()
+                {
+                }
 
                 public OpenGenericCase(
-                    TheoryItem theoryItem,
+                    TheoryItemPromise theoryItem,
                     Type serviceType,
                     Type implementationType,
                     Type requestType)
                 {
-                    this.TheoryItem = theoryItem;
+                    this.Promise = theoryItem;
                     this.ServiceType = serviceType;
                     this.ImplementationType = implementationType;
                     this.RequestType = requestType;
@@ -193,7 +242,23 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
                 public override string ToString()
                 {
-                    return $"{this.TheoryItem}-{this.ImplementationType.Name}";
+                    return $"{this.Promise}-{this.ImplementationType.Name}";
+                }
+
+                public void Deserialize(IXunitSerializationInfo info)
+                {
+                    this.Promise = info.GetValue<TheoryItemPromise>(nameof(Promise));
+                    this.ServiceType = info.GetValue<Type>(nameof(ServiceType));
+                    this.ImplementationType = info.GetValue<Type>(nameof(ImplementationType));
+                    this.RequestType = info.GetValue<Type>(nameof(RequestType));
+                }
+
+                public void Serialize(IXunitSerializationInfo info)
+                {
+                    info.AddValue(nameof(Promise), this.Promise);
+                    info.AddValue(nameof(ServiceType), this.ServiceType);
+                    info.AddValue(nameof(ImplementationType), this.ImplementationType);
+                    info.AddValue(nameof(RequestType), this.RequestType);
                 }
             }
 
@@ -238,7 +303,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             // Arrange
             var arrangeCollection = new ServiceCollection();
 
-            var theoryItem = @case.TheoryItem;
+            var theoryItem = @case.Promise.Resolve();
 
             // Act
             theoryItem.SetupExtension(new UseDependenciesTheoryExtension().Setup(() => arrangeCollection));
@@ -254,7 +319,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             AutomaticServicesRegistration.Case @case)
         {
             // Arrange
-            var theoryItem = @case.TheoryItem;
+            var theoryItem = @case.Promise.Resolve();
             var requiredType = @case.RequiredType;
 
             object actualObject = null;
@@ -273,7 +338,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             HierarchyServiceRegistration.Case @case)
         {
             // Arrange
-            var theoryItem = @case.TheoryItem;
+            var theoryItem = @case.Promise.Resolve();
 
             var arrangeUpperLevelObject = new TestDependency();
             var arrangeLowerLevelObject = new TestDependency();
@@ -319,7 +384,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             HierarchyServiceRegistration.Case @case)
         {
             // Arrange
-            var theoryItem = @case.TheoryItem;
+            var theoryItem = @case.Promise.Resolve();
 
             var arrangeDescriptor = new ServiceDescriptor(typeof(ITestDependency), new TestDependency());
 
@@ -359,7 +424,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             HierarchyServiceRegistration.Case @case)
         {
             // Arrange
-            var theoryItem = @case.TheoryItem;
+            var theoryItem = @case.Promise.Resolve();
 
             var arrangeDescriptor = new ServiceDescriptor(typeof(ITestDependency), typeof(TestDependency), ServiceLifetime.Singleton);
 
@@ -399,7 +464,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             HierarchyServiceRegistration.Case @case)
         {
             // Arrange
-            var theoryItem = @case.TheoryItem;
+            var theoryItem = @case.Promise.Resolve();
 
             var arrangeDescriptor = new ServiceDescriptor(typeof(ITestDependency), typeof(TestDependency), ServiceLifetime.Transient);
 
@@ -439,7 +504,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             HierarchyServiceRegistration.OpenGenericCase @case)
         {
             // Arrange
-            var theoryItem = @case.TheoryItem;
+            var theoryItem = @case.Promise.Resolve();
 
             var arrangeDescriptor = new ServiceDescriptor(
                 @case.ServiceType,
@@ -482,7 +547,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             HierarchyServiceRegistration.OpenGenericCase @case)
         {
             // Arrange
-            var theoryItem = @case.TheoryItem;
+            var theoryItem = @case.Promise.Resolve();
 
             var arrangeDescriptor = new ServiceDescriptor(
                 @case.ServiceType,

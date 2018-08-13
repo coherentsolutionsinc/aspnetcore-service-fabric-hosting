@@ -7,6 +7,7 @@ using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools;
 using Microsoft.Extensions.DependencyInjection;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
 {
@@ -46,13 +47,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
 
         private static class Cases
         {
-            public class Case
+            public class Case : IXunitSerializable
             {
-                public Type ServiceType { get; }
+                public Type ServiceType { get; private set; }
 
-                public Type RequestType { get; }
+                public Type RequestType { get; private set; }
                 
-                public Type[] ImplementationTypes { get; }
+                public Type[] ImplementationTypes { get; private set; }
+
+                public Case()
+                {
+                }
 
                 public Case(
                     Type serviceType,
@@ -66,7 +71,21 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
 
                 public override string ToString()
                 {
-                    return $"{string.Join(",", this.ImplementationTypes.Select(i => i.Name))}";
+                    return string.Join(",", this.ImplementationTypes.Select(i => i.Name));
+                }
+
+                public void Deserialize(IXunitSerializationInfo info)
+                {
+                    this.ServiceType = info.GetValue<Type>(nameof(ServiceType));
+                    this.RequestType = info.GetValue<Type>(nameof(RequestType));
+                    this.ImplementationTypes = info.GetValue<Type[]>(nameof(ImplementationTypes));
+                }
+
+                public void Serialize(IXunitSerializationInfo info)
+                {
+                    info.AddValue(nameof(this.ServiceType), this.ServiceType);
+                    info.AddValue(nameof(this.RequestType), this.RequestType);
+                    info.AddValue(nameof(this.ImplementationTypes), this.ImplementationTypes);
                 }
             }
 

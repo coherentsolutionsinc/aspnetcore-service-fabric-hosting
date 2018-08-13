@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 
 using Microsoft.Extensions.Hosting;
+using Xunit.Abstractions;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Items
 {
-    public sealed class TheoryItem
+    public class TheoryItem
     {
         public sealed class TheoryItemExtensionProvider
         {

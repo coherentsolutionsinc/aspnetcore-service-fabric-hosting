@@ -28,7 +28,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
             }
 
             if (pi.SetMethod == null)
-            {
+            { 
                 pi = pi.DeclaringType.GetProperty(property, flags);
                 if (pi == null)
                 {
