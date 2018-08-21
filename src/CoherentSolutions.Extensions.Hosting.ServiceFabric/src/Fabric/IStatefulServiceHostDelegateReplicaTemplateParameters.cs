@@ -3,5 +3,6 @@
     public interface IStatefulServiceHostDelegateReplicaTemplateParameters
         : IServiceHostDelegateReplicaTemplateParameters
     {
+        StatefulServiceLifecycleEvent Event { get; }
     }
 }

@@ -11,17 +11,28 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
               IServiceHostDelegateInvoker>,
           IStatefulServiceHostDelegateReplicaTemplate
     {
-        private class StatefulAsyncDelegateParameters
+        private class StatefulDelegateParameters
             : DelegateParameters,
               IStatefulServiceHostDelegateReplicaTemplateParameters,
               IStatefulServiceHostDelegateReplicaTemplateConfigurator
         {
+            public StatefulServiceLifecycleEvent Event { get; private set; }
+
+            public StatefulDelegateParameters()
+            {
+                this.Event = StatefulServiceLifecycleEvent.OnRunAfterListenersAreOpened;
+            }
+
+            public void UseEvent(StatefulServiceLifecycleEvent @event)
+            {
+                this.Event = @event;
+            }
         }
 
         public override IServiceHostDelegateInvoker Activate(
             IStatefulService service)
         {
-            var parameters = new StatefulAsyncDelegateParameters();
+            var parameters = new StatefulDelegateParameters();
 
             parameters.ConfigureDependencies(
                 dependencies =>

@@ -447,6 +447,26 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
+        public static IStatefulServiceHostDelegateReplicaTemplate UseEvent(
+            this IStatefulServiceHostDelegateReplicaTemplate @this,
+            StatefulServiceLifecycleEvent @event)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseEvent(@event));
+
+            return @this;
+        }
+
+        public static IStatelessServiceHostDelegateReplicaTemplate UseEvent(
+            this IStatelessServiceHostDelegateReplicaTemplate @this,
+            StatelessServiceLifecycleEvent @event)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseEvent(@event));
+
+            return @this;
+        }
+
         public static TCaller UseEndpoint<TCaller>(
             this TCaller @this,
             string endpointName)
