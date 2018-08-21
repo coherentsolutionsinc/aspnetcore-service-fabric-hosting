@@ -244,7 +244,7 @@ This project is owned and maintained by [Coherent Solutions][4].
 This project is licensed under the MS-PL License - see the [LICENSE.md][5] for details.
 
 [1]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki "wiki: Home"
-[2]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/VersionHistory "wiki: Version History"
+[2]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Version-History "wiki: Version History"
 [3]:  CONTRIBUTING.md "Contributing"
 [4]:  https://www.coherentsolutions.com/ "Coherent Solutions Inc."
 [5]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/blob/master/LICENSE.md "License"
