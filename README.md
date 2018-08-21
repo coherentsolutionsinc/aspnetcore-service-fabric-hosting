@@ -1,3 +1,8 @@
+# CoherentSolutions.Extensions.Hosting.ServiceFabric
+
+![build & test](https://codebuild.us-east-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiUnE1c1A2RGNaNDVMUFBLaFhPNkxDeUxkVXZBT1lGT1JCcm9RUnZWWmxDSmFXMnB5TDk5UHBOT1FDSUpBNXM1NW8zUGRKbmlqQVgwdGVnRStVa0luOTRRPSIsIml2UGFyYW1ldGVyU3BlYyI6ImVpN3hVTDd0UTh6RzJMeFQiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
+[![nuget package](https://img.shields.io/badge/nuget-1.1.0-blue.svg)](https://www.nuget.org/packages/CoherentSolutions.Extensions.Hosting.ServiceFabric/1.1.0)
+
 ## About the Project
 
 **CoherentSolutions.Extensions.Hosting.ServiceFabric** changes a way how you develop **Reliable Services**. The main idea is simplify development process as much as possible by removing unnecessary code, improving separation of concern and making the whole process much easier and convenient by introducing set of friendly builders. 
@@ -8,7 +13,7 @@ As usual the easiest way to get started is to code something. Let's create a new
 
 > **NOTE**
 >
-> Please note that current section doesn't contain explanation of all the aspects of the **CoherentSolutions.Extensions.Hosting.ServiceFabric**. The full documentation can be found on [project wiki][1]. The package can be downloaded from [nuget.org](https://www.nuget.org/packages/CoherentSolutions.Extensions.Hosting.ServiceFabric).
+> Please note that current section doesn't contain explanation of all the aspects of the **CoherentSolutions.Extensions.Hosting.ServiceFabric**. The full documentation can be found on [project wiki][1]. 
 
 In the **Getting Started** section we would develop Stateful Service with one **aspnetcore listener** (Kestrel), one **remoting listener** and one background job.
 
