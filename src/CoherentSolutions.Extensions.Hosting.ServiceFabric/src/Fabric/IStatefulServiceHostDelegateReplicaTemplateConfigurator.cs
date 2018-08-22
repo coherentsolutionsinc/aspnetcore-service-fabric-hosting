@@ -3,5 +3,7 @@
     public interface IStatefulServiceHostDelegateReplicaTemplateConfigurator
         : IServiceHostDelegateReplicaTemplateConfigurator
     {
+        void UseEvent(
+            StatefulServiceLifecycleEvent @event);
     }
 }

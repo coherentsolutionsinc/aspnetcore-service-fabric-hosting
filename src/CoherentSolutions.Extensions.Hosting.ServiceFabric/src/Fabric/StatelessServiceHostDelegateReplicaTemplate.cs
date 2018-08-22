@@ -8,17 +8,29 @@
               IServiceHostDelegateInvoker>,
           IStatelessServiceHostDelegateReplicaTemplate
     {
-        private class StatelessAsyncDelegateParameters
+        private class StatelessDelegateParameters
             : DelegateParameters,
               IStatelessServiceHostDelegateReplicaTemplateParameters,
               IStatelessServiceHostDelegateReplicaTemplateConfigurator
         {
+            public StatelessServiceLifecycleEvent Event { get; private set; }
+
+            public StatelessDelegateParameters()
+            {
+                this.Event = StatelessServiceLifecycleEvent.OnRunAfterListenersAreOpened;
+            }
+
+            public void UseEvent(
+                StatelessServiceLifecycleEvent @event)
+            {
+                this.Event = @event;
+            }
         }
 
         public override IServiceHostDelegateInvoker Activate(
             IStatelessService service)
         {
-            var parameters = new StatelessAsyncDelegateParameters();
+            var parameters = new StatelessDelegateParameters();
 
             this.UpstreamConfiguration(parameters);
 
