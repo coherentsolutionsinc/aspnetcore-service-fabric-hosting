@@ -8,9 +8,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         : IConfigurableObjectDependenciesConfigurator,
           IServiceHostLoggerConfigurator
     {
-        void UseDelegateInvoker(
-            Func<Delegate, IServiceProvider, IServiceHostDelegateInvoker> factoryFunc);
-
         void UseDelegate(
             Delegate @delegate);
     }

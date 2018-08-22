@@ -11,6 +11,7 @@
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Product>CoherentSolutions.AspNetCore.ServiceFabric.Hosting</Product>
     <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Moq" Version="4.9.0" />

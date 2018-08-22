@@ -65,7 +65,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
                                         {
                                             // We should ignore certain types.
                                             var ignore = new HashSet<Type>(dependencies.Select(i => i.ServiceType));
-                                            
+
                                             // See https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/issues/30
                                             ignore.Add(typeof(IHostedService));
 

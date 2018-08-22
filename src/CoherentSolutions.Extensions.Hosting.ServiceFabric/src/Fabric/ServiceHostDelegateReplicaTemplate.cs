@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public abstract class ServiceHostDelegateReplicaTemplate<TService, TParameters, TConfigurator, TDelegate>
+    public abstract class ServiceHostDelegateReplicaTemplate<TService, TParameters, TConfigurator, TDelegateInvoker, TDelegate>
         : ConfigurableObject<TConfigurator>, IServiceHostDelegateReplicaTemplate<TConfigurator>
         where TService : IService
         where TParameters : IServiceHostDelegateReplicaTemplateParameters
@@ -19,8 +19,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             : IServiceHostDelegateReplicaTemplateParameters,
               IServiceHostDelegateReplicaTemplateConfigurator
         {
-            public Func<Delegate, IServiceProvider, IServiceHostDelegateInvoker> DelegateInvokerFunc { get; private set; }
-
             public Delegate Delegate { get; private set; }
 
             public Func<IServiceHostLoggerOptions> LoggerOptionsFunc { get; private set; }
@@ -32,17 +30,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             protected DelegateParameters()
             {
                 this.LoggerOptionsFunc = DefaultLoggerOptionsFunc;
-                this.DelegateInvokerFunc = DefaulDelegateInvokerFunc;
                 this.Delegate = null;
                 this.DependenciesFunc = DefaultDependenciesFunc;
                 this.DependenciesConfigAction = null;
-            }
-
-            public void UseDelegateInvoker(
-                Func<Delegate, IServiceProvider, IServiceHostDelegateInvoker> factoryFunc)
-            {
-                this.DelegateInvokerFunc = factoryFunc
-                 ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
 
             public void UseDelegate(
@@ -77,23 +67,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.DependenciesConfigAction = this.DependenciesConfigAction.Chain(configAction);
             }
 
-            private static IServiceHostDelegateInvoker DefaulDelegateInvokerFunc(
-                Delegate @delegate,
-                IServiceProvider services)
-            {
-                if (@delegate == null)
-                {
-                    throw new ArgumentNullException(nameof(@delegate));
-                }
-
-                if (services == null)
-                {
-                    throw new ArgumentNullException(nameof(services));
-                }
-
-                return new ServiceHostDelegateInvoker(@delegate, services);
-            }
-
             private static IServiceHostLoggerOptions DefaultLoggerOptionsFunc()
             {
                 return ServiceHostLoggerOptions.Disabled;
@@ -108,7 +81,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         public abstract TDelegate Activate(
             TService service);
 
-        protected Func<IServiceHostDelegateInvoker> CreateFunc(
+        protected Func<Func<Delegate, IServiceProvider, TDelegateInvoker>, TDelegateInvoker> CreateDelegateInvokerFunc(
             TService service,
             TParameters parameters)
         {
@@ -122,54 +95,50 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 throw new ArgumentNullException(nameof(parameters));
             }
 
-            var delegateInvokerFunc = parameters.DelegateInvokerFunc;
-            if (delegateInvokerFunc == null)
-            {
-                throw new InvalidOperationException(
-                    $"No {parameters.DelegateInvokerFunc} was configured.");
-            }
-
-            var serviceContext = service.GetContext();
-            var servicePartition = service.GetPartition();
-            var serviceEventSource = service.GetEventSource();
-
-            var dependenciesCollection = parameters.DependenciesFunc();
-            if (dependenciesCollection == null)
-            {
-                throw new FactoryProducesNullInstanceException<IServiceCollection>();
-            }
-
-            dependenciesCollection.Add(serviceContext);
-            dependenciesCollection.Add(servicePartition);
-            dependenciesCollection.Add(serviceEventSource);
-
-            parameters.DependenciesConfigAction?.Invoke(dependenciesCollection);
-
-            var loggerOptions = parameters.LoggerOptionsFunc();
-            if (loggerOptions == null)
-            {
-                throw new FactoryProducesNullInstanceException<IServiceHostLoggerOptions>();
-            }
-
-            dependenciesCollection.AddLogging(
-                builder =>
+            var build = new Func<Func<Delegate, IServiceProvider, TDelegateInvoker>, TDelegateInvoker>(
+                factory =>
                 {
-                    builder.AddProvider(new ServiceHostDelegateLoggerProvider(loggerOptions, serviceEventSource));
+                    var serviceContext = service.GetContext();
+                    var servicePartition = service.GetPartition();
+                    var serviceEventSource = service.GetEventSource();
+
+                    var dependenciesCollection = parameters.DependenciesFunc();
+                    if (dependenciesCollection == null)
+                    {
+                        throw new FactoryProducesNullInstanceException<IServiceCollection>();
+                    }
+
+                    dependenciesCollection.Add(serviceContext);
+                    dependenciesCollection.Add(servicePartition);
+                    dependenciesCollection.Add(serviceEventSource);
+
+                    parameters.DependenciesConfigAction?.Invoke(dependenciesCollection);
+
+                    var loggerOptions = parameters.LoggerOptionsFunc();
+                    if (loggerOptions == null)
+                    {
+                        throw new FactoryProducesNullInstanceException<IServiceHostLoggerOptions>();
+                    }
+
+                    dependenciesCollection.AddLogging(
+                        builder =>
+                        {
+                            builder.AddProvider(new ServiceHostDelegateLoggerProvider(loggerOptions, serviceEventSource));
+                        });
+
+                    // Adding support for open-generics
+                    var provider = new ProxynatorAwareServiceProvider(dependenciesCollection.BuildServiceProvider());
+
+                    var invoker = factory(parameters.Delegate, provider);
+                    if (invoker == null)
+                    {
+                        throw new FactoryProducesNullInstanceException<TDelegateInvoker>();
+                    }
+
+                    return invoker;
                 });
 
-            // Adding support for open-generics
-            var provider = new ProxynatorAwareServiceProvider(dependenciesCollection.BuildServiceProvider());
-
-            return () =>
-            {
-                var invoker = delegateInvokerFunc(parameters.Delegate, provider);
-                if (invoker == null)
-                {
-                    throw new FactoryProducesNullInstanceException<IServiceHostDelegateInvoker>();
-                }
-
-                return invoker;
-            };
+            return build;
         }
     }
 }

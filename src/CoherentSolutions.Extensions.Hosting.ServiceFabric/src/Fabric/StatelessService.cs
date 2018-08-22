@@ -6,6 +6,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools;
+
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
@@ -134,13 +136,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             }
         }
 
-        private readonly IReadOnlyList<IStatelessServiceHostDelegateReplicator> serviceDelegateReplicators;
-
-        private readonly IReadOnlyList<IStatelessServiceHostListenerReplicator> serviceListenerReplicators;
-
         private readonly ServiceEventSource eventSource;
 
         private readonly EventSynchronization eventSynchronization;
+
+        private readonly ILookup<StatelessServiceLifecycleEvent, StatelessServiceDelegate> serviceDelegates;
+
+        private readonly IReadOnlyList<ServiceInstanceListener> serviceListeners;
 
         public StatelessService(
             StatelessServiceContext serviceContext,
@@ -148,11 +150,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             IReadOnlyList<IStatelessServiceHostListenerReplicator> serviceListenerReplicators)
             : base(serviceContext)
         {
-            if (serviceListenerReplicators == null)
-            {
-                throw new ArgumentNullException(nameof(serviceListenerReplicators));
-            }
-
             this.eventSource = new ServiceEventSource(
                 serviceContext,
                 $"{serviceContext.CodePackageActivationContext.ApplicationTypeName}.{serviceContext.ServiceTypeName}",
@@ -161,28 +158,41 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             this.eventSynchronization = new EventSynchronization(
                 serviceListenerReplicators.Count);
 
-            this.serviceDelegateReplicators = serviceDelegateReplicators
-             ?? throw new ArgumentNullException(nameof(serviceDelegateReplicators));
+            if (serviceDelegateReplicators != null)
+            {
+                this.serviceDelegates = serviceDelegateReplicators
+                   .SelectMany(
+                        replicator =>
+                        {
+                            var @delegate = replicator.ReplicateFor(this);
+                            return @delegate.Event.GetBitFlags().Select(v => (v, @delegate));
+                        })
+                   .ToLookup(kv => kv.v, kv => kv.@delegate);
+            }
 
-            this.serviceListenerReplicators = serviceListenerReplicators;
+            if (serviceListenerReplicators != null)
+            {
+                this.serviceListeners = serviceListenerReplicators
+                   .Select(
+                        replicator =>
+                        {
+                            var replicaListener = replicator.ReplicateFor(this);
+                            return new ServiceInstanceListener(
+                                context =>
+                                {
+                                    return new ListenerEventDecorator(
+                                        this.eventSynchronization,
+                                        replicaListener.CreateCommunicationListener(context));
+                                },
+                                replicaListener.Name);
+                        })
+                   .ToList();
+            }
         }
 
         protected override IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners()
         {
-            return this.serviceListenerReplicators
-               .Select(
-                    replicator =>
-                    {
-                        var replicaListener = replicator.ReplicateFor(this);
-                        return new ServiceInstanceListener(
-                            context =>
-                            {
-                                return new ListenerEventDecorator(
-                                    this.eventSynchronization,
-                                    replicaListener.CreateCommunicationListener(context));
-                            },
-                            replicaListener.Name);
-                    });
+            return this.GetServiceListeners();
         }
 
         protected override async Task RunAsync(
@@ -192,13 +202,28 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             await this.eventSynchronization.WhenAllListenersOpened(cancellationToken);
 
-            var delegates = this.serviceDelegateReplicators.Select(replicator => replicator.ReplicateFor(this));
-            foreach (var @delegate in delegates)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
+            await this.InvokeDelegates(StatelessServiceLifecycleEvent.OnRunAfterListenersAreOpened, cancellationToken);
+        }
 
-                await @delegate.InvokeAsync(cancellationToken);
-            }
+        protected override async Task OnOpenAsync(
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            await this.InvokeDelegates(StatelessServiceLifecycleEvent.OnOpen, cancellationToken);
+        }
+
+        protected override async Task OnCloseAsync(
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            await this.InvokeDelegates(StatelessServiceLifecycleEvent.OnClose, cancellationToken);
+        }
+
+        protected override void OnAbort()
+        {
+            Task.Run(async () => await this.InvokeDelegates(StatelessServiceLifecycleEvent.OnAbort)).Wait();
         }
 
         public ServiceContext GetContext()
@@ -214,6 +239,35 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         public IServicePartition GetPartition()
         {
             return this.Partition;
+        }
+
+        private async Task InvokeDelegates(
+            StatelessServiceLifecycleEvent @event,
+            CancellationToken cancellationToken = default)
+        {
+            var context = new StatelessServiceDelegateInvocationContext(@event);
+            var delegates = this.GetServiceDelegates(@event);
+            foreach (var @delegate in delegates)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var invoker = @delegate.CreateDelegateInvokerFunc();
+
+                await invoker.InvokeAsync(context, cancellationToken);
+            }
+        }
+
+        private IEnumerable<StatelessServiceDelegate> GetServiceDelegates(
+            StatelessServiceLifecycleEvent @event)
+        {
+            return this.serviceDelegates == null
+                ? Enumerable.Empty<StatelessServiceDelegate>()
+                : this.serviceDelegates[@event];
+        }
+
+        private IEnumerable<ServiceInstanceListener> GetServiceListeners()
+        {
+            return this.serviceListeners ?? Enumerable.Empty<ServiceInstanceListener>();
         }
     }
 }

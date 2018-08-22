@@ -1,86 +1,73 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools;
+
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public class ServiceHostDelegateInvoker : IServiceHostDelegateInvoker
+    public abstract class ServiceHostDelegateInvoker
     {
-        private readonly IServiceProvider services;
+        private readonly Delegate @delegate;
 
-        private readonly Func<IServiceProvider, CancellationToken, Task> invocation;
-
-        public ServiceHostDelegateInvoker(
-            Delegate @delegate,
-            IServiceProvider services)
+        protected ServiceHostDelegateInvoker(
+            Delegate @delegate)
         {
-            if (@delegate == null)
-            {
-                throw new ArgumentNullException(nameof(@delegate));
-            }
-
-            this.services = services
-             ?? throw new ArgumentNullException(nameof(services));
-
-            this.invocation =
-                (
-                    dependencies,
-                    cancellationToken) =>
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    var arguments = @delegate
-                       .GetMethodInfo()
-                       .GetParameters()
-                       .Select(
-                            (
-                                pi,
-                                index) =>
-                            {
-                                if (pi.ParameterType == typeof(CancellationToken))
-                                {
-                                    return cancellationToken;
-                                }
-
-                                return dependencies.GetRequiredService(pi.ParameterType);
-                            })
-                       .ToArray();
-
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    try
-                    {
-                        var result = @delegate.DynamicInvoke(arguments);
-                        if (result is Task returnTask)
-                        {
-                            return returnTask;
-                        }
-
-                        return Task.CompletedTask;
-                    }
-                    catch (TargetInvocationException e)
-                    {
-                        if (e.InnerException != null)
-                        {
-                            ExceptionDispatchInfo.Capture(e.InnerException).Throw();
-                        }
-
-                        throw;
-                    }
-                };
+            this.@delegate = @delegate
+             ?? throw new ArgumentNullException(nameof(@delegate));
         }
 
-        public Task InvokeAsync(
-            CancellationToken cancellationToken)
+        public Func<CancellationToken, Task> CreateInvocation(
+            IServiceProvider invocationArgumentsProvider)
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            Task Function(
+                CancellationToken cancellationToken)
+            {
+                var argumentsProvider = new ReplaceAwareServiceProvider(
+                    new Dictionary<Type, object>
+                    {
+                        [typeof(CancellationToken)] = cancellationToken
+                    },
+                    invocationArgumentsProvider);
 
-            return this.invocation(this.services, cancellationToken);
+                var arguments = this.@delegate.GetMethodInfo()
+                   .GetParameters()
+                   .Select(
+                        (
+                            pi,
+                            index) => argumentsProvider.GetRequiredService(pi.ParameterType))
+                   .ToArray();
+
+                cancellationToken.ThrowIfCancellationRequested();
+
+                try
+                {
+                    var result = this.@delegate.DynamicInvoke(arguments);
+                    if (result is Task returnTask)
+                    {
+                        return returnTask;
+                    }
+
+                    return Task.CompletedTask;
+                }
+                catch (TargetInvocationException e)
+                {
+                    if (e.InnerException != null)
+                    {
+                        ExceptionDispatchInfo.Capture(e.InnerException).Throw();
+                    }
+
+                    throw;
+                }
+            }
+
+            return Function;
         }
     }
 }
