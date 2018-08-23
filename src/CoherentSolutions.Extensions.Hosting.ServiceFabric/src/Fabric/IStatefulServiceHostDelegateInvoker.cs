@@ -1,12 +1,7 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
+﻿namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public interface IStatefulServiceHostDelegateInvoker
+        : IServiceHostDelegateInvoker<IStatefulServiceDelegateInvocationContext>
     {
-        Task InvokeAsync(
-            IStatefulServiceDelegateInvocationContext context,
-            CancellationToken cancellationToken);
     }
 }
