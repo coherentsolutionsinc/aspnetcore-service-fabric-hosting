@@ -5,27 +5,28 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
 {
     public class ReplaceAwareServiceProvider : IServiceProvider
     {
-        private readonly Dictionary<Type, object> replacements;
+        private readonly IReadOnlyDictionary<Type, object> replacements;
 
         private readonly IServiceProvider impl;
 
         public ReplaceAwareServiceProvider(
-            Dictionary<Type, object> replacements,
+            IDictionary<Type, object> replacements,
             IServiceProvider impl)
         {
-            this.replacements = replacements;
+            this.replacements = new Dictionary<Type, object>(replacements)
+            {
+                [typeof(IServiceProvider)] = this
+            };
+
             this.impl = impl;
         }
 
         public object GetService(
             Type serviceType)
         {
-            if (this.replacements.TryGetValue(serviceType, out var instance))
-            {
-                return instance;
-            }
-
-            return this.impl.GetService(serviceType);
+            return this.replacements.TryGetValue(serviceType, out var instance)
+                ? instance
+                : this.impl.GetService(serviceType);
         }
     }
 }
