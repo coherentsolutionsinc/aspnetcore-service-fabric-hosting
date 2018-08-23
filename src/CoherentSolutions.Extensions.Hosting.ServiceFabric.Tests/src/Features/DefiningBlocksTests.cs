@@ -50,12 +50,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
                 public void Deserialize(IXunitSerializationInfo info)
                 {
-                    this.Promise = info.GetValue<TheoryItemPromise>(nameof(Promise));
+                    this.Promise = info.GetValue<TheoryItemPromise>(nameof(this.Promise));
                 }
 
                 public void Serialize(IXunitSerializationInfo info)
                 {
-                    info.AddValue(nameof(Promise), this.Promise);
+                    info.AddValue(nameof(this.Promise), this.Promise);
                 }
             }
 
@@ -145,9 +145,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             Theories.Case @case)
         {
             // Arrange
-            var mockDelegateInvoker = new Mock<IServiceHostDelegateInvoker>();
+            var mockDelegateInvoker = new Mock<IServiceHostDelegateInvoker<object>>();
             mockDelegateInvoker
-               .Setup(instance => instance.InvokeAsync(It.IsAny<CancellationToken>()))
+               .Setup(instance => instance.InvokeAsync(It.IsAny<object>(), It.IsAny<CancellationToken>()))
                .Returns(Task.CompletedTask)
                .Verifiable();
 

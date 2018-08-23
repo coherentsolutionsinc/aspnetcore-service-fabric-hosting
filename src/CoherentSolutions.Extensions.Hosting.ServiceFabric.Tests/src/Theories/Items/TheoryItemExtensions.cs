@@ -7,49 +7,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
 {
     public static class TheoryItemExtensions
     {
-        public static TheoryItem SetupExtensionsAsDelegate(
-            this TheoryItem @this)
-        {
-            return @this
-               .SetupExtension(new UseDelegateTheoryExtension())
-               .SetupExtension(new UseDelegateInvokerTheoryExtension())
-               .SetupExtension(new UseDependenciesTheoryExtension())
-               .SetupExtension(new ConfigureDependenciesTheoryExtension())
-               .SetupExtension(new PickDependencyTheoryExtension());
-        }
-
-        public static TheoryItem SetupExtensionsAsAspNetCoreListener(
-            this TheoryItem @this)
-        {
-            return @this
-               .SetupExtension(new UseListenerEndpointTheoryExtension())
-               .SetupExtension(new UseAspNetCoreListenerCommunicationListenerTheoryExtension())
-               .SetupExtension(new UseAspNetCoreListenerWebHostBuilderTheoryExtension())
-               .SetupExtension(new ConfigureDependenciesTheoryExtension())
-               .SetupExtension(new PickDependencyTheoryExtension())
-               .SetupExtension(new PickListenerEndpointTheoryExtension());
-        }
-
-        public static TheoryItem SetupExtensionsAsRemotingListener(
-            this TheoryItem @this)
-        {
-            return @this
-               .SetupExtension(new UseListenerEndpointTheoryExtension())
-               .SetupExtension(new UseRemotingListenerCommunicationListenerTheoryExtension())
-               .SetupExtension(new UseRemotingListenerImplementationTheoryExtension())
-               .SetupExtension(new UseRemotingListenerSettingsTheoryExtension())
-               .SetupExtension(new UseRemotingListenerSerializationProviderTheoryExtension())
-               .SetupExtension(new UseRemotingListenerHandlerTheoryExtension())
-               .SetupExtension(new UseDependenciesTheoryExtension())
-               .SetupExtension(new ConfigureDependenciesTheoryExtension())
-               .SetupExtension(new PickDependencyTheoryExtension())
-               .SetupExtension(new PickListenerEndpointTheoryExtension())
-               .SetupExtension(new PickRemotingListenerImplementationTheoryExtension())
-               .SetupExtension(new PickRemotingListenerSettingsTheoryExtension())
-               .SetupExtension(new PickRemotingListenerSerializationProviderTheoryExtension())
-               .SetupExtension(new PickRemotingListenerHandlerTheoryExtension());
-        }
-
         public static TheoryItem SetupConfigAsStatefulService(
             this TheoryItem @this,
             Action<IStatefulServiceHostBuilderConfigurator, TheoryItem.TheoryItemExtensionProvider> configAction)
@@ -98,6 +55,64 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                                         });
                             });
                     });
+        }
+
+        public static TheoryItem SetupExtensionsAsStatefulDelegate(
+            this TheoryItem @this)
+        {
+            return @this
+               .SetupExtension(new UseStatefulDelegateInvokerTheoryExtension())
+               .SetupExtensionsAsDelegate();
+        }
+
+        public static TheoryItem SetupExtensionsAsStatelessDelegate(
+            this TheoryItem @this)
+        {
+            return @this
+               .SetupExtension(new UseStatelessDelegateInvokerTheoryExtension())
+               .SetupExtensionsAsDelegate();
+        }
+
+        public static TheoryItem SetupExtensionsAsAspNetCoreListener(
+            this TheoryItem @this)
+        {
+            return @this
+               .SetupExtension(new UseListenerEndpointTheoryExtension())
+               .SetupExtension(new UseAspNetCoreListenerCommunicationListenerTheoryExtension())
+               .SetupExtension(new UseAspNetCoreListenerWebHostBuilderTheoryExtension())
+               .SetupExtension(new ConfigureDependenciesTheoryExtension())
+               .SetupExtension(new PickDependencyTheoryExtension())
+               .SetupExtension(new PickListenerEndpointTheoryExtension());
+        }
+
+        public static TheoryItem SetupExtensionsAsRemotingListener(
+            this TheoryItem @this)
+        {
+            return @this
+               .SetupExtension(new UseListenerEndpointTheoryExtension())
+               .SetupExtension(new UseRemotingListenerCommunicationListenerTheoryExtension())
+               .SetupExtension(new UseRemotingListenerImplementationTheoryExtension())
+               .SetupExtension(new UseRemotingListenerSettingsTheoryExtension())
+               .SetupExtension(new UseRemotingListenerSerializationProviderTheoryExtension())
+               .SetupExtension(new UseRemotingListenerHandlerTheoryExtension())
+               .SetupExtension(new UseDependenciesTheoryExtension())
+               .SetupExtension(new ConfigureDependenciesTheoryExtension())
+               .SetupExtension(new PickDependencyTheoryExtension())
+               .SetupExtension(new PickListenerEndpointTheoryExtension())
+               .SetupExtension(new PickRemotingListenerImplementationTheoryExtension())
+               .SetupExtension(new PickRemotingListenerSettingsTheoryExtension())
+               .SetupExtension(new PickRemotingListenerSerializationProviderTheoryExtension())
+               .SetupExtension(new PickRemotingListenerHandlerTheoryExtension());
+        }
+
+        private static TheoryItem SetupExtensionsAsDelegate(
+            this TheoryItem @this)
+        {
+            return @this
+               .SetupExtension(new UseDelegateTheoryExtension())
+               .SetupExtension(new UseDependenciesTheoryExtension())
+               .SetupExtension(new ConfigureDependenciesTheoryExtension())
+               .SetupExtension(new PickDependencyTheoryExtension());
         }
     }
 }

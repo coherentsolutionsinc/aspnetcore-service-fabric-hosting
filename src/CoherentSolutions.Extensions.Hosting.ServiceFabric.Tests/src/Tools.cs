@@ -215,23 +215,23 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
             return () => new ServiceCollection();
         }
 
-        public static Func<Delegate, IServiceProvider, IServiceHostDelegateInvoker> GetDelegateInvokerFunc()
+        public static Func<Delegate, IServiceProvider, IServiceHostDelegateInvoker<object>> GetDelegateInvokerFunc()
         {
             return (
                 @delegate,
                 provider) =>
             {
-                var invoker = new Mock<IServiceHostDelegateInvoker>();
+                var invoker = new Mock<IServiceHostDelegateInvoker<object>>();
 
                 invoker
-                   .Setup(instance => instance.InvokeAsync(It.IsAny<CancellationToken>()))
-                   .Callback<CancellationToken>(
-                        cancellationToken =>
+                   .Setup(instance => instance.InvokeAsync(It.IsAny<object>(), It.IsAny<CancellationToken>()))
+                   .Callback<object, CancellationToken>(
+                        (@object, cancellationToken) =>
                         {
                             @delegate.DynamicInvoke();
                         })
                    .Returns(Task.CompletedTask);
-
+                
                 return invoker.Object;
             };
         }

@@ -29,11 +29,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             switch (this.setup)
             {
                 case TheoryItemSetup.AsStatefulDelegate:
-                    item.SetupExtensionsAsDelegate()
+                    item.SetupExtensionsAsStatefulDelegate()
                         .SetupConfigAsStatefulService(TheoryItemConfigure.ConfigureDelegateExtensions);
                     break;
                 case TheoryItemSetup.AsStatelessDelegate:
-                    item.SetupExtensionsAsDelegate()
+                    item.SetupExtensionsAsStatelessDelegate()
                         .SetupConfigAsStatelessService(TheoryItemConfigure.ConfigureDelegateExtensions);
                     break;
                 case TheoryItemSetup.AsStatefulAspNetCoreListener:
@@ -65,8 +65,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
 
         public void Serialize(IXunitSerializationInfo info)
         {
-            info.AddValue(nameof(name), this.name);
-            info.AddValue(nameof(setup), this.setup);
+            info.AddValue(nameof(this.name), this.name);
+            info.AddValue(nameof(this.setup), this.setup);
+        }
+
+        public override string ToString()
+        {
+            return this.name;
         }
     }
 }
