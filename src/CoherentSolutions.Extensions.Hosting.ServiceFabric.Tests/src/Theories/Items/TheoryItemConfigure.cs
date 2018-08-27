@@ -17,7 +17,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
 {
     public static class TheoryItemConfigure
     {
-        private class DelegateWrap
+        private static class DelegateWrap
         {
             public static Delegate Create(
                 Delegate source,
