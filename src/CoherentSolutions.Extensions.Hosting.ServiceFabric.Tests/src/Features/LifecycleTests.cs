@@ -16,7 +16,67 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
     public static class LifecycleTests
     {
         [Fact]
-        private static async void Should_invoke_delegates_On_stateless_service_startup_cycle()
+        private static Task Should_invoke_delegate_On_stateful_service_unknown_to_primary_cycle()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        private static Task Should_invoke_delegate_On_stateful_service_unknown_to_idle_secondary_cycle()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        private static Task Should_invoke_delegate_On_stateful_service_unknown_to_delete_cycle()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        private static Task Should_invoke_delegate_On_stateful_service_idle_secondary_to_active_secondary_cycle()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        private static Task Should_invoke_delegate_On_stateful_service_idle_secondary_to_primary_cycle()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        private static Task Should_invoke_delegate_On_stateful_service_idle_secondary_to_deleted_cycle()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        private static Task Should_invoke_delegate_On_stateful_service_active_secondary_to_primary_cycle()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        private static Task Should_invoke_delegate_On_stateful_service_active_secondary_to_deleted_cycle()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        private static Task Should_invoke_delegate_On_stateful_service_primary_to_active_secondary_cycle()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        private static Task Should_invoke_delegate_On_stateful_service_primary_to_deleted_cycle()
+        {
+            throw new NotImplementedException();
+        }
+
+        [Fact]
+        private static async Task Should_invoke_delegates_On_stateless_service_startup_cycle()
         {
             // Arrange
             var expectedCallStack = new Stack<StatelessServiceLifecycleEvent>(
@@ -70,7 +130,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         }
 
         [Fact]
-        private static async void Should_invoke_delegates_On_stateless_service_shutdown_cycle()
+        private static async Task Should_invoke_delegates_On_stateless_service_shutdown_cycle()
         {
             // Arrange
             var expectedCallStack = new Stack<StatelessServiceLifecycleEvent>(
