@@ -20,6 +20,8 @@ using Microsoft.ServiceFabric.Services.Remoting.V2.Runtime;
 
 using Moq;
 
+using ServiceFabric.Mocks;
+
 using Xunit;
 using Xunit.Abstractions;
 
@@ -48,14 +50,30 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                     return this.Promise.ToString();
                 }
 
-                public void Deserialize(IXunitSerializationInfo info)
+                public void Deserialize(
+                    IXunitSerializationInfo info)
                 {
                     this.Promise = info.GetValue<TheoryItemPromise>(nameof(this.Promise));
                 }
 
-                public void Serialize(IXunitSerializationInfo info)
+                public void Serialize(
+                    IXunitSerializationInfo info)
                 {
                     info.AddValue(nameof(this.Promise), this.Promise);
+                }
+            }
+
+            public static IEnumerable<object[]> AllDelegateCases
+            {
+                get
+                {
+                    foreach (var item in TheoryItemsSet.DelegateItems)
+                    {
+                        yield return new object[]
+                        {
+                            new Case(item)
+                        };
+                    }
                 }
             }
 
@@ -103,17 +121,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         }
 
         [Theory]
-        [InlineData(StatefulServiceLifecycleEvent.OnRunBeforeListenersOpened)]
-        [InlineData(StatefulServiceLifecycleEvent.OnRunAfterListenersOpened)]
-        [InlineData(StatefulServiceLifecycleEvent.OnRunBeforeRoleChanged)]
-        [InlineData(StatefulServiceLifecycleEvent.OnRunAfterRoleChanged)]
-        [InlineData(StatefulServiceLifecycleEvent.OnAbort)]
-        [InlineData(StatefulServiceLifecycleEvent.OnOpen)]
-        [InlineData(StatefulServiceLifecycleEvent.OnClose)]
-        [InlineData(StatefulServiceLifecycleEvent.OnDataLoss)]
-        [InlineData(StatefulServiceLifecycleEvent.OnRestoreCompleted)]
+        [MemberData(nameof(Theories.AllDelegateCases), MemberType = typeof(Theories))]
         private static void Should_invoke_delegate_On_stateful_service_lifecycle_event(
-            StatefulServiceLifecycleEvent @event)
+            Theories.Case @case)
         {
             // Arrange
             var mockDelegate = new Mock<Action>();
@@ -123,97 +133,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
             var arrangeDelegate = mockDelegate.Object;
 
-            var theoryItem = TheoryItemsSet.StatefulServiceDelegate.Resolve();
+            var theoryItem = @case.Promise.Resolve();
 
             // Act
-            theoryItem.SetupExtension(new UseStatefulDelegateEventTheoryExtension().Setup(@event));
             theoryItem.SetupExtension(new UseDelegateTheoryExtension().Setup(arrangeDelegate));
             theoryItem.Try();
 
             // Assert
             mockDelegate.Verify();
-        }
-
-        [Theory]
-        [InlineData(StatelessServiceLifecycleEvent.OnRunBeforeListenersOpened)]
-        [InlineData(StatelessServiceLifecycleEvent.OnRunAfterListenersOpened)]
-        [InlineData(StatelessServiceLifecycleEvent.OnOpen)]
-        [InlineData(StatelessServiceLifecycleEvent.OnClose)]
-        [InlineData(StatelessServiceLifecycleEvent.OnAbort)]
-        private static void Should_invoke_delegate_On_stateless_service_lifecycle_event(
-            StatelessServiceLifecycleEvent @event)
-        {
-            // Arrange
-            var mockDelegate = new Mock<Action>();
-            mockDelegate
-               .Setup(instance => instance())
-               .Verifiable();
-
-            var arrangeDelegate = mockDelegate.Object;
-
-            var theoryItem = TheoryItemsSet.StatelessServiceDelegate.Resolve();
-
-            // Act
-            theoryItem.SetupExtension(new UseStatelessDelegateEventTheoryExtension().Setup(@event));
-            theoryItem.SetupExtension(new UseDelegateTheoryExtension().Setup(arrangeDelegate));
-            theoryItem.Try();
-
-            // Assert
-            mockDelegate.Verify();
-        }
-
-        [Fact]
-        private static void Should_use_delegate_invoker_When_invoking_delegates_on_stateful_service_lifecycle_events()
-        {
-            // Arrange
-            var mockDelegateInvoker = new Mock<IServiceHostDelegateInvoker<IStatefulServiceDelegateInvocationContext>>();
-            mockDelegateInvoker
-               .Setup(instance => instance.InvokeAsync(It.IsAny<IStatefulServiceDelegateInvocationContext>(), It.IsAny<CancellationToken>()))
-               .Returns(Task.CompletedTask)
-               .Verifiable();
-
-            var arrangeDelegateInvoker = mockDelegateInvoker.Object;
-
-            var theoryItem = TheoryItemsSet.StatefulServiceDelegate.Resolve();
-
-            // Act
-            theoryItem.SetupExtension(
-                new UseStatefulDelegateInvokerTheoryExtension().Setup(
-                    (
-                        @delegate,
-                        provider) => arrangeDelegateInvoker));
-
-            theoryItem.Try();
-
-            // Assert
-            mockDelegateInvoker.Verify();
-        }
-
-        [Fact]
-        private static void Should_use_delegate_invoker_When_invoking_delegates_on_stateless_service_lifecycle_events()
-        {
-            // Arrange
-            var mockDelegateInvoker = new Mock<IServiceHostDelegateInvoker<IStatelessServiceDelegateInvocationContext>>();
-            mockDelegateInvoker
-               .Setup(instance => instance.InvokeAsync(It.IsAny<IStatelessServiceDelegateInvocationContext>(), It.IsAny<CancellationToken>()))
-               .Returns(Task.CompletedTask)
-               .Verifiable();
-
-            var arrangeDelegateInvoker = mockDelegateInvoker.Object;
-
-            var theoryItem = TheoryItemsSet.StatelessServiceDelegate.Resolve();
-
-            // Act
-            theoryItem.SetupExtension(
-                new UseStatelessDelegateInvokerTheoryExtension().Setup(
-                    (
-                        @delegate,
-                        provider) => arrangeDelegateInvoker));
-
-            theoryItem.Try();
-
-            // Assert
-            mockDelegateInvoker.Verify();
         }
 
         [Theory]
@@ -521,6 +448,60 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
             // Assert
             Assert.Same(expectedHandler, actualHandler);
+        }
+
+        [Fact]
+        private static void Should_use_delegate_invoker_When_invoking_delegates_on_stateful_service_lifecycle_events()
+        {
+            // Arrange
+            var mockDelegateInvoker = new Mock<IServiceHostDelegateInvoker<IStatefulServiceDelegateInvocationContext>>();
+            mockDelegateInvoker
+               .Setup(instance => instance.InvokeAsync(It.IsAny<IStatefulServiceDelegateInvocationContext>(), It.IsAny<CancellationToken>()))
+               .Returns(Task.CompletedTask)
+               .Verifiable();
+
+            var arrangeDelegateInvoker = mockDelegateInvoker.Object;
+
+            var theoryItem = TheoryItemsSet.StatefulServiceDelegate.Resolve();
+
+            // Act
+            theoryItem.SetupExtension(
+                new UseStatefulDelegateInvokerTheoryExtension().Setup(
+                    (
+                        @delegate,
+                        provider) => arrangeDelegateInvoker));
+
+            theoryItem.Try();
+
+            // Assert
+            mockDelegateInvoker.Verify();
+        }
+
+        [Fact]
+        private static void Should_use_delegate_invoker_When_invoking_delegates_on_stateless_service_lifecycle_events()
+        {
+            // Arrange
+            var mockDelegateInvoker = new Mock<IServiceHostDelegateInvoker<IStatelessServiceDelegateInvocationContext>>();
+            mockDelegateInvoker
+               .Setup(instance => instance.InvokeAsync(It.IsAny<IStatelessServiceDelegateInvocationContext>(), It.IsAny<CancellationToken>()))
+               .Returns(Task.CompletedTask)
+               .Verifiable();
+
+            var arrangeDelegateInvoker = mockDelegateInvoker.Object;
+
+            var theoryItem = TheoryItemsSet.StatelessServiceDelegate.Resolve();
+
+            // Act
+            theoryItem.SetupExtension(
+                new UseStatelessDelegateInvokerTheoryExtension().Setup(
+                    (
+                        @delegate,
+                        provider) => arrangeDelegateInvoker));
+
+            theoryItem.Try();
+
+            // Assert
+            mockDelegateInvoker.Verify();
         }
     }
 }

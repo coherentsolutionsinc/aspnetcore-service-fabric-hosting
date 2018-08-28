@@ -1,20 +1,24 @@
 ﻿using System;
 using System.Fabric;
 using System.Linq;
-using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
+using Microsoft.ServiceFabric.Services.Runtime;
 
 using ServiceFabric.Mocks;
-
-using StatelessService = Microsoft.ServiceFabric.Services.Runtime.StatelessService;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
 {
     public class MockStatelessServiceInstance
     {
+        private readonly Func<StatelessServiceContext, StatelessService> serviceFactory;
+
+        private readonly StatelessServiceContext serviceContext;
+
+        private StatelessService serviceInstance;
+
         private ICommunicationListener[] communicationListeners;
 
         private Task runAsyncTask;
@@ -27,27 +31,23 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
 
         private TaskCompletionSource<bool> stopTaskSource;
 
-        public StatelessService ServiceInstance { get; }
-
-        public StatelessServiceContext ServiceContext { get; }
-
         public MockStatelessServiceInstance(
-            StatelessService serviceInstance,
+            Func<StatelessServiceContext, StatelessService> serviceFactory,
             StatelessServiceContext serviceContext)
         {
-            this.ServiceInstance = serviceInstance
-             ?? throw new ArgumentNullException(nameof(serviceInstance));
+            this.serviceFactory = serviceFactory
+             ?? throw new ArgumentNullException(nameof(serviceFactory));
 
-            this.ServiceContext = serviceContext
+            this.serviceContext = serviceContext
              ?? throw new ArgumentNullException(nameof(serviceContext));
         }
 
-        public Task StartAsync()
+        public Task CreateAsync()
         {
             return this.InitiateStartupSequence();
         }
 
-        public Task StopAsync()
+        public Task DestroyAsync()
         {
             return this.InitiateShutdownSequence();
         }
@@ -55,10 +55,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
         private async Task InitiateStartupSequence()
         {
             var skip = true;
-            lock (this.ServiceInstance)
+            lock (this.serviceFactory)
             {
                 if (!this.running)
                 {
+                    this.serviceInstance = this.serviceFactory(this.serviceContext);
+
                     this.running = true;
                     this.startTaskSource = new TaskCompletionSource<bool>();
                     this.stopTaskSource = new TaskCompletionSource<bool>();
@@ -73,7 +75,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
                 return;
             }
 
-            Injector.InjectProperty(this.ServiceInstance, "Partition", new MockStatelessServicePartition(), true);
+            Injector.InjectProperty(this.serviceInstance, "Partition", new MockStatelessServicePartition(), true);
 
             var cancellationTokenSource = new CancellationTokenSource();
 
@@ -81,9 +83,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
             var openListenersTask = Task.Run(
                 async () =>
                 {
-                    this.communicationListeners = this.ServiceInstance
+                    this.communicationListeners = this.serviceInstance
                        .InvokeCreateServiceInstanceListeners()
-                       .Select(l => l.CreateCommunicationListener(this.ServiceContext))
+                       .Select(l => l.CreateCommunicationListener(this.serviceContext))
                        .ToArray();
 
                     var communicationListenersOpenTasks = new Task[this.communicationListeners.Length];
@@ -96,7 +98,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
                 });
 
             this.runAsyncCancellationTokenSource = new CancellationTokenSource();
-            this.runAsyncTask = this.ServiceInstance.InvokeRunAsync(this.runAsyncCancellationTokenSource.Token);
+            this.runAsyncTask = this.serviceInstance.InvokeRunAsync(this.runAsyncCancellationTokenSource.Token);
 
             #pragma warning disable 4014
             this.runAsyncTask
@@ -111,7 +113,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
 
             await openListenersTask;
 
-            await this.ServiceInstance.InvokeOnOpenAsync(cancellationTokenSource.Token);
+            await this.serviceInstance.InvokeOnOpenAsync(cancellationTokenSource.Token);
 
             this.startTaskSource.SetResult(true);
         }
@@ -119,7 +121,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
         private async Task InitiateShutdownSequence()
         {
             var skip = true;
-            lock (this.ServiceInstance)
+            lock (this.serviceFactory)
             {
                 if (this.running)
                 {
@@ -167,7 +169,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
 
             await closeListenersTask;
 
-            await this.ServiceInstance.InvokeOnCloseAsync(cancellationTokenSource.Token);
+            await this.serviceInstance.InvokeOnCloseAsync(cancellationTokenSource.Token);
 
             if (exception == null)
             {

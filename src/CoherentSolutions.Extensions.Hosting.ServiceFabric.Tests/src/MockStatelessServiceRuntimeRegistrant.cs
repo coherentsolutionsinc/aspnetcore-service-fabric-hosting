@@ -20,24 +20,23 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
             Func<StatelessServiceContext, StatelessService> serviceFactory,
             CancellationToken cancellationToken)
         {
-            var serviceRuntime = MockServiceRuntimeFactory.CreateStatelessServiceRuntime(serviceFactory);
-
-            this.serviceInstance = serviceRuntime.CreateInstance(
+            this.serviceInstance = new MockStatelessServiceInstance(
+                serviceFactory,
                 MockStatelessServiceContextFactory.Create(
-                    MockServiceCodePackageActivationContext.Default,
+                    MockCodePackageActivationContext.Default,
                     serviceTypeName,
                     new Uri(MockStatelessServiceContextFactory.ServiceName),
                     Guid.Empty,
                     default));
 
-            return this.serviceInstance.StartAsync();
+            return this.serviceInstance.CreateAsync();
         }
 
         public Task UnregisterAsync(
             string serviceTypeName,
             CancellationToken cancellationToken)
         {
-            return this.serviceInstance.StopAsync();
+            return this.serviceInstance.DestroyAsync();
         }
     }
 }

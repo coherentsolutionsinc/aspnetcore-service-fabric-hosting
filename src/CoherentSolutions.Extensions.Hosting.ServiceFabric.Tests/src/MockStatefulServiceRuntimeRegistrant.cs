@@ -13,31 +13,30 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
 {
     public class MockStatefulServiceRuntimeRegistrant : IStatefulServiceRuntimeRegistrant
     {
-        private MockStatefulServiceReplica serviceInstance;
+        private MockStatefulServiceReplica serviceReplica;
 
         public Task RegisterAsync(
             string serviceTypeName,
             Func<StatefulServiceContext, StatefulServiceBase> serviceFactory,
             CancellationToken cancellationToken)
         {
-            var serviceRuntime = MockServiceRuntimeFactory.CreateStatefulServiceRuntime(serviceFactory);
-
-            this.serviceInstance = serviceRuntime.CreateInstance(
+            this.serviceReplica = new MockStatefulServiceReplica(
+                serviceFactory,
                 MockStatefulServiceContextFactory.Create(
-                    MockServiceCodePackageActivationContext.Default,
+                    MockCodePackageActivationContext.Default,
                     serviceTypeName,
                     new Uri(MockStatefulServiceContextFactory.ServiceName),
                     Guid.Empty,
                     default));
 
-            return this.serviceInstance.StartAsync();
+            return this.serviceReplica.StartAsync();
         }
 
         public Task UnregisterAsync(
             string serviceTypeName,
             CancellationToken cancellationToken)
         {
-            return this.serviceInstance.StopAsync();
+            return this.serviceReplica.StopAsync();
         }
     }
 }

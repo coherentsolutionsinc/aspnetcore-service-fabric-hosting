@@ -13,6 +13,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
 {
     public class MockStatefulServiceReplica
     {
+        private readonly Func<StatefulServiceContext, StatefulServiceBase> serviceFactory;
+
+        private readonly StatefulServiceContext serviceContext;
+
+        private StatefulServiceBase serviceReplica;
+
         private ICommunicationListener[] communicationListeners;
 
         private Task runAsyncTask;
@@ -25,18 +31,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
 
         private TaskCompletionSource<bool> stopTaskSource;
 
-        public StatefulServiceBase ServiceReplica { get; }
-
-        public StatefulServiceContext ServiceContext { get; }
-
         public MockStatefulServiceReplica(
-            StatefulServiceBase serviceReplica,
+            Func<StatefulServiceContext, StatefulServiceBase> serviceFactory,
             StatefulServiceContext serviceContext)
         {
-            this.ServiceReplica = serviceReplica
-             ?? throw new ArgumentNullException(nameof(serviceReplica));
+            this.serviceFactory = serviceFactory
+             ?? throw new ArgumentNullException(nameof(serviceFactory));
 
-            this.ServiceContext = serviceContext
+            this.serviceContext = serviceContext
              ?? throw new ArgumentNullException(nameof(serviceContext));
         }
 
@@ -53,10 +55,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
         private async Task InitiateStartupSequence()
         {
             var skip = true;
-            lock (this.ServiceReplica)
+            lock (this.serviceFactory)
             {
                 if (!this.running)
                 {
+                    this.serviceReplica = this.serviceFactory(this.serviceContext);
+
                     this.running = true;
                     this.startTaskSource = new TaskCompletionSource<bool>();
                     this.stopTaskSource = new TaskCompletionSource<bool>();
@@ -71,19 +75,19 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
                 return;
             }
 
-            Injector.InjectProperty(this.ServiceReplica, "Partition", new MockStatefulServicePartition(), true);
+            Injector.InjectProperty(this.serviceReplica, "Partition", new MockStatefulServicePartition(), true);
 
             var cancellationTokenSource = new CancellationTokenSource();
 
-            await this.ServiceReplica.InvokeOnOpenAsync(ReplicaOpenMode.New, cancellationTokenSource.Token);
+            await this.serviceReplica.InvokeOnOpenAsync(ReplicaOpenMode.New, cancellationTokenSource.Token);
 
             // ReSharper disable once MethodSupportsCancellation
             var openListenersTask = Task.Run(
                 async () =>
                 {
-                    this.communicationListeners = this.ServiceReplica
+                    this.communicationListeners = this.serviceReplica
                        .InvokeCreateServiceReplicaListeners()
-                       .Select(l => l.CreateCommunicationListener(this.ServiceContext))
+                       .Select(l => l.CreateCommunicationListener(this.serviceContext))
                        .ToArray();
 
                     var communicationListenersOpenTasks = new Task[this.communicationListeners.Length];
@@ -96,7 +100,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
                 });
 
             this.runAsyncCancellationTokenSource = new CancellationTokenSource();
-            this.runAsyncTask = this.ServiceReplica.InvokeRunAsync(this.runAsyncCancellationTokenSource.Token);
+            this.runAsyncTask = this.serviceReplica.InvokeRunAsync(this.runAsyncCancellationTokenSource.Token);
 
             #pragma warning disable 4014
             this.runAsyncTask
@@ -111,7 +115,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
 
             await openListenersTask;
 
-            await this.ServiceReplica.InvokeOnChangeRoleAsync(ReplicaRole.Primary, cancellationTokenSource.Token);
+            await this.serviceReplica.InvokeOnChangeRoleAsync(ReplicaRole.Primary, cancellationTokenSource.Token);
 
             this.startTaskSource.SetResult(true);
         }
@@ -119,7 +123,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
         private async Task InitiateShutdownSequence()
         {
             var skip = true;
-            lock (this.ServiceReplica)
+            lock (this.serviceFactory)
             {
                 if (this.running)
                 {
@@ -167,9 +171,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
 
             await closeListenersTask;
 
-            await this.ServiceReplica.InvokeOnChangeRoleAsync(ReplicaRole.None, cancellationTokenSource.Token);
+            await this.serviceReplica.InvokeOnChangeRoleAsync(ReplicaRole.None, cancellationTokenSource.Token);
 
-            await this.ServiceReplica.InvokeOnCloseAsync(cancellationTokenSource.Token);
+            await this.serviceReplica.InvokeOnCloseAsync(cancellationTokenSource.Token);
 
             if (exception == null)
             {
