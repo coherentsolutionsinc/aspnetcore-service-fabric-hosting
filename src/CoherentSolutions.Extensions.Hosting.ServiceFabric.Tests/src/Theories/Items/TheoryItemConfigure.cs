@@ -179,11 +179,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                     delegateBuilder.ConfigureObject(
                         c =>
                         {
-                            var useDelegateInvokerObject = extensions
-                               .GetExtension<IUseDelegateInvokerTheoryExtension<object>>();
-
                             var useDelegateInvoker = extensions
                                .GetExtension<IUseDelegateInvokerTheoryExtension<IStatefulServiceDelegateInvocationContext>>();
+
+                            var useDelegateEvent = extensions
+                               .GetExtension<IUseDelegateEventTheoryExtension<StatefulServiceLifecycleEvent>>();
 
                             var pickDependency = extensions.GetExtension<IPickDependencyTheoryExtension>();
 
@@ -203,12 +203,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                                                 }
                                             }));
 
-                                    var invoker = useDelegateInvokerObject != null
-                                        ? useDelegateInvokerObject.Factory(@delegate, provider)
-                                        : useDelegateInvoker.Factory(@delegate, provider);
-
+                                    var invoker = useDelegateInvoker.Factory(@delegate, provider);
                                     return new StatefulServiceHostDelegateInvokerDecorator(invoker);
                                 });
+                            c.UseEvent(useDelegateEvent.Event);
                         });
                 });
         }
@@ -224,11 +222,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                     delegateBuilder.ConfigureObject(
                         c =>
                         {
-                            var useDelegateInvokerObject = extensions
-                               .GetExtension<IUseDelegateInvokerTheoryExtension<object>>();
-
                             var useDelegateInvoker = extensions
                                .GetExtension<IUseDelegateInvokerTheoryExtension<IStatelessServiceDelegateInvocationContext>>();
+
+                            var useDelegateEvent = extensions
+                               .GetExtension<IUseDelegateEventTheoryExtension<StatelessServiceLifecycleEvent>>();
 
                             var pickDependency = extensions.GetExtension<IPickDependencyTheoryExtension>();
 
@@ -248,12 +246,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                                                 }
                                             }));
 
-                                    var invoker = useDelegateInvokerObject != null
-                                        ? useDelegateInvokerObject.Factory(@delegate, provider)
-                                        : useDelegateInvoker.Factory(@delegate, provider);
-
+                                    var invoker = useDelegateInvoker.Factory(@delegate, provider);
                                     return new StatelessServiceHostDelegateInvokerDecorator(invoker);
                                 });
+                            c.UseEvent(useDelegateEvent.Event);
                         });
                 });
         }

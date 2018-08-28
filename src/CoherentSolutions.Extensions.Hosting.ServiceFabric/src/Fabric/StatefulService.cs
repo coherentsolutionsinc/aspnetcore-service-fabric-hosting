@@ -119,7 +119,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             await this.eventSynchronization.WhenAllListenersOpened(cancellationToken);
 
-            await this.InvokeDelegates(StatefulServiceLifecycleEvent.OnRunAfterListenersAreOpened, cancellationToken);
+            await this.InvokeDelegates(StatefulServiceLifecycleEvent.OnRunAfterListenersOpened, cancellationToken);
         }
 
         protected override async Task OnOpenAsync(

@@ -28,7 +28,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
                     c.UseEndpoint(arrangeEndpointName);
                 });
 
-            var listener = arrangeReplicableTemplate.Activate(Tools.StatefulService);
+            var listener = arrangeReplicableTemplate.Activate(new MockStatefulService());
 
             // Assert
             Assert.Same(arrangeEndpointName, listener.Name);
@@ -47,7 +47,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
                     c.UseListenerOnSecondary();
                 });
 
-            var listener = arrangeReplicableTemplate.Activate(Tools.StatefulService);
+            var listener = arrangeReplicableTemplate.Activate(new MockStatefulService());
 
             // Assert
             Assert.True(listener.ListenOnSecondary);
@@ -76,7 +76,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
                     c.UseEndpoint(arrangeEndpointName);
                 });
 
-            var listener = arrangeReplicableTemplate.Activate(Tools.StatelessService);
+            var listener = arrangeReplicableTemplate.Activate(new MockStatelessService());
 
             // Assert
             Assert.Same(arrangeEndpointName, listener.Name);

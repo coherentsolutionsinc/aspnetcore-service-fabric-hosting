@@ -59,20 +59,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                 }
             }
 
-            public static IEnumerable<object[]> AllDelegatesCases
-            {
-                get
-                {
-                    foreach (var item in TheoryItemsSet.DelegateItems)
-                    {
-                        yield return new object[]
-                        {
-                            new Case(item)
-                        };
-                    }
-                }
-            }
-
             public static IEnumerable<object[]> AllListenerCases
             {
                 get
@@ -117,9 +103,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         }
 
         [Theory]
-        [MemberData(nameof(Theories.AllDelegatesCases), MemberType = typeof(Theories))]
-        private static void Should_invoke_custom_delegate_From_delegate_definition(
-            Theories.Case @case)
+        [InlineData(StatefulServiceLifecycleEvent.OnRunBeforeListenersOpened)]
+        [InlineData(StatefulServiceLifecycleEvent.OnRunAfterListenersOpened)]
+        [InlineData(StatefulServiceLifecycleEvent.OnRunBeforeRoleChanged)]
+        [InlineData(StatefulServiceLifecycleEvent.OnRunAfterRoleChanged)]
+        [InlineData(StatefulServiceLifecycleEvent.OnAbort)]
+        [InlineData(StatefulServiceLifecycleEvent.OnOpen)]
+        [InlineData(StatefulServiceLifecycleEvent.OnClose)]
+        [InlineData(StatefulServiceLifecycleEvent.OnDataLoss)]
+        [InlineData(StatefulServiceLifecycleEvent.OnRestoreCompleted)]
+        private static void Should_invoke_delegate_On_stateful_service_lifecycle_event(
+            StatefulServiceLifecycleEvent @event)
         {
             // Arrange
             var mockDelegate = new Mock<Action>();
@@ -129,9 +123,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
             var arrangeDelegate = mockDelegate.Object;
 
-            var theoryItem = @case.Promise.Resolve();
+            var theoryItem = TheoryItemsSet.StatefulServiceDelegate.Resolve();
 
             // Act
+            theoryItem.SetupExtension(new UseStatefulDelegateEventTheoryExtension().Setup(@event));
             theoryItem.SetupExtension(new UseDelegateTheoryExtension().Setup(arrangeDelegate));
             theoryItem.Try();
 
@@ -140,24 +135,77 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         }
 
         [Theory]
-        [MemberData(nameof(Theories.AllDelegatesCases), MemberType = typeof(Theories))]
-        private static void Should_use_custom_delegate_invoker_For_delegate_invocation(
-            Theories.Case @case)
+        [InlineData(StatelessServiceLifecycleEvent.OnRunBeforeListenersOpened)]
+        [InlineData(StatelessServiceLifecycleEvent.OnRunAfterListenersOpened)]
+        [InlineData(StatelessServiceLifecycleEvent.OnOpen)]
+        [InlineData(StatelessServiceLifecycleEvent.OnClose)]
+        [InlineData(StatelessServiceLifecycleEvent.OnAbort)]
+        private static void Should_invoke_delegate_On_stateless_service_lifecycle_event(
+            StatelessServiceLifecycleEvent @event)
         {
             // Arrange
-            var mockDelegateInvoker = new Mock<IServiceHostDelegateInvoker<object>>();
+            var mockDelegate = new Mock<Action>();
+            mockDelegate
+               .Setup(instance => instance())
+               .Verifiable();
+
+            var arrangeDelegate = mockDelegate.Object;
+
+            var theoryItem = TheoryItemsSet.StatelessServiceDelegate.Resolve();
+
+            // Act
+            theoryItem.SetupExtension(new UseStatelessDelegateEventTheoryExtension().Setup(@event));
+            theoryItem.SetupExtension(new UseDelegateTheoryExtension().Setup(arrangeDelegate));
+            theoryItem.Try();
+
+            // Assert
+            mockDelegate.Verify();
+        }
+
+        [Fact]
+        private static void Should_use_delegate_invoker_When_invoking_delegates_on_stateful_service_lifecycle_events()
+        {
+            // Arrange
+            var mockDelegateInvoker = new Mock<IServiceHostDelegateInvoker<IStatefulServiceDelegateInvocationContext>>();
             mockDelegateInvoker
-               .Setup(instance => instance.InvokeAsync(It.IsAny<object>(), It.IsAny<CancellationToken>()))
+               .Setup(instance => instance.InvokeAsync(It.IsAny<IStatefulServiceDelegateInvocationContext>(), It.IsAny<CancellationToken>()))
                .Returns(Task.CompletedTask)
                .Verifiable();
 
             var arrangeDelegateInvoker = mockDelegateInvoker.Object;
 
-            var theoryItem = @case.Promise.Resolve();
+            var theoryItem = TheoryItemsSet.StatefulServiceDelegate.Resolve();
 
             // Act
             theoryItem.SetupExtension(
-                new UseDelegateInvokerTheoryExtension().Setup(
+                new UseStatefulDelegateInvokerTheoryExtension().Setup(
+                    (
+                        @delegate,
+                        provider) => arrangeDelegateInvoker));
+
+            theoryItem.Try();
+
+            // Assert
+            mockDelegateInvoker.Verify();
+        }
+
+        [Fact]
+        private static void Should_use_delegate_invoker_When_invoking_delegates_on_stateless_service_lifecycle_events()
+        {
+            // Arrange
+            var mockDelegateInvoker = new Mock<IServiceHostDelegateInvoker<IStatelessServiceDelegateInvocationContext>>();
+            mockDelegateInvoker
+               .Setup(instance => instance.InvokeAsync(It.IsAny<IStatelessServiceDelegateInvocationContext>(), It.IsAny<CancellationToken>()))
+               .Returns(Task.CompletedTask)
+               .Verifiable();
+
+            var arrangeDelegateInvoker = mockDelegateInvoker.Object;
+
+            var theoryItem = TheoryItemsSet.StatelessServiceDelegate.Resolve();
+
+            // Act
+            theoryItem.SetupExtension(
+                new UseStatelessDelegateInvokerTheoryExtension().Setup(
                     (
                         @delegate,
                         provider) => arrangeDelegateInvoker));

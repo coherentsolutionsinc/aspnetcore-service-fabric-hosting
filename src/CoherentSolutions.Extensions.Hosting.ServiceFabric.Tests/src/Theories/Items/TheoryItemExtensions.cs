@@ -24,7 +24,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                                    .ConfigureObject(
                                         c =>
                                         {
-                                            c.UseRuntimeRegistrant(Tools.GetStatefulRuntimeRegistrantFunc());
+                                            c.UseRuntimeRegistrant(() => new MockStatefulServiceRuntimeRegistrant());
 
                                             configAction(c, extensions);
                                         });
@@ -49,7 +49,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                                    .ConfigureObject(
                                         c =>
                                         {
-                                            c.UseRuntimeRegistrant(Tools.GetStatelessRuntimeRegistrantFunc());
+                                            c.UseRuntimeRegistrant(() => new MockStatelessServiceRuntimeRegistrant());
 
                                             configAction(c, provider);
                                         });
@@ -62,6 +62,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
         {
             return @this
                .SetupExtension(new UseStatefulDelegateInvokerTheoryExtension())
+               .SetupExtension(new UseStatefulDelegateEventTheoryExtension())
                .SetupExtensionsAsDelegate();
         }
 
@@ -70,6 +71,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
         {
             return @this
                .SetupExtension(new UseStatelessDelegateInvokerTheoryExtension())
+               .SetupExtension(new UseStatelessDelegateEventTheoryExtension())
                .SetupExtensionsAsDelegate();
         }
 
@@ -109,8 +111,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             this TheoryItem @this)
         {
             return @this
-               .SetupExtension(new UseDelegateTheoryExtension())
                .SetupExtension(new UseDependenciesTheoryExtension())
+               .SetupExtension(new UseDelegateTheoryExtension())
                .SetupExtension(new ConfigureDependenciesTheoryExtension())
                .SetupExtension(new PickDependencyTheoryExtension());
         }

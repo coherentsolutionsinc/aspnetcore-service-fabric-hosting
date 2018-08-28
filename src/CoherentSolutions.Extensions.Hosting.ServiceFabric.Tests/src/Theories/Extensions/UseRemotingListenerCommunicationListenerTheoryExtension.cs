@@ -8,7 +8,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Exte
 
         public UseRemotingListenerCommunicationListenerTheoryExtension()
         {
-            this.Factory = Tools.GetRemotingCommunicationListenerFunc();
+            this.Factory = (
+                context,
+                build) =>
+            {
+                var options = build(context);
+                return new MockFabricTransportServiceRemotingListener(
+                    context,
+                    options.MessageHandler,
+                    options.ListenerSettings,
+                    options.MessageSerializationProvider);
+            };
         }
 
         public UseRemotingListenerCommunicationListenerTheoryExtension Setup(

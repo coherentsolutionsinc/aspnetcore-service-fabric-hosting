@@ -25,7 +25,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             public StatefulDelegateParameters()
             {
-                this.Event = StatefulServiceLifecycleEvent.OnRunAfterListenersAreOpened;
+                this.Event = StatefulServiceLifecycleEvent.OnRunAfterListenersOpened;
                 this.DelegateInvokerFunc = DefaultDelegateInvokerFunc;
             }
 

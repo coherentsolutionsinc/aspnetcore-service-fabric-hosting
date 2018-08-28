@@ -8,7 +8,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Exte
 
         public UseAspNetCoreListenerCommunicationListenerTheoryExtension()
         {
-            this.Factory = Tools.GetAspNetCoreCommunicationListenerFunc();
+            this.Factory = (
+                context,
+                name,
+                factory) => new MockAspNetCoreCommunicationListener(context, factory);
         }
 
         public UseAspNetCoreListenerCommunicationListenerTheoryExtension Setup(

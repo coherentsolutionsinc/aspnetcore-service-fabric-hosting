@@ -14,98 +14,239 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public class StatelessService : Microsoft.ServiceFabric.Services.Runtime.StatelessService, IStatelessService
     {
-        private class EventSynchronization
+        private class NotificationEventArgs : EventArgs
         {
-            private readonly TaskCompletionSource<int> whenAllListenersOpenedTaskSource;
+            private readonly Action completion;
 
-            private SpinLock spinLock;
+            private readonly Action<Exception> failure;
 
-            private int remainingListenersCount;
+            public CancellationToken CancellationToken { get; }
 
-            public EventSynchronization(
-                int listenersCount)
-            {
-                if (listenersCount < 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(listenersCount));
-                }
-
-                this.spinLock = new SpinLock();
-                this.remainingListenersCount = listenersCount;
-
-                this.whenAllListenersOpenedTaskSource = new TaskCompletionSource<int>();
-
-                if (listenersCount == 0)
-                {
-                    this.whenAllListenersOpenedTaskSource.SetResult(0);
-                }
-            }
-
-            public void NotifyListenerOpened()
-            {
-                var lockTaken = false;
-                try
-                {
-                    this.spinLock.Enter(ref lockTaken);
-
-                    if (--this.remainingListenersCount == 0)
-                    {
-                        this.whenAllListenersOpenedTaskSource.SetResult(0);
-                    }
-                }
-                finally
-                {
-                    if (lockTaken)
-                    {
-                        this.spinLock.Exit(true);
-                    }
-                }
-            }
-
-            public async Task WhenAllListenersOpened(
+            public NotificationEventArgs(
+                Action completion,
+                Action<Exception> failure,
                 CancellationToken cancellationToken)
             {
-                if (cancellationToken.IsCancellationRequested)
+                this.completion = completion;
+                this.failure = failure;
+                this.CancellationToken = cancellationToken;
+            }
+
+            public void Completed()
+            {
+                this.completion();
+            }
+
+            public void Failed(
+                Exception exception)
+            {
+                this.failure(exception);
+            }
+        }
+
+        private class ServiceEvents
+        {
+            private readonly TaskCompletionSource<bool> canOpenListenersTaskCompletionSource;
+
+            private readonly TaskCompletionSource<bool> whenAllListenersOpenedTaskCompletionSource;
+
+            private int listenerCount;
+
+            public event EventHandler<NotificationEventArgs> OnRunBeforeListenersOpened;
+
+            public event EventHandler<NotificationEventArgs> OnRunAfterListenersOpened;
+
+            public event EventHandler<NotificationEventArgs> OnOpen;
+
+            public event EventHandler<NotificationEventArgs> OnClose;
+
+            public event EventHandler<NotificationEventArgs> OnAbort;
+
+            public ServiceEvents(
+                int listenerCount = 0)
+            {
+                this.listenerCount = listenerCount;
+
+                this.whenAllListenersOpenedTaskCompletionSource = new TaskCompletionSource<bool>();
+                this.canOpenListenersTaskCompletionSource = new TaskCompletionSource<bool>();
+
+                if (this.listenerCount == 0)
+                {
+                    this.whenAllListenersOpenedTaskCompletionSource.SetResult(true);
+                }
+            }
+
+            public ListenerEvents CreateListenerEvents()
+            {
+                var listenerEvents = new ListenerEvents(this.canOpenListenersTaskCompletionSource.Task);
+                listenerEvents.Opened += (
+                    sender,
+                    args) =>
+                {
+                    try
+                    {
+                        if (Interlocked.Decrement(ref this.listenerCount) == 0)
+                        {
+                            this.whenAllListenersOpenedTaskCompletionSource.SetResult(true);
+                        }
+
+                        args.Completed();
+                    }
+                    catch (Exception e)
+                    {
+                        args.Failed(e);
+                    }
+                };
+
+                return listenerEvents;
+            }
+
+            public async Task SynchronizeWhenAllListenersOpened(
+                CancellationToken cancellationToken)
+            {
+                using (cancellationToken.Register(
+                    () =>
+                    {
+                        this.whenAllListenersOpenedTaskCompletionSource.SetCanceled();
+                    }))
+                {
+                    await this.whenAllListenersOpenedTaskCompletionSource.Task;
+                }
+            }
+
+            public async Task NotifyRunBeforeListenersOpened(
+                CancellationToken cancellationToken)
+            {
+                await this.NotifyAsync(this.OnRunBeforeListenersOpened, cancellationToken);
+
+                this.canOpenListenersTaskCompletionSource.SetResult(true);
+            }
+
+            public async Task  NotifyRunAfterListenersOpenedAsync(
+                CancellationToken cancellationToken)
+            {
+                await this.NotifyAsync(this.OnRunAfterListenersOpened, cancellationToken);
+            }
+
+            public async Task  NotifyOpenAsync(
+                CancellationToken cancellationToken)
+            {
+                await this.NotifyAsync(this.OnOpen, cancellationToken);
+            }
+
+            public async Task  NotifyCloseAsync(
+                CancellationToken cancellationToken)
+            {
+                await this.NotifyAsync(this.OnClose, cancellationToken);
+            }
+
+            public void  NotifyAbort(
+                CancellationToken cancellationToken)
+            {
+                this.NotifyAsync(this.OnAbort, cancellationToken).GetAwaiter().GetResult();
+            }
+
+            private async Task NotifyAsync(
+                EventHandler<NotificationEventArgs> @event,
+                CancellationToken cancellationToken)
+            {
+                var handler = @event;
+                if (handler == null)
                 {
                     return;
                 }
 
-                using (cancellationToken.Register(
-                    () =>
-                    {
-                        var lockTaken = false;
-                        try
-                        {
-                            this.spinLock.Enter(ref lockTaken);
+                var tcs = new TaskCompletionSource<bool>();
 
-                            this.whenAllListenersOpenedTaskSource.SetCanceled();
-                        }
-                        finally
-                        {
-                            if (lockTaken)
-                            {
-                                this.spinLock.Exit(true);
-                            }
-                        }
-                    }))
-                {
-                    await this.whenAllListenersOpenedTaskSource.Task;
-                }
+                handler(
+                    this,
+                    new NotificationEventArgs(
+                        () => tcs.SetResult(true),
+                        exception => tcs.SetException(exception),
+                        cancellationToken));
+
+                await tcs.Task;
             }
         }
 
-        private class ListenerEventDecorator : ICommunicationListener
+        private class ListenerEvents
         {
+            private readonly Task canOpenTask;
+
+            public ListenerEvents(
+                Task canOpenTask)
+            {
+                this.canOpenTask = canOpenTask
+                 ?? throw new ArgumentNullException(nameof(canOpenTask));
+            }
+
+            public event EventHandler<NotificationEventArgs> Opened;
+
+            public event EventHandler<NotificationEventArgs> Closed;
+
+            public event EventHandler<NotificationEventArgs> Aborted;
+
+            public Task SynchronizeWhenCanOpen(
+                CancellationToken cancellationToken)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                return this.canOpenTask;
+            }
+
+            public async Task NotifyOpenedAsync(
+                CancellationToken cancellationToken)
+            {
+                await this.NotifyAsync(this.Opened, cancellationToken);
+            }
+
+            public async Task NotifyClosedAsync(
+                CancellationToken cancellationToken)
+            {
+                await this.NotifyAsync(this.Closed, cancellationToken);
+            }
+
+            public void NotifyAborted(
+                CancellationToken cancellationToken)
+            {
+                this.NotifyAsync(this.Aborted, cancellationToken).GetAwaiter().GetResult();
+            }
+
+            private async Task NotifyAsync(
+                EventHandler<NotificationEventArgs> @event,
+                CancellationToken cancellationToken)
+            {
+                var handler = @event;
+                if (handler == null)
+                {
+                    return;
+                }
+
+                var tcs = new TaskCompletionSource<bool>();
+                
+                handler(
+                    this, 
+                    new NotificationEventArgs(
+                        () => tcs.SetResult(true), 
+                        exception => tcs.SetException(exception),
+                        cancellationToken));
+
+                await tcs.Task;
+            }
+        }
+
+        private class ListenerEventsDecorator : ICommunicationListener
+        {
+            private readonly ListenerEvents events;
+
             private readonly ICommunicationListener successor;
 
-            private readonly EventSynchronization eventSynchronization;
-
-            public ListenerEventDecorator(
-                EventSynchronization eventSynchronization,
+            public ListenerEventsDecorator(
+                ListenerEvents events,
                 ICommunicationListener successor)
             {
-                this.eventSynchronization = eventSynchronization
-                 ?? throw new ArgumentNullException(nameof(eventSynchronization));
+                this.events = events
+                 ?? throw new ArgumentNullException(nameof(events));
 
                 this.successor = successor
                  ?? throw new ArgumentNullException(nameof(successor));
@@ -116,29 +257,45 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 try
                 {
+                    await this.events.SynchronizeWhenCanOpen(cancellationToken);
+
                     return await this.successor.OpenAsync(cancellationToken);
                 }
                 finally
                 {
-                    this.eventSynchronization.NotifyListenerOpened();
+                    await this.events.NotifyOpenedAsync(cancellationToken);
                 }
             }
 
-            public Task CloseAsync(
+            public async Task CloseAsync(
                 CancellationToken cancellationToken)
             {
-                return this.successor.CloseAsync(cancellationToken);
+                try
+                {
+                    await this.successor.CloseAsync(cancellationToken);
+                }
+                finally
+                {
+                    await this.events.NotifyClosedAsync(cancellationToken);
+                }
             }
 
             public void Abort()
             {
-                this.successor.Abort();
+                try
+                {
+                    this.successor.Abort();
+                }
+                finally
+                {
+                    this.events.NotifyAborted(CancellationToken.None);
+                }
             }
         }
 
         private readonly ServiceEventSource eventSource;
 
-        private readonly EventSynchronization eventSynchronization;
+        private readonly ServiceEvents serviceEvents;
 
         private readonly ILookup<StatelessServiceLifecycleEvent, StatelessServiceDelegate> serviceDelegates;
 
@@ -155,9 +312,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 $"{serviceContext.CodePackageActivationContext.ApplicationTypeName}.{serviceContext.ServiceTypeName}",
                 EventSourceSettings.EtwSelfDescribingEventFormat);
 
-            this.eventSynchronization = new EventSynchronization(
-                serviceListenerReplicators.Count);
-
             if (serviceDelegateReplicators != null)
             {
                 this.serviceDelegates = serviceDelegateReplicators
@@ -172,22 +326,99 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             if (serviceListenerReplicators != null)
             {
+                this.serviceEvents = new ServiceEvents(serviceListenerReplicators.Count);
                 this.serviceListeners = serviceListenerReplicators
                    .Select(
                         replicator =>
                         {
+                            var events = this.serviceEvents.CreateListenerEvents();
                             var replicaListener = replicator.ReplicateFor(this);
                             return new ServiceInstanceListener(
-                                context =>
-                                {
-                                    return new ListenerEventDecorator(
-                                        this.eventSynchronization,
-                                        replicaListener.CreateCommunicationListener(context));
-                                },
+                                context => new ListenerEventsDecorator(events, replicaListener.CreateCommunicationListener(context)),
                                 replicaListener.Name);
                         })
                    .ToList();
             }
+            else
+            {
+                this.serviceEvents = new ServiceEvents();
+            }
+
+            this.serviceEvents.OnRunBeforeListenersOpened += async (
+                sender,
+                args) =>
+            {
+                try
+                {
+                    await this.InvokeDelegates(StatelessServiceLifecycleEvent.OnRunBeforeListenersOpened, args.CancellationToken);
+
+                    args.Completed();
+                }
+                catch (Exception e)
+                {
+                    args.Failed(e);
+                }
+            };
+            this.serviceEvents.OnRunAfterListenersOpened += async (
+                sender,
+                args) =>
+            {
+                try
+                {
+                    await this.InvokeDelegates(StatelessServiceLifecycleEvent.OnRunAfterListenersOpened, args.CancellationToken);
+
+                    args.Completed();
+                }
+                catch (Exception e)
+                {
+                    args.Failed(e);
+                }
+            };
+            this.serviceEvents.OnOpen += async (
+                sender,
+                args) =>
+            {
+                try
+                {
+                    await this.InvokeDelegates(StatelessServiceLifecycleEvent.OnOpen, args.CancellationToken);
+
+                    args.Completed();
+                }
+                catch (Exception e)
+                {
+                    args.Failed(e);
+                }
+            };
+            this.serviceEvents.OnClose += async (
+                sender,
+                args) =>
+            {
+                try
+                {
+                    await this.InvokeDelegates(StatelessServiceLifecycleEvent.OnClose, args.CancellationToken);
+
+                    args.Completed();
+                }
+                catch (Exception e)
+                {
+                    args.Failed(e);
+                }
+            };
+            this.serviceEvents.OnAbort += async (
+                sender,
+                args) =>
+            {
+                try
+                {
+                    await this.InvokeDelegates(StatelessServiceLifecycleEvent.OnAbort, args.CancellationToken);
+
+                    args.Completed();
+                }
+                catch (Exception e)
+                {
+                    args.Failed(e);
+                }
+            };
         }
 
         protected override IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners()
@@ -198,32 +429,28 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         protected override async Task RunAsync(
             CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            await this.serviceEvents.NotifyRunBeforeListenersOpened(cancellationToken);
 
-            await this.eventSynchronization.WhenAllListenersOpened(cancellationToken);
+            await this.serviceEvents.SynchronizeWhenAllListenersOpened(cancellationToken);
 
-            await this.InvokeDelegates(StatelessServiceLifecycleEvent.OnRunAfterListenersAreOpened, cancellationToken);
+            await this.serviceEvents.NotifyRunAfterListenersOpenedAsync(cancellationToken);
         }
 
         protected override async Task OnOpenAsync(
             CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            await this.InvokeDelegates(StatelessServiceLifecycleEvent.OnOpen, cancellationToken);
+            await this.serviceEvents.NotifyOpenAsync(cancellationToken);
         }
 
         protected override async Task OnCloseAsync(
             CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            await this.InvokeDelegates(StatelessServiceLifecycleEvent.OnClose, cancellationToken);
+            await this.serviceEvents.NotifyCloseAsync(cancellationToken);
         }
 
         protected override void OnAbort()
         {
-            Task.Run(async () => await this.InvokeDelegates(StatelessServiceLifecycleEvent.OnAbort)).Wait();
+            this.serviceEvents.NotifyAbort(CancellationToken.None);
         }
 
         public ServiceContext GetContext()
@@ -245,6 +472,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             StatelessServiceLifecycleEvent @event,
             CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var context = new StatelessServiceDelegateInvocationContext(@event);
             var delegates = this.GetServiceDelegates(@event);
             foreach (var @delegate in delegates)
@@ -257,17 +486,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             }
         }
 
+        private IEnumerable<ServiceInstanceListener> GetServiceListeners()
+        {
+            return this.serviceListeners ?? Enumerable.Empty<ServiceInstanceListener>();
+        }
+
         private IEnumerable<StatelessServiceDelegate> GetServiceDelegates(
             StatelessServiceLifecycleEvent @event)
         {
             return this.serviceDelegates == null
                 ? Enumerable.Empty<StatelessServiceDelegate>()
                 : this.serviceDelegates[@event];
-        }
-
-        private IEnumerable<ServiceInstanceListener> GetServiceListeners()
-        {
-            return this.serviceListeners ?? Enumerable.Empty<ServiceInstanceListener>();
         }
     }
 }
