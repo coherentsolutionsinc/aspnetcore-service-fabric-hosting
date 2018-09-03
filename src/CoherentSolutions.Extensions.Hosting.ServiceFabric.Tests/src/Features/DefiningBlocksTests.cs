@@ -20,8 +20,6 @@ using Microsoft.ServiceFabric.Services.Remoting.V2.Runtime;
 
 using Moq;
 
-using ServiceFabric.Mocks;
-
 using Xunit;
 using Xunit.Abstractions;
 
@@ -122,7 +120,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(Theories.AllDelegateCases), MemberType = typeof(Theories))]
-        private static void Should_invoke_delegate_On_stateful_service_lifecycle_event(
+        private static void Should_invoke_delegate_On_default_service_lifecycle_event(
             Theories.Case @case)
         {
             // Arrange

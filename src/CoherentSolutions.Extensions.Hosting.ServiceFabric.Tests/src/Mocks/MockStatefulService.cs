@@ -3,27 +3,32 @@ using System.Fabric;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
 
+using Microsoft.ServiceFabric.Data;
+
 using ServiceFabric.Mocks;
 
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Mocks
 {
-    public class MockStatelessService : IStatelessService
+    public class MockStatefulService : IStatefulService
     {
-        private readonly StatelessServiceContext serviceContext;
+        private readonly StatefulServiceContext serviceContext;
 
         private readonly IServiceEventSource serviceEventSource;
 
         private readonly IServicePartition servicePartition;
 
-        public MockStatelessService()
-            : this(MockStatelessServiceContextFactory.Default, new MockServiceEventSource(), new MockStatelessServicePartition())
+        private readonly IReliableStateManager reliableStateManager;
+
+        public MockStatefulService()
+            : this(MockStatefulServiceContextFactory.Default, new MockServiceEventSource(), new MockStatefulServicePartition(), new MockReliableStateManager())
         {
         }
 
-        public MockStatelessService(
-            StatelessServiceContext serviceContext,
+        public MockStatefulService(
+            StatefulServiceContext serviceContext,
             IServiceEventSource serviceEventSource,
-            IServicePartition servicePartition)
+            IServicePartition servicePartition,
+            IReliableStateManager reliableStateManager)
         {
             this.serviceContext = serviceContext
              ?? throw new ArgumentNullException(nameof(serviceContext));
@@ -33,6 +38,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
 
             this.servicePartition = servicePartition
              ?? throw new ArgumentNullException(nameof(servicePartition));
+            this.reliableStateManager = reliableStateManager;
         }
 
         public ServiceContext GetContext()
@@ -48,6 +54,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
         public IServicePartition GetPartition()
         {
             return this.servicePartition;
+        }
+
+        public IReliableStateManager GetReliableStateManager()
+        {
+            return this.reliableStateManager;
         }
     }
 }

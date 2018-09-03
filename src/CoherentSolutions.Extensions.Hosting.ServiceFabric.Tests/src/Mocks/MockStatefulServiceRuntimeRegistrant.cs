@@ -9,7 +9,7 @@ using Microsoft.ServiceFabric.Services.Runtime;
 
 using ServiceFabric.Mocks;
 
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Mocks
 {
     public class MockStatefulServiceRuntimeRegistrant : IStatefulServiceRuntimeRegistrant
     {
@@ -20,23 +20,22 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
             Func<StatefulServiceContext, StatefulServiceBase> serviceFactory,
             CancellationToken cancellationToken)
         {
-            this.serviceReplica = new MockStatefulServiceReplica(
-                serviceFactory,
-                MockStatefulServiceContextFactory.Create(
-                    MockCodePackageActivationContext.Default,
-                    serviceTypeName,
-                    new Uri(MockStatefulServiceContextFactory.ServiceName),
-                    Guid.Empty,
-                    default));
+            var context = MockStatefulServiceContextFactory.Create(
+                MockCodePackageActivationContext.Default,
+                serviceTypeName,
+                new Uri(MockStatefulServiceContextFactory.ServiceName),
+                Guid.Empty,
+                default);
 
-            return this.serviceReplica.StartAsync();
+            this.serviceReplica = new MockStatefulServiceReplica(serviceFactory(context));
+            return this.serviceReplica.InitiateStartupSequenceAsync();
         }
 
         public Task UnregisterAsync(
             string serviceTypeName,
             CancellationToken cancellationToken)
         {
-            return this.serviceReplica.StopAsync();
+            return this.serviceReplica.InitiateShutdownSequenceAsync();
         }
     }
 }

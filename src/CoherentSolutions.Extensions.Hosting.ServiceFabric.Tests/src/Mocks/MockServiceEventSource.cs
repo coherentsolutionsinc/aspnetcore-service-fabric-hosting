@@ -2,7 +2,7 @@
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
 
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Mocks
 {
     public class MockServiceEventSource : IServiceEventSource
     {

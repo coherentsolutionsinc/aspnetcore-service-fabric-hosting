@@ -8,7 +8,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Exte
 
         public UseStatelessDelegateEventTheoryExtension()
         {
-            this.Event = StatelessServiceLifecycleEvent.OnRunAfterListenersOpened;
+            this.Event = StatelessServiceLifecycleEvent.OnRun;
         }
 
         public UseStatelessDelegateEventTheoryExtension Setup(

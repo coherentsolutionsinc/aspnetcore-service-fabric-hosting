@@ -2,11 +2,15 @@
 using System.Fabric;
 using System.Fabric.Health;
 
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Mocks
 {
-    public class MockStatelessServicePartition : IStatelessServicePartition
+    public class MockStatefulServicePartition : IStatefulServicePartition
     {
         public ServicePartitionInformation PartitionInfo => null;
+
+        public PartitionAccessStatus ReadStatus => PartitionAccessStatus.Granted;
+
+        public PartitionAccessStatus WriteStatus => PartitionAccessStatus.Granted;
 
         public void ReportLoad(
             IEnumerable<LoadMetric> metrics)
@@ -34,12 +38,19 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
         {
         }
 
-        public void ReportInstanceHealth(
+        public FabricReplicator CreateReplicator(
+            IStateProvider stateProvider,
+            ReplicatorSettings replicatorSettings)
+        {
+            return null;
+        }
+
+        public void ReportReplicaHealth(
             HealthInformation healthInfo)
         {
         }
 
-        public void ReportInstanceHealth(
+        public void ReportReplicaHealth(
             HealthInformation healthInfo,
             HealthReportSendOptions sendOptions)
         {

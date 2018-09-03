@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Tools
 {
     public static class Injector
     {
@@ -17,6 +17,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
             object value,
             bool nonPublic)
         {
+            if (instance == null)
+            {
+                throw new ArgumentNullException(nameof(instance));
+            }
+
+            if (string.IsNullOrEmpty(property))
+            {
+                throw new ArgumentException("Value cannot be null or empty.", nameof(property));
+            }
+
             var flags = nonPublic
                 ? NONPUBLIC_INSTANCE
                 : PUBLIC_INSTANCE;

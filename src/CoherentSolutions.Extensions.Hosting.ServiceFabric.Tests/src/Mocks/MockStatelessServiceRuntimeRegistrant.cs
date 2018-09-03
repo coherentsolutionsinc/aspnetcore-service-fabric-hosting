@@ -7,9 +7,7 @@ using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
 
 using ServiceFabric.Mocks;
 
-using StatelessService = CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.StatelessService;
-
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Mocks
 {
     public class MockStatelessServiceRuntimeRegistrant : IStatelessServiceRuntimeRegistrant
     {
@@ -20,23 +18,22 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
             Func<StatelessServiceContext, StatelessService> serviceFactory,
             CancellationToken cancellationToken)
         {
-            this.serviceInstance = new MockStatelessServiceInstance(
-                serviceFactory,
-                MockStatelessServiceContextFactory.Create(
-                    MockCodePackageActivationContext.Default,
-                    serviceTypeName,
-                    new Uri(MockStatelessServiceContextFactory.ServiceName),
-                    Guid.Empty,
-                    default));
+            var context = MockStatelessServiceContextFactory.Create(
+                MockCodePackageActivationContext.Default,
+                serviceTypeName,
+                new Uri(MockStatelessServiceContextFactory.ServiceName),
+                Guid.Empty,
+                default);
 
-            return this.serviceInstance.CreateAsync();
+            this.serviceInstance = new MockStatelessServiceInstance(serviceFactory(context));
+            return this.serviceInstance.InitiateStartupSequenceAsync();
         }
 
         public Task UnregisterAsync(
             string serviceTypeName,
             CancellationToken cancellationToken)
         {
-            return this.serviceInstance.DestroyAsync();
+            return this.serviceInstance.InitiateShutdownSequenceAsync();
         }
     }
 }

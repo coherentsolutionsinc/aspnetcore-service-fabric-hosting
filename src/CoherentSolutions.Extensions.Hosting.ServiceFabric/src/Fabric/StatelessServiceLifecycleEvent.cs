@@ -5,14 +5,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
     [Flags]
     public enum StatelessServiceLifecycleEvent
     {
-        OnRunBeforeListenersOpened = 1,
+        OnStartup = 1,
 
-        OnRunAfterListenersOpened = 2,
+        OnRun = 2,
 
-        OnAbort = 4,
-
-        OnOpen = 8,
-
-        OnClose = 16
+        OnShutdown = 4
     }
 }

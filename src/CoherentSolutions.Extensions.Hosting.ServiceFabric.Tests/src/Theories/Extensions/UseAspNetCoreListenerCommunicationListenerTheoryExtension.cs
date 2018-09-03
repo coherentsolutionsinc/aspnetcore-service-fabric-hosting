@@ -1,4 +1,5 @@
 ﻿using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Mocks;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Extensions
 {

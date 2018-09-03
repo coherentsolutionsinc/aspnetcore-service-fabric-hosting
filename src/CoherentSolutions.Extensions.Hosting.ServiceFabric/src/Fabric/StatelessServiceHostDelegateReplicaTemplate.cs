@@ -22,7 +22,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             public StatelessDelegateParameters()
             {
-                this.Event = StatelessServiceLifecycleEvent.OnRunAfterListenersOpened;
+                this.Event = StatelessServiceLifecycleEvent.OnRun;
                 this.DelegateInvokerFunc = DefaultDelegateInvokerFunc;
             }
 

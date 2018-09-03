@@ -1,30 +1,25 @@
 ﻿using System;
 
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Mocks;
+
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ServiceFabric.Services.Remoting;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Extensions
 {
     public class UseRemotingListenerImplementationTheoryExtension : IUseRemotingListenerImplementationTheoryExtension
     {
-        private interface IImplementation : IService
-        {
-        }
-
-        private sealed class Implementation : IImplementation
-        {
-        }
-
         public Func<IServiceProvider, IService> Factory { get; private set; }
 
         public UseRemotingListenerImplementationTheoryExtension()
         {
-            this.Factory = Tools.GetRemotingImplementationFunc<Implementation>();
+            this.Factory = provider => new MockServiceRemotingListenerImplementation();
         }
 
         public UseRemotingListenerImplementationTheoryExtension Setup<T>()
             where T : IService
         {
-            this.Factory = Tools.GetRemotingImplementationFunc<T>();
+            this.Factory = provider => ActivatorUtilities.CreateInstance<T>(provider);
 
             return this;
         }

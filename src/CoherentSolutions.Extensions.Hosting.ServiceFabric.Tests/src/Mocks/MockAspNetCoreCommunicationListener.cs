@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Mocks
 {
     public class MockAspNetCoreCommunicationListener : AspNetCoreCommunicationListener
     {
@@ -18,11 +18,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
             : base(serviceContext, build)
         {
             this.build = build;
-        }
-
-        protected override string GetListenerUrl()
-        {
-            return String.Empty;
         }
 
         public override void Abort()
@@ -41,6 +36,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
             this.build(string.Empty, this);
 
             return Task.FromResult(String.Empty);
+        }
+
+        protected override string GetListenerUrl()
+        {
+            return String.Empty;
         }
     }
 }

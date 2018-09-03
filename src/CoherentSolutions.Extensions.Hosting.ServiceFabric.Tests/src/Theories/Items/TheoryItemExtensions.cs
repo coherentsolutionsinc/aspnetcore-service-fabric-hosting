@@ -1,6 +1,7 @@
 ﻿using System;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Mocks;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Extensions;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Items

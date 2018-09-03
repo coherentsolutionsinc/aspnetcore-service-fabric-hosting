@@ -14,7 +14,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
     {
         protected override IStatefulServiceDelegateInvocationContext CreateInvocationContext()
         {
-            return new StatefulServiceDelegateInvocationContext(StatefulServiceLifecycleEvent.OnAbort);
+            return new StatefulServiceDelegateInvocationContext(StatefulServiceLifecycleEvent.OnRun);
         }
 
         protected override ServiceHostDelegateInvoker<IStatefulServiceDelegateInvocationContext> CreateInvokerInstance(
@@ -29,7 +29,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
     {
         protected override IStatelessServiceDelegateInvocationContext CreateInvocationContext()
         {
-            return new StatelessServiceDelegateInvocationContext(StatelessServiceLifecycleEvent.OnAbort);
+            return new StatelessServiceDelegateInvocationContext(StatelessServiceLifecycleEvent.OnRun);
         }
 
         protected override ServiceHostDelegateInvoker<IStatelessServiceDelegateInvocationContext> CreateInvokerInstance(
