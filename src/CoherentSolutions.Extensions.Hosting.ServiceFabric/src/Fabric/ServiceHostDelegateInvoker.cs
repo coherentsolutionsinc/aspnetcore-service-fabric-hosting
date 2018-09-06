@@ -26,14 +26,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             this.@delegate = @delegate
              ?? throw new ArgumentNullException(nameof(@delegate));
 
-            this.services = services 
+            this.services = services
              ?? throw new ArgumentNullException(nameof(services));
-        }
-
-        protected virtual IEnumerable<(Type t, object o)> UnwrapInvocationContext(
-            TInvocationContext invocationContext)
-        {
-            return Enumerable.Empty<(Type t, object o)>();
         }
 
         public Task InvokeAsync(
@@ -100,6 +94,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
                 throw;
             }
+        }
+
+        protected virtual IEnumerable<(Type t, object o)> UnwrapInvocationContext(
+            TInvocationContext invocationContext)
+        {
+            return Enumerable.Empty<(Type t, object o)>();
         }
     }
 }

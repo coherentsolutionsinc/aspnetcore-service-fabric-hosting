@@ -2,7 +2,7 @@
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public class StatefulServiceDelegateInvocationContextOnDataLoss 
+    public class StatefulServiceDelegateInvocationContextOnDataLoss
         : StatefulServiceDelegateInvocationContext<IStatefulServiceEventPayloadOnDataLoss>,
           IStatefulServiceDelegateInvocationContextOnDataLoss
     {

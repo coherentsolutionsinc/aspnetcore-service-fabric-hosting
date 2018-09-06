@@ -2,9 +2,9 @@
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public class StatefulServiceDelegateInvocationContextOnChangeRole 
+    public class StatefulServiceDelegateInvocationContextOnChangeRole
         : StatefulServiceDelegateInvocationContext<IStatefulServiceEventPayloadOnChangeRole>,
-        IStatefulServiceDelegateInvocationContextOnChangeRole
+          IStatefulServiceDelegateInvocationContextOnChangeRole
     {
         public StatefulServiceDelegateInvocationContextOnChangeRole(
             IStatefulServiceEventPayloadOnChangeRole payload)

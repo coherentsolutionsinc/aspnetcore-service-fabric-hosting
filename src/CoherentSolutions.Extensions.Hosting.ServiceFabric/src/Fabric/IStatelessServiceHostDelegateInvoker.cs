@@ -1,6 +1,6 @@
 ﻿namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public interface IStatelessServiceHostDelegateInvoker 
+    public interface IStatelessServiceHostDelegateInvoker
         : IServiceHostDelegateInvoker<IStatelessServiceDelegateInvocationContext>
     {
     }

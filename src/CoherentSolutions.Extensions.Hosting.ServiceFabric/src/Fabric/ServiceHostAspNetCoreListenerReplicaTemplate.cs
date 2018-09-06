@@ -167,9 +167,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                 {
                                     config.AddProvider(
                                         new ServiceHostAspNetCoreListenerLoggerProvider(
-                                        listenerInformation, 
-                                        loggerOptions, 
-                                        serviceEventSource));
+                                            listenerInformation,
+                                            loggerOptions,
+                                            serviceEventSource));
                                 });
 
                             // Possible point of proxination

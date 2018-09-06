@@ -2,7 +2,7 @@
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public class StatelessServiceDelegateInvocationContextOnShutdown 
+    public class StatelessServiceDelegateInvocationContextOnShutdown
         : StatelessServiceDelegateInvocationContext<IStatelessServiceEventPayloadOnShutdown>,
           IStatelessServiceDelegateInvocationContextOnShutdown
     {
