@@ -1,6 +1,6 @@
 ﻿namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public interface IStatelessServiceEventPayloadShutdown
+    public interface IStatefulServiceEventPayloadOnShutdown
     {
         bool IsAborting { get; }
     }

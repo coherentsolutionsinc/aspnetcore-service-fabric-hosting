@@ -45,12 +45,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             if (disposing)
             {
-                this.disposed = true;
-
-                Thread.MemoryBarrier();
-
                 this.loggers.Clear();
             }
+
+            this.disposed = true;
         }
     }
 }

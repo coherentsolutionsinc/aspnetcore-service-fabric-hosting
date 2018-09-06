@@ -149,11 +149,30 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                     builder.ConfigureServices(
                         services =>
                         {
+                            // We need register all level dependencies first in order to make
+                            // sure that no level dependencies will be ignore during proxination
                             services.Add(serviceContext);
                             services.Add(servicePartition);
                             services.Add(serviceEventSource);
                             services.Add(listenerInformation);
 
+                            var loggerOptions = parameters.LoggerOptionsFunc();
+                            if (loggerOptions == null)
+                            {
+                                throw new FactoryProducesNullInstanceException<IServiceHostLoggerOptions>();
+                            }
+
+                            services.AddLogging(
+                                config =>
+                                {
+                                    config.AddProvider(
+                                        new ServiceHostAspNetCoreListenerLoggerProvider(
+                                        listenerInformation, 
+                                        loggerOptions, 
+                                        serviceEventSource));
+                                });
+
+                            // Possible point of proxination
                             parameters.DependenciesConfigAction?.Invoke(services);
 
                             var descriptor = services.FirstOrDefault(s => s.ServiceType == typeof(IStartup));
@@ -194,18 +213,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
                                 services.Replace(replacement);
                             }
-                        });
-
-                    var loggerOptions = parameters.LoggerOptionsFunc();
-                    if (loggerOptions == null)
-                    {
-                        throw new FactoryProducesNullInstanceException<IServiceHostLoggerOptions>();
-                    }
-
-                    builder.ConfigureLogging(
-                        config =>
-                        {
-                            config.AddProvider(new ServiceHostAspNetCoreListenerLoggerProvider(listenerInformation, loggerOptions, serviceEventSource));
                         });
 
                     return builder.Build();

@@ -30,6 +30,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
              ?? throw new ArgumentNullException(nameof(services));
         }
 
+        protected virtual IEnumerable<(Type t, object o)> UnwrapInvocationContext(
+            TInvocationContext invocationContext)
+        {
+            return Enumerable.Empty<(Type t, object o)>();
+        }
+
         public Task InvokeAsync(
             TInvocationContext invocationContext,
             CancellationToken cancellationToken)
@@ -39,19 +45,32 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 throw new ArgumentNullException(nameof(invocationContext));
             }
 
-            var argumentsProvider = new ReplaceAwareServiceProvider(
-                new Dictionary<Type, object>
-                {
-                    [typeof(TInvocationContext)] = invocationContext,
-                    [typeof(CancellationToken)] = cancellationToken
-                },
-                this.services);
+            // Giving custom invokers a chance to register context payload as first class injections
+            var replacements = new Dictionary<Type, object>
+            {
+                [typeof(TInvocationContext)] = invocationContext,
+                [typeof(CancellationToken)] = cancellationToken
+            };
 
+            foreach (var tuple in this.UnwrapInvocationContext(invocationContext))
+            {
+                replacements[tuple.t] = tuple.o;
+            }
+
+            var argumentsProvider = new ReplaceAwareServiceProvider(replacements, this.services);
 
             // This is required to support closures (for example generated using Linq.Expression) not delegates.
-            var parameters = this.@delegate.GetType().DeclaringType == null
-                ? this.@delegate.GetMethodInfo().GetParameters().Skip(1)
-                : this.@delegate.GetMethodInfo().GetParameters();
+
+            var method = this.@delegate.GetMethodInfo();
+            var parameters = method.GetParameters();
+
+            if (method.IsStatic)
+            {
+                if (this.@delegate.Target != null)
+                {
+                    parameters = parameters.Skip(1).ToArray();
+                }
+            }
 
             var arguments = parameters
                .Select(

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
@@ -11,6 +12,19 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             IServiceProvider services)
             : base(@delegate, services)
         {
+        }
+
+        protected override IEnumerable<(Type t, object o)> UnwrapInvocationContext(
+            IStatelessServiceDelegateInvocationContext invocationContext)
+        {
+            switch (invocationContext)
+            {
+                case StatelessServiceDelegateInvocationContext<IStatelessServiceEventPayloadOnShutdown> ctx:
+                    {
+                        yield return (typeof(IStatelessServiceEventPayloadOnShutdown), ctx.Payload);
+                    }
+                    break;
+            }
         }
     }
 }

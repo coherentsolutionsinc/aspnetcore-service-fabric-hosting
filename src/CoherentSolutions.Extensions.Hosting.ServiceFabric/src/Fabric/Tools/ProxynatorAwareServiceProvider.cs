@@ -21,26 +21,26 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
             switch (services)
             {
                 case IList list:
-                    return GetServices(list);
+                    return UnwrapProxies(list);
                 case IEnumerable enumerable:
-                    return GetServices(enumerable);
+                    return UnwrapProxies(enumerable);
                 default:
-                    return GetService(services);
+                    return UnwrapProxy(services);
             }
         }
 
-        private static IEnumerable GetServices(
+        private static IEnumerable UnwrapProxies(
             IList list)
         {
             for (var i = 0; i < list.Count; ++i)
             {
-                list[i] = GetService(list[i]);
+                list[i] = UnwrapProxy(list[i]);
             }
 
             return list;
         }
 
-        private static IEnumerable GetServices(
+        private static IEnumerable UnwrapProxies(
             IEnumerable enumerable)
         {
             var type = enumerable.GetType().GetGenericArguments()[0];
@@ -48,13 +48,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
             var list = (IList) Activator.CreateInstance(typeof(List<>).MakeGenericType(type), 1);
             foreach (var item in enumerable)
             {
-                list.Add(GetService(item));
+                list.Add(UnwrapProxy(item));
             }
 
             return list;
         }
 
-        private static object GetService(
+        private static object UnwrapProxy(
             object service)
         {
             if (service is IProxynatorProxy proxy)

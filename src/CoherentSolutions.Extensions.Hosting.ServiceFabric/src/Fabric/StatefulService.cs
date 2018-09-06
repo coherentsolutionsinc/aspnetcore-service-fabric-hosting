@@ -18,42 +18,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
     {
         private class ServiceEvents
         {
-            private readonly SemaphoreSlim whenInitialized;
-
-            private readonly SemaphoreSlim whenRoleChanged;
-
-            public ServiceEvents()
-            {
-                this.whenInitialized = new SemaphoreSlim(0, 1);
-                this.whenRoleChanged = new SemaphoreSlim(0, 1);
-            }
-
             public event EventHandler<NotifyAsyncEventArgs> OnStartup;
 
-            public event EventHandler<NotifyAsyncEventArgs> OnChangeRole;
+            public event EventHandler<NotifyAsyncEventArgs<IStatefulServiceEventPayloadOnChangeRole>> OnChangeRole;
 
             public event EventHandler<NotifyAsyncEventArgs> OnRun;
 
-            public event EventHandler<NotifyAsyncEventArgs> OnDataLoss;
+            public event EventHandler<NotifyAsyncEventArgs<IStatefulServiceEventPayloadOnShutdown>> OnShutdown;
+
+            public event EventHandler<NotifyAsyncEventArgs<IStatefulServiceEventPayloadOnDataLoss>> OnDataLoss;
 
             public event EventHandler<NotifyAsyncEventArgs> OnRestoreCompleted;
-
-            public event EventHandler<NotifyAsyncEventArgs<IStatefulServiceEventPayloadShutdown>> OnShutdown;
-
-            public ListenerEvents CreateListenerEvents()
-            {
-                return new ListenerEvents(this.whenInitialized);
-            }
-
-            public async Task SynchronizeWhenInitializedAsync()
-            {
-                await this.whenInitialized.WaitAsync();
-            }
-
-            public async Task SynchronizeWhenRoleChangedAsync()
-            {
-                await this.whenRoleChanged.WaitAsync();
-            }
 
             public Task NotifyStartupAsync(
                 CancellationToken cancellationToken)
@@ -62,9 +37,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             }
 
             public Task NotifyChangeRoleAsync(
+                IStatefulServiceEventPayloadOnChangeRole payload,
                 CancellationToken cancellationToken)
             {
-                return this.OnChangeRole.NotifyAsync(this, cancellationToken);
+                return this.OnChangeRole.NotifyAsync(this, payload, cancellationToken);
             }
 
             public Task NotifyRunAsync(
@@ -74,133 +50,23 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             }
 
             public Task NotifyShutdownAsync(
-                IStatefulServiceEventPayloadShutdown payload,
+                IStatefulServiceEventPayloadOnShutdown payload,
                 CancellationToken cancellationToken)
             {
                 return this.OnShutdown.NotifyAsync(this, payload, cancellationToken);
             }
 
             public Task NotifyDataLossAsync(
+                IStatefulServiceEventPayloadOnDataLoss payload,
                 CancellationToken cancellationToken)
             {
-                return this.OnDataLoss.NotifyAsync(this, cancellationToken);
+                return this.OnDataLoss.NotifyAsync(this, payload, cancellationToken);
             }
 
             public Task NotifyRestoreCompletedAsync(
                 CancellationToken cancellationToken)
             {
                 return this.OnRestoreCompleted.NotifyAsync(this, cancellationToken);
-            }
-
-            public void SignalInitialized()
-            {
-                this.whenInitialized.Release();
-            }
-
-            public void SignalRoleChanged()
-            {
-                this.whenRoleChanged.Release();
-            }
-        }
-
-        private class ListenerEvents
-        {
-            private readonly SemaphoreSlim whenServiceInitialized;
-
-            public ListenerEvents(
-                SemaphoreSlim whenServiceInitialized)
-            {
-                this.whenServiceInitialized = whenServiceInitialized
-                 ?? throw new ArgumentNullException(nameof(whenServiceInitialized));
-            }
-
-            public event EventHandler<NotifyAsyncEventArgs> Opened;
-
-            public event EventHandler<NotifyAsyncEventArgs> Closed;
-
-            public event EventHandler<NotifyAsyncEventArgs> Aborted;
-
-            public async Task SynchronizeWhenServiceInitializedAsync()
-            {
-                await this.whenServiceInitialized.WaitAsync();
-
-                this.whenServiceInitialized.Release();
-            }
-
-            public async Task NotifyOpenedAsync(
-                CancellationToken cancellationToken)
-            {
-                await this.Opened.NotifyAsync(this, cancellationToken);
-            }
-
-            public async Task NotifyClosedAsync(
-                CancellationToken cancellationToken)
-            {
-                await this.Closed.NotifyAsync(this, cancellationToken);
-            }
-
-            public void NotifyAborted(
-                CancellationToken cancellationToken)
-            {
-                this.Aborted.NotifyAsync(this, cancellationToken).GetAwaiter().GetResult();
-            }
-        }
-
-        private class ListenerEventsDecorator : ICommunicationListener
-        {
-            private readonly ListenerEvents events;
-
-            private readonly ICommunicationListener successor;
-
-            public ListenerEventsDecorator(
-                ListenerEvents events,
-                ICommunicationListener successor)
-            {
-                this.events = events
-                 ?? throw new ArgumentNullException(nameof(events));
-
-                this.successor = successor
-                 ?? throw new ArgumentNullException(nameof(successor));
-            }
-
-            public async Task<string> OpenAsync(
-                CancellationToken cancellationToken)
-            {
-                try
-                {
-                    await this.events.SynchronizeWhenServiceInitializedAsync();
-
-                    return await this.successor.OpenAsync(cancellationToken);
-                }
-                finally
-                {
-                    await this.events.NotifyOpenedAsync(cancellationToken);
-                }
-            }
-
-            public async Task CloseAsync(
-                CancellationToken cancellationToken)
-            {
-                try
-                {
-                    await this.successor.CloseAsync(cancellationToken);
-                }
-                finally
-                {
-                    await this.events.NotifyClosedAsync(cancellationToken);
-                }
-            }
-
-            public void Abort()
-            {
-                try
-                {
-                    this.successor.Abort();
-                }
-                finally
-                {
-                    this.events.NotifyAborted(CancellationToken.None);
-                }
             }
         }
 
@@ -240,15 +106,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             if (serviceListenerReplicators != null)
             {
                 this.serviceListeners = serviceListenerReplicators
-                   .Select(
-                        replicator =>
-                        {
-                            var events = this.serviceEvents.CreateListenerEvents();
-                            var replicaListener = replicator.ReplicateFor(this);
-                            return new ServiceReplicaListener(
-                                context => new ListenerEventsDecorator(events, replicaListener.CreateCommunicationListener(context)),
-                                replicaListener.Name);
-                        })
+                   .Select(replicator => replicator.ReplicateFor(this))
                    .ToList();
             }
 
@@ -258,8 +116,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 try
                 {
-                    this.eventSource.Information<ServiceEventSourceData>(-1,"OnStartup","StatefulEvents","OnStartup", new ServiceEventSourceData());
-
                     var context = new StatefulServiceDelegateInvocationContext(StatefulServiceLifecycleEvent.OnStartup);
 
                     await this.InvokeDelegates(context, args.CancellationToken);
@@ -277,8 +133,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 try
                 {
-                    this.eventSource.Information<ServiceEventSourceData>(-1,"OnRun","StatefulEvents","OnRun", new ServiceEventSourceData());
-
                     var context = new StatefulServiceDelegateInvocationContext(StatefulServiceLifecycleEvent.OnRun);
 
                     await this.InvokeDelegates(context, args.CancellationToken);
@@ -296,9 +150,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 try
                 {
-                    this.eventSource.Information<ServiceEventSourceData>(-1,"OnChangeRole","StatefulEvents","OnChangeRole", new ServiceEventSourceData());
-
-                    var context = new StatefulServiceDelegateInvocationContext(StatefulServiceLifecycleEvent.OnChangeRole);
+                    var context = new StatefulServiceDelegateInvocationContextOnChangeRole(args.Payload);
 
                     await this.InvokeDelegates(context, args.CancellationToken);
 
@@ -315,9 +167,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 try
                 {
-                    this.eventSource.Information<ServiceEventSourceData>(-1,"OnShutdown","StatefulEvents","OnShutdown", new ServiceEventSourceData());
-
-                    var context = new StatefulServiceDelegateInvocationContext(StatefulServiceLifecycleEvent.OnShutdown);
+                    var context = new StatefulServiceDelegateInvocationContextOnShutdown(args.Payload);
 
                     await this.InvokeDelegates(context, args.CancellationToken);
 
@@ -334,9 +184,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 try
                 {
-                    this.eventSource.Information<ServiceEventSourceData>(-1,"OnDataLoss","StatefulEvents","OnDataLoss", new ServiceEventSourceData());
-
-                    var context = new StatefulServiceDelegateInvocationContext(StatefulServiceLifecycleEvent.OnDataLoss);
+                    var context = new StatefulServiceDelegateInvocationContextOnDataLoss(args.Payload);
 
                     await this.InvokeDelegates(context, args.CancellationToken);
 
@@ -353,8 +201,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 try
                 {
-                    this.eventSource.Information<ServiceEventSourceData>(-1,"OnRestoreCompleted","StatefulEvents","OnRestoreCompleted", new ServiceEventSourceData());
-
                     var context = new StatefulServiceDelegateInvocationContext(StatefulServiceLifecycleEvent.OnRestoreCompleted);
 
                     await this.InvokeDelegates(context, args.CancellationToken);
@@ -373,46 +219,39 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             return this.GetServiceListeners();
         }
 
+        protected override async Task OnOpenAsync(
+            ReplicaOpenMode openMode,
+            CancellationToken cancellationToken)
+        {
+            await this.serviceEvents.NotifyStartupAsync(cancellationToken);
+        }
+
         protected override async Task OnChangeRoleAsync(
             ReplicaRole newRole,
             CancellationToken cancellationToken)
         {
-            if (newRole == ReplicaRole.Primary)
-            {
-                await this.serviceEvents.SynchronizeWhenInitializedAsync();
-            }
+            var payload = new StatefulServiceEventPayloadOnChangeRole(newRole);
 
-            await this.serviceEvents.NotifyChangeRoleAsync(cancellationToken);
-
-            if (newRole == ReplicaRole.Primary)
-            {
-                this.serviceEvents.SignalRoleChanged();
-            }
+            await this.serviceEvents.NotifyChangeRoleAsync(payload, cancellationToken);
         }
 
         protected override async Task RunAsync(
             CancellationToken cancellationToken)
         {
-            await this.serviceEvents.NotifyStartupAsync(cancellationToken);
-
-            this.serviceEvents.SignalInitialized();
-
-            await this.serviceEvents.SynchronizeWhenRoleChangedAsync();
-
             await this.serviceEvents.NotifyRunAsync(cancellationToken);
         }
 
         protected override async Task OnCloseAsync(
             CancellationToken cancellationToken)
         {
-            var payload = new StatefulServiceEventPayloadShutdown(false);
+            var payload = new StatefulServiceEventPayloadOnShutdown(false);
 
             await this.serviceEvents.NotifyShutdownAsync(payload, cancellationToken);
         }
 
         protected override void OnAbort()
         {
-            var payload = new StatefulServiceEventPayloadShutdown(false);
+            var payload = new StatefulServiceEventPayloadOnShutdown(false);
 
             this.serviceEvents.NotifyShutdownAsync(payload, default).GetAwaiter().GetResult();
         }
@@ -421,9 +260,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             RestoreContext restoreCtx,
             CancellationToken cancellationToken)
         {
-            await this.serviceEvents.NotifyDataLossAsync(cancellationToken);
+            var ctx = new StatefulServiceRestoreContext(restoreCtx);
+            var payload = new StatefulServiceEventPayloadOnDataLoss(ctx);
 
-            return false;
+            await this.serviceEvents.NotifyDataLossAsync(payload, cancellationToken);
+
+            return ctx.IsRestored;
         }
 
         protected override async Task OnRestoreCompletedAsync(

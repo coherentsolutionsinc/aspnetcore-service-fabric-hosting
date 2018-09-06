@@ -161,7 +161,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             mockDelegateListenerOpen.Verify();
             mockDelegateListenerClose.Verify();
 
-            Assert.Equal(13, actualCallStack.Count);
+            Assert.Equal(12, actualCallStack.Count);
 
             // startup
             Assert.Equal("service.Startup", actualCallStack.TryDequeue(out var result) ? result : null);
@@ -177,8 +177,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             Assert.Equal("service.ChangeRole", actualCallStack.TryDequeue(out result) ? result : null);
 
             // promote
-            Assert.Equal("service.Startup", actualCallStack.TryDequeue(out result) ? result : null);
-
             Assert.Equal("listener.Open", actualCallStack.TryDequeue(out result) ? result : null);
 
             Assert.Equal("service.ChangeRole", actualCallStack.TryDequeue(out result) ? result : null);

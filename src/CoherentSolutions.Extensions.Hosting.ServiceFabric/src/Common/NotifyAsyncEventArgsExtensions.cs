@@ -16,19 +16,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Common
                 return Task.CompletedTask;
             }
 
-            var methods = @this.GetInvocationList();
-            if (methods.Length == 0)
-            {
-                return Task.CompletedTask;
-            }
-
             return InvokeAsync(
+                @this,
                 args =>
                 {
-                    foreach (var method in methods)
-                    {
-                        method.DynamicInvoke(args.sender, new NotifyAsyncEventArgs(args.cancellationToken, args.completion, args.failure));
-                    }
+                    args.method.DynamicInvoke(
+                        args.sender,
+                        new NotifyAsyncEventArgs(
+                            args.cancellationToken,
+                            args.completion,
+                            args.failure));
                 },
                 sender,
                 cancellationToken);
@@ -45,51 +42,111 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Common
                 return Task.CompletedTask;
             }
 
-            var methods = @this.GetInvocationList();
-            if (methods.Length == 0)
-            {
-                return Task.CompletedTask;
-            }
-
             return InvokeAsync(
+                @this,
                 args =>
                 {
-                    foreach (var method in methods)
-                    {
-                        method.DynamicInvoke(args.sender, new NotifyAsyncEventArgs<TPayload>(payload, args.cancellationToken, args.completion, args.failure));
-                    }
+                    args.method.DynamicInvoke(
+                        args.sender,
+                        new NotifyAsyncEventArgs<TPayload>(
+                            payload,
+                            args.cancellationToken,
+                            args.completion,
+                            args.failure));
                 },
                 sender,
                 cancellationToken);
         }
 
         private static async Task InvokeAsync(
-            Action<(object sender, CancellationToken cancellationToken, Action completion, Action<Exception> failure)> action,
+            Delegate @delegate,
+            Action<(Delegate method, object sender, CancellationToken cancellationToken, Action completion, Action<Exception> failure)> action,
             object source,
             CancellationToken cancellationToken)
         {
             var tcs = new TaskCompletionSource<bool>();
+            var methods = @delegate.GetInvocationList();
 
-            action(
-                (
-                    source,
-                    cancellationToken,
-                    () =>
-                    {
-                        tcs.SetResult(true);
-                    },
-                    exception =>
-                    {
-                        if (exception is OperationCanceledException)
+            var remaining = methods.Length;
+
+            Exception invocationException = null;
+            foreach (var method in methods)
+            {
+                var sync = new object();
+
+                var invoked = false;
+                action(
+                    (
+                        method,
+                        source,
+                        cancellationToken,
+                        () =>
                         {
-                            tcs.SetCanceled();
-                        }
-                        else
+                            if (invoked)
+                            {
+                                return;
+                            }
+
+                            lock (sync)
+                            {
+                                if (invoked)
+                                {
+                                    return;
+                                }
+
+                                invoked = true;
+                            }
+
+                            if (Interlocked.Decrement(ref remaining) == 0)
+                            {
+                                switch (invocationException)
+                                {
+                                    case null:
+                                        tcs.SetResult(true);
+                                        break;
+                                    case OperationCanceledException _:
+                                        tcs.SetCanceled();
+                                        break;
+                                    default:
+                                        tcs.SetException(invocationException);
+                                        break;
+                                }
+                            }
+                        },
+                        exception =>
                         {
-                            tcs.SetException(exception);
+                            if (invoked)
+                            {
+                                return;
+                            }
+
+                            lock (sync)
+                            {
+                                if (invoked)
+                                {
+                                    return;
+                                }
+
+                                invocationException = exception;
+                                invoked = true;
+                            }
+
+                            if (Interlocked.Decrement(ref remaining) != 0)
+                            {
+                                return;
+                            }
+
+                            if (exception is OperationCanceledException)
+                            {
+                                tcs.SetCanceled();
+                            }
+                            else
+                            {
+                                tcs.SetException(exception);
+                            }
                         }
-                    }
-                ));
+                    ));
+            }
 
             await tcs.Task;
         }

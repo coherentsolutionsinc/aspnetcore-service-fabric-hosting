@@ -11,4 +11,17 @@
             this.Event = @event;
         }
     }
+
+    public class StatelessServiceDelegateInvocationContext<TPayload> : StatelessServiceDelegateInvocationContext
+    {
+        public TPayload Payload { get; }
+
+        public StatelessServiceDelegateInvocationContext(
+            StatelessServiceLifecycleEvent @event,
+            TPayload payload)
+            : base(@event)
+        {
+            this.Payload = payload;
+        }
+    }
 }

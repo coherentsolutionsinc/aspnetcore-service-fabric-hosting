@@ -7,9 +7,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
     {
         OnStartup = 1,
 
-        OnRun = 2,
+        OnChangeRole = 2,
 
-        OnChangeRole = 4,
+        OnRun = 4,
 
         OnShutdown = 8,
 

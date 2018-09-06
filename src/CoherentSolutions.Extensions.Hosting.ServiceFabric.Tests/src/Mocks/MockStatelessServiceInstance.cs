@@ -22,27 +22,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Mocks
 
         public async Task InitiateStartupSequenceAsync()
         {
-            var openListenersTask = Task.Run(
-                async () =>
-                {
-                    var communicationListeners = this.serviceInstance
-                       .InvokeCreateServiceInstanceListeners()
-                       .Select(l => l.CreateCommunicationListener(this.serviceInstance.Context))
-                       .ToArray();
+            var communicationListeners = this.serviceInstance
+               .InvokeCreateServiceInstanceListeners()
+               .Select(l => l.CreateCommunicationListener(this.serviceInstance.Context))
+               .ToArray();
 
-                    var communicationListenersOpenTasks = new Task[communicationListeners.Length];
-                    for (var i = 0; i < communicationListeners.Length; ++i)
-                    {
-                        communicationListenersOpenTasks[i] = communicationListeners[i].OpenAsync(default);
-                    }
-
-                    await Task.WhenAll(communicationListenersOpenTasks);
-                });
+            for (var i = 0; i < communicationListeners.Length; ++i)
+            {
+                await communicationListeners[i].OpenAsync(default);
+            }
 
             var runAsyncTask = this.serviceInstance.InvokeRunAsync();
-
-            await openListenersTask;
-
             var openAsyncTask = this.serviceInstance.InvokeOnOpenAsync();
 
             await Task.WhenAll(openAsyncTask, runAsyncTask);
@@ -50,24 +40,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Mocks
 
         public async Task InitiateShutdownSequenceAsync()
         {
-            var closeListenersTask = Task.Run(
-                async () =>
-                {
-                    var communicationListeners = this.serviceInstance
-                       .InvokeCreateServiceInstanceListeners()
-                       .Select(l => l.CreateCommunicationListener(this.serviceInstance.Context))
-                       .ToArray();
+            var communicationListeners = this.serviceInstance
+               .InvokeCreateServiceInstanceListeners()
+               .Select(l => l.CreateCommunicationListener(this.serviceInstance.Context))
+               .ToArray();
 
-                    var communicationListenersCloseTasks = new Task[communicationListeners.Length];
-                    for (var i = 0; i < communicationListeners.Length; ++i)
-                    {
-                        communicationListenersCloseTasks[i] = communicationListeners[i].CloseAsync(default);
-                    }
-
-                    await Task.WhenAll(communicationListenersCloseTasks);
-                });
-
-            await closeListenersTask;
+            for (var i = 0; i < communicationListeners.Length; ++i)
+            {
+                await communicationListeners[i].CloseAsync(default);
+            }
 
             await this.serviceInstance.InvokeOnCloseAsync();
         }

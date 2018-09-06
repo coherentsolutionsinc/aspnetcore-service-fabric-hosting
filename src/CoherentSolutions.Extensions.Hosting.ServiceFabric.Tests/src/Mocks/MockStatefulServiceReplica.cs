@@ -48,52 +48,32 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Mocks
 
         private async Task PromoteSequenceAsync()
         {
-            var openListenersTask = Task.Run(
-                async () =>
-                {
-                    var communicationListeners = this.serviceReplica
-                       .InvokeCreateServiceReplicaListeners()
-                       .Select(l => l.CreateCommunicationListener(this.serviceReplica.Context))
-                       .ToArray();
+            var communicationListeners = this.serviceReplica
+               .InvokeCreateServiceReplicaListeners()
+               .Select(l => l.CreateCommunicationListener(this.serviceReplica.Context))
+               .ToArray();
 
-                    var communicationListenersOpenTasks = new Task[communicationListeners.Length];
-                    for (var i = 0; i < communicationListeners.Length; ++i)
-                    {
-                        communicationListenersOpenTasks[i] = communicationListeners[i].OpenAsync(default);
-                    }
-
-                    await Task.WhenAll(communicationListenersOpenTasks);
-                });
-
-            var runAsyncTask = this.serviceReplica.InvokeRunAsync();
-
-            await openListenersTask;
+            for (var i = 0; i < communicationListeners.Length; ++i)
+            {
+                await communicationListeners[i].OpenAsync(default);
+            }
 
             await this.serviceReplica.InvokeOnChangeRoleAsync(ReplicaRole.Primary);
-
-            await runAsyncTask;
+            
+            await this.serviceReplica.InvokeRunAsync();
         }
 
         private async Task DemoteSequenceAsync()
         {
-            var closeListenersTask = Task.Run(
-                async () =>
-                {
-                    var communicationListeners = this.serviceReplica
-                       .InvokeCreateServiceReplicaListeners()
-                       .Select(l => l.CreateCommunicationListener(this.serviceReplica.Context))
-                       .ToArray();
+            var communicationListeners = this.serviceReplica
+               .InvokeCreateServiceReplicaListeners()
+               .Select(l => l.CreateCommunicationListener(this.serviceReplica.Context))
+               .ToArray();
 
-                    var communicationListenersCloseTasks = new Task[communicationListeners.Length];
-                    for (var i = 0; i < communicationListeners.Length; ++i)
-                    {
-                        communicationListenersCloseTasks[i] = communicationListeners[i].CloseAsync(default);
-                    }
-
-                    await Task.WhenAll(communicationListenersCloseTasks);
-                });
-
-            await closeListenersTask;
+            for (var i = 0; i < communicationListeners.Length; ++i)
+            {
+                await communicationListeners[i].CloseAsync(default);
+            }
 
             await this.serviceReplica.InvokeOnChangeRoleAsync(ReplicaRole.ActiveSecondary);
         }

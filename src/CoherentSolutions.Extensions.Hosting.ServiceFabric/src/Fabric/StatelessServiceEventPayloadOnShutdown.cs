@@ -1,10 +1,10 @@
 ﻿namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public class StatelessServiceEventPayloadShutdown : IStatelessServiceEventPayloadShutdown
+    public class StatelessServiceEventPayloadOnShutdown : IStatelessServiceEventPayloadOnShutdown
     {
         public bool IsAborting { get; }
 
-        public StatelessServiceEventPayloadShutdown(
+        public StatelessServiceEventPayloadOnShutdown(
             bool isAborting)
         {
             this.IsAborting = isAborting;
