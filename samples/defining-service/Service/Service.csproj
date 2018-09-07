@@ -10,15 +10,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CoherentSolutions.Extensions.Hosting.ServiceFabric" Version="1.1.0" />
+    <PackageReference Include="CoherentSolutions.Extensions.Hosting.ServiceFabric" Version="1.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.8" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.1.1" />
-    <PackageReference Include="Microsoft.ServiceFabric" Version="6.2.283" />
-    <PackageReference Include="Microsoft.ServiceFabric.AspNetCore.HttpSys" Version="3.1.283" />
-    <PackageReference Include="Microsoft.ServiceFabric.AspNetCore.Kestrel" Version="3.1.283" />
-    <PackageReference Include="Microsoft.ServiceFabric.Data" Version="3.1.283" />
-    <PackageReference Include="Microsoft.ServiceFabric.Services" Version="3.1.283" />
-    <PackageReference Include="Microsoft.ServiceFabric.Services.Remoting" Version="3.1.283" />
+    <PackageReference Include="Microsoft.ServiceFabric" Version="6.3.176" />
+    <PackageReference Include="Microsoft.ServiceFabric.AspNetCore.Abstractions" Version="3.2.176" />
+    <PackageReference Include="Microsoft.ServiceFabric.AspNetCore.HttpSys" Version="3.2.176" />
+    <PackageReference Include="Microsoft.ServiceFabric.AspNetCore.Kestrel" Version="3.2.176" />
+    <PackageReference Include="Microsoft.ServiceFabric.Data" Version="3.2.176" />
+    <PackageReference Include="Microsoft.ServiceFabric.Diagnostics.Internal" Version="3.2.176" />
+    <PackageReference Include="Microsoft.ServiceFabric.Services" Version="3.2.176" />
+    <PackageReference Include="Microsoft.ServiceFabric.Services.Remoting" Version="3.2.176" />
   </ItemGroup>
 
   <ItemGroup>

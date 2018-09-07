@@ -29,5 +29,5 @@ For more information please check this [wiki article][1] and explore source code
 
 If you have a suggestion or found an issue please consider [reporting it][2].
 
-[1]: https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Services#defining-multiple-services
+[1]: https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Services
 [2]: https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/issues

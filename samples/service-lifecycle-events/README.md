@@ -1,6 +1,6 @@
-# Defining Services
+# Services Lifecycle Events
 
-This sample demonstrates how to configure a simple stateful service with one **aspnetcore** listener by using `HostBuilder` and **CoherentSolutions.Extensions.Hosting.ServiceFabric**.
+This sample demonstrates how to configure **delegates** to react on service events for both **stateful service** and **stateless service**.
 
 ## What is inside?
 
@@ -9,19 +9,15 @@ There are two projects inside:
 * **App** - this is a application project
 * **Service** - this is a service project
 
-The application is configured to have stateful service without partitioning with one replica. 
+The application is configured to have one **stateful service** and one **stateless service** both configured to use singleton partitioning and have one replica / instance. 
 
-The service is configured to have one **aspnetcore** listener bound to SF endpoint - `ServiceEndpoint`. 
+Both services have **delegates** configured on each service event. Each **delegate** writes an event to ETW pipeline when service event occurs.
 
 ## How to use?
 
-When application is deployed on the cluster navigate to `ServiceEndpoint` appending `/api/value` at the end.
+Open **Diagnostics Windows** in Visual Studio or use other ETW friendly tool and register two additional ETW providers: `AppType.StatelessServiceType` and `AppType.StatefulServiceType`.
 
-The result output should be:
-
-Service Endpoint |
---- | ---
-Value from ApiController |
+When application is deployed to cluster you should start seeing services events.
 
 ## Conclusion
 
@@ -29,5 +25,5 @@ For more information please check this [wiki article][1] and explore source code
 
 If you have a suggestion or found an issue please consider [reporting it][2].
 
-[1]: https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Services#defining-single-service
+[1]: https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Delegates
 [2]: https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/issues

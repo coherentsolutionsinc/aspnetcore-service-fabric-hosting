@@ -6,12 +6,12 @@
   </ServiceManifestImport>
   <DefaultServices>
     <Service Name="StatefulService" ServicePackageActivationMode="ExclusiveProcess">
-      <StatefulService ServiceTypeName="StatefulServiceType" TargetReplicaSetSize="5" MinReplicaSetSize="5">
+      <StatefulService ServiceTypeName="StatefulServiceType">
         <SingletonPartition />
       </StatefulService>
     </Service>
     <Service Name="StatelessService" ServicePackageActivationMode="ExclusiveProcess">
-      <StatelessService ServiceTypeName="StatelessServiceType" InstanceCount="-1">
+      <StatelessService ServiceTypeName="StatelessServiceType">
         <SingletonPartition />
       </StatelessService>
     </Service>

@@ -17,11 +17,7 @@ The service is configured to have one **aspnetcore** listener bound to SF endpoi
 
 When application is deployed on the cluster navigate to `ServiceEndpoint` appending `/api/value` at the end.
 
-The result output should be:
-
-Service Endpoint |
---- | ---
-Value from ApiController |
+The result output should be: `Value from ApiController`
 
 ## Conclusion
 
@@ -29,5 +25,5 @@ For more information please check this [wiki article][1] and explore source code
 
 If you have a suggestion or found an issue please consider [reporting it][2].
 
-[1]: https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Services#defining-single-service
+[1]: https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Services
 [2]: https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/issues

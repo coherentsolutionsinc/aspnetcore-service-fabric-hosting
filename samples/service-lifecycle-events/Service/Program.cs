@@ -29,7 +29,9 @@ namespace Service
                                        .UseDelegate(
                                             (StatefulServiceContext svcCtx, ILogger<object> logger) =>
                                             {
-                                                logger.LogInformation($"The replica {svcCtx.ReplicaId} is starting up.");
+                                                logger.LogInformation(
+                                                    new EventId(0, "Stateful.OnStartup"),
+                                                    $"The replica {svcCtx.ReplicaId} is starting up.");
                                             });
                                 })
                            .DefineDelegate(
@@ -41,7 +43,9 @@ namespace Service
                                        .UseDelegate(
                                             (StatefulServiceContext svcCtx, IStatefulServiceEventPayloadOnChangeRole payload, ILogger<object> logger) =>
                                             {
-                                                logger.LogInformation($"The replica {svcCtx.ReplicaId} is changing role: {payload.NewRole}.");
+                                                logger.LogInformation(
+                                                    new EventId(0, "Stateful.OnChangeRole"),
+                                                    $"The replica {svcCtx.ReplicaId} is changing role: {payload.NewRole}.");
                                             });
                                 })
                            .DefineDelegate(
@@ -53,7 +57,9 @@ namespace Service
                                        .UseDelegate(
                                             (StatefulServiceContext svcCtx, ILogger<object> logger) =>
                                             {
-                                                logger.LogInformation($"The replica {svcCtx.ReplicaId} is running (primary).");
+                                                logger.LogInformation(
+                                                    new EventId(0, "Stateful.OnRun"),
+                                                    $"The replica {svcCtx.ReplicaId} is running (primary).");
                                             });
                                 })
                            .DefineDelegate(
@@ -65,7 +71,9 @@ namespace Service
                                        .UseDelegate(
                                             (StatefulServiceContext svcCtx, IStatefulServiceEventPayloadOnShutdown payload, ILogger<object> logger) =>
                                             {
-                                                logger.LogInformation($"The replica {svcCtx.ReplicaId} is shutting down (aborting: {payload.IsAborting}).");
+                                                logger.LogInformation(
+                                                    new EventId(0, "Stateful.OnShutdown"),
+                                                    $"The replica {svcCtx.ReplicaId} is shutting down (aborting: {payload.IsAborting}).");
                                             });
                                 })
                            .DefineDelegate(
@@ -77,7 +85,9 @@ namespace Service
                                        .UseDelegate(
                                             (StatefulServiceContext svcCtx, IStatefulServiceEventPayloadOnDataLoss payload, ILogger<object> logger) =>
                                             {
-                                                logger.LogInformation($"The replica {svcCtx.ReplicaId} data loss detected.");
+                                                logger.LogInformation(
+                                                    new EventId(0, "Stateful.OnDataLoss"),
+                                                    $"The replica {svcCtx.ReplicaId} data loss detected.");
                                             });
                                 })
                            .DefineDelegate(
@@ -89,7 +99,9 @@ namespace Service
                                        .UseDelegate(
                                             (StatefulServiceContext svcCtx, ILogger<object> logger) =>
                                             {
-                                                logger.LogInformation($"The replica {svcCtx.ReplicaId} restore completed.");
+                                                logger.LogInformation(
+                                                    new EventId(0, "Stateful.OnRestoreCompleted"),
+                                                    $"The replica {svcCtx.ReplicaId} restore completed.");
                                             });
                                 })
                            .DefineAspNetCoreListener(
@@ -119,7 +131,9 @@ namespace Service
                                        .UseDelegate(
                                             (StatelessServiceContext svcCtx, ILogger<object> logger) =>
                                             {
-                                                logger.LogInformation($"The instance {svcCtx.InstanceId} is starting up.");
+                                                logger.LogInformation(
+                                                    new EventId(0, "Stateful.OnStartup"),
+                                                    $"The instance {svcCtx.InstanceId} is starting up.");
                                             });
                                 })
                            .DefineDelegate(
@@ -131,7 +145,9 @@ namespace Service
                                        .UseDelegate(
                                             (StatelessServiceContext svcCtx, ILogger<object> logger) =>
                                             {
-                                                logger.LogInformation($"The instance {svcCtx.InstanceId} is running.");
+                                                logger.LogInformation(
+                                                    new EventId(0, "Stateful.OnRun"),
+                                                    $"The instance {svcCtx.InstanceId} is running.");
                                             });
                                 })
                            .DefineDelegate(
@@ -143,7 +159,9 @@ namespace Service
                                        .UseDelegate(
                                             (StatelessServiceContext svcCtx, IStatelessServiceEventPayloadOnShutdown payload, ILogger<object> logger) =>
                                             {
-                                                logger.LogInformation($"The instance {svcCtx.InstanceId} is shutting down (aborting: {payload.IsAborting}).");
+                                                logger.LogInformation(
+                                                    new EventId(0, "Stateful.OnShutdown"),
+                                                    $"The instance {svcCtx.InstanceId} is shutting down (aborting: {payload.IsAborting}).");
                                             });
                                 })
                            .DefineAspNetCoreListener(
