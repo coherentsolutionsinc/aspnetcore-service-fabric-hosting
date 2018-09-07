@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -23,7 +22,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
             {
                 this.providerType = providerType
                  ?? throw new ArgumentNullException(nameof(providerType));
-                
+
                 this.implementationType = implementationType;
             }
 
@@ -60,7 +59,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
                 // Call object.ctor()
                 il.Emit(OpCodes.Ldarg_0);
                 il.Emit(OpCodes.Call, typeof(object).GetConstructor(Type.EmptyTypes));
-                
+
                 // var array = ((IEnumerable<T>)services.GetService(typeof(IEnumerable<T>))).ToArray();
                 il.Emit(OpCodes.Ldarg_1);
                 il.Emit(OpCodes.Ldtoken, enumerableType);
@@ -69,48 +68,48 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
                 il.Emit(OpCodes.Castclass, enumerableType);
                 il.Emit(OpCodes.Call, typeof(Enumerable).GetMethod(nameof(Enumerable.ToArray)).MakeGenericMethod(itemType));
                 il.Emit(OpCodes.Stloc, array);
-                
+
                 // var index = 0;
                 il.Emit(OpCodes.Ldc_I4_0);
                 il.Emit(OpCodes.Stloc, index);
-                
+
                 // goto forIndexBoundry;
                 il.Emit(OpCodes.Br_S, forIndexBoundry);
 
                 // forStart:
                 il.MarkLabel(forStart);
-                
+
                 // var t = array[index].GetType();
                 il.Emit(OpCodes.Ldloc, array);
                 il.Emit(OpCodes.Ldloc, index);
                 il.Emit(OpCodes.Ldelem_Ref);
                 il.Emit(OpCodes.Callvirt, typeof(object).GetMethod(nameof(object.GetType)));
                 il.Emit(OpCodes.Stloc, type);
-                
+
                 // var isGenericType = t.IsGenericType;
                 il.Emit(OpCodes.Ldloc, type);
                 il.Emit(OpCodes.Callvirt, typeof(Type).GetProperty(nameof(Type.IsGenericType)).GetMethod);
                 il.Emit(OpCodes.Stloc, isGenericType);
-                
+
                 // if (!isGenericType) goto isntGenericType;
                 il.Emit(OpCodes.Ldloc, isGenericType);
                 il.Emit(OpCodes.Brfalse_S, isntGenericType);
-                
+
                 // t = t.GetGenericTypeDefinition();
                 il.Emit(OpCodes.Ldloc, type);
                 il.Emit(OpCodes.Callvirt, typeof(Type).GetMethod(nameof(Type.GetGenericTypeDefinition)));
                 il.Emit(OpCodes.Stloc, type);
-                
+
                 // isntGenericType:
                 il.MarkLabel(isntGenericType);
-                
+
                 // var areEqual = t == T;
                 il.Emit(OpCodes.Ldloc, type);
                 il.Emit(OpCodes.Ldtoken, this.implementationType);
                 il.Emit(OpCodes.Call, typeof(Type).GetMethod(nameof(Type.GetTypeFromHandle)));
                 il.Emit(OpCodes.Call, typeof(Type).GetMethod("op_Equality"));
                 il.Emit(OpCodes.Stloc, areEqual);
-                
+
                 // if (!areEqual) goto forBoundryCheck;
                 il.Emit(OpCodes.Ldloc, areEqual);
                 il.Emit(OpCodes.Brfalse_S, forNextIndex);
@@ -121,23 +120,22 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
                 il.Emit(OpCodes.Ldloc, index);
                 il.Emit(OpCodes.Ldelem_Ref);
                 il.Emit(OpCodes.Stfld, fieldBuilder);
-                
+
                 // goto exitCtor;
                 il.Emit(OpCodes.Br_S, exitCtor);
-                
-                
+
                 // forNextIndex:
                 il.MarkLabel(forNextIndex);
-                
+
                 // ++index
                 il.Emit(OpCodes.Ldloc, index);
                 il.Emit(OpCodes.Ldc_I4_1);
                 il.Emit(OpCodes.Add);
                 il.Emit(OpCodes.Stloc, index);
-                
+
                 // forIndexBoundry:
                 il.MarkLabel(forIndexBoundry);
-                
+
                 // if (index < array.Length) goto forStart;
                 il.Emit(OpCodes.Ldloc, index);
                 il.Emit(OpCodes.Ldloc, array);
@@ -145,10 +143,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
                 il.Emit(OpCodes.Conv_I4);
                 il.Emit(OpCodes.Clt);
                 il.Emit(OpCodes.Brtrue_S, forStart);
-                
+
                 // exitCtor:
                 il.MarkLabel(exitCtor);
-                
+
                 // return
                 il.Emit(OpCodes.Ret);
             }

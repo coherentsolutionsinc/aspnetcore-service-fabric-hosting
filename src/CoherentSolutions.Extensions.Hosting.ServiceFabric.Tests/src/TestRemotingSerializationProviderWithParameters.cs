@@ -22,14 +22,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests
 
         public IServiceRemotingRequestMessageBodySerializer CreateRequestMessageSerializer(
             Type serviceInterfaceType,
-            IEnumerable<Type> requestBodyTypes)
+            IEnumerable<Type> requestWrappedTypes,
+            IEnumerable<Type> requestBodyTypes = null)
         {
             return null;
         }
 
         public IServiceRemotingResponseMessageBodySerializer CreateResponseMessageSerializer(
             Type serviceInterfaceType,
-            IEnumerable<Type> responseBodyTypes)
+            IEnumerable<Type> responseWrappedTypes,
+            IEnumerable<Type> responseBodyTypes = null)
         {
             return null;
         }

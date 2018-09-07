@@ -149,12 +149,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                         throw new FactoryProducesNullInstanceException<IServiceCollection>();
                     }
 
+                    // We need register all level dependencies first in order to make
+                    // sure that no level dependencies will be ignore during proxination
                     dependenciesCollection.Add(serviceContext);
                     dependenciesCollection.Add(servicePartition);
                     dependenciesCollection.Add(serviceEventSource);
                     dependenciesCollection.Add(listenerInformation);
-
-                    parameters.DependenciesConfigAction?.Invoke(dependenciesCollection);
 
                     var loggerOptions = parameters.LoggerOptionsFunc();
                     if (loggerOptions == null)
@@ -167,6 +167,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                         {
                             builder.AddProvider(new ServiceHostRemotingListenerLoggerProvider(listenerInformation, loggerOptions, serviceEventSource));
                         });
+
+                    // Possible point of proxination
+                    parameters.DependenciesConfigAction?.Invoke(dependenciesCollection);
 
                     // Adding open-generic proxies
                     IServiceProvider provider = new ProxynatorAwareServiceProvider(dependenciesCollection.BuildServiceProvider());

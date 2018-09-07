@@ -6,6 +6,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools;
+
 using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 
@@ -13,56 +16,67 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public class StatefulService : Microsoft.ServiceFabric.Services.Runtime.StatefulService, IStatefulService
     {
-        private class EventSynchronization
+        private class ServiceEvents
         {
-            private TaskCompletionSource<int> whenRoleDetermined;
+            public event EventHandler<NotifyAsyncEventArgs> OnStartup;
 
-            public EventSynchronization()
-            {
-                this.whenRoleDetermined = new TaskCompletionSource<int>();
-            }
+            public event EventHandler<NotifyAsyncEventArgs<IStatefulServiceEventPayloadOnChangeRole>> OnChangeRole;
 
-            public void NotifyRoleDetermined(
-                ReplicaRole toRole)
-            {
-                // Initialization or promotion - we can reuse existing Task.
-                if (toRole == ReplicaRole.Primary)
-                {
-                    this.whenRoleDetermined.SetResult(0);
-                }
-                else
-                {
-                    this.whenRoleDetermined = new TaskCompletionSource<int>();
-                }
-            }
+            public event EventHandler<NotifyAsyncEventArgs> OnRun;
 
-            public async Task WhenAllListenersOpened(
+            public event EventHandler<NotifyAsyncEventArgs<IStatefulServiceEventPayloadOnShutdown>> OnShutdown;
+
+            public event EventHandler<NotifyAsyncEventArgs<IStatefulServiceEventPayloadOnDataLoss>> OnDataLoss;
+
+            public event EventHandler<NotifyAsyncEventArgs> OnRestoreCompleted;
+
+            public Task NotifyStartupAsync(
                 CancellationToken cancellationToken)
             {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    return;
-                }
+                return this.OnStartup.NotifyAsync(this, cancellationToken);
+            }
 
-                var allSource = this.whenRoleDetermined;
-                using (cancellationToken.Register(
-                    () =>
-                    {
-                        allSource.SetCanceled();
-                    }))
-                {
-                    await allSource.Task;
-                }
+            public Task NotifyChangeRoleAsync(
+                IStatefulServiceEventPayloadOnChangeRole payload,
+                CancellationToken cancellationToken)
+            {
+                return this.OnChangeRole.NotifyAsync(this, payload, cancellationToken);
+            }
+
+            public Task NotifyRunAsync(
+                CancellationToken cancellationToken)
+            {
+                return this.OnRun.NotifyAsync(this, cancellationToken);
+            }
+
+            public Task NotifyShutdownAsync(
+                IStatefulServiceEventPayloadOnShutdown payload,
+                CancellationToken cancellationToken)
+            {
+                return this.OnShutdown.NotifyAsync(this, payload, cancellationToken);
+            }
+
+            public Task NotifyDataLossAsync(
+                IStatefulServiceEventPayloadOnDataLoss payload,
+                CancellationToken cancellationToken)
+            {
+                return this.OnDataLoss.NotifyAsync(this, payload, cancellationToken);
+            }
+
+            public Task NotifyRestoreCompletedAsync(
+                CancellationToken cancellationToken)
+            {
+                return this.OnRestoreCompleted.NotifyAsync(this, cancellationToken);
             }
         }
 
-        private readonly IReadOnlyList<IStatefulServiceHostDelegateReplicator> serviceDelegateReplicators;
-
-        private readonly IEnumerable<IStatefulServiceHostListenerReplicator> serviceListenerReplicators;
-
         private readonly ServiceEventSource eventSource;
 
-        private readonly EventSynchronization eventSynchronization;
+        private readonly ServiceEvents serviceEvents;
+
+        private readonly ILookup<StatefulServiceLifecycleEvent, StatefulServiceDelegate> serviceDelegates;
+
+        private readonly IReadOnlyList<ServiceReplicaListener> serviceListeners;
 
         public StatefulService(
             StatefulServiceContext serviceContext,
@@ -75,43 +89,189 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 $"{serviceContext.CodePackageActivationContext.ApplicationTypeName}.{serviceContext.ServiceTypeName}",
                 EventSourceSettings.EtwSelfDescribingEventFormat);
 
-            this.eventSynchronization = new EventSynchronization();
+            this.serviceEvents = new ServiceEvents();
 
-            this.serviceDelegateReplicators = serviceDelegateReplicators
-             ?? throw new ArgumentNullException(nameof(serviceDelegateReplicators));
+            if (serviceDelegateReplicators != null)
+            {
+                this.serviceDelegates = serviceDelegateReplicators
+                   .SelectMany(
+                        replicator =>
+                        {
+                            var @delegate = replicator.ReplicateFor(this);
+                            return @delegate.Event.GetBitFlags().Select(v => (v, @delegate));
+                        })
+                   .ToLookup(kv => kv.v, kv => kv.@delegate);
+            }
 
-            this.serviceListenerReplicators = serviceListenerReplicators
-             ?? throw new ArgumentNullException(nameof(serviceListenerReplicators));
+            if (serviceListenerReplicators != null)
+            {
+                this.serviceListeners = serviceListenerReplicators
+                   .Select(replicator => replicator.ReplicateFor(this))
+                   .ToList();
+            }
+
+            this.serviceEvents.OnStartup += async (
+                sender,
+                args) =>
+            {
+                try
+                {
+                    var context = new StatefulServiceDelegateInvocationContext(StatefulServiceLifecycleEvent.OnStartup);
+
+                    await this.InvokeDelegates(context, args.CancellationToken);
+
+                    args.Completed();
+                }
+                catch (Exception e)
+                {
+                    args.Failed(e);
+                }
+            };
+            this.serviceEvents.OnRun += async (
+                sender,
+                args) =>
+            {
+                try
+                {
+                    var context = new StatefulServiceDelegateInvocationContext(StatefulServiceLifecycleEvent.OnRun);
+
+                    await this.InvokeDelegates(context, args.CancellationToken);
+
+                    args.Completed();
+                }
+                catch (Exception e)
+                {
+                    args.Failed(e);
+                }
+            };
+            this.serviceEvents.OnChangeRole += async (
+                sender,
+                args) =>
+            {
+                try
+                {
+                    var context = new StatefulServiceDelegateInvocationContextOnChangeRole(args.Payload);
+
+                    await this.InvokeDelegates(context, args.CancellationToken);
+
+                    args.Completed();
+                }
+                catch (Exception e)
+                {
+                    args.Failed(e);
+                }
+            };
+            this.serviceEvents.OnShutdown += async (
+                sender,
+                args) =>
+            {
+                try
+                {
+                    var context = new StatefulServiceDelegateInvocationContextOnShutdown(args.Payload);
+
+                    await this.InvokeDelegates(context, args.CancellationToken);
+
+                    args.Completed();
+                }
+                catch (Exception e)
+                {
+                    args.Failed(e);
+                }
+            };
+            this.serviceEvents.OnDataLoss += async (
+                sender,
+                args) =>
+            {
+                try
+                {
+                    var context = new StatefulServiceDelegateInvocationContextOnDataLoss(args.Payload);
+
+                    await this.InvokeDelegates(context, args.CancellationToken);
+
+                    args.Completed();
+                }
+                catch (Exception e)
+                {
+                    args.Failed(e);
+                }
+            };
+            this.serviceEvents.OnRestoreCompleted += async (
+                sender,
+                args) =>
+            {
+                try
+                {
+                    var context = new StatefulServiceDelegateInvocationContext(StatefulServiceLifecycleEvent.OnRestoreCompleted);
+
+                    await this.InvokeDelegates(context, args.CancellationToken);
+
+                    args.Completed();
+                }
+                catch (Exception e)
+                {
+                    args.Failed(e);
+                }
+            };
         }
 
         protected override IEnumerable<ServiceReplicaListener> CreateServiceReplicaListeners()
         {
-            return this.serviceListenerReplicators.Select(replicator => replicator.ReplicateFor(this));
+            return this.GetServiceListeners();
         }
 
-        protected override Task OnChangeRoleAsync(
+        protected override async Task OnOpenAsync(
+            ReplicaOpenMode openMode,
+            CancellationToken cancellationToken)
+        {
+            await this.serviceEvents.NotifyStartupAsync(cancellationToken);
+        }
+
+        protected override async Task OnChangeRoleAsync(
             ReplicaRole newRole,
             CancellationToken cancellationToken)
         {
-            this.eventSynchronization.NotifyRoleDetermined(newRole);
+            var payload = new StatefulServiceEventPayloadOnChangeRole(newRole);
 
-            return Task.CompletedTask;
+            await this.serviceEvents.NotifyChangeRoleAsync(payload, cancellationToken);
         }
 
         protected override async Task RunAsync(
             CancellationToken cancellationToken)
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            await this.serviceEvents.NotifyRunAsync(cancellationToken);
+        }
 
-            await this.eventSynchronization.WhenAllListenersOpened(cancellationToken);
+        protected override async Task OnCloseAsync(
+            CancellationToken cancellationToken)
+        {
+            var payload = new StatefulServiceEventPayloadOnShutdown(false);
 
-            var delegates = this.serviceDelegateReplicators.Select(replicator => replicator.ReplicateFor(this));
-            foreach (var @delegate in delegates)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
+            await this.serviceEvents.NotifyShutdownAsync(payload, cancellationToken);
+        }
 
-                await @delegate.InvokeAsync(cancellationToken);
-            }
+        protected override void OnAbort()
+        {
+            var payload = new StatefulServiceEventPayloadOnShutdown(false);
+
+            this.serviceEvents.NotifyShutdownAsync(payload, default).GetAwaiter().GetResult();
+        }
+
+        protected override async Task<bool> OnDataLossAsync(
+            RestoreContext restoreCtx,
+            CancellationToken cancellationToken)
+        {
+            var ctx = new StatefulServiceRestoreContext(restoreCtx);
+            var payload = new StatefulServiceEventPayloadOnDataLoss(ctx);
+
+            await this.serviceEvents.NotifyDataLossAsync(payload, cancellationToken);
+
+            return ctx.IsRestored;
+        }
+
+        protected override async Task OnRestoreCompletedAsync(
+            CancellationToken cancellationToken)
+        {
+            await this.serviceEvents.NotifyRestoreCompletedAsync(cancellationToken);
         }
 
         public IReliableStateManager GetReliableStateManager()
@@ -132,6 +292,34 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         public IServicePartition GetPartition()
         {
             return this.Partition;
+        }
+
+        private async Task InvokeDelegates(
+            IStatefulServiceDelegateInvocationContext context,
+            CancellationToken cancellationToken = default)
+        {
+            var delegates = this.GetServiceDelegates(context.Event);
+            foreach (var @delegate in delegates)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var invoker = @delegate.CreateDelegateInvokerFunc();
+
+                await invoker.InvokeAsync(context, cancellationToken);
+            }
+        }
+
+        private IEnumerable<StatefulServiceDelegate> GetServiceDelegates(
+            StatefulServiceLifecycleEvent @event)
+        {
+            return this.serviceDelegates == null
+                ? Enumerable.Empty<StatefulServiceDelegate>()
+                : this.serviceDelegates[@event];
+        }
+
+        private IEnumerable<ServiceReplicaListener> GetServiceListeners()
+        {
+            return this.serviceListeners ?? Enumerable.Empty<ServiceReplicaListener>();
         }
     }
 }

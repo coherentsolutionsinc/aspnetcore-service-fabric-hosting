@@ -10,7 +10,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Exte
 
         public UseDependenciesTheoryExtension()
         {
-            this.Factory = Tools.GetDependenciesFunc();
+            this.Factory = () => new ServiceCollection();
         }
 
         public UseDependenciesTheoryExtension Setup(

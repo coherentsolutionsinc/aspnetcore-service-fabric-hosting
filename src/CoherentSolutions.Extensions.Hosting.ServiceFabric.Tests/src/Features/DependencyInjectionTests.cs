@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Fabric;
+using System.Threading;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories;
@@ -127,6 +128,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                         };
                     }
 
+                    foreach (var item in TheoryItemsSet.DelegateItems)
+                    {
+                        yield return new object[]
+                        {
+                            new Case(item, typeof(CancellationToken))
+                        };
+                    }
+
                     foreach (var item in TheoryItemsSet.AllListenerItems)
                     {
                         yield return new object[]
@@ -178,6 +187,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                             new Case(item, typeof(IStatelessServicePartition))
                         };
                     }
+
+                    yield return new object[]
+                    {
+                        new Case(TheoryItemsSet.StatefulServiceDelegate, typeof(IStatefulServiceDelegateInvocationContext))
+                    };
+                    yield return new object[]
+                    {
+                        new Case(TheoryItemsSet.StatelessServiceDelegate, typeof(IStatelessServiceDelegateInvocationContext))
+                    };
                 }
             }
         }
@@ -315,7 +333,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(AutomaticServicesRegistration.Cases), MemberType = typeof(AutomaticServicesRegistration))]
-        private static void Should_resolve_instance_From_autoregistred_types(
+        private static void Should_resolve_instance_From_auto_registered_types(
             AutomaticServicesRegistration.Case @case)
         {
             // Arrange

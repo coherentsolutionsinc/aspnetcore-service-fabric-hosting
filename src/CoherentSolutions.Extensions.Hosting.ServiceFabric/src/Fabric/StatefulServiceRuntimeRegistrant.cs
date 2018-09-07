@@ -16,5 +16,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         {
             return ServiceRuntime.RegisterServiceAsync(serviceTypeName, serviceFactory, cancellationToken: cancellationToken);
         }
+
+        public Task UnregisterAsync(
+            string serviceTypeName,
+            CancellationToken cancellationToken)
+        {
+            // currently we do nothing here.
+
+            return Task.CompletedTask;
+        }
     }
 }

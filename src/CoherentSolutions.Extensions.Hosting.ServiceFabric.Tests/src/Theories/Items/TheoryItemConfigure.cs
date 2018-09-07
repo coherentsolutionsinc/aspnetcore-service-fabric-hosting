@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,34 +17,93 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
 {
     public static class TheoryItemConfigure
     {
-        private class ServiceHostDelegateInvokerDecorator : IServiceHostDelegateInvoker
+        private static class DelegateWrap
         {
-            private readonly IServiceHostDelegateInvoker target;
+            public static Delegate Create(
+                Delegate source,
+                Delegate hook)
+            {
+                var sourceParameters = source.Method.GetParameters();
+                var sourceDynamicInvokeMethod = source.GetType().GetMethod(nameof(source.DynamicInvoke));
 
-            private readonly Action beforeInvoke;
+                var hookParameters = hook.Method.GetParameters();
+                var hookDynamicInvokeMethod = source.GetType().GetMethod(nameof(hook.DynamicInvoke));
 
-            private readonly Action afterInvoke;
+                var sourceParameterExpressions = sourceParameters
+                   .Select(p => Expression.Parameter(p.ParameterType, p.Name))
+                   .ToArray();
 
-            public ServiceHostDelegateInvokerDecorator(
-                IServiceHostDelegateInvoker target,
-                Action beforeInvoke = null,
-                Action afterInvoke = null)
+                var hookParameterExpressions = hookParameters
+                   .GroupJoin(
+                        sourceParameterExpressions,
+                        p => p.ParameterType,
+                        p => p.Type,
+                        (
+                            p,
+                            expressions) =>
+                        {
+                            var expression = expressions.FirstOrDefault() ?? Expression.Parameter(p.ParameterType, p.Name);
+
+                            return expression;
+                        })
+                   .ToArray();
+
+                var sourceInvocationExpression = Expression.Call(
+                    Expression.Constant(source), 
+                    sourceDynamicInvokeMethod, 
+                    Expression.NewArrayInit(typeof(object), sourceParameterExpressions));
+
+                var hookInvocationExpression = Expression.Call(
+                    Expression.Constant(hook), 
+                    hookDynamicInvokeMethod, 
+                    Expression.NewArrayInit(typeof(object), hookParameterExpressions));
+
+                return Expression.Lambda(
+                        Expression.Block(hookInvocationExpression, sourceInvocationExpression),
+                        sourceParameterExpressions.Union(hookParameterExpressions))
+                   .Compile();
+            }
+        }
+
+        private abstract class ServiceHostDelegateInvokerDecorator<TInvocationContext> : IServiceHostDelegateInvoker<TInvocationContext>
+        {
+            private readonly IServiceHostDelegateInvoker<TInvocationContext> target;
+
+            protected ServiceHostDelegateInvokerDecorator(
+                IServiceHostDelegateInvoker<TInvocationContext> target)
             {
                 this.target = target;
-                this.beforeInvoke = beforeInvoke;
-                this.afterInvoke = afterInvoke;
             }
 
             public Task InvokeAsync(
+                TInvocationContext invocationContext,
                 CancellationToken cancellationToken)
             {
-                this.beforeInvoke?.Invoke();
-
-                var result = this.target.InvokeAsync(cancellationToken);
-
-                this.afterInvoke?.Invoke();
+                var result = this.target.InvokeAsync(invocationContext, cancellationToken);
 
                 return result;
+            }
+        }
+
+        private class StatefulServiceHostDelegateInvokerDecorator
+            : ServiceHostDelegateInvokerDecorator<IStatefulServiceDelegateInvocationContext>,
+              IStatefulServiceHostDelegateInvoker
+        {
+            public StatefulServiceHostDelegateInvokerDecorator(
+                IServiceHostDelegateInvoker<IStatefulServiceDelegateInvocationContext> target)
+                : base(target)
+            {
+            }
+        }
+
+        private class StatelessServiceHostDelegateInvokerDecorator
+            : ServiceHostDelegateInvokerDecorator<IStatelessServiceDelegateInvocationContext>,
+              IStatelessServiceHostDelegateInvoker
+        {
+            public StatelessServiceHostDelegateInvokerDecorator(
+                IServiceHostDelegateInvoker<IStatelessServiceDelegateInvocationContext> target)
+                : base(target)
+            {
             }
         }
 
@@ -115,6 +176,38 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                 delegateBuilder =>
                 {
                     delegateBuilder.ConfigureObject(c => ConfigureDelegateExtensions(c, extensions));
+                    delegateBuilder.ConfigureObject(
+                        c =>
+                        {
+                            var useDelegateInvoker = extensions
+                               .GetExtension<IUseDelegateInvokerTheoryExtension<IStatefulServiceDelegateInvocationContext>>();
+
+                            var useDelegateEvent = extensions
+                               .GetExtension<IUseDelegateEventTheoryExtension<StatefulServiceLifecycleEvent>>();
+
+                            var pickDependency = extensions.GetExtension<IPickDependencyTheoryExtension>();
+
+                            c.UseDelegateInvoker(
+                                (
+                                    @delegate,
+                                    provider) =>
+                                {
+                                    @delegate = DelegateWrap.Create(
+                                        @delegate,
+                                        new Action<IServiceProvider>(
+                                            serviceProvider =>
+                                            {
+                                                foreach (var pickAction in pickDependency.PickActions)
+                                                {
+                                                    pickAction(serviceProvider);
+                                                }
+                                            }));
+
+                                    var invoker = useDelegateInvoker.Factory(@delegate, provider);
+                                    return new StatefulServiceHostDelegateInvokerDecorator(invoker);
+                                });
+                            c.UseEvent(useDelegateEvent.Event);
+                        });
                 });
         }
 
@@ -126,6 +219,38 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                 delegateBuilder =>
                 {
                     delegateBuilder.ConfigureObject(c => ConfigureDelegateExtensions(c, extensions));
+                    delegateBuilder.ConfigureObject(
+                        c =>
+                        {
+                            var useDelegateInvoker = extensions
+                               .GetExtension<IUseDelegateInvokerTheoryExtension<IStatelessServiceDelegateInvocationContext>>();
+
+                            var useDelegateEvent = extensions
+                               .GetExtension<IUseDelegateEventTheoryExtension<StatelessServiceLifecycleEvent>>();
+
+                            var pickDependency = extensions.GetExtension<IPickDependencyTheoryExtension>();
+
+                            c.UseDelegateInvoker(
+                                (
+                                    @delegate,
+                                    provider) =>
+                                {
+                                    @delegate = DelegateWrap.Create(
+                                        @delegate,
+                                        new Action<IServiceProvider>(
+                                            serviceProvider =>
+                                            {
+                                                foreach (var pickAction in pickDependency.PickActions)
+                                                {
+                                                    pickAction(serviceProvider);
+                                                }
+                                            }));
+
+                                    var invoker = useDelegateInvoker.Factory(@delegate, provider);
+                                    return new StatelessServiceHostDelegateInvokerDecorator(invoker);
+                                });
+                            c.UseEvent(useDelegateEvent.Event);
+                        });
                 });
         }
 
@@ -178,29 +303,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             TheoryItem.TheoryItemExtensionProvider extensions)
         {
             var useDelegate = extensions.GetExtension<IUseDelegateTheoryExtension>();
-            var useDelegateInvoker = extensions.GetExtension<IUseDelegateInvokerTheoryExtension>();
             var useDependencies = extensions.GetExtension<IUseDependenciesTheoryExtension>();
             var configureDependencies = extensions.GetExtension<IConfigureDependenciesTheoryExtension>();
-            var pickDependency = extensions.GetExtension<IPickDependencyTheoryExtension>();
 
             configurator.UseDependencies(useDependencies.Factory);
             configurator.UseDelegate(useDelegate.Delegate);
-            configurator.UseDelegateInvoker(
-                (
-                    @delegate,
-                    provider) =>
-                {
-                    var invoker = useDelegateInvoker.Factory(@delegate, provider);
-                    return new ServiceHostDelegateInvokerDecorator(
-                        invoker,
-                        beforeInvoke: () =>
-                        {
-                            foreach (var pickAction in pickDependency.PickActions)
-                            {
-                                pickAction(provider);
-                            }
-                        });
-                });
             configurator.ConfigureDependencies(
                 dependencies =>
                 {

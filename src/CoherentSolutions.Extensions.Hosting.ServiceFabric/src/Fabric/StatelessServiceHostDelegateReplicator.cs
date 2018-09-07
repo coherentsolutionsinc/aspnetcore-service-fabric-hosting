@@ -1,7 +1,7 @@
 ﻿namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public class StatelessServiceHostDelegateReplicator
-        : ServiceHostDelegateReplicator<IStatelessServiceHostDelegateReplicableTemplate, IStatelessService, IServiceHostDelegateInvoker>,
+        : ServiceHostDelegateReplicator<IStatelessServiceHostDelegateReplicableTemplate, IStatelessService, StatelessServiceDelegate>,
           IStatelessServiceHostDelegateReplicator
     {
         public StatelessServiceHostDelegateReplicator(

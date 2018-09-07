@@ -84,10 +84,19 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
-        public static TCaller UseDelegateInvoker<TCaller>(
-            this TCaller @this,
-            Func<Delegate, IServiceProvider, IServiceHostDelegateInvoker> factoryFunc)
-            where TCaller : IConfigurableObject<IServiceHostDelegateReplicaTemplateConfigurator>
+        public static IStatefulServiceHostDelegateReplicaTemplate UseDelegateInvoker(
+            this IStatefulServiceHostDelegateReplicaTemplate @this,
+            Func<Delegate, IServiceProvider, IStatefulServiceHostDelegateInvoker> factoryFunc)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseDelegateInvoker(factoryFunc));
+
+            return @this;
+        }
+
+        public static IStatelessServiceHostDelegateReplicaTemplate UseDelegateInvoker(
+            this IStatelessServiceHostDelegateReplicaTemplate @this,
+            Func<Delegate, IServiceProvider, IStatelessServiceHostDelegateInvoker> factoryFunc)
         {
             @this.ConfigureObject(
                 configurator => configurator.UseDelegateInvoker(factoryFunc));
@@ -443,6 +452,26 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
         {
             @this.ConfigureObject(
                 configurator => configurator.UseDelegate(@delegate));
+
+            return @this;
+        }
+
+        public static IStatefulServiceHostDelegateReplicaTemplate UseEvent(
+            this IStatefulServiceHostDelegateReplicaTemplate @this,
+            StatefulServiceLifecycleEvent @event)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseEvent(@event));
+
+            return @this;
+        }
+
+        public static IStatelessServiceHostDelegateReplicaTemplate UseEvent(
+            this IStatelessServiceHostDelegateReplicaTemplate @this,
+            StatelessServiceLifecycleEvent @event)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseEvent(@event));
 
             return @this;
         }

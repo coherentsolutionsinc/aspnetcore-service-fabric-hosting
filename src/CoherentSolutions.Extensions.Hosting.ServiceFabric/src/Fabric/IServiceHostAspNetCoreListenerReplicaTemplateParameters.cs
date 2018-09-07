@@ -15,7 +15,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         Func<IWebHostBuilder> WebHostBuilderFunc { get; }
 
         Action<IWebHostBuilder> WebHostConfigAction { get; }
-        
+
         Action<IWebHostBuilder> WebHostCommunicationListenerConfigAction { get; }
     }
 }

@@ -34,10 +34,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
              ?? Array.Empty<IStatelessServiceHostListenerReplicator>();
         }
 
-        public async Task StartAsync(
+        public Task StartAsync(
             CancellationToken cancellationToken)
         {
-            await this.serviceRuntimeRegistrant.RegisterAsync(
+            return this.serviceRuntimeRegistrant.RegisterAsync(
                 this.serviceTypeName,
                 serviceContext => new StatelessService(
                     serviceContext,
@@ -49,7 +49,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         public Task StopAsync(
             CancellationToken cancellationToken)
         {
-            return Task.CompletedTask;
+            return this.serviceRuntimeRegistrant.UnregisterAsync(
+                this.serviceTypeName,
+                cancellationToken);
         }
     }
 }

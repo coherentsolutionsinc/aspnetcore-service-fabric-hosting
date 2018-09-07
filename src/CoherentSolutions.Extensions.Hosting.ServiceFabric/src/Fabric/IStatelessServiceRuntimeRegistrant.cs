@@ -11,5 +11,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             string serviceTypeName,
             Func<StatelessServiceContext, StatelessService> serviceFactory,
             CancellationToken cancellationToken);
+
+        Task UnregisterAsync(
+            string serviceTypeName,
+            CancellationToken cancellationToken);
     }
 }

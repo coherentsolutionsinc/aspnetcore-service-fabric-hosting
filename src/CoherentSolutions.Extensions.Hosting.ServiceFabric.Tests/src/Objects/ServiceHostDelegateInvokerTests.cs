@@ -10,7 +10,37 @@ using Xunit;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
 {
-    public class ServiceHostDelegateInvokerTests
+    public class StatefulServiceHostDelegateInvokerTests : ServiceHostDelegateInvokerTests<IStatefulServiceDelegateInvocationContext>
+    {
+        protected override IStatefulServiceDelegateInvocationContext CreateInvocationContext()
+        {
+            return new StatefulServiceDelegateInvocationContext(StatefulServiceLifecycleEvent.OnRun);
+        }
+
+        protected override ServiceHostDelegateInvoker<IStatefulServiceDelegateInvocationContext> CreateInvokerInstance(
+            Delegate @delegate,
+            IServiceProvider services)
+        {
+            return new StatefulServiceHostDelegateInvoker(@delegate, services);
+        }
+    }
+
+    public class StatelessServiceHostDelegateInvokerTests : ServiceHostDelegateInvokerTests<IStatelessServiceDelegateInvocationContext>
+    {
+        protected override IStatelessServiceDelegateInvocationContext CreateInvocationContext()
+        {
+            return new StatelessServiceDelegateInvocationContext(StatelessServiceLifecycleEvent.OnRun);
+        }
+
+        protected override ServiceHostDelegateInvoker<IStatelessServiceDelegateInvocationContext> CreateInvokerInstance(
+            Delegate @delegate,
+            IServiceProvider services)
+        {
+            return new StatelessServiceHostDelegateInvoker(@delegate, services);
+        }
+    }
+
+    public abstract class ServiceHostDelegateInvokerTests<TInvocationContext>
     {
         private interface ITestDependency
         {
@@ -24,110 +54,171 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         {
         }
 
+        protected abstract TInvocationContext CreateInvocationContext();
+
+        protected abstract ServiceHostDelegateInvoker<TInvocationContext> CreateInvokerInstance(
+            Delegate @delegate,
+            IServiceProvider services);
+
         [Fact]
-        public void
-            Should_pass_cancellation_token_to_wrapped_delegate_When_invoking()
+        private async Task Should_resolve_arguments_When_action_has_parameters()
         {
             // Arrange 
-            var cancellationTokenSource = new CancellationTokenSource();
+            var arrangeObject = new TestDependency();
 
-            var expectedHash = cancellationTokenSource.Token.GetHashCode();
-            var actualHash = 0;
+            var expectedByType = arrangeObject;
+            ITestDependency expectedByInterface = arrangeObject;
+            TestDependency actualByType = null;
+            ITestDependency actualByInterface = null;
 
-            var services = new Mock<IServiceProvider>();
-            var @delegate = new ServiceHostDelegateInvoker(
-                new Action<CancellationToken>(cancellationToken => actualHash = cancellationToken.GetHashCode()),
-                services.Object);
-
-            // Act
-            @delegate.InvokeAsync(cancellationTokenSource.Token).GetAwaiter().GetResult();
-
-            // Assert
-            services.VerifyNoOtherCalls();
-
-            Assert.Equal(expectedHash, actualHash);
-        }
-
-        [Fact]
-        public void
-            Should_propagate_original_exception_When_invoking()
-        {
-            // Arrange
-            var services = new Mock<IServiceProvider>();
-
-            var @delegate = new ServiceHostDelegateInvoker(
-                new Action(() => throw new TestException()),
-                services.Object);
-
-            // Act, Assert
-            Assert.Throws<TestException>(
-                () =>
+            var arrangeAction = new Action<TestDependency, ITestDependency>(
+                (
+                    byType,
+                    byInterface) =>
                 {
-                    @delegate.InvokeAsync(CancellationToken.None).GetAwaiter().GetResult();
+                    actualByType = byType;
+                    actualByInterface = byInterface;
                 });
 
-            services.VerifyNoOtherCalls();
-        }
+            var mockServices = new Mock<IServiceProvider>();
+            mockServices
+               .Setup(instance => instance.GetService(typeof(TestDependency)))
+               .Returns(expectedByType)
+               .Verifiable();
 
-        [Fact]
-        public void
-            Should_resolve_arguments_using_services_When_invoking()
-        {
-            // Arrange
-            var root = new TestDependency();
+            mockServices
+               .Setup(instance => instance.GetService(typeof(ITestDependency)))
+               .Returns(expectedByInterface)
+               .Verifiable();
 
-            object expectedObject = root;
-            object expectedInterface = root;
-            object actualObject = null;
-            object actualInterface = null;
+            var arrangeServices = mockServices.Object;
 
-            var services = new Mock<IServiceProvider>();
-            services.Setup(instance => instance.GetService(typeof(TestDependency))).Returns(root).Verifiable();
-            services.Setup(instance => instance.GetService(typeof(ITestDependency))).Returns(root).Verifiable();
-
-            var @delegate = new ServiceHostDelegateInvoker(
-                new Action<TestDependency, ITestDependency>(
-                    (
-                        @object,
-                        @interface) =>
-                    {
-                        actualObject = @object;
-                        actualInterface = @interface;
-                    }),
-                services.Object);
+            var arrangeInvocationContext = this.CreateInvocationContext();
+            var arrangeInvoker = this.CreateInvokerInstance(arrangeAction, arrangeServices);
 
             // Act
-            @delegate.InvokeAsync(CancellationToken.None).GetAwaiter().GetResult();
+            await arrangeInvoker.InvokeAsync(arrangeInvocationContext, CancellationToken.None);
 
             // Assert
-            services.Verify();
+            mockServices.Verify();
+            mockServices.VerifyNoOtherCalls();
 
-            Assert.Same(expectedObject, actualObject);
-            Assert.Same(expectedInterface, actualInterface);
+            Assert.Same(expectedByType, actualByType);
+            Assert.Same(expectedByInterface, actualByInterface);
         }
 
         [Fact]
-        public void
-            Should_return_original_task_When_invoking_delegate_returining_task()
+        private async Task Should_resolve_invocation_context_argument_When_action_has_invocation_context_parameter()
         {
             // Arrange 
-            var root = new TaskCompletionSource<int>().Task;
+            var arrangeInvocationContext = this.CreateInvocationContext();
 
-            object expectedTask = root;
-            object actualTask = null;
+            var mockServices = new Mock<IServiceProvider>();
+            mockServices
+               .Setup(instance => instance.GetService(typeof(TInvocationContext)))
+               .Returns(arrangeInvocationContext)
+               .Verifiable();
 
-            var services = new Mock<IServiceProvider>();
-            var @delegate = new ServiceHostDelegateInvoker(
-                new Func<Task>(() => root),
-                services.Object);
+            TInvocationContext expectedInvocationContext = arrangeInvocationContext;
+            TInvocationContext actualInvocationContext = default;
+
+            var arrangeServices = mockServices.Object;
+            var arrangeAction = new Action<TInvocationContext>(invocationContext => actualInvocationContext = invocationContext);
+
+            var arrangeInvoker = this.CreateInvokerInstance(arrangeAction, arrangeServices);
 
             // Act
-            actualTask = @delegate.InvokeAsync(CancellationToken.None);
+            await arrangeInvoker.InvokeAsync(arrangeInvocationContext, CancellationToken.None);
 
             // Assert
-            services.VerifyNoOtherCalls();
+            mockServices.Verify();
+            mockServices.VerifyNoOtherCalls();
 
-            Assert.Equal(expectedTask, actualTask);
+            Assert.Equal(expectedInvocationContext, actualInvocationContext);
+        }
+
+        [Fact]
+        private async Task Should_resolve_cancellation_token_argument_When_action_has_cancellation_token_parameter()
+        {
+            // Arrange 
+            var arrangeCancellationTokenSource = new CancellationTokenSource();
+            var arrangeCancellationToken = arrangeCancellationTokenSource.Token;
+
+            var mockServices = new Mock<IServiceProvider>();
+            mockServices
+               .Setup(instance => instance.GetService(typeof(CancellationToken)))
+               .Returns(arrangeCancellationToken)
+               .Verifiable();
+
+            var expectedCancellationToken = arrangeCancellationTokenSource.Token;
+            CancellationToken actualCancellationToken = default;
+
+            var arrangeServices = mockServices.Object;
+            var arrangeAction = new Action<CancellationToken>(cancellationToken => actualCancellationToken = cancellationToken);
+
+            var arrangeInvocationContext = this.CreateInvocationContext();
+            var arrangeInvoker = this.CreateInvokerInstance(arrangeAction, arrangeServices);
+
+            // Act
+            await arrangeInvoker.InvokeAsync(arrangeInvocationContext, expectedCancellationToken);
+
+            // Assert
+            mockServices.Verify();
+            mockServices.VerifyNoOtherCalls();
+
+            Assert.Equal(expectedCancellationToken.GetHashCode(), actualCancellationToken.GetHashCode());
+        }
+
+        [Fact]
+        private async Task Should_rethrow_original_exception_When_action_throws_exception()
+        {
+            // Arrange 
+            var mockServices = new Mock<IServiceProvider>();
+
+            var arrangeServices = mockServices.Object;
+            var arrangeAction = new Action<CancellationToken>(cancellationToken => throw new TestException());
+
+            var arrangeInvocationContext = this.CreateInvocationContext();
+            var arrangeInvoker = this.CreateInvokerInstance(arrangeAction, arrangeServices);
+
+            // Assert
+            await Assert.ThrowsAsync<TestException>(
+                async () =>
+                {
+                    // Act
+                    await arrangeInvoker.InvokeAsync(arrangeInvocationContext, CancellationToken.None);
+                });
+
+            mockServices.VerifyNoOtherCalls();
+        }
+
+        [Fact]
+        private async Task Should_return_original_task_When_function_returns_task()
+        {
+            // Arrange 
+            var arrangeTaskCompletionSource = new TaskCompletionSource<int>();
+            var arrangeTask = arrangeTaskCompletionSource.Task;
+
+            var mockServices = new Mock<IServiceProvider>();
+
+            Task expectedTask = arrangeTask;
+            Task actualTask = null;
+
+            var arrangeServices = mockServices.Object;
+            var arrangeFunction = new Func<Task>(() => arrangeTask);
+
+            var arrangeInvocationContext = this.CreateInvocationContext();
+            var arrangeInvoker = this.CreateInvokerInstance(arrangeFunction, arrangeServices);
+
+            // Act
+            actualTask = arrangeInvoker.InvokeAsync(arrangeInvocationContext, CancellationToken.None);
+            await actualTask;
+
+            // Assert
+            mockServices.Verify();
+            mockServices.VerifyNoOtherCalls();
+
+            Assert.Same(expectedTask, actualTask);
         }
     }
 }
