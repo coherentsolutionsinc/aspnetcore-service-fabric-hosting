@@ -31,7 +31,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                     break;
                 case StatefulServiceDelegateInvocationContext<IStatefulServiceEventPayloadOnDataLoss> ctx:
                     {
-                        yield return (typeof(IStatefulServiceEventPayloadOnShutdown), ctx.Payload);
+                        yield return (typeof(IStatefulServiceEventPayloadOnDataLoss), ctx.Payload);
                     }
                     break;
             }
