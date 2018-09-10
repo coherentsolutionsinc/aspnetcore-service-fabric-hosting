@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Fabric;
 using System.Threading;
 using System.Threading.Tasks;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
+
+using Microsoft.ServiceFabric.Data;
 
 using Moq;
 
@@ -23,6 +26,81 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         {
             return new StatefulServiceHostDelegateInvoker(@delegate, services);
         }
+
+        [Fact]
+        private async Task Should_resolve_on_changerole_payload_argument_When_shutdown_reacting_on_changerole_event()
+        {
+            // Arrange 
+            IStatefulServiceEventPayloadOnChangeRole expectedPayload = new StatefulServiceEventPayloadOnChangeRole(ReplicaRole.Primary);
+            IStatefulServiceEventPayloadOnChangeRole actualPayload = default;
+
+            var mockServices = new Mock<IServiceProvider>();
+
+            var arrangeInvocationContext = new StatefulServiceDelegateInvocationContextOnChangeRole(expectedPayload);
+            var arrangeServices = mockServices.Object;
+            var arrangeAction = new Action<IStatefulServiceEventPayloadOnChangeRole>(payload => actualPayload = payload);
+
+            var arrangeInvoker = this.CreateInvokerInstance(arrangeAction, arrangeServices);
+
+            // Act
+            await arrangeInvoker.InvokeAsync(arrangeInvocationContext, CancellationToken.None);
+
+            // Assert
+            mockServices.VerifyNoOtherCalls();
+
+            Assert.Equal(expectedPayload, actualPayload);
+        }
+
+        [Fact]
+        private async Task Should_resolve_on_dataloss_payload_argument_When_shutdown_reacting_on_dataloss_event()
+        {
+            // Arrange 
+            IStatefulServiceEventPayloadOnDataLoss expectedPayload = new StatefulServiceEventPayloadOnDataLoss(
+                new StatefulServiceRestoreContext(
+                    new RestoreContext()));
+
+            IStatefulServiceEventPayloadOnDataLoss actualPayload = default;
+
+            var mockServices = new Mock<IServiceProvider>();
+
+            var arrangeInvocationContext = new StatefulServiceDelegateInvocationContextOnDataLoss(expectedPayload);
+            var arrangeServices = mockServices.Object;
+            var arrangeAction = new Action<IStatefulServiceEventPayloadOnDataLoss>(payload => actualPayload = payload);
+
+            var arrangeInvoker = this.CreateInvokerInstance(arrangeAction, arrangeServices);
+
+            // Act
+            await arrangeInvoker.InvokeAsync(arrangeInvocationContext, CancellationToken.None);
+
+            // Assert
+            mockServices.VerifyNoOtherCalls();
+
+            Assert.Equal(expectedPayload, actualPayload);
+        }
+
+        [Fact]
+        private async Task Should_resolve_on_shutdown_payload_argument_When_shutdown_reacting_on_shutdown_event()
+        {
+            // Arrange 
+            IStatefulServiceEventPayloadOnShutdown expectedPayload = new StatefulServiceEventPayloadOnShutdown(false);
+            IStatefulServiceEventPayloadOnShutdown actualPayload = default;
+
+            var mockServices = new Mock<IServiceProvider>();
+
+            var arrangeInvocationContext = new StatefulServiceDelegateInvocationContextOnShutdown(expectedPayload);
+            var arrangeServices = mockServices.Object;
+            var arrangeAction = new Action<IStatefulServiceEventPayloadOnShutdown>(payload => actualPayload = payload);
+
+            var arrangeInvoker = this.CreateInvokerInstance(arrangeAction, arrangeServices);
+
+            // Act
+            await arrangeInvoker.InvokeAsync(arrangeInvocationContext, CancellationToken.None);
+
+            // Assert
+            mockServices.VerifyNoOtherCalls();
+
+            Assert.Equal(expectedPayload, actualPayload);
+        }
     }
 
     public class StatelessServiceHostDelegateInvokerTests : ServiceHostDelegateInvokerTests<IStatelessServiceDelegateInvocationContext>
@@ -37,6 +115,30 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             IServiceProvider services)
         {
             return new StatelessServiceHostDelegateInvoker(@delegate, services);
+        }
+
+        [Fact]
+        private async Task Should_resolve_on_shutdown_payload_argument_When_shutdown_reacting_on_shutdown_event()
+        {
+            // Arrange 
+            IStatelessServiceEventPayloadOnShutdown expectedPayload = new StatelessServiceEventPayloadOnShutdown(false);
+            IStatelessServiceEventPayloadOnShutdown actualPayload = default;
+
+            var mockServices = new Mock<IServiceProvider>();
+
+            var arrangeInvocationContext = new StatelessServiceDelegateInvocationContextOnShutdown(expectedPayload);
+            var arrangeServices = mockServices.Object;
+            var arrangeAction = new Action<IStatelessServiceEventPayloadOnShutdown>(payload => actualPayload = payload);
+
+            var arrangeInvoker = this.CreateInvokerInstance(arrangeAction, arrangeServices);
+
+            // Act
+            await arrangeInvoker.InvokeAsync(arrangeInvocationContext, CancellationToken.None);
+
+            // Assert
+            mockServices.VerifyNoOtherCalls();
+
+            Assert.Equal(expectedPayload, actualPayload);
         }
     }
 
