@@ -1,7 +1,7 @@
 # CoherentSolutions.Extensions.Hosting.ServiceFabric
 
 ![build & test](https://codebuild.us-east-1.amazonaws.com/badges?uuid=eyJlbmNyeXB0ZWREYXRhIjoiUnE1c1A2RGNaNDVMUFBLaFhPNkxDeUxkVXZBT1lGT1JCcm9RUnZWWmxDSmFXMnB5TDk5UHBOT1FDSUpBNXM1NW8zUGRKbmlqQVgwdGVnRStVa0luOTRRPSIsIml2UGFyYW1ldGVyU3BlYyI6ImVpN3hVTDd0UTh6RzJMeFQiLCJtYXRlcmlhbFNldFNlcmlhbCI6MX0%3D&branch=master)
-[![nuget package](https://img.shields.io/badge/nuget-1.2.0-blue.svg)](https://www.nuget.org/packages/CoherentSolutions.Extensions.Hosting.ServiceFabric/1.2.0)
+[![nuget package](https://img.shields.io/badge/nuget-1.2.1-blue.svg)](https://www.nuget.org/packages/CoherentSolutions.Extensions.Hosting.ServiceFabric/1.2.1)
 
 ## About the Project
 
