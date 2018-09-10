@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CoherentSolutions.Extensions.Hosting.ServiceFabric" Version="1.2.0" />
+    <PackageReference Include="CoherentSolutions.Extensions.Hosting.ServiceFabric" Version="1.2.1" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.8" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.1.1" />
     <PackageReference Include="Microsoft.ServiceFabric" Version="6.3.176" />
