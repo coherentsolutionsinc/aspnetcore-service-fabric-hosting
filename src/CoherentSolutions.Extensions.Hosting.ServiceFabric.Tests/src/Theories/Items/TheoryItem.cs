@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Xunit.Abstractions;
 
@@ -111,6 +112,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             var provider = new TheoryItemExtensionProvider(this);
 
             var builder = new HostBuilder();
+            builder.ConfigureServices(
+                services =>
+                {
+                    services.Configure<ConsoleLifetimeOptions>(
+                        options => options.SuppressStatusMessages = true);  
+                });
 
             foreach (var configAction in this.configActions)
             {

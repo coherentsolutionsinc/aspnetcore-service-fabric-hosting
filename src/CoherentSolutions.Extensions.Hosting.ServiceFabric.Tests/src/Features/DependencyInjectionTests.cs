@@ -136,15 +136,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                         };
                     }
 
-                    yield return new object[]
-                    {
-                        new Case(TheoryItemsSet.StatefulServiceDelegate, typeof(IStatefulServiceDelegateInvocationContext))
-                    };
-                    yield return new object[]
-                    {
-                        new Case(TheoryItemsSet.StatelessServiceDelegate, typeof(IStatelessServiceDelegateInvocationContext))
-                    };
-
                     foreach (var item in TheoryItemsSet.AllListenerItems)
                     {
                         yield return new object[]
