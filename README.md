@@ -5,21 +5,24 @@
 
 ## About the Project
 
-**CoherentSolutions.Extensions.Hosting.ServiceFabric** changes a way how you develop **Reliable Services**. The main idea is simplify development process as much as possible by removing unnecessary code, improving separation of concern and making the whole process much easier and convenient by introducing set of friendly builders. 
+**CoherentSolutions.Extensions.Hosting.ServiceFabric** changes a way how [Service Fabric Reliable Services](https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-reliable-services-introduction) are developed. The main idea is to simplify development process as much as possible by removing unnecessary code, improving separation of concerns. 
 
 ## Getting Started
 
-As usual the easiest way to get started is to code something. Let's create a new **reliable service**!
+As usual, the easiest way to get started is to code something -> let's start from a new **reliable service**!
 
 > **NOTE**
 >
-> Please note that current section doesn't contain explanation of all the aspects of the **CoherentSolutions.Extensions.Hosting.ServiceFabric**. The full documentation can be found on [project wiki][1]. 
+> Please note that current section doesn't explain all the aspects of the **CoherentSolutions.Extensions.Hosting.ServiceFabric**. The complete documentation is available on [project wiki][1]. 
 
-In the **Getting Started** section we would develop Stateful Service with one **aspnetcore listener** (Kestrel), one **remoting listener** and one background job.
+In this section we would: 
+1. Configure one stateful service 
+2. Configure two access points (by configuring two listeners: aspnetcore and remoting) 
+3. Configure one background job (by configuring a delegate to run in `RunAsync`).
 
-Let's go!
+### Initial Setup
 
-All programs start with the entry point so the development of **reliable service** does too. When using **CoherentSolutions.Extensions.Hosting.ServiceFabric** the entry point setup starts from new instance of the [HostBuilder](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-2.1) class and default calls to `Build()` and `Run()`.
+Any program starts with the entry point and so does reliable services. When using **CoherentSolutions.Extensions.Hosting.ServiceFabric** the entry point setup starts with the new instance of the [HostBuilder](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-2.1) class and calls to `Build()` and `Run()` methods.
 
 ``` csharp
 private static void Main(string[] args)
@@ -30,7 +33,9 @@ private static void Main(string[] args)
 }
 ```
 
-Configuration of any service starts by calling `DefineStatefulService(...)` or `DefineStatelessService(...)` method. This method creates a new **service** building block ...
+The service configuration starts with a call to `DefineStatefulService(...)` extension method. This method accepts an action where all service configuration is done.
+
+ _You can find more details on [defining services](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Services) wiki page._
 
 ``` csharp
 private static void Main(string[] args)
@@ -42,7 +47,21 @@ private static void Main(string[] args)
 }
 ```
 
-... that should be bound to the service type from the `ServiceManifest.xml`. This can be done by calling `.UseServiceType(...)` method with the name of service type.
+> **NOTE**
+>
+> When speaking in context of **CoherentSolutions.Extensions.Hosting.ServiceFabric** the `Define...` method always creates a so called **building block**. In this case call to `DefineStatefulService` creates a new **service** block.
+
+The first step in configuration of any service (stateful or stateless) in **CoherentSolutions.Extensions.Hosting.ServiceFabric** is to link service configuration to one of the service service types defined in the `ServiceManifest.xml`. 
+
+``` xml
+<ServiceManifest Name="ServicePkg" Version="1.0.0">
+  <ServiceTypes>
+    <StatefulServiceType ServiceTypeName="ServiceType" HasPersistedState="true" />
+  </ServiceTypes>
+</ServiceManifest>
+```
+
+This link is create by using `UseServiceType(...)` method.
 
 ``` csharp
 private static void Main(string[] args)
@@ -58,7 +77,17 @@ private static void Main(string[] args)
 }
 ```
 
-Now when the initial setup is done we can start continue configuring **aspnetcore listener**. This is done by calling `.DefineAspNetCoreListener(...)` method. 
+This code is now ready to run but unfortunately it quite useless.
+
+### Configuring Access Point
+
+Reliable Services can expose endpoints. This exposure is represented in form of service listeners configured when replica is build. The **CoherentSolutions.Extensions.Hosting.ServiceFabric** provides a simple way to configure: ASP.NET Core based listeners (**AspNetCoreListener**) and Service Fabric Remoting Listeners (**RemotingListener**).
+ 
+ _You can find more details on [defining listeners](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Listeners#AspNetCoreListener) wiki page._
+
+#### ASP.NET Core
+
+The configuration of **AspNetCoreListener** looks very similar to service configuration. Configuration starts with a call to `.DefineAspNetCoreListener(...)` method. This method accepts an action where all configuration is done.
 
 ``` csharp
 private static void Main(string[] args)
@@ -76,7 +105,19 @@ private static void Main(string[] args)
 }
 ```
 
-This method creates new **listener** building block that gets bound to endpoint resource from `ServiceManifest.xml` by calling `.UseEndpoint(...)` method with the name of endpoint resource.
+The listener should be linked to one of the endpoint resources defined in the `ServiceManifest.xml`. 
+
+``` xml
+<ServiceManifest Name="ServicePkg" Version="1.0.0">
+  <Resources>
+    <Endpoints>
+      <Endpoint Name="ServiceEndpoint" />
+    </Endpoints>
+  </Resources>
+</ServiceManifest>
+```
+
+The linkage is done using `UseEndpoint(...)` method.
 
 ``` csharp
 private static void Main(string[] args)
@@ -98,7 +139,7 @@ private static void Main(string[] args)
 }
 ```
 
-Using `.ConfigureWebHost(...)` method we can configure underlying `IWebHost`.
+This listener is an infrastructure wrapper around the configuration process of `IWebHost`. The `IWebHost` configuration is done in `ConfigureWebHost(...)` method.
 
 ``` csharp
 private static void Main(string[] args)
@@ -122,31 +163,9 @@ private static void Main(string[] args)
 }
 ```
 
-Configuration of **remoting listener** requires _implementation interface_ that defines remoting methods accessible to client and _implementation class_ that implements the logic behind _implementation interface_.
+#### Remoting
 
-
-Simple _implementation interface_ ...
-
-``` csharp
-public interface IApiService : IService
-{
-    Task<string> GetVersionAsync();
-}
-```
-
-... and its _implementation class_
-
-``` csharp
-public class ApiServiceImpl : IApiService
-{
-    public Task<string> GetVersionAsync()
-    {
-        return Task.FromResult("1.0");
-    }
-}
-```
-
-Configuration of **remoting listener** is done by `.DefineRemotingListener(...)` method where listener is bound to endpoint resource ... 
+The basics of **RemotingListener** configuration are the same as for **AspNetCoreListener**. The main difference is that we use `DefineRemotingListener(...)` instead of `DefineAspNetCoreListener(...)`. 
 
 ``` csharp
 private static void Main(string[] args)
@@ -161,7 +180,8 @@ private static void Main(string[] args)
                     .DefineRemotingListener(
                         listenerBuilder =>
                         {
-                            listenerBuilder.UseEndpoint("ServiceEndpoint2");
+                            listenerBuilder
+                                .UseEndpoint("ServiceEndpoint2")
                         });
             })
         .Build()
@@ -169,7 +189,30 @@ private static void Main(string[] args)
 }
 ```
 
-... and remoting implementation is set by calling `.UseImplementation<T>(...)` method.
+The real difference with the remoting is how the _remoting API interface_ and _remoting class_ are done.
+
+The _remoting API interface_ defines the remoting endpoint API ...
+
+``` csharp
+public interface IApiService : IService
+{
+    Task<string> GetVersionAsync();
+}
+```
+
+... while _remoting class_ implements this API
+
+``` csharp
+public class ApiServiceImpl : IApiService
+{
+    public Task<string> GetVersionAsync()
+    {
+        return Task.FromResult("1.0");
+    }
+}
+```
+
+Configuration of the _remoting class_ is done with call to `UseImplementation<T>(...)` method.
 
 ``` csharp
 private static void Main(string[] args)
@@ -194,10 +237,30 @@ private static void Main(string[] args)
 }
 ```
 
-The listeners are successfully configured. All is left is a background job.
+### Configuring a Background Job
 
+Background jobs in **CoherentSolutions.Extensions.Hosting.ServiceFabric** are represented in form of so called **Delegates** which are configured by calling `DefineDefine(...)` method. 
 
-Background jobs in **CoherentSolutions.Extensions.Hosting.ServiceFabric** are represented as **delegates** which are configured by calling `.DefineDefine(...)` where using `.UseDelegate(...)` method we can set any `Action<...>` or `Func<..., Task>` to be executed as background job.
+ _You can find more details on [defining delegates](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Delegates) wiki page._
+
+``` csharp
+private static void Main(string[] args)
+{
+    new HostBuilder()
+        .DefineStatefulService(
+            serviceBuilder =>
+            {
+                serviceBuilder
+                    .UseServiceType(...)
+                    .DefineAspNetCoreListener(...)
+                    .DefineRemotingListener(...)
+                    .DefineDelegate(delegateBuilder => { })
+            })
+        .Build()
+        .Run();
+}
+```
+The action to execute is configured by calling `UseDelegate(...)` method with accepts any `Action<...>` or `Func<..., Task>` compatible delegate.
 
 ``` csharp
 private static void Main(string[] args)
@@ -221,9 +284,11 @@ private static void Main(string[] args)
 }
 ```
 
+### Conclusion
+
 That is it :)
 
-### Documentation
+## Documentation
 
 For project documentation please refer to [project wiki][1].
 
