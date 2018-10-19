@@ -1,17 +1,22 @@
 ﻿using System;
-using System.Fabric;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public class StatefulServiceEventSource
     {
-        public Func<StatefulServiceContext, IServiceEventSource> CreateEventSourceFunc { get; }
+        public Func<IServiceEventSource> CreateEventSourceFunc { get; }
 
         public StatefulServiceEventSource(
-            Func<StatefulServiceContext, IServiceEventSource> eventSourceFunc)
+            Func<IServiceEventSource> eventSourceFunc)
         {
-            this.CreateEventSourceFunc = eventSourceFunc
-             ?? throw new ArgumentNullException(nameof(eventSourceFunc));
+            if (eventSourceFunc == null)
+            {
+                throw new ArgumentNullException(nameof(eventSourceFunc));
+            }
+
+            var lazy = new Lazy<IServiceEventSource>(eventSourceFunc);
+
+            this.CreateEventSourceFunc = () => lazy.Value;
         }
     }
 }

@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Fabric;
 
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.DependencyInjection;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Exceptions;
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.DependencyInjection.Extensions;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator.DependencyInjection;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -58,9 +61,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 Func<IServiceProvider, TImplementation> factoryFunc)
                 where TImplementation : IRemotingImplementation
             {
-                this.RemotingImplementationFunc = factoryFunc == null
-                    ? provider => ActivatorUtilities.CreateInstance<TImplementation>(provider)
-                    : (Func<IServiceProvider, IRemotingImplementation>) (provider => factoryFunc(provider));
+                if (factoryFunc == null)
+                {
+                    throw new ArgumentNullException(nameof(factoryFunc));
+                }
+
+                this.RemotingImplementationFunc = provider => factoryFunc(provider);
             }
 
             public void UseSettings(
@@ -74,18 +80,24 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 Func<IServiceProvider, TSerializationProvider> factoryFunc)
                 where TSerializationProvider : IServiceRemotingMessageSerializationProvider
             {
-                this.RemotingSerializationProviderFunc = factoryFunc == null
-                    ? provider => ActivatorUtilities.CreateInstance<TSerializationProvider>(provider)
-                    : (Func<IServiceProvider, IServiceRemotingMessageSerializationProvider>) (provider => factoryFunc(provider));
+                if (factoryFunc == null)
+                {
+                    throw new ArgumentNullException(nameof(factoryFunc));
+                }
+
+                this.RemotingSerializationProviderFunc = provider => factoryFunc(provider);
             }
 
             public void UseHandler<THandler>(
                 Func<IServiceProvider, THandler> factoryFunc)
                 where THandler : IServiceRemotingMessageHandler
             {
-                this.RemotingHandlerFunc = factoryFunc == null
-                    ? provider => ActivatorUtilities.CreateInstance<THandler>(provider)
-                    : (Func<IServiceProvider, IServiceRemotingMessageHandler>) (provider => factoryFunc(provider));
+                if (factoryFunc == null)
+                {
+                    throw new ArgumentNullException(nameof(factoryFunc));
+                }
+
+                this.RemotingHandlerFunc = provider => factoryFunc(provider);
             }
 
             private static FabricTransportServiceRemotingListener DefaultRemotingCommunicationListenerFunc(
@@ -159,13 +171,18 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                     var loggerOptions = parameters.LoggerOptionsFunc();
                     if (loggerOptions == null)
                     {
-                        throw new FactoryProducesNullInstanceException<IServiceHostLoggerOptions>();
+                        throw new FactoryProducesNullInstanceException<IConfigurableObjectLoggerOptions>();
                     }
 
                     dependenciesCollection.AddLogging(
                         builder =>
                         {
-                            builder.AddProvider(new ServiceHostRemotingListenerLoggerProvider(listenerInformation, loggerOptions, serviceEventSource));
+                            builder.AddProvider(
+                                new ServiceHostRemotingListenerLoggerProvider(
+                                    listenerInformation,
+                                    serviceContext,
+                                    serviceEventSource,
+                                    loggerOptions));
                         });
 
                     // Possible point of proxination

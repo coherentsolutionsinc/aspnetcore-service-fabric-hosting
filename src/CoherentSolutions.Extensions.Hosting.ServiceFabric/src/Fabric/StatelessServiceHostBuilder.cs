@@ -9,6 +9,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
               IStatelessServiceHost,
               IStatelessServiceHostBuilderParameters,
               IStatelessServiceHostBuilderConfigurator,
+              IStatelessServiceHostEventSourceReplicableTemplate,
+              IStatelessServiceHostEventSourceReplicaTemplate,
+              IStatelessServiceHostEventSourceReplicator,
               IStatelessServiceHostDelegateReplicableTemplate,
               IStatelessServiceHostDelegateReplicaTemplate,
               IStatelessServiceHostDelegateReplicator,
@@ -29,11 +32,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 this.RuntimeRegistrantFunc = DefaultRuntimeRegistrant;
 
-                this.UseDelegateReplicaTemplate(DefaultDelegateReplicaTemplate);
-                this.UseDelegateReplicator(DefaultDelegateReplicatorFactory);
-                this.UseAspNetCoreListenerReplicaTemplate(DefaultAspNetCoreListenerReplicaTemplate);
-                this.UseRemotingListenerReplicaTemplate(DefaultRemotingListenerReplicaTemplate);
-                this.UseListenerReplicator(DefaultListenerReplicatorFactory);
+                this.UseEventSourceReplicaTemplate(DefaultEventSourceReplicaTemplateFunc);
+                this.UseEventSourceReplicator(DefaultEventSourceReplicatorFunc);
+                this.UseDelegateReplicaTemplate(DefaultDelegateReplicaTemplateFunc);
+                this.UseDelegateReplicator(DefaultDelegateReplicatorFunc);
+                this.UseAspNetCoreListenerReplicaTemplate(DefaultAspNetCoreListenerReplicaTemplateFunc);
+                this.UseRemotingListenerReplicaTemplate(DefaultRemotingListenerReplicaTemplateFunc);
+                this.UseListenerReplicator(DefaultListenerReplicatorFunc);
             }
 
             public void UseRuntimeRegistrant(
@@ -43,33 +48,44 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                  ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
 
+            private static IStatelessServiceHostEventSourceReplicaTemplate DefaultEventSourceReplicaTemplateFunc()
+            {
+                return new StatelessServiceHostEventSourceReplicaTemplate();
+            }
+
             private static IStatelessServiceRuntimeRegistrant DefaultRuntimeRegistrant()
             {
                 return new StatelessServiceRuntimeRegistrant();
             }
 
-            private static IStatelessServiceHostDelegateReplicaTemplate DefaultDelegateReplicaTemplate()
+            private static IStatelessServiceHostEventSourceReplicator DefaultEventSourceReplicatorFunc(
+                IStatelessServiceHostEventSourceReplicableTemplate replicableTemplate)
+            {
+                return new StatelessServiceHostEventSourceReplicator(replicableTemplate);
+            }
+
+            private static IStatelessServiceHostDelegateReplicaTemplate DefaultDelegateReplicaTemplateFunc()
             {
                 return new StatelessServiceHostDelegateReplicaTemplate();
             }
 
-            private static IStatelessServiceHostDelegateReplicator DefaultDelegateReplicatorFactory(
+            private static IStatelessServiceHostDelegateReplicator DefaultDelegateReplicatorFunc(
                 IStatelessServiceHostDelegateReplicableTemplate template)
             {
                 return new StatelessServiceHostDelegateReplicator(template);
             }
 
-            private static IStatelessServiceHostAspNetCoreListenerReplicaTemplate DefaultAspNetCoreListenerReplicaTemplate()
+            private static IStatelessServiceHostAspNetCoreListenerReplicaTemplate DefaultAspNetCoreListenerReplicaTemplateFunc()
             {
                 return new StatelessServiceHostAspNetCoreListenerReplicaTemplate();
             }
 
-            private static IStatelessServiceHostRemotingListenerReplicaTemplate DefaultRemotingListenerReplicaTemplate()
+            private static IStatelessServiceHostRemotingListenerReplicaTemplate DefaultRemotingListenerReplicaTemplateFunc()
             {
                 return new StatelessServiceHostRemotingListenerReplicaTemplate();
             }
 
-            private static IStatelessServiceHostListenerReplicator DefaultListenerReplicatorFactory(
+            private static IStatelessServiceHostListenerReplicator DefaultListenerReplicatorFunc(
                 IStatelessServiceHostListenerReplicableTemplate template)
             {
                 return new StatelessServiceHostListenerReplicator(template);
@@ -93,6 +109,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             return new StatelessServiceHost(
                 parameters.ServiceTypeName,
                 registrant,
+                compilation.EventSourceReplicator,
                 compilation.DelegateReplicators,
                 compilation.ListenerReplicators);
         }

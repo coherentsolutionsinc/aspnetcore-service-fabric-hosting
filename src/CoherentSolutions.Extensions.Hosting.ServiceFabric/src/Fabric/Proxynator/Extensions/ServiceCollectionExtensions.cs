@@ -1,10 +1,11 @@
 ﻿using System;
-using System.Fabric;
 using System.Linq;
+
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator.DependencyInjection;
 
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator.Extensions
 {
     public static class ServiceCollectionExtensions
     {

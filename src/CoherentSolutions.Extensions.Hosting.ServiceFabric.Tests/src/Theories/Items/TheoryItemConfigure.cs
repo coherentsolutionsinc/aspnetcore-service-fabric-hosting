@@ -49,13 +49,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                    .ToArray();
 
                 var sourceInvocationExpression = Expression.Call(
-                    Expression.Constant(source), 
-                    sourceDynamicInvokeMethod, 
+                    Expression.Constant(source),
+                    sourceDynamicInvokeMethod,
                     Expression.NewArrayInit(typeof(object), sourceParameterExpressions));
 
                 var hookInvocationExpression = Expression.Call(
-                    Expression.Constant(hook), 
-                    hookDynamicInvokeMethod, 
+                    Expression.Constant(hook),
+                    hookDynamicInvokeMethod,
                     Expression.NewArrayInit(typeof(object), hookParameterExpressions));
 
                 return Expression.Lambda(
@@ -166,6 +166,28 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             {
                 return this.implementation.UseSetting(key, value);
             }
+        }
+
+        public static void ConfigureEventSourceExtensions(
+            IStatefulServiceHostBuilderConfigurator configurator,
+            TheoryItem.TheoryItemExtensionProvider extensions)
+        {
+            configurator.SetupEventSource(
+                eventSourceBuilder =>
+                {
+                    eventSourceBuilder.ConfigureObject(c => ConfigureEventSourceExtensions(c, extensions));
+                });
+        }
+
+        public static void ConfigureEventSourceExtensions(
+            IStatelessServiceHostBuilderConfigurator configurator,
+            TheoryItem.TheoryItemExtensionProvider extensions)
+        {
+            configurator.SetupEventSource(
+                eventSourceBuilder =>
+                {
+                    eventSourceBuilder.ConfigureObject(c => ConfigureEventSourceExtensions(c, extensions));
+                });
         }
 
         public static void ConfigureDelegateExtensions(
@@ -295,6 +317,33 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                 listenerBuilder =>
                 {
                     listenerBuilder.ConfigureObject(c => ConfigureRemotingListenerExtensions(c, extensions));
+                });
+        }
+
+        private static void ConfigureEventSourceExtensions(
+            IServiceHostEventSourceReplicaTemplateConfigurator configurator,
+            TheoryItem.TheoryItemExtensionProvider extensions)
+        {
+            var useDependencies = extensions.GetExtension<IUseDependenciesTheoryExtension>();
+            var useEventSourceImplementation = extensions.GetExtension<IUseEventSourceImplementationTheoryExtension>();
+            var configureDependencies = extensions.GetExtension<IConfigureDependenciesTheoryExtension>();
+            var pickDependency = extensions.GetExtension<IPickDependencyTheoryExtension>();
+
+            configurator.UseDependencies(useDependencies.Factory);
+            configurator.ConfigureDependencies(
+                dependencies =>
+                {
+                    configureDependencies.ConfigAction(dependencies);
+                });
+            configurator.UseImplementation(
+                provider =>
+                {
+                    foreach (var action in pickDependency.PickActions)
+                    {
+                        action(provider);
+                    }
+
+                    return useEventSourceImplementation.Factory(provider);
                 });
         }
 

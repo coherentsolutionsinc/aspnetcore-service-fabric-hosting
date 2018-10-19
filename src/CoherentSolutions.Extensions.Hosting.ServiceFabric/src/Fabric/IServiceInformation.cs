@@ -5,7 +5,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
     public interface IServiceInformation
     {
         ServiceContext GetContext();
-        IServicePartition GetPartition();
 
+        IServicePartition GetPartition();
     }
 }

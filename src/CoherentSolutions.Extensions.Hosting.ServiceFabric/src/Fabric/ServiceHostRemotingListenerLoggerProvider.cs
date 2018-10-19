@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Fabric;
+
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 using Microsoft.Extensions.Logging;
 
@@ -8,15 +11,21 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
     {
         private readonly IServiceHostRemotingListenerInformation listenerInformation;
 
-        private readonly IServiceHostLoggerOptions loggerOptions;
+        private readonly ServiceContext serviceContext;
+
+        private readonly IConfigurableObjectLoggerOptions loggerOptions;
 
         private readonly IServiceEventSource eventSource;
 
         public ServiceHostRemotingListenerLoggerProvider(
             IServiceHostRemotingListenerInformation listenerInformation,
-            IServiceHostLoggerOptions loggerOptions,
-            IServiceEventSource eventSource)
+            ServiceContext serviceContext,
+            IServiceEventSource eventSource,
+            IConfigurableObjectLoggerOptions loggerOptions)
         {
+            this.serviceContext = serviceContext
+             ?? throw new ArgumentNullException(nameof(serviceContext));
+
             this.listenerInformation = listenerInformation
              ?? throw new ArgumentNullException(nameof(listenerInformation));
 
@@ -30,7 +39,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         protected override ILogger CreateLoggerInstance(
             string categoryName)
         {
-            return new ServiceHostRemotingListenerLogger(this.listenerInformation, this.eventSource, categoryName, this.loggerOptions);
+            return new ServiceHostRemotingListenerLogger(
+                this.listenerInformation,
+                this.serviceContext,
+                this.eventSource,
+                categoryName,
+                this.loggerOptions);
         }
     }
 }

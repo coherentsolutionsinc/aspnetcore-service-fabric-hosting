@@ -13,6 +13,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         public string EventName { get; set; }
 
         [EventField]
+        public EventLevel EventLevel { get; set; }
+
+        [EventField]
+        public EventOpcode EventOpCode { get; set; }
+
+        [EventField]
         public string EventCategoryName { get; set; }
 
         [EventField]

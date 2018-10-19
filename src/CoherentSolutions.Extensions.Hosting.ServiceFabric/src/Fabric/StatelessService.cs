@@ -1,19 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Tracing;
 using System.Fabric;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common;
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Exceptions;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Extensions;
 
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public class StatelessService : Microsoft.ServiceFabric.Services.Runtime.StatelessService, IStatelessService
+    public class StatelessService
+        : Microsoft.ServiceFabric.Services.Runtime.StatelessService,
+          IStatelessService,
+          IStatelessServiceInformation
     {
         private class ServiceEvents
         {
@@ -43,9 +46,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             }
         }
 
-        private readonly ServiceEventSource eventSource;
-
         private readonly ServiceEvents serviceEvents;
+
+        private readonly StatelessServiceEventSource serviceEventSource;
 
         private readonly ILookup<StatelessServiceLifecycleEvent, StatelessServiceDelegate> serviceDelegates;
 
@@ -53,16 +56,18 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
         public StatelessService(
             StatelessServiceContext serviceContext,
+            IStatelessServiceHostEventSourceReplicator serviceEventSourceReplicator,
             IReadOnlyList<IStatelessServiceHostDelegateReplicator> serviceDelegateReplicators,
             IReadOnlyList<IStatelessServiceHostListenerReplicator> serviceListenerReplicators)
             : base(serviceContext)
         {
-            this.eventSource = new ServiceEventSource(
-                serviceContext,
-                $"{serviceContext.CodePackageActivationContext.ApplicationTypeName}.{serviceContext.ServiceTypeName}",
-                EventSourceSettings.EtwSelfDescribingEventFormat);
-
             this.serviceEvents = new ServiceEvents();
+
+            this.serviceEventSource = serviceEventSourceReplicator.ReplicateFor(this);
+            if (this.serviceEventSource == null)
+            {
+                throw new ReplicatorProducesNullInstanceException<StatelessServiceEventSource>();
+            }
 
             if (serviceDelegateReplicators != null)
             {
@@ -71,6 +76,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                         replicator =>
                         {
                             var @delegate = replicator.ReplicateFor(this);
+                            if (@delegate == null)
+                            {
+                                throw new ReplicatorProducesNullInstanceException<StatelessServiceDelegate>();
+                            }
+
                             return @delegate.Event.GetBitFlags().Select(v => (v, @delegate));
                         })
                    .ToLookup(kv => kv.v, kv => kv.@delegate);
@@ -79,7 +89,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             if (serviceListenerReplicators != null)
             {
                 this.serviceListeners = serviceListenerReplicators
-                   .Select(replicator => replicator.ReplicateFor(this))
+                   .Select(
+                        replicator =>
+                        {
+                            var listener = replicator.ReplicateFor(this);
+                            if (listener == null)
+                            {
+                                throw new ReplicatorProducesNullInstanceException<ServiceInstanceListener>();
+                            }
+
+                            return listener;
+                        })
                    .ToList();
             }
             else
@@ -175,12 +195,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
         public IServiceEventSource GetEventSource()
         {
-            return this.eventSource;
+            return this.CreateEventSource();
         }
 
         public IServicePartition GetPartition()
         {
             return this.Partition;
+        }
+
+        private IServiceEventSource CreateEventSource()
+        {
+            return this.GetServiceEventSource().CreateEventSourceFunc();
         }
 
         private async Task InvokeDelegates(
@@ -211,6 +236,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             return this.serviceDelegates == null
                 ? Enumerable.Empty<StatelessServiceDelegate>()
                 : this.serviceDelegates[@event];
+        }
+
+        private StatelessServiceEventSource GetServiceEventSource()
+        {
+            return this.serviceEventSource;
         }
     }
 }

@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Fabric;
+
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
@@ -9,10 +12,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
         protected ServiceHostListenerLogger(
             IServiceHostListenerInformation listenerInformation,
+            ServiceContext serviceContext,
             IServiceEventSource eventSource,
             string eventCategoryName,
-            IServiceHostLoggerOptions options)
-            : base(eventSource, eventCategoryName, options)
+            IConfigurableObjectLoggerOptions options)
+            : base(serviceContext, eventSource, eventCategoryName, options)
         {
             this.listenerInformation = listenerInformation
              ?? throw new ArgumentNullException(nameof(listenerInformation));

@@ -1,8 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools
 {
-    public interface IServiceHostLoggerOptions
+    public interface IConfigurableObjectLoggerOptions
     {
         LogLevel LogLevel { get; }
 

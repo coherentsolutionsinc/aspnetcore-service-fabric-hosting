@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,6 +18,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 {
     public static class StatefulServiceLifecycleTests
     {
+        private static IStatefulServiceHostEventSourceReplicator MockStatefulServiceHostEventSourceReplicator()
+        {
+            var mockEventSourceReplicator = new Mock<IStatefulServiceHostEventSourceReplicator>();
+            mockEventSourceReplicator
+               .Setup(instance => instance.ReplicateFor(It.IsAny<IStatefulServiceInformation>()))
+               .Returns(new StatefulServiceEventSource(() => new Mock<IServiceEventSource>().Object));
+
+            return mockEventSourceReplicator.Object;
+        }
+
         private static IStatefulServiceHostDelegateReplicator MockStatefulServiceHostDelegateReplicatorForEvent(
             Action mockDelegate,
             StatefulServiceLifecycleEvent mockEvent)
@@ -117,32 +126,35 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                .Callback(() => actualCallStack.Enqueue("listener.Close"))
                .Verifiable();
 
+            var mockEventSourceReplicator = MockStatefulServiceHostEventSourceReplicator();
             var mockDelegateReplicators = new[]
             {
                 MockStatefulServiceHostDelegateReplicatorForEvent(
-                    mockDelegateServiceStartup.Object, 
+                    mockDelegateServiceStartup.Object,
                     StatefulServiceLifecycleEvent.OnStartup),
-
                 MockStatefulServiceHostDelegateReplicatorForEvent(
-                    mockDelegateServiceChangeRole.Object, 
+                    mockDelegateServiceChangeRole.Object,
                     StatefulServiceLifecycleEvent.OnChangeRole),
-
                 MockStatefulServiceHostDelegateReplicatorForEvent(
-                    mockDelegateServiceRun.Object, 
+                    mockDelegateServiceRun.Object,
                     StatefulServiceLifecycleEvent.OnRun),
-
                 MockStatefulServiceHostDelegateReplicatorForEvent(
-                    mockDelegateServiceShutdown.Object, 
+                    mockDelegateServiceShutdown.Object,
                     StatefulServiceLifecycleEvent.OnShutdown)
             };
             var mockListenerReplicators = new[]
             {
                 MockListenerReplicator(
-                    openAsyncDelegate: mockDelegateListenerOpen.Object,
-                    closeAsyncDelegate: mockDelegateListenerClose.Object)
+                    mockDelegateListenerOpen.Object,
+                    mockDelegateListenerClose.Object)
             };
 
-            var statefulService = new StatefulService(MockStatefulServiceContextFactory.Default, mockDelegateReplicators, mockListenerReplicators);
+            var statefulService = new StatefulService(
+                MockStatefulServiceContextFactory.Default,
+                mockEventSourceReplicator,
+                mockDelegateReplicators,
+                mockListenerReplicators);
+
             var statefulReplica = new MockStatefulServiceReplica(statefulService);
 
             // Act
@@ -164,29 +176,77 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             Assert.Equal(12, actualCallStack.Count);
 
             // startup
-            Assert.Equal("service.Startup", actualCallStack.TryDequeue(out var result) ? result : null);
+            Assert.Equal(
+                "service.Startup",
+                actualCallStack.TryDequeue(out var result)
+                    ? result
+                    : null);
 
-            Assert.Equal("listener.Open", actualCallStack.TryDequeue(out result) ? result : null);
+            Assert.Equal(
+                "listener.Open",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
 
-            Assert.Equal("service.ChangeRole", actualCallStack.TryDequeue(out result) ? result : null);
-            Assert.Equal("service.Run", actualCallStack.TryDequeue(out result) ? result : null);
+            Assert.Equal(
+                "service.ChangeRole",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
+            Assert.Equal(
+                "service.Run",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
 
             // demote
-            Assert.Equal("listener.Close", actualCallStack.TryDequeue(out result) ? result : null);
+            Assert.Equal(
+                "listener.Close",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
 
-            Assert.Equal("service.ChangeRole", actualCallStack.TryDequeue(out result) ? result : null);
+            Assert.Equal(
+                "service.ChangeRole",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
 
             // promote
-            Assert.Equal("listener.Open", actualCallStack.TryDequeue(out result) ? result : null);
+            Assert.Equal(
+                "listener.Open",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
 
-            Assert.Equal("service.ChangeRole", actualCallStack.TryDequeue(out result) ? result : null);
-            Assert.Equal("service.Run", actualCallStack.TryDequeue(out result) ? result : null);
+            Assert.Equal(
+                "service.ChangeRole",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
+            Assert.Equal(
+                "service.Run",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
 
             // shutdown
-            Assert.Equal("listener.Close", actualCallStack.TryDequeue(out result) ? result : null);
+            Assert.Equal(
+                "listener.Close",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
 
-            Assert.Equal("service.ChangeRole", actualCallStack.TryDequeue(out result) ? result : null);
-            Assert.Equal("service.Shutdown", actualCallStack.TryDequeue(out result) ? result : null);
+            Assert.Equal(
+                "service.ChangeRole",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
+            Assert.Equal(
+                "service.Shutdown",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
         }
 
         [Fact]
@@ -212,14 +272,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                .Callback(() => actualCallStack.Enqueue("listener.Close"))
                .Verifiable();
 
+            var mockEventSourceReplicator = MockStatefulServiceHostEventSourceReplicator();
             var mockDelegateReplicators = new[]
             {
                 MockStatefulServiceHostDelegateReplicatorForEvent(
-                    mockDelegateServiceShutdown.Object, 
+                    mockDelegateServiceShutdown.Object,
                     StatefulServiceLifecycleEvent.OnShutdown),
-
                 MockStatefulServiceHostDelegateReplicatorForEvent(
-                    mockDelegateServiceChangeRole.Object, 
+                    mockDelegateServiceChangeRole.Object,
                     StatefulServiceLifecycleEvent.OnChangeRole)
             };
             var mockListenerReplicators = new[]
@@ -228,7 +288,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                     closeAsyncDelegate: mockDelegateListenerClose.Object)
             };
 
-            var statefulService = new StatefulService(MockStatefulServiceContextFactory.Default, mockDelegateReplicators, mockListenerReplicators);
+            var statefulService = new StatefulService(
+                MockStatefulServiceContextFactory.Default,
+                mockEventSourceReplicator,
+                mockDelegateReplicators,
+                mockListenerReplicators);
+
             var statefulReplica = new MockStatefulServiceReplica(statefulService);
 
             // Act
@@ -242,10 +307,22 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
             Assert.Equal(3, actualCallStack.Count);
 
-            Assert.Equal("listener.Close", actualCallStack.TryDequeue(out var result) ? result : null);
+            Assert.Equal(
+                "listener.Close",
+                actualCallStack.TryDequeue(out var result)
+                    ? result
+                    : null);
 
-            Assert.Equal("service.ChangeRole", actualCallStack.TryDequeue(out result) ? result : null);
-            Assert.Equal("service.Shutdown", actualCallStack.TryDequeue(out result) ? result : null);
+            Assert.Equal(
+                "service.ChangeRole",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
+            Assert.Equal(
+                "service.Shutdown",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
         }
 
         [Fact]
@@ -278,27 +355,31 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                .Callback(() => actualCallStack.Enqueue("listener.Open"))
                .Verifiable();
 
+            var mockEventSourceReplicator = MockStatefulServiceHostEventSourceReplicator();
             var mockDelegateReplicators = new[]
             {
                 MockStatefulServiceHostDelegateReplicatorForEvent(
-                    mockDelegateServiceStartup.Object, 
+                    mockDelegateServiceStartup.Object,
                     StatefulServiceLifecycleEvent.OnStartup),
-
                 MockStatefulServiceHostDelegateReplicatorForEvent(
-                    mockDelegateServiceChangeRoleAsync.Object, 
+                    mockDelegateServiceChangeRoleAsync.Object,
                     StatefulServiceLifecycleEvent.OnChangeRole),
-
                 MockStatefulServiceHostDelegateReplicatorForEvent(
-                    mockDelegateServiceRun.Object, 
+                    mockDelegateServiceRun.Object,
                     StatefulServiceLifecycleEvent.OnRun),
             };
             var mockListenerReplicators = new[]
             {
                 MockListenerReplicator(
-                    openAsyncDelegate: mockDelegateListenerOpen.Object)
+                    mockDelegateListenerOpen.Object)
             };
 
-            var statefulService = new StatefulService(MockStatefulServiceContextFactory.Default, mockDelegateReplicators, mockListenerReplicators);
+            var statefulService = new StatefulService(
+                MockStatefulServiceContextFactory.Default,
+                mockEventSourceReplicator,
+                mockDelegateReplicators,
+                mockListenerReplicators);
+
             var statefulReplica = new MockStatefulServiceReplica(statefulService);
 
             // Act
@@ -313,12 +394,28 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
             Assert.Equal(4, actualCallStack.Count);
 
-            Assert.Equal("service.Startup", actualCallStack.TryDequeue(out var result) ? result : null);
+            Assert.Equal(
+                "service.Startup",
+                actualCallStack.TryDequeue(out var result)
+                    ? result
+                    : null);
 
-            Assert.Equal("listener.Open", actualCallStack.TryDequeue(out result) ? result : null);
+            Assert.Equal(
+                "listener.Open",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
 
-            Assert.Equal("service.ChangeRole", actualCallStack.TryDequeue(out result) ? result : null);
-            Assert.Equal("service.Run", actualCallStack.TryDequeue(out result) ? result : null);
+            Assert.Equal(
+                "service.ChangeRole",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
+            Assert.Equal(
+                "service.Run",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
         }
     }
 }

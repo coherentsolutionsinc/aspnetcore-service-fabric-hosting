@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator.DependencyInjection
 {
     public class ProxynatorAwareServiceProvider : IServiceProvider
     {

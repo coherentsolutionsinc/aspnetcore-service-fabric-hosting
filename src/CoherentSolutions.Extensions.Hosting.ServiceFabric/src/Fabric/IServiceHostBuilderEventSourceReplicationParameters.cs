@@ -1,10 +1,9 @@
 ﻿using System;
-using System.Fabric;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public interface IServiceHostBuilderEventSourceParameters
+    public interface IServiceHostBuilderEventSourceReplicationParameters<in TReplicableTemplate, out TReplicator>
     {
-        Func<ServiceContext, IServiceEventSource> EventSourceFunc { get; }
+        Func<TReplicableTemplate, TReplicator> EventSourceReplicatorFunc { get; }
     }
 }

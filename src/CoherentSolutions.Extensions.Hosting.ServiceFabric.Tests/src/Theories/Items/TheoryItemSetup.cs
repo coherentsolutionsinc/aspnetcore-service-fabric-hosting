@@ -1,5 +1,4 @@
 ﻿using System;
-using Xunit.Abstractions;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Items
 {
@@ -7,11 +6,21 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
     public enum TheoryItemSetup
     {
         None,
+
+        AsStatefulEventSource,
+
+        AsStatelessEventSource,
+
         AsStatefulDelegate,
+
         AsStatelessDelegate,
+
         AsStatefulAspNetCoreListener,
+
         AsStatelessAspNetCoreListener,
+
         AsStatefulRemotingListener,
+
         AsStatelessRemotingListener
     }
 }

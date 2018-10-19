@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.DependencyInjection
 {
     public class ReplaceAwareServiceProvider : IServiceProvider
     {

@@ -4,6 +4,5 @@
         : IStatelessServiceHostEventSourceReplicableTemplate,
           IServiceHostEventSourceReplicaTemplate<IStatelessServiceHostEventSourceReplicaTemplateConfigurator>
     {
-        
     }
 }

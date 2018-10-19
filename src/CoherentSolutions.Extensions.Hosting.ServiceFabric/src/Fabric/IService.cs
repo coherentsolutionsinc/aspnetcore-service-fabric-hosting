@@ -6,8 +6,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
     {
         ServiceContext GetContext();
 
-        IServiceEventSource GetEventSource();
-
         IServicePartition GetPartition();
+
+        IServiceEventSource GetEventSource();
     }
 }

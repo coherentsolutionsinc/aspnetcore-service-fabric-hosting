@@ -3,7 +3,9 @@ using System.Fabric;
 using System.Linq;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Exceptions;
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.DependencyInjection.Extensions;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator.AspNetCore;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
@@ -159,7 +161,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                             var loggerOptions = parameters.LoggerOptionsFunc();
                             if (loggerOptions == null)
                             {
-                                throw new FactoryProducesNullInstanceException<IServiceHostLoggerOptions>();
+                                throw new FactoryProducesNullInstanceException<IConfigurableObjectLoggerOptions>();
                             }
 
                             services.AddLogging(
@@ -168,8 +170,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                     config.AddProvider(
                                         new ServiceHostAspNetCoreListenerLoggerProvider(
                                             listenerInformation,
-                                            loggerOptions,
-                                            serviceEventSource));
+                                            serviceContext,
+                                            serviceEventSource,
+                                            loggerOptions));
                                 });
 
                             // Possible point of proxination

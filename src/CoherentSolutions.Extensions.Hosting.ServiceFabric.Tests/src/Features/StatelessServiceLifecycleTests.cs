@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -19,6 +18,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 {
     public static class StatelessServiceLifecycleTests
     {
+        private static IStatelessServiceHostEventSourceReplicator MockStatefulServiceHostEventSourceReplicator()
+        {
+            var mockEventSourceReplicator = new Mock<IStatelessServiceHostEventSourceReplicator>();
+            mockEventSourceReplicator
+               .Setup(instance => instance.ReplicateFor(It.IsAny<IStatelessServiceInformation>()))
+               .Returns(new StatelessServiceEventSource(() => new Mock<IServiceEventSource>().Object));
+
+            return mockEventSourceReplicator.Object;
+        }
+
         private static IStatelessServiceHostDelegateReplicator MockDelegateReplicatorForEvent(
             Action mockDelegate,
             StatelessServiceLifecycleEvent mockEvent)
@@ -93,10 +102,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                .Callback(() => actualCallStack.Enqueue("listener.Close"))
                .Verifiable();
 
+            var mockEventSourceReplicator = MockStatefulServiceHostEventSourceReplicator();
             var mockDelegateReplicators = new[]
             {
                 MockDelegateReplicatorForEvent(
-                    mockDelegateServiceShutdown.Object, 
+                    mockDelegateServiceShutdown.Object,
                     StatelessServiceLifecycleEvent.OnShutdown),
             };
             var mockListenerReplicators = new[]
@@ -106,7 +116,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             };
 
             var statelessService = new MockStatelessServiceInstance(
-                new StatelessService(MockStatelessServiceContextFactory.Default, mockDelegateReplicators, mockListenerReplicators));
+                new StatelessService(
+                    MockStatelessServiceContextFactory.Default,
+                    mockEventSourceReplicator,
+                    mockDelegateReplicators,
+                    mockListenerReplicators));
 
             // Act
             await statelessService.InitiateShutdownSequenceAsync();
@@ -118,9 +132,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
             Assert.Equal(2, actualCallStack.Count);
 
-            Assert.Equal("listener.Close", actualCallStack.TryDequeue(out var result) ? result : null);
+            Assert.Equal(
+                "listener.Close",
+                actualCallStack.TryDequeue(out var result)
+                    ? result
+                    : null);
 
-            Assert.Equal("service.Shutdown", actualCallStack.TryDequeue(out result) ? result : null);
+            Assert.Equal(
+                "service.Shutdown",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
         }
 
         [Fact]
@@ -147,25 +169,29 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                .Callback(() => actualCallStack.Enqueue("listener.Open"))
                .Verifiable();
 
+            var mockEventSourceReplicator = MockStatefulServiceHostEventSourceReplicator();
             var mockDelegateReplicators = new[]
             {
                 MockDelegateReplicatorForEvent(
-                    mockDelegateServiceStartup.Object, 
+                    mockDelegateServiceStartup.Object,
                     StatelessServiceLifecycleEvent.OnStartup),
-
                 MockDelegateReplicatorForEvent(
-                    mockDelegateServiceRun.Object, 
+                    mockDelegateServiceRun.Object,
                     StatelessServiceLifecycleEvent.OnRun)
             };
 
             var mockListenerReplicators = new[]
             {
                 MockListenerReplicator(
-                    openAsyncDelegate: mockDelegateListenerOpen.Object)
+                    mockDelegateListenerOpen.Object)
             };
 
             var statelessInstance = new MockStatelessServiceInstance(
-                new StatelessService(MockStatelessServiceContextFactory.Default, mockDelegateReplicators, mockListenerReplicators));
+                new StatelessService(
+                    MockStatelessServiceContextFactory.Default,
+                    mockEventSourceReplicator,
+                    mockDelegateReplicators,
+                    mockListenerReplicators));
 
             // Act
             await statelessInstance.InitiateStartupSequenceAsync();
@@ -178,11 +204,23 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
             Assert.Equal(3, actualCallStack.Count);
 
-            Assert.Equal("service.Startup", actualCallStack.TryDequeue(out var result) ? result : null);
+            Assert.Equal(
+                "service.Startup",
+                actualCallStack.TryDequeue(out var result)
+                    ? result
+                    : null);
 
-            Assert.Equal("listener.Open", actualCallStack.TryDequeue(out result) ? result : null);
+            Assert.Equal(
+                "listener.Open",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
 
-            Assert.Equal("service.Run", actualCallStack.TryDequeue(out result) ? result : null);
+            Assert.Equal(
+                "service.Run",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
         }
     }
 }

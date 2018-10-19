@@ -9,7 +9,7 @@
 
 ## Getting Started
 
-As usual, the easiest way to get started is to code something -> let's start from a new **reliable service**!
+As usual, the easiest way to get started is to code something -> let's start from a new Reliable Service!
 
 > **NOTE**
 >
@@ -17,10 +17,10 @@ As usual, the easiest way to get started is to code something -> let's start fro
 
 In this section we would: 
 1. Configure one stateful service 
-2. Configure two access points (by configuring two listeners: aspnetcore and remoting) 
+2. Configure two endpoints (by configuring two listeners: aspnetcore and remoting) 
 3. Configure one background job (by configuring a delegate to run in `RunAsync`).
 
-### Initial Setup
+### Initial setup
 
 Any program starts with the entry point and so does reliable services. When using **CoherentSolutions.Extensions.Hosting.ServiceFabric** the entry point setup starts with the new instance of the [HostBuilder](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-2.1) class and calls to `Build()` and `Run()` methods.
 
@@ -46,10 +46,6 @@ private static void Main(string[] args)
         .Run();
 }
 ```
-
-> **NOTE**
->
-> When speaking in context of **CoherentSolutions.Extensions.Hosting.ServiceFabric** the `Define...` method always creates a so called **building block**. In this case call to `DefineStatefulService` creates a new **service** block.
 
 The first step in configuration of any service (stateful or stateless) in **CoherentSolutions.Extensions.Hosting.ServiceFabric** is to link service configuration to one of the service service types defined in the `ServiceManifest.xml`. 
 
@@ -79,9 +75,9 @@ private static void Main(string[] args)
 
 This code is now ready to run but unfortunately it quite useless.
 
-### Configuring Access Point
+### Configuring Endpoints
 
-Reliable Services can expose endpoints. This exposure is represented in form of service listeners configured when replica is build. The **CoherentSolutions.Extensions.Hosting.ServiceFabric** provides a simple way to configure: ASP.NET Core based listeners (**AspNetCoreListener**) and Service Fabric Remoting Listeners (**RemotingListener**).
+Reliable Services can expose endpoints. This exposure is represented in form of service listeners configured when replica is build. The **CoherentSolutions.Extensions.Hosting.ServiceFabric** provides a simple way to configure both: ASP.NET Core based listeners (**AspNetCoreListener**) and Remoting Listeners (**RemotingListener**).
  
  _You can find more details on [defining listeners](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Listeners#AspNetCoreListener) wiki page._
 
@@ -239,7 +235,7 @@ private static void Main(string[] args)
 
 ### Configuring a Background Job
 
-Background jobs in **CoherentSolutions.Extensions.Hosting.ServiceFabric** are represented in form of so called **Delegates** which are configured by calling `DefineDefine(...)` method. 
+In **CoherentSolutions.Extensions.Hosting.ServiceFabric** background jobs and event handlers are represented in form of **Delegates**. The **Delegate** is configured using `DefineDefine(...)` method. 
 
  _You can find more details on [defining delegates](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Delegates) wiki page._
 

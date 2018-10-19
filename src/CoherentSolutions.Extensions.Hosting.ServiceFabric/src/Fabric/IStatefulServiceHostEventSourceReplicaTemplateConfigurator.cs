@@ -3,6 +3,5 @@
     public interface IStatefulServiceHostEventSourceReplicaTemplateConfigurator
         : IServiceHostEventSourceReplicaTemplateConfigurator
     {
-        
     }
 }

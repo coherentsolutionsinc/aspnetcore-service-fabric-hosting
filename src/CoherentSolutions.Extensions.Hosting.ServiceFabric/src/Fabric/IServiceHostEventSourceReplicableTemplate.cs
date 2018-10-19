@@ -1,11 +1,9 @@
-﻿using Microsoft.AspNetCore.Server.Kestrel.Core.Internal;
-
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
+﻿namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public interface IServiceHostEventSourceReplicableTemplate<out TEventSource>
-        where TEventSource : IServiceEventSource
+    public interface IServiceHostEventSourceReplicableTemplate<in TServiceInformation, out TEventSource>
+        where TServiceInformation : IServiceInformation
     {
         TEventSource Activate(
-            ServiceContext serviceContext);
+            TServiceInformation serviceContext);
     }
 }

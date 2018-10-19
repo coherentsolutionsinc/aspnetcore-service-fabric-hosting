@@ -1,10 +1,12 @@
 ﻿using System;
 
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator.DependencyInjection;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator.DependencyInjection
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator.AspNetCore
 {
     internal class ProxynatorAwareStartup : IStartup
     {

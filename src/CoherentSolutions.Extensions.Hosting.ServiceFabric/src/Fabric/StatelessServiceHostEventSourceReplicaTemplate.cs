@@ -1,10 +1,9 @@
-﻿using System.Fabric;
-
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
+﻿namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public class StatelessServiceHostEventSourceReplicaTemplate
         : ServiceHostEventSourceReplicaTemplate<
-              IStatelessServiceHostEventSourceReplicaTemplateParameters, 
+              IStatelessServiceInformation,
+              IStatelessServiceHostEventSourceReplicaTemplateParameters,
               IStatelessServiceHostEventSourceReplicaTemplateConfigurator,
               StatelessServiceEventSource>,
           IStatelessServiceHostEventSourceReplicaTemplate
@@ -17,7 +16,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         }
 
         public override StatelessServiceEventSource Activate(
-            ServiceContext serviceContext)
+            IStatelessServiceInformation serviceInformation)
         {
             var parameters = new StatelessEventSourceParameters();
 
@@ -25,7 +24,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             var factory = this.CreateEventSourceFunc(parameters);
 
-            return new StatelessServiceEventSource(() => factory(serviceContext));
+            return new StatelessServiceEventSource(() => factory(serviceInformation));
         }
     }
 }

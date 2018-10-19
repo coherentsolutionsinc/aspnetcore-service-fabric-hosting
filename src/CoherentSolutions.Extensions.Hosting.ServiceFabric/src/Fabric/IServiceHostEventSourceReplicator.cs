@@ -1,10 +1,8 @@
-﻿using System.Fabric;
-
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
+﻿namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public interface IServiceHostEventSourceReplicator
+    public interface IServiceHostEventSourceReplicator<in TServiceInformation, out TEventSource>
     {
-        IServiceEventSource ReplicateFor(
-            ServiceContext serviceContext);
+        TEventSource ReplicateFor(
+            TServiceInformation serviceContext);
     }
 }

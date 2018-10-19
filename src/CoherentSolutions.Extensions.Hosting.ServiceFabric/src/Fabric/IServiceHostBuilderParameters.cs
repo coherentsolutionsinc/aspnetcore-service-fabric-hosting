@@ -9,6 +9,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
     {
         string ServiceTypeName { get; }
 
+        IServiceHostEventSourceDescriptor EventSourceDescriptor { get; }
+
         List<IServiceHostListenerDescriptor> ListenerDescriptors { get; }
 
         List<IServiceHostDelegateDescriptor> DelegateDescriptors { get; }

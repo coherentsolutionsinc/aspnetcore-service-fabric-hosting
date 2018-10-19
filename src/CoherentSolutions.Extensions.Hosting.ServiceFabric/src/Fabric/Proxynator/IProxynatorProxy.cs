@@ -1,4 +1,4 @@
-﻿namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools
+﻿namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator
 {
     public interface IProxynatorProxy
     {

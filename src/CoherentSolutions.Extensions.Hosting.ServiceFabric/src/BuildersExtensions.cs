@@ -64,8 +64,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
 
         public static TCaller UseLoggerOptions<TCaller>(
             this TCaller @this,
-            Func<IServiceHostLoggerOptions> factoryFunc)
-            where TCaller : IConfigurableObject<IServiceHostLoggerConfigurator>
+            Func<IConfigurableObjectLoggerOptions> factoryFunc)
+            where TCaller : IConfigurableObject<IConfigurableObjectLoggerConfigurator>
         {
             @this.ConfigureObject(
                 configurator => configurator.UseLoggerOptions(factoryFunc));
@@ -623,6 +623,46 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
+        public static IStatefulServiceHostBuilder UseEventSourceReplicaTemplate(
+            this IStatefulServiceHostBuilder @this,
+            Func<IStatefulServiceHostEventSourceReplicaTemplate> factoryFunc)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseEventSourceReplicaTemplate(factoryFunc));
+
+            return @this;
+        }
+
+        public static IStatelessServiceHostBuilder UseEventSourceReplicaTemplate(
+            this IStatelessServiceHostBuilder @this,
+            Func<IStatelessServiceHostEventSourceReplicaTemplate> factoryFunc)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseEventSourceReplicaTemplate(factoryFunc));
+
+            return @this;
+        }
+
+        public static IStatefulServiceHostBuilder UseEventSourceReplicator(
+            this IStatefulServiceHostBuilder @this,
+            Func<IStatefulServiceHostEventSourceReplicableTemplate, IStatefulServiceHostEventSourceReplicator> factoryFunc)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseEventSourceReplicator(factoryFunc));
+
+            return @this;
+        }
+
+        public static IStatelessServiceHostBuilder UseEventSourceReplicator(
+            this IStatelessServiceHostBuilder @this,
+            Func<IStatelessServiceHostEventSourceReplicableTemplate, IStatelessServiceHostEventSourceReplicator> factoryFunc)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseEventSourceReplicator(factoryFunc));
+
+            return @this;
+        }
+
         public static IStatefulServiceHostBuilder UseDelegateReplicaTemplate(
             this IStatefulServiceHostBuilder @this,
             Func<IStatefulServiceHostDelegateReplicaTemplate> factoryFunc)
@@ -723,41 +763,32 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
-        public static IStatefulServiceHostRemotingListenerReplicaTemplate UseImplementation<TRemotingImplementation>(
-            this IStatefulServiceHostRemotingListenerReplicaTemplate @this)
-            where TRemotingImplementation : IService
+        public static IStatefulServiceHostEventSourceReplicaTemplate UseImplementation<TImplementation>(
+            this IStatefulServiceHostEventSourceReplicaTemplate @this)
+            where TImplementation : IServiceEventSource
         {
             @this.ConfigureObject(
-                configurator => configurator.UseImplementation<TRemotingImplementation>(null));
+                configurator => configurator.UseImplementation(
+                    provider => ActivatorUtilities.CreateInstance<TImplementation>(provider)));
 
             return @this;
         }
 
-        public static IStatelessServiceHostRemotingListenerReplicaTemplate UseImplementation<TRemotingImplementation>(
-            this IStatelessServiceHostRemotingListenerReplicaTemplate @this)
-            where TRemotingImplementation : IService
+        public static IStatelessServiceHostEventSourceReplicaTemplate UseImplementation<TImplementation>(
+            this IStatelessServiceHostEventSourceReplicaTemplate @this)
+            where TImplementation : IServiceEventSource
         {
             @this.ConfigureObject(
-                configurator => configurator.UseImplementation<TRemotingImplementation>(null));
+                configurator => configurator.UseImplementation(
+                    provider => ActivatorUtilities.CreateInstance<TImplementation>(provider)));
 
             return @this;
         }
 
-        public static IStatefulServiceHostRemotingListenerReplicaTemplate UseImplementation<TRemotingImplementation>(
-            this IStatefulServiceHostRemotingListenerReplicaTemplate @this,
-            Func<TRemotingImplementation> factoryFunc)
-            where TRemotingImplementation : IService
-        {
-            @this.ConfigureObject(
-                configurator => configurator.UseImplementation(provider => factoryFunc()));
-
-            return @this;
-        }
-
-        public static IStatelessServiceHostRemotingListenerReplicaTemplate UseImplementation<TRemotingImplementation>(
-            this IStatelessServiceHostRemotingListenerReplicaTemplate @this,
-            Func<TRemotingImplementation> factoryFunc)
-            where TRemotingImplementation : IService
+        public static IStatefulServiceHostEventSourceReplicaTemplate UseImplementation<TImplementation>(
+            this IStatefulServiceHostEventSourceReplicaTemplate @this,
+            Func<TImplementation> factoryFunc)
+            where TImplementation : IServiceEventSource
         {
             @this.ConfigureObject(
                 configurator => configurator.UseImplementation(provider => factoryFunc()));
@@ -765,10 +796,21 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
-        public static IStatefulServiceHostRemotingListenerReplicaTemplate UseImplementation<TRemotingImplementation>(
-            this IStatefulServiceHostRemotingListenerReplicaTemplate @this,
-            Func<IServiceProvider, TRemotingImplementation> factoryFunc)
-            where TRemotingImplementation : IService
+        public static IStatelessServiceHostEventSourceReplicaTemplate UseImplementation<TImplementation>(
+            this IStatelessServiceHostEventSourceReplicaTemplate @this,
+            Func<TImplementation> factoryFunc)
+            where TImplementation : IServiceEventSource
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseImplementation(provider => factoryFunc()));
+
+            return @this;
+        }
+
+        public static IStatefulServiceHostEventSourceReplicaTemplate UseImplementation<TImplementation>(
+            this IStatefulServiceHostEventSourceReplicaTemplate @this,
+            Func<IServiceProvider, TImplementation> factoryFunc)
+            where TImplementation : IServiceEventSource
         {
             @this.ConfigureObject(
                 configurator => configurator.UseImplementation(factoryFunc));
@@ -776,10 +818,76 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
-        public static IStatelessServiceHostRemotingListenerReplicaTemplate UseImplementation<TRemotingImplementation>(
+        public static IStatelessServiceHostEventSourceReplicaTemplate UseImplementation<TImplementation>(
+            this IStatelessServiceHostEventSourceReplicaTemplate @this,
+            Func<IServiceProvider, TImplementation> factoryFunc)
+            where TImplementation : IServiceEventSource
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseImplementation(factoryFunc));
+
+            return @this;
+        }
+
+        public static IStatefulServiceHostRemotingListenerReplicaTemplate UseImplementation<TImplementation>(
+            this IStatefulServiceHostRemotingListenerReplicaTemplate @this)
+            where TImplementation : IService
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseImplementation(
+                    provider => ActivatorUtilities.CreateInstance<TImplementation>(provider)));
+
+            return @this;
+        }
+
+        public static IStatelessServiceHostRemotingListenerReplicaTemplate UseImplementation<TImplementation>(
+            this IStatelessServiceHostRemotingListenerReplicaTemplate @this)
+            where TImplementation : IService
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseImplementation(
+                    provider => ActivatorUtilities.CreateInstance<TImplementation>(provider)));
+
+            return @this;
+        }
+
+        public static IStatefulServiceHostRemotingListenerReplicaTemplate UseImplementation<TImplementation>(
+            this IStatefulServiceHostRemotingListenerReplicaTemplate @this,
+            Func<TImplementation> factoryFunc)
+            where TImplementation : IService
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseImplementation(provider => factoryFunc()));
+
+            return @this;
+        }
+
+        public static IStatelessServiceHostRemotingListenerReplicaTemplate UseImplementation<TImplementation>(
             this IStatelessServiceHostRemotingListenerReplicaTemplate @this,
-            Func<IServiceProvider, TRemotingImplementation> factoryFunc)
-            where TRemotingImplementation : IService
+            Func<TImplementation> factoryFunc)
+            where TImplementation : IService
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseImplementation(provider => factoryFunc()));
+
+            return @this;
+        }
+
+        public static IStatefulServiceHostRemotingListenerReplicaTemplate UseImplementation<TImplementation>(
+            this IStatefulServiceHostRemotingListenerReplicaTemplate @this,
+            Func<IServiceProvider, TImplementation> factoryFunc)
+            where TImplementation : IService
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseImplementation(factoryFunc));
+
+            return @this;
+        }
+
+        public static IStatelessServiceHostRemotingListenerReplicaTemplate UseImplementation<TImplementation>(
+            this IStatelessServiceHostRemotingListenerReplicaTemplate @this,
+            Func<IServiceProvider, TImplementation> factoryFunc)
+            where TImplementation : IService
         {
             @this.ConfigureObject(
                 configurator => configurator.UseImplementation(factoryFunc));
@@ -792,7 +900,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             where TSerializationProvider : IServiceRemotingMessageSerializationProvider
         {
             @this.ConfigureObject(
-                configurator => configurator.UseSerializationProvider<TSerializationProvider>(null));
+                configurator => configurator.UseSerializationProvider(
+                    provider => ActivatorUtilities.CreateInstance<TSerializationProvider>(provider)));
 
             return @this;
         }
@@ -802,7 +911,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             where TSerializationProvider : IServiceRemotingMessageSerializationProvider
         {
             @this.ConfigureObject(
-                configurator => configurator.UseSerializationProvider<TSerializationProvider>(null));
+                configurator => configurator.UseSerializationProvider(
+                    provider => ActivatorUtilities.CreateInstance<TSerializationProvider>(provider)));
 
             return @this;
         }
@@ -856,7 +966,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             where THandler : IServiceRemotingMessageHandler
         {
             @this.ConfigureObject(
-                configurator => configurator.UseHandler<THandler>(null));
+                configurator => configurator.UseHandler(
+                    provider => ActivatorUtilities.CreateInstance<THandler>(provider)));
 
             return @this;
         }
@@ -866,7 +977,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             where THandler : IServiceRemotingMessageHandler
         {
             @this.ConfigureObject(
-                configurator => configurator.UseHandler<THandler>(null));
+                configurator => configurator.UseHandler(
+                    provider => ActivatorUtilities.CreateInstance<THandler>(provider)));
 
             return @this;
         }
@@ -933,6 +1045,26 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
         {
             @this.ConfigureObject(
                 configurator => configurator.ConfigureWebHost(configAction));
+
+            return @this;
+        }
+
+        public static IStatefulServiceHostBuilder SetupEventSource(
+            this IStatefulServiceHostBuilder @this,
+            Action<IStatefulServiceHostEventSourceReplicaTemplate> configAction)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.SetupEventSource(configAction));
+
+            return @this;
+        }
+
+        public static IStatelessServiceHostBuilder SetupEventSource(
+            this IStatelessServiceHostBuilder @this,
+            Action<IStatelessServiceHostEventSourceReplicaTemplate> configAction)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.SetupEventSource(configAction));
 
             return @this;
         }

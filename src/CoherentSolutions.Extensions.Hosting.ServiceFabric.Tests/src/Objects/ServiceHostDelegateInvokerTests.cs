@@ -210,36 +210,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         }
 
         [Fact]
-        private async Task Should_resolve_invocation_context_argument_When_action_has_invocation_context_parameter()
-        {
-            // Arrange 
-            var arrangeInvocationContext = this.CreateInvocationContext();
-
-            var mockServices = new Mock<IServiceProvider>();
-            mockServices
-               .Setup(instance => instance.GetService(typeof(TInvocationContext)))
-               .Returns(arrangeInvocationContext)
-               .Verifiable();
-
-            TInvocationContext expectedInvocationContext = arrangeInvocationContext;
-            TInvocationContext actualInvocationContext = default;
-
-            var arrangeServices = mockServices.Object;
-            var arrangeAction = new Action<TInvocationContext>(invocationContext => actualInvocationContext = invocationContext);
-
-            var arrangeInvoker = this.CreateInvokerInstance(arrangeAction, arrangeServices);
-
-            // Act
-            await arrangeInvoker.InvokeAsync(arrangeInvocationContext, CancellationToken.None);
-
-            // Assert
-            mockServices.Verify();
-            mockServices.VerifyNoOtherCalls();
-
-            Assert.Equal(expectedInvocationContext, actualInvocationContext);
-        }
-
-        [Fact]
         private async Task Should_resolve_cancellation_token_argument_When_action_has_cancellation_token_parameter()
         {
             // Arrange 
@@ -269,6 +239,36 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             mockServices.VerifyNoOtherCalls();
 
             Assert.Equal(expectedCancellationToken.GetHashCode(), actualCancellationToken.GetHashCode());
+        }
+
+        [Fact]
+        private async Task Should_resolve_invocation_context_argument_When_action_has_invocation_context_parameter()
+        {
+            // Arrange 
+            var arrangeInvocationContext = this.CreateInvocationContext();
+
+            var mockServices = new Mock<IServiceProvider>();
+            mockServices
+               .Setup(instance => instance.GetService(typeof(TInvocationContext)))
+               .Returns(arrangeInvocationContext)
+               .Verifiable();
+
+            var expectedInvocationContext = arrangeInvocationContext;
+            TInvocationContext actualInvocationContext = default;
+
+            var arrangeServices = mockServices.Object;
+            var arrangeAction = new Action<TInvocationContext>(invocationContext => actualInvocationContext = invocationContext);
+
+            var arrangeInvoker = this.CreateInvokerInstance(arrangeAction, arrangeServices);
+
+            // Act
+            await arrangeInvoker.InvokeAsync(arrangeInvocationContext, CancellationToken.None);
+
+            // Assert
+            mockServices.Verify();
+            mockServices.VerifyNoOtherCalls();
+
+            Assert.Equal(expectedInvocationContext, actualInvocationContext);
         }
 
         [Fact]

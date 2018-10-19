@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Fabric;
+using System.Linq;
 
 using Microsoft.Extensions.DependencyInjection;
 
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Extensions
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.DependencyInjection.Extensions
 {
     public static class ServiceCollectionExtensions
     {
@@ -75,7 +76,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Extensions
                 throw new ArgumentNullException(nameof(serviceEventSource));
             }
 
-            @this.Add(new ServiceDescriptor(serviceEventSource.GetType(), serviceEventSource));
+            var type = serviceEventSource.GetType();
+
+            foreach (var @interface in type
+               .GetInterfaces()
+               .Where(@interface => typeof(IServiceEventSourceInterface).IsAssignableFrom(@interface)))
+            {
+                @this.Add(new ServiceDescriptor(@interface, serviceEventSource));
+            }
+
+            @this.Add(new ServiceDescriptor(type, serviceEventSource));
             @this.Add(new ServiceDescriptor(typeof(IServiceEventSource), serviceEventSource));
         }
 

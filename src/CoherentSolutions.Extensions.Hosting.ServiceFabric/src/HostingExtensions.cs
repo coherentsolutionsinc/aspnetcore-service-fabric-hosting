@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator.Extensions;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;

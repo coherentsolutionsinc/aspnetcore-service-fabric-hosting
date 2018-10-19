@@ -2,10 +2,9 @@
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public interface IServiceHostBuilderEventSourceConfigurator<in TReplicator>
-        where TReplicator : IServiceHostEventSourceReplicator
+    public interface IServiceHostBuilderEventSourceReplicationConfigurator<out TReplicaTemplate, in TReplicator>
     {
         void UseEventSourceReplicator(
-            Func<TReplicator> factoryFunc);
+            Func<TReplicaTemplate, TReplicator> factoryFunc);
     }
 }

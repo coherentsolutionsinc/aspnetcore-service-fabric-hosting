@@ -12,6 +12,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         : ServiceHostBuilderTests<IStatefulServiceHost,
             IStatefulServiceHostBuilderParameters,
             IStatefulServiceHostBuilderConfigurator,
+            IStatefulServiceHostEventSourceReplicableTemplate,
+            IStatefulServiceHostEventSourceReplicaTemplate,
+            IStatefulServiceHostEventSourceReplicaTemplateConfigurator,
+            IStatefulServiceHostEventSourceReplicator,
             IStatefulServiceHostDelegateReplicableTemplate,
             IStatefulServiceHostDelegateReplicaTemplate,
             IStatefulServiceHostDelegateReplicaTemplateConfigurator,
@@ -28,6 +32,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
                 IStatefulServiceHost,
                 IStatefulServiceHostBuilderParameters,
                 IStatefulServiceHostBuilderConfigurator,
+                IStatefulServiceHostEventSourceReplicableTemplate,
+                IStatefulServiceHostEventSourceReplicaTemplate,
+                IStatefulServiceHostEventSourceReplicator,
                 IStatefulServiceHostDelegateReplicableTemplate,
                 IStatefulServiceHostDelegateReplicaTemplate,
                 IStatefulServiceHostDelegateReplicator,
@@ -46,6 +53,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         : ServiceHostBuilderTests<IStatelessServiceHost,
             IStatelessServiceHostBuilderParameters,
             IStatelessServiceHostBuilderConfigurator,
+            IStatelessServiceHostEventSourceReplicableTemplate,
+            IStatelessServiceHostEventSourceReplicaTemplate,
+            IStatelessServiceHostEventSourceReplicaTemplateConfigurator,
+            IStatelessServiceHostEventSourceReplicator,
             IStatelessServiceHostDelegateReplicableTemplate,
             IStatelessServiceHostDelegateReplicaTemplate,
             IStatelessServiceHostDelegateReplicaTemplateConfigurator,
@@ -62,6 +73,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
                 IStatelessServiceHost,
                 IStatelessServiceHostBuilderParameters,
                 IStatelessServiceHostBuilderConfigurator,
+                IStatelessServiceHostEventSourceReplicableTemplate,
+                IStatelessServiceHostEventSourceReplicaTemplate,
+                IStatelessServiceHostEventSourceReplicator,
                 IStatelessServiceHostDelegateReplicableTemplate,
                 IStatelessServiceHostDelegateReplicaTemplate,
                 IStatelessServiceHostDelegateReplicator,
@@ -80,6 +94,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         TServiceHost,
         TParameters,
         TConfigurator,
+        TEventSourceReplicableTemplate,
+        TEventSourceReplicaTemplate,
+        TEventSourceReplicaTemplateConfigurator,
+        TEventSourceReplicator,
         TDelegateReplicableTemplate,
         TDelegateReplicaTemplate,
         TDelegateReplicaTemplateConfigurator,
@@ -93,6 +111,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         where TParameters :
         class,
         IServiceHostBuilderParameters,
+        IServiceHostBuilderEventSourceParameters<TEventSourceReplicaTemplate>,
+        IServiceHostBuilderEventSourceReplicationParameters<TEventSourceReplicableTemplate, TEventSourceReplicator>,
         IServiceHostBuilderDelegateParameters<TDelegateReplicaTemplate>,
         IServiceHostBuilderDelegateReplicationParameters<TDelegateReplicableTemplate, TDelegateReplicator>,
         IServiceHostBuilderAspNetCoreListenerParameters<TListenerAspNetCoreReplicaTemplate>,
@@ -101,11 +121,22 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         where TConfigurator :
         class,
         IServiceHostBuilderConfigurator,
+        IServiceHostBuilderEventSourceConfigurator<TEventSourceReplicaTemplate>,
+        IServiceHostBuilderEventSourceReplicationConfigurator<TEventSourceReplicableTemplate, TEventSourceReplicator>,
         IServiceHostBuilderDelegateConfigurator<TDelegateReplicaTemplate>,
         IServiceHostBuilderDelegateReplicationConfigurator<TDelegateReplicableTemplate, TDelegateReplicator>,
         IServiceHostBuilderAspNetCoreListenerConfigurator<TListenerAspNetCoreReplicaTemplate>,
         IServiceHostBuilderRemotingListenerConfigurator<TListenerRemotingReplicaTemplate>,
         IServiceHostBuilderListenerReplicationConfigurator<TListenerReplicableTemplate, TListenerReplicator>
+        where TEventSourceReplicaTemplate :
+        class,
+        TEventSourceReplicableTemplate,
+        IServiceHostEventSourceReplicaTemplate<TEventSourceReplicaTemplateConfigurator>
+        where TEventSourceReplicaTemplateConfigurator :
+        class,
+        IServiceHostEventSourceReplicaTemplateConfigurator
+        where TEventSourceReplicator :
+        class
         where TDelegateReplicaTemplate :
         class,
         TDelegateReplicableTemplate,
@@ -135,6 +166,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         protected abstract ServiceHostBuilder<TServiceHost,
             TParameters,
             TConfigurator,
+            TEventSourceReplicableTemplate,
+            TEventSourceReplicaTemplate,
+            TEventSourceReplicator,
             TDelegateReplicableTemplate,
             TDelegateReplicaTemplate,
             TDelegateReplicator,
@@ -191,6 +225,86 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
 
             // Assert
             factory.Verify(instance => instance(), Times.Once());
+        }
+
+        [Fact]
+        public void
+            Should_use_delegate_configuration_action_When_configuring_delegate()
+        {
+            // Arrange
+            var action = new Mock<Action<TDelegateReplicableTemplate>>();
+            action
+               .Setup(instance => instance(It.IsAny<TDelegateReplicableTemplate>()));
+
+            // Act
+            var builder = this.CreateServiceInstance();
+            builder.ConfigureObject(
+                config =>
+                {
+                    config.DefineDelegate(action.Object);
+                });
+            builder.Build();
+
+            // Assert
+            action.Verify(instance => instance(It.IsAny<TDelegateReplicableTemplate>()), Times.Once());
+        }
+
+        [Fact]
+        public void
+            Should_use_delegate_replicator_func_When_configuring_service()
+        {
+            // Arrange
+            var factory = new Mock<Func<TDelegateReplicableTemplate, TDelegateReplicator>>();
+            factory
+               .Setup(instance => instance(It.IsAny<TDelegateReplicableTemplate>()))
+               .Returns(new Mock<TDelegateReplicator>().Object);
+
+            // Act
+            var builder = this.CreateServiceInstance();
+            builder.ConfigureObject(
+                config =>
+                {
+                    config.UseDelegateReplicator(factory.Object);
+                    config.DefineDelegate(
+                        c =>
+                        {
+                        });
+                });
+            builder.Build();
+
+            // Assert
+            factory.Verify(instance => instance(It.IsAny<TDelegateReplicableTemplate>()), Times.Once());
+        }
+
+        [Fact]
+        public void
+            Should_use_event_source_func_When_configuring_service()
+        {
+            // Arrange
+            var factory = new Mock<Func<TEventSourceReplicableTemplate, TEventSourceReplicator>>();
+            factory
+               .Setup(instance => instance(It.IsAny<TEventSourceReplicableTemplate>()))
+               .Returns(new Mock<TEventSourceReplicator>().Object);
+
+            // Act
+            var builder = this.CreateServiceInstance();
+            builder.ConfigureObject(
+                config =>
+                {
+                    config.UseEventSourceReplicator(factory.Object);
+                    config.DefineAspNetCoreListener(
+                        c =>
+                        {
+                        });
+                    config.DefineRemotingListener(
+                        c =>
+                        {
+                        });
+                });
+            builder.Build();
+
+            // Assert
+            factory.Verify(instance => instance(It.IsAny<TEventSourceReplicableTemplate>()), Times.Once());
         }
 
         [Fact]
@@ -271,55 +385,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
 
             // Assert
             factory.Verify(instance => instance(), Times.Once());
-        }
-
-        [Fact]
-        public void
-            Should_use_delegate_configuration_action_When_configuring_delegate()
-        {
-            // Arrange
-            var action = new Mock<Action<TDelegateReplicableTemplate>>();
-            action
-               .Setup(instance => instance(It.IsAny<TDelegateReplicableTemplate>()));
-
-            // Act
-            var builder = this.CreateServiceInstance();
-            builder.ConfigureObject(
-                config =>
-                {
-                    config.DefineDelegate(action.Object);
-                });
-            builder.Build();
-
-            // Assert
-            action.Verify(instance => instance(It.IsAny<TDelegateReplicableTemplate>()), Times.Once());
-        }
-
-        [Fact]
-        public void
-            Should_use_delegate_replicator_func_When_configuring_service()
-        {
-            // Arrange
-            var factory = new Mock<Func<TDelegateReplicableTemplate, TDelegateReplicator>>();
-            factory
-               .Setup(instance => instance(It.IsAny<TDelegateReplicableTemplate>()))
-               .Returns(new Mock<TDelegateReplicator>().Object);
-
-            // Act
-            var builder = this.CreateServiceInstance();
-            builder.ConfigureObject(
-                config =>
-                {
-                    config.UseDelegateReplicator(factory.Object);
-                    config.DefineDelegate(
-                        c =>
-                        {
-                        });
-                });
-            builder.Build();
-
-            // Assert
-            factory.Verify(instance => instance(It.IsAny<TDelegateReplicableTemplate>()), Times.Once());
         }
     }
 }

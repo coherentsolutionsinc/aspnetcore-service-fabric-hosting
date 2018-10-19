@@ -1,10 +1,10 @@
 ﻿using System;
 
-namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools
 {
-    public interface IServiceHostLoggerConfigurator
+    public interface IConfigurableObjectLoggerConfigurator
     {
         void UseLoggerOptions(
-            Func<IServiceHostLoggerOptions> factoryFunc);
+            Func<IConfigurableObjectLoggerOptions> factoryFunc);
     }
 }

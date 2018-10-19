@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Diagnostics.Tracing;
+using System.Fabric;
 using System.Threading;
+
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 using Microsoft.Extensions.Logging;
 
@@ -43,19 +46,25 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             }
         }
 
+        private readonly ServiceContext serviceContext;
+
         private readonly IServiceEventSource eventSource;
 
         private readonly string eventCategoryName;
 
         private readonly AsyncLocal<Scope> scope;
 
-        private readonly IServiceHostLoggerOptions options;
+        private readonly IConfigurableObjectLoggerOptions options;
 
         protected ServiceHostLogger(
+            ServiceContext serviceContext,
             IServiceEventSource eventSource,
             string eventCategoryName,
-            IServiceHostLoggerOptions options)
+            IConfigurableObjectLoggerOptions options)
         {
+            this.serviceContext = serviceContext
+             ?? throw new ArgumentNullException(nameof(serviceContext));
+
             this.eventSource = eventSource
              ?? throw new ArgumentNullException(nameof(eventSource));
 
@@ -79,12 +88,22 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             Exception exception,
             Func<TState, Exception, string> formatter)
         {
-            var eventMessage = formatter(state, exception);
-            var eventData = new TEventSourceData
-            {
-                EventCategoryName = this.eventCategoryName,
-                EventMetadata = this.scope.Value?.Metadata
-            };
+            var eventData = new TEventSourceData();
+
+            this.FillEventData(state, eventData);
+
+            eventData.EventId = eventId.Id;
+            eventData.EventName = eventId.Name;
+            eventData.EventLevel = GetEventLevel(logLevel);
+            eventData.EventMessage = formatter(state, exception);
+            eventData.EventCategoryName = this.eventCategoryName;
+            eventData.ServiceName = this.serviceContext.ServiceName.AbsoluteUri;
+            eventData.ServiceTypeName = this.serviceContext.ServiceTypeName;
+            eventData.ReplicaOrInstanceId = this.serviceContext.ReplicaOrInstanceId;
+            eventData.PartitionId = this.serviceContext.PartitionId;
+            eventData.ApplicationName = this.serviceContext.CodePackageActivationContext.ApplicationName;
+            eventData.ApplicationTypeName = this.serviceContext.CodePackageActivationContext.ApplicationTypeName;
+            eventData.NodeName = this.serviceContext.NodeContext.NodeName;
 
             if (this.options.IncludeMetadata && this.scope.Value != null)
             {
@@ -96,63 +115,41 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 eventData.EventStackTrace = exception.StackTrace;
             }
 
-            this.FillEventData(state, eventData);
-
-            switch (logLevel)
-            {
-                case LogLevel.None:
-                case LogLevel.Trace:
-                case LogLevel.Debug:
-                    this.eventSource.Verbose(eventId.Id, eventId.Name, this.eventCategoryName, eventMessage, eventData);
-                    break;
-                case LogLevel.Information:
-                    this.eventSource.Information(eventId.Id, eventId.Name, this.eventCategoryName, eventMessage, eventData);
-                    break;
-                case LogLevel.Warning:
-                    this.eventSource.Warning(eventId.Id, eventId.Name, this.eventCategoryName, eventMessage, eventData);
-                    break;
-                case LogLevel.Error:
-                    this.eventSource.Error(eventId.Id, eventId.Name, this.eventCategoryName, eventMessage, eventData);
-                    break;
-                case LogLevel.Critical:
-                    this.eventSource.Critical(eventId.Id, eventId.Name, this.eventCategoryName, eventMessage, eventData);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null);
-            }
+            this.eventSource.WriteEvent(ref eventData);
         }
 
         public bool IsEnabled(
             LogLevel logLevel)
         {
-            if (this.options.LogLevel > logLevel)
-            {
-                return false;
-            }
-
-            switch (logLevel)
-            {
-                case LogLevel.None:
-                case LogLevel.Trace:
-                case LogLevel.Debug:
-                    return this.eventSource.IsEnabled(EventLevel.Verbose);
-                case LogLevel.Information:
-                    return this.eventSource.IsEnabled(EventLevel.Informational);
-                case LogLevel.Warning:
-                    return this.eventSource.IsEnabled(EventLevel.Warning);
-                case LogLevel.Error:
-                    return this.eventSource.IsEnabled(EventLevel.Error);
-                case LogLevel.Critical:
-                    return this.eventSource.IsEnabled(EventLevel.Critical);
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null);
-            }
+            return this.options.LogLevel <= logLevel;
         }
 
         public IDisposable BeginScope<TState>(
             TState state)
         {
             return this.scope.Value = new Scope(this.scope, state);
+        }
+
+        private static EventLevel GetEventLevel(
+            LogLevel logLevel)
+        {
+            switch (logLevel)
+            {
+                case LogLevel.None:
+                case LogLevel.Trace:
+                case LogLevel.Debug:
+                    return EventLevel.Verbose;
+                case LogLevel.Information:
+                    return EventLevel.Informational;
+                case LogLevel.Warning:
+                    return EventLevel.Warning;
+                case LogLevel.Error:
+                    return EventLevel.Error;
+                case LogLevel.Critical:
+                    return EventLevel.Critical;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(logLevel), logLevel, null);
+            }
         }
     }
 }

@@ -108,6 +108,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                .SetupExtension(new PickRemotingListenerHandlerTheoryExtension());
         }
 
+        public static TheoryItem SetupExtensionsAsEventSource(
+            this TheoryItem @this)
+        {
+            return @this
+               .SetupExtension(new UseDependenciesTheoryExtension())
+               .SetupExtension(new UseEventSourceImplementationTheoryExtension())
+               .SetupExtension(new ConfigureDependenciesTheoryExtension())
+               .SetupExtension(new PickDependencyTheoryExtension());
+        }
+
         private static TheoryItem SetupExtensionsAsDelegate(
             this TheoryItem @this)
         {
