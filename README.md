@@ -79,7 +79,7 @@ This code is now ready to run but unfortunately it quite useless.
 
 Reliable Services can expose endpoints. This exposure is represented in form of service listeners configured when replica is build. The **CoherentSolutions.Extensions.Hosting.ServiceFabric** provides a simple way to configure both: ASP.NET Core based listeners (**AspNetCoreListener**) and Remoting Listeners (**RemotingListener**).
  
- _You can find more details on [defining listeners](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Listeners#AspNetCoreListener) wiki page._
+ _You can find more details on [defining listeners](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Services#defining-listeners) wiki page._
 
 #### ASP.NET Core
 
@@ -237,7 +237,7 @@ private static void Main(string[] args)
 
 In **CoherentSolutions.Extensions.Hosting.ServiceFabric** background jobs and event handlers are represented in form of **Delegates**. The **Delegate** is configured using `DefineDefine(...)` method. 
 
- _You can find more details on [defining delegates](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Delegates) wiki page._
+ _You can find more details on [defining delegates](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Services#defining-delegates) wiki page._
 
 ``` csharp
 private static void Main(string[] args)
