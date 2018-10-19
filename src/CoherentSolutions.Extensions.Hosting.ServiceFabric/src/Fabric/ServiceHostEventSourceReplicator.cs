@@ -1,8 +1,24 @@
-﻿using System.Diagnostics.Tracing;
+﻿using System;
+using System.Diagnostics.Tracing;
 using System.Fabric;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
+    public class ServiceHostEventSourceReplicator : IServiceHostEventSourceReplicator
+    {
+        public IServiceEventSource ReplicateFor(
+            ServiceContext serviceContext)
+        {
+            if (serviceContext == null)
+            {
+                throw new ArgumentNullException(nameof(serviceContext));
+            }
+
+            return new ServiceEventSource(serviceContext, 
+                $"{serviceContext.CodePackageActivationContext.ApplicationTypeName}.{serviceContext.ServiceTypeName}",
+                EventSourceSettings.EtwSelfDescribingEventFormat);
+        }
+    }
     public class ServiceEventSource : EventSource, IServiceEventSource
     {
         private static class Keywords
