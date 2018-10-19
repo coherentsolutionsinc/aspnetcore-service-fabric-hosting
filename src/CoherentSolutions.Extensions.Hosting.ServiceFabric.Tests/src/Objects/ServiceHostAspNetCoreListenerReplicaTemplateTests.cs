@@ -9,16 +9,35 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
 {
     public class ServiceHostAspNetCoreListenerReplicaTemplateTests
         : ServiceHostAspNetCoreListenerReplicaTemplateTests<
-            IStatefulService, 
+            IStatefulService,
             IStatefulServiceHostAspNetCoreListenerReplicaTemplateParameters,
             IStatefulServiceHostAspNetCoreListenerReplicaTemplateConfigurator,
             ServiceReplicaListener>
     {
         [Fact]
+        public static void Should_set_listeners_listen_on_secondary_When_listen_on_secondary_is_configured()
+        {
+            // Arrange
+            var arrangeReplicableTemplate = new StatefulServiceHostAspNetCoreListenerReplicaTemplate();
+
+            // Act
+            arrangeReplicableTemplate.ConfigureObject(
+                c =>
+                {
+                    c.UseListenerOnSecondary();
+                });
+
+            var listener = arrangeReplicableTemplate.Activate(new MockStatefulService());
+
+            // Assert
+            Assert.True(listener.ListenOnSecondary);
+        }
+
+        [Fact]
         public static void Should_set_listeners_name_to_endpoint_name_When_endpoint_name_is_configured()
         {
             // Arrange
-            string arrangeEndpointName = "endpoint-name";
+            var arrangeEndpointName = "endpoint-name";
 
             var arrangeReplicableTemplate = new StatefulServiceHostAspNetCoreListenerReplicaTemplate();
 
@@ -34,30 +53,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             // Assert
             Assert.Same(arrangeEndpointName, listener.Name);
         }
-
-        [Fact]
-        public static void Should_set_listeners_listen_on_secondary_When_listen_on_secondary_is_configured()
-        {
-            // Arrange
-            var arrangeReplicableTemplate = new StatefulServiceHostAspNetCoreListenerReplicaTemplate();
-            
-            // Act
-            arrangeReplicableTemplate.ConfigureObject(
-                c =>
-                {
-                    c.UseListenerOnSecondary();
-                });
-
-            var listener = arrangeReplicableTemplate.Activate(new MockStatefulService());
-
-            // Assert
-            Assert.True(listener.ListenOnSecondary);
-        }
     }
-    
+
     public class StatelessServiceHostAspNetCoreListenerReplicaTemplateTests
         : ServiceHostAspNetCoreListenerReplicaTemplateTests<
-            IStatelessService, 
+            IStatelessService,
             IStatelessServiceHostAspNetCoreListenerReplicaTemplateParameters,
             IStatelessServiceHostAspNetCoreListenerReplicaTemplateConfigurator,
             ServiceInstanceListener>
@@ -66,7 +66,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         public static void Should_set_listeners_name_to_endpoint_name_When_endpoint_name_is_configured()
         {
             // Arrange
-            string arrangeEndpointName = "endpoint-name";
+            var arrangeEndpointName = "endpoint-name";
 
             var arrangeReplicableTemplate = new StatelessServiceHostAspNetCoreListenerReplicaTemplate();
 

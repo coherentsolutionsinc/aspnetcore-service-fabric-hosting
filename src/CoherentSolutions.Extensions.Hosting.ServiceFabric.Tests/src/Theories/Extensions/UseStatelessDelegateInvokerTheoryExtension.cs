@@ -4,7 +4,7 @@ using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Extensions
 {
-    public class UseStatelessDelegateInvokerTheoryExtension 
+    public class UseStatelessDelegateInvokerTheoryExtension
         : IUseDelegateInvokerTheoryExtension<IStatelessServiceDelegateInvocationContext>
     {
         public Func<Delegate, IServiceProvider, IServiceHostDelegateInvoker<IStatelessServiceDelegateInvocationContext>> Factory { get; private set; }

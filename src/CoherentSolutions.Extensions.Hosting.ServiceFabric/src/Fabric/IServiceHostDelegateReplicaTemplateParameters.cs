@@ -6,7 +6,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public interface IServiceHostDelegateReplicaTemplateParameters
         : IConfigurableObjectDependenciesParameters,
-          IServiceHostLoggerParameters
+          IConfigurableObjectLoggerParameters
     {
         Delegate Delegate { get; }
     }

@@ -11,6 +11,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
         private readonly IStatefulServiceRuntimeRegistrant serviceRuntimeRegistrant;
 
+        private readonly IStatefulServiceHostEventSourceReplicator serviceEventSourceReplicator;
+
         private readonly IReadOnlyList<IStatefulServiceHostDelegateReplicator> serviceDelegateReplicators;
 
         private readonly IReadOnlyList<IStatefulServiceHostListenerReplicator> serviceListenerReplicators;
@@ -18,6 +20,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         public StatefulServiceHost(
             string serviceTypeName,
             IStatefulServiceRuntimeRegistrant serviceRuntimeRegistrant,
+            IStatefulServiceHostEventSourceReplicator serviceEventSourceReplicator,
             IReadOnlyList<IStatefulServiceHostDelegateReplicator> serviceDelegateReplicators,
             IReadOnlyList<IStatefulServiceHostListenerReplicator> serviceListenerReplicators)
         {
@@ -26,6 +29,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             this.serviceRuntimeRegistrant = serviceRuntimeRegistrant
              ?? throw new ArgumentNullException(nameof(serviceRuntimeRegistrant));
+
+            this.serviceEventSourceReplicator = serviceEventSourceReplicator
+             ?? throw new ArgumentNullException(nameof(serviceEventSourceReplicator));
 
             this.serviceDelegateReplicators = serviceDelegateReplicators
              ?? throw new ArgumentNullException(nameof(serviceDelegateReplicators));
@@ -41,6 +47,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.serviceTypeName,
                 serviceContext => new StatefulService(
                     serviceContext,
+                    this.serviceEventSourceReplicator,
                     this.serviceDelegateReplicators,
                     this.serviceListenerReplicators),
                 cancellationToken);

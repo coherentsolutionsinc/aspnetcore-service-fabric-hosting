@@ -1,7 +1,8 @@
 ﻿using System;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Exceptions;
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.DependencyInjection.Extensions;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator.DependencyInjection;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -21,7 +22,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         {
             public Delegate Delegate { get; private set; }
 
-            public Func<IServiceHostLoggerOptions> LoggerOptionsFunc { get; private set; }
+            public Func<IConfigurableObjectLoggerOptions> LoggerOptionsFunc { get; private set; }
 
             public Func<IServiceCollection> DependenciesFunc { get; private set; }
 
@@ -43,7 +44,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             }
 
             public void UseLoggerOptions(
-                Func<IServiceHostLoggerOptions> factoryFunc)
+                Func<IConfigurableObjectLoggerOptions> factoryFunc)
             {
                 this.LoggerOptionsFunc = factoryFunc
                  ?? throw new ArgumentNullException(nameof(factoryFunc));
@@ -67,7 +68,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.DependenciesConfigAction = this.DependenciesConfigAction.Chain(configAction);
             }
 
-            private static IServiceHostLoggerOptions DefaultLoggerOptionsFunc()
+            private static IConfigurableObjectLoggerOptions DefaultLoggerOptionsFunc()
             {
                 return ServiceHostLoggerOptions.Disabled;
             }
@@ -117,13 +118,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                     var loggerOptions = parameters.LoggerOptionsFunc();
                     if (loggerOptions == null)
                     {
-                        throw new FactoryProducesNullInstanceException<IServiceHostLoggerOptions>();
+                        throw new FactoryProducesNullInstanceException<IConfigurableObjectLoggerOptions>();
                     }
 
                     dependenciesCollection.AddLogging(
                         builder =>
                         {
-                            builder.AddProvider(new ServiceHostDelegateLoggerProvider(loggerOptions, serviceEventSource));
+                            builder.AddProvider(
+                                new ServiceHostDelegateLoggerProvider(
+                                    serviceContext,
+                                    serviceEventSource,
+                                    loggerOptions));
                         });
 
                     // Possible point of proxination

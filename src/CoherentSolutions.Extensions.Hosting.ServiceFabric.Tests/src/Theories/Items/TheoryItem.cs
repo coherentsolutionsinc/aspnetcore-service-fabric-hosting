@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Xunit.Abstractions;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Items
 {
@@ -116,7 +114,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                 services =>
                 {
                     services.Configure<ConsoleLifetimeOptions>(
-                        options => options.SuppressStatusMessages = true);  
+                        options => options.SuppressStatusMessages = true);
                 });
 
             foreach (var configAction in this.configActions)

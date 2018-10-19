@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Tools;
 
 using Microsoft.ServiceFabric.Services.Runtime;
@@ -18,8 +19,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Mocks
             StatefulServiceBase serviceReplica)
         {
             this.serviceReplica = serviceReplica;
-
             Injector.InjectProperty(this.serviceReplica, "Partition", new MockStatefulServicePartition(), true);
+
+            if (this.serviceReplica is IStatefulService statefulService)
+            {
+                statefulService.GetEventSource(); // Provoke event source initialization
+            }
         }
 
         public async Task InitiateStartupSequenceAsync()
@@ -59,7 +64,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Mocks
             }
 
             await this.serviceReplica.InvokeOnChangeRoleAsync(ReplicaRole.Primary);
-            
+
             await this.serviceReplica.InvokeRunAsync();
         }
 

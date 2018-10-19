@@ -1,8 +1,12 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Runtime.CompilerServices;
+
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
+
+using Microsoft.Extensions.Logging;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public class ServiceHostLoggerOptions : IServiceHostLoggerOptions
+    public class ServiceHostLoggerOptions : IConfigurableObjectLoggerOptions
     {
         public static readonly ServiceHostLoggerOptions Disabled;
 

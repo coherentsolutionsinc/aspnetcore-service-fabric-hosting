@@ -262,7 +262,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(Theories.RemotingListenerCases), MemberType = typeof(Theories))]
-        private static void Should_inject_remoting_implementation_dependencies_When_remoting_implemenation_type_is_set(
+        private static void Should_inject_remoting_implementation_dependencies_When_remoting_implementation_type_is_set(
             Theories.Case @case)
         {
             // Arrange

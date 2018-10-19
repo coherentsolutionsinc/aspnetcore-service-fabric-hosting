@@ -1,12 +1,17 @@
-﻿namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
+﻿using System.Fabric;
+
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
+
+namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public class ServiceHostDelegateLogger : ServiceHostLogger<ServiceEventSourceData>
     {
         public ServiceHostDelegateLogger(
+            ServiceContext serviceContext,
             IServiceEventSource eventSource,
             string eventCategoryName,
-            IServiceHostLoggerOptions options)
-            : base(eventSource, eventCategoryName, options)
+            IConfigurableObjectLoggerOptions options)
+            : base(serviceContext, eventSource, eventCategoryName, options)
         {
         }
 

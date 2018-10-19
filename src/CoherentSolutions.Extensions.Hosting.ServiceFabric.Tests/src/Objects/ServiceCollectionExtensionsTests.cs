@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator.Extensions;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,7 +17,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         public interface ITestInterface
         {
         }
-        
+
         public interface ITestGenericInterface<T>
         {
         }
@@ -24,7 +25,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         private class TestVariant : ITestInterface
         {
         }
-        
+
         private class TestVariantOne : ITestInterface
         {
         }
@@ -52,7 +53,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
                 public Type ServiceType { get; private set; }
 
                 public Type RequestType { get; private set; }
-                
+
                 public Type[] ImplementationTypes { get; private set; }
 
                 public Case()
@@ -74,14 +75,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
                     return string.Join(",", this.ImplementationTypes.Select(i => i.Name));
                 }
 
-                public void Deserialize(IXunitSerializationInfo info)
+                public void Deserialize(
+                    IXunitSerializationInfo info)
                 {
-                    this.ServiceType = info.GetValue<Type>(nameof(ServiceType));
-                    this.RequestType = info.GetValue<Type>(nameof(RequestType));
-                    this.ImplementationTypes = info.GetValue<Type[]>(nameof(ImplementationTypes));
+                    this.ServiceType = info.GetValue<Type>(nameof(this.ServiceType));
+                    this.RequestType = info.GetValue<Type>(nameof(this.RequestType));
+                    this.ImplementationTypes = info.GetValue<Type[]>(nameof(this.ImplementationTypes));
                 }
 
-                public void Serialize(IXunitSerializationInfo info)
+                public void Serialize(
+                    IXunitSerializationInfo info)
                 {
                     info.AddValue(nameof(this.ServiceType), this.ServiceType);
                     info.AddValue(nameof(this.RequestType), this.RequestType);
@@ -105,7 +108,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
                         new Case(
                             typeof(ITestInterface),
                             typeof(ITestInterface),
-                            typeof(TestVariantOne), typeof(TestVariantTwo)),
+                            typeof(TestVariantOne),
+                            typeof(TestVariantTwo)),
                     };
                     yield return new object[]
                     {
@@ -119,7 +123,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
                         new Case(
                             typeof(ITestGenericInterface<>),
                             typeof(ITestGenericInterface<int>),
-                            typeof(TestGenericVariantOne<>), typeof(TestGenericVariantTwo<>)),
+                            typeof(TestGenericVariantOne<>),
+                            typeof(TestGenericVariantTwo<>)),
                     };
                 }
             }
@@ -134,18 +139,19 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             var arrangeRootCollection = (IServiceCollection) new ServiceCollection();
             foreach (var implementationType in @case.ImplementationTypes)
             {
-                arrangeRootCollection.Add(new ServiceDescriptor(
-                    @case.ServiceType, 
-                    implementationType, 
-                    ServiceLifetime.Singleton));
+                arrangeRootCollection.Add(
+                    new ServiceDescriptor(
+                        @case.ServiceType,
+                        implementationType,
+                        ServiceLifetime.Singleton));
             }
-            
+
             var arrangeRootServices = (IServiceProvider) arrangeRootCollection.BuildServiceProvider();
 
             // Act
             var arrangeCollection = (IServiceCollection) new ServiceCollection();
             arrangeCollection.Proxinate(arrangeRootCollection, arrangeRootServices);
-            
+
             var arrangeServices = (IServiceProvider) arrangeCollection.BuildServiceProvider();
 
             var proxies = arrangeServices.GetServices(@case.RequestType)
@@ -155,15 +161,18 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             // Assert
             foreach (var implementationType in @case.ImplementationTypes)
             {
-                Assert.Contains(proxies, proxy =>
-                {
-                    var t = proxy.Target.GetType();
-                    if (t.IsGenericType)
+                Assert.Contains(
+                    proxies,
+                    proxy =>
                     {
-                        return t.GetGenericTypeDefinition() == implementationType;
-                    }
-                    return t == implementationType;
-                });
+                        var t = proxy.Target.GetType();
+                        if (t.IsGenericType)
+                        {
+                            return t.GetGenericTypeDefinition() == implementationType;
+                        }
+
+                        return t == implementationType;
+                    });
             }
         }
     }

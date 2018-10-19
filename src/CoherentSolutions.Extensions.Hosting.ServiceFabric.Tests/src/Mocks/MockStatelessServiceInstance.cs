@@ -16,8 +16,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Mocks
             StatelessService instance)
         {
             this.serviceInstance = instance;
-
             Injector.InjectProperty(this.serviceInstance, "Partition", new MockStatelessServicePartition(), true);
+
+            if (this.serviceInstance is IStatelessService statelessService)
+            {
+                statelessService.GetEventSource(); // Provoke event source initialization
+            }
         }
 
         public async Task InitiateStartupSequenceAsync()

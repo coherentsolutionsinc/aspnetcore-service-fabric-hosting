@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Exceptions;
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator.Extensions;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +14,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             TServiceHost,
             TParameters,
             TConfigurator,
+            TEventSourceReplicableTemplate,
+            TEventSourceReplicaTemplate,
+            TEventSourceReplicator,
             TDelegateReplicableTemplate,
             TDelegateReplicaTemplate,
             TDelegateReplicator,
@@ -25,6 +28,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
           IServiceHostBuilder<TServiceHost, TConfigurator>
         where TParameters :
         IServiceHostBuilderParameters,
+        IServiceHostBuilderEventSourceParameters<TEventSourceReplicaTemplate>,
+        IServiceHostBuilderEventSourceReplicationParameters<TEventSourceReplicableTemplate, TEventSourceReplicator>,
         IServiceHostBuilderDelegateParameters<TDelegateReplicaTemplate>,
         IServiceHostBuilderDelegateReplicationParameters<TDelegateReplicableTemplate, TDelegateReplicator>,
         IServiceHostBuilderAspNetCoreListenerParameters<TListenerAspNetCoreReplicaTemplate>,
@@ -32,24 +37,36 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         IServiceHostBuilderListenerReplicationParameters<TListenerReplicableTemplate, TListenerReplicator>
         where TConfigurator :
         IServiceHostBuilderConfigurator,
+        IServiceHostBuilderEventSourceConfigurator<TEventSourceReplicaTemplate>,
+        IServiceHostBuilderEventSourceReplicationConfigurator<TEventSourceReplicableTemplate, TEventSourceReplicator>,
         IServiceHostBuilderDelegateConfigurator<TDelegateReplicaTemplate>,
         IServiceHostBuilderDelegateReplicationConfigurator<TDelegateReplicableTemplate, TDelegateReplicator>,
         IServiceHostBuilderAspNetCoreListenerConfigurator<TListenerAspNetCoreReplicaTemplate>,
         IServiceHostBuilderRemotingListenerConfigurator<TListenerRemotingReplicaTemplate>,
         IServiceHostBuilderListenerReplicationConfigurator<TListenerReplicableTemplate, TListenerReplicator>
+        where TEventSourceReplicaTemplate :
+        TEventSourceReplicableTemplate,
+        IServiceHostEventSourceReplicaTemplate<IServiceHostEventSourceReplicaTemplateConfigurator>
+        where TEventSourceReplicator : class
         where TDelegateReplicaTemplate :
         TDelegateReplicableTemplate,
         IServiceHostDelegateReplicaTemplate<IServiceHostDelegateReplicaTemplateConfigurator>
+        where TDelegateReplicator : class
         where TListenerAspNetCoreReplicaTemplate :
         TListenerReplicableTemplate,
         IServiceHostAspNetCoreListenerReplicaTemplate<IServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
         where TListenerRemotingReplicaTemplate :
         TListenerReplicableTemplate,
         IServiceHostRemotingListenerReplicaTemplate<IServiceHostRemotingListenerReplicaTemplateConfigurator>
+        where TListenerReplicator : class
     {
         protected abstract class Parameters
             : IServiceHostBuilderParameters,
               IServiceHostBuilderConfigurator,
+              IServiceHostBuilderEventSourceParameters<TEventSourceReplicaTemplate>,
+              IServiceHostBuilderEventSourceConfigurator<TEventSourceReplicaTemplate>,
+              IServiceHostBuilderEventSourceReplicationParameters<TEventSourceReplicableTemplate, TEventSourceReplicator>,
+              IServiceHostBuilderEventSourceReplicationConfigurator<TEventSourceReplicableTemplate, TEventSourceReplicator>,
               IServiceHostBuilderDelegateParameters<TDelegateReplicaTemplate>,
               IServiceHostBuilderDelegateConfigurator<TDelegateReplicaTemplate>,
               IServiceHostBuilderDelegateReplicationParameters<TDelegateReplicableTemplate, TDelegateReplicator>,
@@ -63,9 +80,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         {
             public string ServiceTypeName { get; private set; }
 
+            public IServiceHostEventSourceDescriptor EventSourceDescriptor { get; private set; }
+
             public List<IServiceHostListenerDescriptor> ListenerDescriptors { get; private set; }
 
             public List<IServiceHostDelegateDescriptor> DelegateDescriptors { get; private set; }
+
+            public Func<TEventSourceReplicaTemplate> EventSourceReplicaTemplateFunc { get; private set; }
+
+            public Func<TEventSourceReplicableTemplate, TEventSourceReplicator> EventSourceReplicatorFunc { get; private set; }
 
             public Func<TDelegateReplicaTemplate> DelegateReplicaTemplateFunc { get; private set; }
 
@@ -84,8 +107,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             protected Parameters()
             {
                 this.ServiceTypeName = string.Empty;
+                this.EventSourceDescriptor = null;
                 this.ListenerDescriptors = null;
                 this.DelegateDescriptors = null;
+                this.EventSourceReplicaTemplateFunc = null;
+                this.EventSourceReplicatorFunc = null;
                 this.DelegateReplicaTemplateFunc = null;
                 this.DelegateReplicatorFunc = null;
                 this.AspNetCoreListenerReplicaTemplateFunc = null;
@@ -100,6 +126,20 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 this.ServiceTypeName = serviceName
                  ?? throw new ArgumentNullException(nameof(serviceName));
+            }
+
+            public void UseEventSourceReplicaTemplate(
+                Func<TEventSourceReplicaTemplate> factoryFunc)
+            {
+                this.EventSourceReplicaTemplateFunc = factoryFunc
+                 ?? throw new ArgumentNullException(nameof(factoryFunc));
+            }
+
+            public void UseEventSourceReplicator(
+                Func<TEventSourceReplicableTemplate, TEventSourceReplicator> factoryFunc)
+            {
+                this.EventSourceReplicatorFunc = factoryFunc
+                 ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
 
             public void UseDelegateReplicaTemplate(
@@ -153,6 +193,18 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 }
 
                 this.DependenciesConfigAction = this.DependenciesConfigAction.Chain(configAction);
+            }
+
+            public void SetupEventSource(
+                Action<TEventSourceReplicaTemplate> setupAction)
+            {
+                if (setupAction == null)
+                {
+                    throw new ArgumentNullException(nameof(setupAction));
+                }
+
+                this.EventSourceDescriptor = new ServiceHostEventSourceDescriptor(
+                    replicaTemplate => setupAction((TEventSourceReplicaTemplate) replicaTemplate));
             }
 
             public void DefineDelegate(
@@ -219,14 +271,20 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
         protected class Compilation
         {
+            public TEventSourceReplicator EventSourceReplicator { get; }
+
             public IReadOnlyList<TDelegateReplicator> DelegateReplicators { get; }
 
             public IReadOnlyList<TListenerReplicator> ListenerReplicators { get; }
 
             public Compilation(
+                TEventSourceReplicator eventSourceReplicator,
                 IReadOnlyList<TDelegateReplicator> delegateReplicators,
                 IReadOnlyList<TListenerReplicator> listenerReplicators)
             {
+                this.EventSourceReplicator = eventSourceReplicator
+                 ?? throw new ArgumentNullException(nameof(eventSourceReplicator));
+
                 this.DelegateReplicators = delegateReplicators
                  ?? throw new ArgumentNullException(nameof(delegateReplicators));
 
@@ -262,6 +320,44 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             var dependencies = new DefaultServiceProviderFactory().CreateServiceProvider(dependenciesCollection);
 
+            if (parameters.EventSourceReplicaTemplateFunc == null)
+            {
+                throw new InvalidOperationException(
+                    $"No {nameof(parameters.EventSourceReplicaTemplateFunc)} was configured");
+            }
+
+            if (parameters.EventSourceReplicatorFunc == null)
+            {
+                throw new InvalidOperationException(
+                    $"No {nameof(parameters.EventSourceReplicaTemplateFunc)} was configured");
+            }
+
+            var eventSourceReplicaTemplate = parameters.EventSourceReplicaTemplateFunc();
+            if (eventSourceReplicaTemplate == null)
+            {
+                throw new FactoryProducesNullInstanceException<TEventSourceReplicaTemplate>();
+            }
+
+            eventSourceReplicaTemplate
+               .ConfigureObject(
+                    c =>
+                    {
+                        c.ConfigureDependencies(
+                            services =>
+                            {
+                                var ignore = new HashSet<Type>(services.Select(i => i.ServiceType));
+                                services.Proxinate(dependenciesCollection, dependencies, i => !ignore.Contains(i));
+                            });
+                    });
+
+            parameters.EventSourceDescriptor?.ConfigAction(eventSourceReplicaTemplate);
+
+            var eventSourceReplicator = parameters.EventSourceReplicatorFunc(eventSourceReplicaTemplate);
+            if (eventSourceReplicator == null)
+            {
+                throw new FactoryProducesNullInstanceException<TEventSourceReplicator>();
+            }
+
             var delegateReplicators = parameters.DelegateDescriptors == null
                 ? Array.Empty<TDelegateReplicator>()
                 : parameters.DelegateDescriptors
@@ -272,6 +368,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                             {
                                 throw new InvalidOperationException(
                                     $"No {nameof(parameters.DelegateReplicaTemplateFunc)} was configured");
+                            }
+
+                            if (parameters.DelegateReplicatorFunc == null)
+                            {
+                                throw new InvalidOperationException(
+                                    $"No {nameof(parameters.DelegateReplicatorFunc)} was configured");
                             }
 
                             var template = parameters.DelegateReplicaTemplateFunc();
@@ -380,6 +482,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                     throw new ArgumentOutOfRangeException(nameof(descriptor.ListenerType));
                             }
 
+                            if (parameters.ListenerReplicatorFunc == null)
+                            {
+                                throw new InvalidOperationException(
+                                    $"No {nameof(parameters.ListenerReplicatorFunc)} was configured");
+                            }
+
                             var replicator = parameters.ListenerReplicatorFunc(replicableTemplate);
                             if (replicator == null)
                             {
@@ -390,7 +498,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                         })
                    .ToArray();
 
-            return new Compilation(delegateReplicators, listenerReplicators);
+            return new Compilation(eventSourceReplicator, delegateReplicators, listenerReplicators);
         }
     }
 }

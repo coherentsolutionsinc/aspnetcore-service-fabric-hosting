@@ -1,4 +1,5 @@
 ﻿using System;
+
 using Xunit.Abstractions;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Items
@@ -6,6 +7,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
     public class TheoryItemPromise : IXunitSerializable
     {
         private string name;
+
         private TheoryItemSetup setup;
 
         public TheoryItemPromise()
@@ -16,10 +18,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             string name,
             TheoryItemSetup setup)
         {
-            this.name = name 
-                ?? throw new ArgumentNullException(nameof(name));
+            this.name = name
+             ?? throw new ArgumentNullException(nameof(name));
 
             this.setup = setup;
+        }
+
+        public override string ToString()
+        {
+            return this.name;
         }
 
         public TheoryItem Resolve()
@@ -28,50 +35,55 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
 
             switch (this.setup)
             {
+                case TheoryItemSetup.AsStatefulEventSource:
+                    item.SetupExtensionsAsEventSource()
+                       .SetupConfigAsStatefulService(TheoryItemConfigure.ConfigureEventSourceExtensions);
+                    break;
+                case TheoryItemSetup.AsStatelessEventSource:
+                    item.SetupExtensionsAsEventSource()
+                       .SetupConfigAsStatelessService(TheoryItemConfigure.ConfigureEventSourceExtensions);
+                    break;
                 case TheoryItemSetup.AsStatefulDelegate:
                     item.SetupExtensionsAsStatefulDelegate()
-                        .SetupConfigAsStatefulService(TheoryItemConfigure.ConfigureDelegateExtensions);
+                       .SetupConfigAsStatefulService(TheoryItemConfigure.ConfigureDelegateExtensions);
                     break;
                 case TheoryItemSetup.AsStatelessDelegate:
                     item.SetupExtensionsAsStatelessDelegate()
-                        .SetupConfigAsStatelessService(TheoryItemConfigure.ConfigureDelegateExtensions);
+                       .SetupConfigAsStatelessService(TheoryItemConfigure.ConfigureDelegateExtensions);
                     break;
                 case TheoryItemSetup.AsStatefulAspNetCoreListener:
                     item.SetupExtensionsAsAspNetCoreListener()
-                        .SetupConfigAsStatefulService(TheoryItemConfigure.ConfigureAspNetCoreListenerExtensions);
+                       .SetupConfigAsStatefulService(TheoryItemConfigure.ConfigureAspNetCoreListenerExtensions);
                     break;
                 case TheoryItemSetup.AsStatelessAspNetCoreListener:
                     item.SetupExtensionsAsAspNetCoreListener()
-                        .SetupConfigAsStatelessService(TheoryItemConfigure.ConfigureAspNetCoreListenerExtensions);
+                       .SetupConfigAsStatelessService(TheoryItemConfigure.ConfigureAspNetCoreListenerExtensions);
                     break;
                 case TheoryItemSetup.AsStatefulRemotingListener:
                     item.SetupExtensionsAsRemotingListener()
-                        .SetupConfigAsStatefulService(TheoryItemConfigure.ConfigureRemotingListenerExtensions);
+                       .SetupConfigAsStatefulService(TheoryItemConfigure.ConfigureRemotingListenerExtensions);
                     break;
                 case TheoryItemSetup.AsStatelessRemotingListener:
                     item.SetupExtensionsAsRemotingListener()
-                        .SetupConfigAsStatelessService(TheoryItemConfigure.ConfigureRemotingListenerExtensions);
+                       .SetupConfigAsStatelessService(TheoryItemConfigure.ConfigureRemotingListenerExtensions);
                     break;
             }
 
             return item;
         }
 
-        public void Deserialize(IXunitSerializationInfo info)
+        public void Deserialize(
+            IXunitSerializationInfo info)
         {
-            this.name = info.GetValue<string>(nameof(name));
-            this.setup = info.GetValue<TheoryItemSetup>(nameof(setup));
+            this.name = info.GetValue<string>(nameof(this.name));
+            this.setup = info.GetValue<TheoryItemSetup>(nameof(this.setup));
         }
 
-        public void Serialize(IXunitSerializationInfo info)
+        public void Serialize(
+            IXunitSerializationInfo info)
         {
             info.AddValue(nameof(this.name), this.name);
             info.AddValue(nameof(this.setup), this.setup);
-        }
-
-        public override string ToString()
-        {
-            return this.name;
         }
     }
 }

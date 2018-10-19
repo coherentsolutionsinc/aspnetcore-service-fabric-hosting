@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
 
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Tools;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -541,14 +540,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
                     return this.ImplementationType.Name;
                 }
 
-                public void Deserialize(IXunitSerializationInfo info)
+                public void Deserialize(
+                    IXunitSerializationInfo info)
                 {
-                    this.ServiceType = info.GetValue<Type>(nameof(ServiceType));
-                    this.ImplementationType = info.GetValue<Type>(nameof(ImplementationType));
-                    this.RequestType = info.GetValue<Type>(nameof(RequestType));
+                    this.ServiceType = info.GetValue<Type>(nameof(this.ServiceType));
+                    this.ImplementationType = info.GetValue<Type>(nameof(this.ImplementationType));
+                    this.RequestType = info.GetValue<Type>(nameof(this.RequestType));
                 }
 
-                public void Serialize(IXunitSerializationInfo info)
+                public void Serialize(
+                    IXunitSerializationInfo info)
                 {
                     info.AddValue(nameof(this.ServiceType), this.ServiceType);
                     info.AddValue(nameof(this.ImplementationType), this.ImplementationType);
@@ -865,13 +866,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             foreach (var mi in proxyType.GetInterfaceMap(@case.RequestType).TargetMethods)
             {
                 var method = mi;
-                
+
                 if (method.IsGenericMethodDefinition)
                 {
                     // TODO: Implement generic argument resolution mechanism
                     continue;
                 }
-                
+
                 var parameters = method.GetParameters();
                 var values = parameters
                    .Select(
@@ -947,7 +948,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
                 {
                     arrangeServices
                 });
-            
+
             // Assert
             foreach (var mi in proxyType.GetInterfaceMap(@case.RequestType).TargetMethods)
             {
@@ -958,7 +959,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
                     // TODO: Implement generic argument resolution mechanism
                     continue;
                 }
-                
+
                 var parameters = method.GetParameters();
                 var values = parameters
                    .Select(

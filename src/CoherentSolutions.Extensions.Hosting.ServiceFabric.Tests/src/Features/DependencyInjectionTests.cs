@@ -40,14 +40,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                     return this.Promise.ToString();
                 }
 
-                public void Deserialize(IXunitSerializationInfo info)
+                public void Deserialize(
+                    IXunitSerializationInfo info)
                 {
-                    this.Promise = info.GetValue<TheoryItemPromise>(nameof(Promise));
+                    this.Promise = info.GetValue<TheoryItemPromise>(nameof(this.Promise));
                 }
 
-                public void Serialize(IXunitSerializationInfo info)
+                public void Serialize(
+                    IXunitSerializationInfo info)
                 {
-                    info.AddValue(nameof(Promise), this.Promise);
+                    info.AddValue(nameof(this.Promise), this.Promise);
                 }
             }
 
@@ -91,16 +93,18 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                     return $"{this.Promise} & {this.RequiredType.Name}";
                 }
 
-                public void Deserialize(IXunitSerializationInfo info)
+                public void Deserialize(
+                    IXunitSerializationInfo info)
                 {
-                    this.Promise = info.GetValue<TheoryItemPromise>(nameof(Promise));
-                    this.RequiredType = info.GetValue<Type>(nameof(RequiredType));
+                    this.Promise = info.GetValue<TheoryItemPromise>(nameof(this.Promise));
+                    this.RequiredType = info.GetValue<Type>(nameof(this.RequiredType));
                 }
 
-                public void Serialize(IXunitSerializationInfo info)
+                public void Serialize(
+                    IXunitSerializationInfo info)
                 {
-                    info.AddValue(nameof(Promise), this.Promise);
-                    info.AddValue(nameof(RequiredType), this.RequiredType);
+                    info.AddValue(nameof(this.Promise), this.Promise);
+                    info.AddValue(nameof(this.RequiredType), this.RequiredType);
                 }
             }
 
@@ -117,14 +121,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                         yield return new object[]
                         {
                             new Case(item, typeof(IServicePartition))
-                        };
-                        yield return new object[]
-                        {
-                            new Case(item, typeof(IServiceEventSource))
-                        };
-                        yield return new object[]
-                        {
-                            new Case(item, typeof(ILoggerProvider))
                         };
                     }
 
@@ -188,6 +184,18 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                         };
                     }
 
+                    foreach (var item in TheoryItemsSet.SupportEventSourcingAndLogging)
+                    {
+                        yield return new object[]
+                        {
+                            new Case(item, typeof(IServiceEventSource))
+                        };
+                        yield return new object[]
+                        {
+                            new Case(item, typeof(ILoggerProvider))
+                        };
+                    }
+
                     yield return new object[]
                     {
                         new Case(TheoryItemsSet.StatefulServiceDelegate, typeof(IStatefulServiceDelegateInvocationContext))
@@ -221,14 +229,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                     return this.Promise.ToString();
                 }
 
-                public void Deserialize(IXunitSerializationInfo info)
+                public void Deserialize(
+                    IXunitSerializationInfo info)
                 {
-                    this.Promise = info.GetValue<TheoryItemPromise>(nameof(Promise));
+                    this.Promise = info.GetValue<TheoryItemPromise>(nameof(this.Promise));
                 }
 
-                public void Serialize(IXunitSerializationInfo info)
+                public void Serialize(
+                    IXunitSerializationInfo info)
                 {
-                    info.AddValue(nameof(Promise), this.Promise);
+                    info.AddValue(nameof(this.Promise), this.Promise);
                 }
             }
 
@@ -263,20 +273,22 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                     return $"{this.Promise}-{this.ImplementationType.Name}";
                 }
 
-                public void Deserialize(IXunitSerializationInfo info)
+                public void Deserialize(
+                    IXunitSerializationInfo info)
                 {
-                    this.Promise = info.GetValue<TheoryItemPromise>(nameof(Promise));
-                    this.ServiceType = info.GetValue<Type>(nameof(ServiceType));
-                    this.ImplementationType = info.GetValue<Type>(nameof(ImplementationType));
-                    this.RequestType = info.GetValue<Type>(nameof(RequestType));
+                    this.Promise = info.GetValue<TheoryItemPromise>(nameof(this.Promise));
+                    this.ServiceType = info.GetValue<Type>(nameof(this.ServiceType));
+                    this.ImplementationType = info.GetValue<Type>(nameof(this.ImplementationType));
+                    this.RequestType = info.GetValue<Type>(nameof(this.RequestType));
                 }
 
-                public void Serialize(IXunitSerializationInfo info)
+                public void Serialize(
+                    IXunitSerializationInfo info)
                 {
-                    info.AddValue(nameof(Promise), this.Promise);
-                    info.AddValue(nameof(ServiceType), this.ServiceType);
-                    info.AddValue(nameof(ImplementationType), this.ImplementationType);
-                    info.AddValue(nameof(RequestType), this.RequestType);
+                    info.AddValue(nameof(this.Promise), this.Promise);
+                    info.AddValue(nameof(this.ServiceType), this.ServiceType);
+                    info.AddValue(nameof(this.ImplementationType), this.ImplementationType);
+                    info.AddValue(nameof(this.RequestType), this.RequestType);
                 }
             }
 

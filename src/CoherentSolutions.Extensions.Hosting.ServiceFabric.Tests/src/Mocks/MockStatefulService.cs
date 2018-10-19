@@ -38,6 +38,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Mocks
 
             this.servicePartition = servicePartition
              ?? throw new ArgumentNullException(nameof(servicePartition));
+
             this.reliableStateManager = reliableStateManager;
         }
 

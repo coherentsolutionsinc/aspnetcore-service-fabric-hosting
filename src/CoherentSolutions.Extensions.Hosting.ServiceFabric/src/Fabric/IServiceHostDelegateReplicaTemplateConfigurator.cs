@@ -6,7 +6,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public interface IServiceHostDelegateReplicaTemplateConfigurator
         : IConfigurableObjectDependenciesConfigurator,
-          IServiceHostLoggerConfigurator
+          IConfigurableObjectLoggerConfigurator
     {
         void UseDelegate(
             Delegate @delegate);
