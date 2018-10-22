@@ -10,8 +10,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CoherentSolutions.Extensions.Hosting.ServiceFabric" Version="1.2.1" />
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.9" />
+    <PackageReference Include="CoherentSolutions.Extensions.Hosting.ServiceFabric" Version="1.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.5" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.1.1" />
     <PackageReference Include="Microsoft.ServiceFabric" Version="6.3.187" />
     <PackageReference Include="Microsoft.ServiceFabric.AspNetCore.Abstractions" Version="3.2.187" />
