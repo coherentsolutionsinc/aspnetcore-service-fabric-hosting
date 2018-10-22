@@ -5,7 +5,7 @@
 
 ## About the Project
 
-**CoherentSolutions.Extensions.Hosting.ServiceFabric** changes a way how [Service Fabric Reliable Services](https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-reliable-services-introduction) are developed. The main idea is to simplify development process as much as possible by removing unnecessary code, improving separation of concerns. 
+**CoherentSolutions.Extensions.Hosting.ServiceFabric** is an extension to existing [HostBuilder](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-2.1). The idea is to simplify configuration of [Reliable Services](https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-reliable-services-introduction) by removing unnecessary code and improving separation of concerns. 
 
 ## Getting Started
 
@@ -35,7 +35,7 @@ private static void Main(string[] args)
 
 The service configuration starts with a call to `DefineStatefulService(...)` extension method. This method accepts an action where all service configuration is done.
 
- _You can find more details on [defining services](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Services) wiki page._
+ _You can find more details on [defining services](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/defining-services) wiki page._
 
 ``` csharp
 private static void Main(string[] args)
@@ -79,7 +79,7 @@ This code is now ready to run but unfortunately it quite useless.
 
 Reliable Services can expose endpoints. This exposure is represented in form of service listeners configured when replica is build. The **CoherentSolutions.Extensions.Hosting.ServiceFabric** provides a simple way to configure both: ASP.NET Core based listeners (**AspNetCoreListener**) and Remoting Listeners (**RemotingListener**).
  
- _You can find more details on [defining listeners](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Services#defining-listeners) wiki page._
+ _You can find more details on [defining listeners](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/defining-listeners) wiki page._
 
 #### ASP.NET Core
 
@@ -237,7 +237,7 @@ private static void Main(string[] args)
 
 In **CoherentSolutions.Extensions.Hosting.ServiceFabric** background jobs and event handlers are represented in form of **Delegates**. The **Delegate** is configured using `DefineDefine(...)` method. 
 
- _You can find more details on [defining delegates](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Defining-Services#defining-delegates) wiki page._
+ _You can find more details on [defining delegates](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/defining-delegates) wiki page._
 
 ``` csharp
 private static void Main(string[] args)
