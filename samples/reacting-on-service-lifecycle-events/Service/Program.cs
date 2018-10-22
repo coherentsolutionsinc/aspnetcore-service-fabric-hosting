@@ -6,8 +6,6 @@ using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-using Service.src;
-
 namespace Service
 {
     public class Program

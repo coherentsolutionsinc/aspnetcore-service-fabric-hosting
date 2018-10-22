@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics.Tracing;
 using System.Threading.Tasks;
 
-namespace Service.src
+namespace Service
 {
     [EventSource(Name = "App-StatelessService")]
     internal sealed class StatelessServiceEventSource : EventSource
