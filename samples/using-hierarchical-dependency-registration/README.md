@@ -114,5 +114,5 @@ For more information please check this [wiki article][1] and explore the source 
 
 If you have a suggestion or found an issue please consider [reporting it][2].
 
-[1]: https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Hierarchical-Services-Registration
+[1]: https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/tree/master/samples/using-hierarchical-dependency-registration#hierarchical-services-registration
 [2]: https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/issues
