@@ -124,5 +124,23 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.DependencyIn
             @this.Add(new ServiceDescriptor(typeof(IServiceHostListenerInformation), remotingListenerInformation));
             @this.Add(new ServiceDescriptor(typeof(IServiceHostRemotingListenerInformation), remotingListenerInformation));
         }
+
+        public static void Add(
+            this IServiceCollection @this,
+            IServiceHostGenericListenerInformation genericListenerInformation)
+        {
+            if (@this == null)
+            {
+                throw new ArgumentNullException(nameof(@this));
+            }
+
+            if (genericListenerInformation == null)
+            {
+                throw new ArgumentNullException(nameof(genericListenerInformation));
+            }
+
+            @this.Add(new ServiceDescriptor(typeof(IServiceHostListenerInformation), genericListenerInformation));
+            @this.Add(new ServiceDescriptor(typeof(IServiceHostGenericListenerInformation), genericListenerInformation));
+        }
     }
 }

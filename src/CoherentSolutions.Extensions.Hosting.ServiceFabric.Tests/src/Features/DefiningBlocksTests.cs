@@ -116,6 +116,20 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                     }
                 }
             }
+
+            public static IEnumerable<object[]> GenericListenerCases
+            {
+                get
+                {
+                    foreach (var item in TheoryItemsSet.GenericListenerItems)
+                    {
+                        yield return new object[]
+                        {
+                            new Case(item)
+                        };
+                    }
+                }
+            }
         }
 
         [Theory]
@@ -254,6 +268,38 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
             // Act
             theoryItem.SetupExtension(new UseRemotingListenerCommunicationListenerTheoryExtension().Setup(ArrangeListenerFactory));
+            theoryItem.Try();
+
+            // Assert
+            mockListener.Verify();
+        }
+
+        [Theory]
+        [MemberData(nameof(Theories.GenericListenerCases), MemberType = typeof(Theories))]
+        private static void Should_use_custom_generic_communication_listener_For_communication_listener(
+            Theories.Case @case)
+        {
+            // Arrange
+            Mock<ICommunicationListener> mockListener = null;
+
+            ICommunicationListener ArrangeListenerFactory(
+                ServiceContext context,
+                string endpointName,
+                IServiceProvider provider)
+            {
+                mockListener = new Mock<ICommunicationListener>();
+                mockListener
+                   .As<ICommunicationListener>()
+                   .Setup(instance => instance.OpenAsync(It.IsAny<CancellationToken>()))
+                   .Returns(Task.FromResult(string.Empty));
+
+                return mockListener.Object;
+            }
+
+            var theoryItem = @case.Promise.Resolve();
+
+            // Act
+            theoryItem.SetupExtension(new UseGenericListenerCommunicationListenerTheoryExtension().Setup(ArrangeListenerFactory));
             theoryItem.Try();
 
             // Assert

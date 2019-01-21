@@ -1,8 +1,8 @@
 ﻿namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public interface IStatelessServiceHostRemotingListenerReplicaTemplateConfigurator
+    public interface IStatelessServiceHostGenericListenerReplicaTemplateConfigurator
         : IStatelessServiceHostListenerReplicaTemplateConfigurator,
-          IServiceHostRemotingListenerReplicaTemplateConfigurator
+          IServiceHostGenericListenerReplicaTemplateConfigurator
     {
     }
 }

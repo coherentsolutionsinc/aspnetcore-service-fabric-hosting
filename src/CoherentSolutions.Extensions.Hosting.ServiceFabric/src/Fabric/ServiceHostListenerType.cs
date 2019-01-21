@@ -4,6 +4,8 @@
     {
         AspNetCore,
 
-        Remoting
+        Remoting,
+
+        Generic
     }
 }

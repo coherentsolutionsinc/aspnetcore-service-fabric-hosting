@@ -1,6 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
+﻿using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 using Microsoft.Extensions.Logging;
 

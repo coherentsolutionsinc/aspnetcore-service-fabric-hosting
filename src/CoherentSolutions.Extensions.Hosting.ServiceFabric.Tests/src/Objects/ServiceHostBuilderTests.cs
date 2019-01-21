@@ -25,6 +25,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             IStatefulServiceHostAspNetCoreListenerReplicaTemplateConfigurator,
             IStatefulServiceHostRemotingListenerReplicaTemplate,
             IStatefulServiceHostRemotingListenerReplicaTemplateConfigurator,
+            IStatefulServiceHostGenericListenerReplicaTemplate,
+            IStatefulServiceHostGenericListenerReplicaTemplateConfigurator,
             IStatefulServiceHostListenerReplicator
         >
     {
@@ -41,6 +43,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
                 IStatefulServiceHostListenerReplicableTemplate,
                 IStatefulServiceHostAspNetCoreListenerReplicaTemplate,
                 IStatefulServiceHostRemotingListenerReplicaTemplate,
+                IStatefulServiceHostGenericListenerReplicaTemplate,
                 IStatefulServiceHostListenerReplicator
             >
             CreateServiceInstance()
@@ -66,6 +69,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             IStatelessServiceHostAspNetCoreListenerReplicaTemplateConfigurator,
             IStatelessServiceHostRemotingListenerReplicaTemplate,
             IStatelessServiceHostRemotingListenerReplicaTemplateConfigurator,
+            IStatelessServiceHostGenericListenerReplicaTemplate,
+            IStatelessServiceHostGenericListenerReplicaTemplateConfigurator,
             IStatelessServiceHostListenerReplicator
         >
     {
@@ -82,6 +87,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
                 IStatelessServiceHostListenerReplicableTemplate,
                 IStatelessServiceHostAspNetCoreListenerReplicaTemplate,
                 IStatelessServiceHostRemotingListenerReplicaTemplate,
+                IStatelessServiceHostGenericListenerReplicaTemplate,
                 IStatelessServiceHostListenerReplicator
             >
             CreateServiceInstance()
@@ -107,6 +113,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         TListenerAspNetCoreReplicaTemplateConfigurator,
         TListenerRemotingReplicaTemplate,
         TListenerRemotingReplicaTemplateConfigurator,
+        TListenerGenericReplicaTemplate,
+        TListenerGenericReplicaTemplateConfigurator,
         TListenerReplicator>
         where TParameters :
         class,
@@ -117,6 +125,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         IServiceHostBuilderDelegateReplicationParameters<TDelegateReplicableTemplate, TDelegateReplicator>,
         IServiceHostBuilderAspNetCoreListenerParameters<TListenerAspNetCoreReplicaTemplate>,
         IServiceHostBuilderRemotingListenerParameters<TListenerRemotingReplicaTemplate>,
+        IServiceHostBuilderGenericListenerParameters<TListenerGenericReplicaTemplate>,
         IServiceHostBuilderListenerReplicationParameters<TListenerReplicableTemplate, TListenerReplicator>
         where TConfigurator :
         class,
@@ -127,6 +136,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         IServiceHostBuilderDelegateReplicationConfigurator<TDelegateReplicableTemplate, TDelegateReplicator>,
         IServiceHostBuilderAspNetCoreListenerConfigurator<TListenerAspNetCoreReplicaTemplate>,
         IServiceHostBuilderRemotingListenerConfigurator<TListenerRemotingReplicaTemplate>,
+        IServiceHostBuilderGenericListenerConfigurator<TListenerGenericReplicaTemplate>,
         IServiceHostBuilderListenerReplicationConfigurator<TListenerReplicableTemplate, TListenerReplicator>
         where TEventSourceReplicaTemplate :
         class,
@@ -160,6 +170,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         where TListenerRemotingReplicaTemplateConfigurator :
         class,
         IServiceHostRemotingListenerReplicaTemplateConfigurator
+        where TListenerGenericReplicaTemplate :
+        class,
+        TListenerReplicableTemplate,
+        IServiceHostGenericListenerReplicaTemplate<TListenerGenericReplicaTemplateConfigurator>
+        where TListenerGenericReplicaTemplateConfigurator :
+        class,
+        IServiceHostGenericListenerReplicaTemplateConfigurator
         where TListenerReplicator :
         class
     {
@@ -175,6 +192,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             TListenerReplicableTemplate,
             TListenerAspNetCoreReplicaTemplate,
             TListenerRemotingReplicaTemplate,
+            TListenerGenericReplicaTemplate,
             TListenerReplicator
         > CreateServiceInstance();
 
@@ -305,6 +323,55 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
 
             // Assert
             factory.Verify(instance => instance(It.IsAny<TEventSourceReplicableTemplate>()), Times.Once());
+        }
+
+        [Fact]
+        public void
+            Should_use_generic_listener_configuration_action_When_configuring_generic_listener()
+        {
+            // Arrange
+            var action = new Mock<Action<TListenerGenericReplicaTemplate>>();
+            action
+               .Setup(instance => instance(It.IsAny<TListenerGenericReplicaTemplate>()));
+
+            // Act
+            var builder = this.CreateServiceInstance();
+            builder.ConfigureObject(
+                config =>
+                {
+                    config.DefineGenericListener(action.Object);
+                });
+            builder.Build();
+
+            // Assert
+            action.Verify(instance => instance(It.IsAny<TListenerGenericReplicaTemplate>()), Times.Once());
+        }
+
+        [Fact]
+        public void
+            Should_use_generic_listener_replica_template_func_When_configuring_generic_listener()
+        {
+            // Arrange
+            var factory = new Mock<Func<TListenerGenericReplicaTemplate>>();
+            factory
+               .Setup(instance => instance())
+               .Returns(new Mock<TListenerGenericReplicaTemplate>().Object);
+
+            // Act
+            var builder = this.CreateServiceInstance();
+            builder.ConfigureObject(
+                config =>
+                {
+                    config.UseGenericListenerReplicaTemplate(factory.Object);
+                    config.DefineGenericListener(
+                        c =>
+                        {
+                        });
+                });
+            builder.Build();
+
+            // Assert
+            factory.Verify(instance => instance(), Times.Once());
         }
 
         [Fact]

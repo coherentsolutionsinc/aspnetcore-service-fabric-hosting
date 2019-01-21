@@ -41,6 +41,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             public Func<IServiceProvider, IServiceRemotingMessageHandler> RemotingHandlerFunc { get; private set; }
 
+            public Func<IServiceCollection> DependenciesFunc { get; private set; }
+
+            public Action<IServiceCollection> DependenciesConfigAction { get; private set; }
+
+            public Func<IConfigurableObjectLoggerOptions> LoggerOptionsFunc { get; private set; }
+
             protected RemotingListenerParameters()
             {
                 this.RemotingCommunicationListenerFunc = DefaultRemotingCommunicationListenerFunc;
@@ -48,6 +54,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.RemotingSettingsFunc = DefaultRemotingSettingsFunc;
                 this.RemotingSerializationProviderFunc = null;
                 this.RemotingHandlerFunc = DefaultRemotingHandlerFunc;
+                this.DependenciesFunc = DefaultDependenciesFunc;
+                this.DependenciesConfigAction = null;
+                this.LoggerOptionsFunc = DefaultLoggerOptionsFunc;
             }
 
             public void UseCommunicationListener(
@@ -100,6 +109,31 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.RemotingHandlerFunc = provider => factoryFunc(provider);
             }
 
+            public void UseDependencies(
+                Func<IServiceCollection> factoryFunc)
+            {
+                this.DependenciesFunc = factoryFunc
+                 ?? throw new ArgumentNullException(nameof(factoryFunc));
+            }
+
+            public void ConfigureDependencies(
+                Action<IServiceCollection> configAction)
+            {
+                if (configAction == null)
+                {
+                    throw new ArgumentNullException(nameof(configAction));
+                }
+
+                this.DependenciesConfigAction = this.DependenciesConfigAction.Chain(configAction);
+            }
+
+            public void UseLoggerOptions(
+                Func<IConfigurableObjectLoggerOptions> factoryFunc)
+            {
+                this.LoggerOptionsFunc = factoryFunc
+                 ?? throw new ArgumentNullException(nameof(factoryFunc));
+            }
+
             private static FabricTransportServiceRemotingListener DefaultRemotingCommunicationListenerFunc(
                 ServiceContext serviceContext,
                 ServiceHostRemotingCommunicationListenerComponentsFactory build)
@@ -128,6 +162,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                     serviceContext,
                     serviceImplementation,
                     serviceRemotingMessageBodyFactory);
+            }
+
+            private static IServiceCollection DefaultDependenciesFunc()
+            {
+                return new ServiceCollection();
+            }
+
+            private static IConfigurableObjectLoggerOptions DefaultLoggerOptionsFunc()
+            {
+                return ServiceHostLoggerOptions.Disabled;
             }
         }
 

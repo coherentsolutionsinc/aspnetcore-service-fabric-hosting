@@ -320,6 +320,28 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                 });
         }
 
+        public static void ConfigureGenericListenerExtensions(
+            IStatefulServiceHostBuilderConfigurator configurator,
+            TheoryItem.TheoryItemExtensionProvider extensions)
+        {
+            configurator.DefineGenericListener(
+                listenerBuilder =>
+                {
+                    listenerBuilder.ConfigureObject(c => ConfigureGenericListenerExtensions(c, extensions));
+                });
+        }
+
+        public static void ConfigureGenericListenerExtensions(
+            IStatelessServiceHostBuilderConfigurator configurator,
+            TheoryItem.TheoryItemExtensionProvider extensions)
+        {
+            configurator.DefineGenericListener(
+                listenerBuilder =>
+                {
+                    listenerBuilder.ConfigureObject(c => ConfigureGenericListenerExtensions(c, extensions));
+                });
+        }
+
         private static void ConfigureEventSourceExtensions(
             IServiceHostEventSourceReplicaTemplateConfigurator configurator,
             TheoryItem.TheoryItemExtensionProvider extensions)
@@ -467,6 +489,41 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                 });
             configurator.UseSerializationProvider(useRemotingSerializationProvider.Factory);
             configurator.UseSettings(useRemotingSettings.Factory);
+            configurator.ConfigureDependencies(
+                dependencies =>
+                {
+                    configureDependencies.ConfigAction(dependencies);
+                });
+        }
+
+        private static void ConfigureGenericListenerExtensions(
+            IServiceHostGenericListenerReplicaTemplateConfigurator configurator,
+            TheoryItem.TheoryItemExtensionProvider extensions)
+        {
+            var useListenerEndpoint = extensions.GetExtension<IUseListenerEndpointTheoryExtension>();
+            var useGenericCommunicationListener = extensions.GetExtension<IUseGenericListenerCommunicationListenerTheoryExtension>();
+            var useDependencies = extensions.GetExtension<IUseDependenciesTheoryExtension>();
+            var configureDependencies = extensions.GetExtension<IConfigureDependenciesTheoryExtension>();
+            var pickDependency = extensions.GetExtension<IPickDependencyTheoryExtension>();
+            var pickListenerEndpoint = extensions.GetExtension<IPickListenerEndpointTheoryExtension>();
+
+            configurator.UseEndpoint(useListenerEndpoint.Endpoint);
+            configurator.UseDependencies(useDependencies.Factory);
+            configurator.UseCommunicationListener(
+                (
+                    context,
+                    endpointName,
+                    provider) =>
+                {
+                    pickListenerEndpoint.PickAction(endpointName);
+
+                    foreach (var pickAction in pickDependency.PickActions)
+                    {
+                        pickAction(provider);
+                    }
+
+                    return useGenericCommunicationListener.Factory(context, endpointName, provider);
+                });
             configurator.ConfigureDependencies(
                 dependencies =>
                 {

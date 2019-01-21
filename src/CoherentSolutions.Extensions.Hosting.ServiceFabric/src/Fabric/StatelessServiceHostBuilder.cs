@@ -18,6 +18,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
               IStatelessServiceHostListenerReplicableTemplate,
               IStatelessServiceHostAspNetCoreListenerReplicaTemplate,
               IStatelessServiceHostRemotingListenerReplicaTemplate,
+              IStatelessServiceHostGenericListenerReplicaTemplate,
               IStatelessServiceHostListenerReplicator>,
           IStatelessServiceHostBuilder
     {
@@ -38,6 +39,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.UseDelegateReplicator(DefaultDelegateReplicatorFunc);
                 this.UseAspNetCoreListenerReplicaTemplate(DefaultAspNetCoreListenerReplicaTemplateFunc);
                 this.UseRemotingListenerReplicaTemplate(DefaultRemotingListenerReplicaTemplateFunc);
+                this.UseGenericListenerReplicaTemplate(DefaultGenericListenerReplicaTemplateFunc);
                 this.UseListenerReplicator(DefaultListenerReplicatorFunc);
             }
 
@@ -83,6 +85,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             private static IStatelessServiceHostRemotingListenerReplicaTemplate DefaultRemotingListenerReplicaTemplateFunc()
             {
                 return new StatelessServiceHostRemotingListenerReplicaTemplate();
+            }
+
+            private static IStatelessServiceHostGenericListenerReplicaTemplate DefaultGenericListenerReplicaTemplateFunc()
+            {
+                return new StatelessServiceHostGenericListenerReplicaTemplate();
             }
 
             private static IStatelessServiceHostListenerReplicator DefaultListenerReplicatorFunc(

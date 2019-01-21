@@ -10,6 +10,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
           IServiceHostBuilderDelegateReplicationConfigurator<IStatelessServiceHostDelegateReplicableTemplate, IStatelessServiceHostDelegateReplicator>,
           IServiceHostBuilderAspNetCoreListenerConfigurator<IStatelessServiceHostAspNetCoreListenerReplicaTemplate>,
           IServiceHostBuilderRemotingListenerConfigurator<IStatelessServiceHostRemotingListenerReplicaTemplate>,
+          IServiceHostBuilderGenericListenerConfigurator<IStatelessServiceHostGenericListenerReplicaTemplate>,
           IServiceHostBuilderListenerReplicationConfigurator<IStatelessServiceHostListenerReplicableTemplate, IStatelessServiceHostListenerReplicator>
 
     {

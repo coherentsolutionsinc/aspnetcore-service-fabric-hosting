@@ -67,6 +67,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                     item.SetupExtensionsAsRemotingListener()
                        .SetupConfigAsStatelessService(TheoryItemConfigure.ConfigureRemotingListenerExtensions);
                     break;
+                case TheoryItemSetup.AsStatefulGenericListener:
+                    item.SetupExtensionsAsGenericListener()
+                       .SetupConfigAsStatefulService(TheoryItemConfigure.ConfigureGenericListenerExtensions);
+                    break;
+                case TheoryItemSetup.AsStatelessGenericListener:
+                    item.SetupExtensionsAsGenericListener()
+                       .SetupConfigAsStatelessService(TheoryItemConfigure.ConfigureGenericListenerExtensions);
+                    break;
             }
 
             return item;

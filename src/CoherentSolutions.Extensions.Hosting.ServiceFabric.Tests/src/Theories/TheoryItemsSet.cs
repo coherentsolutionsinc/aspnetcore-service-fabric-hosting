@@ -27,16 +27,24 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories
         public static TheoryItemPromise StatelessServiceRemotingListener
             => new TheoryItemPromise("Stateless-RemotingListener", TheoryItemSetup.AsStatelessRemotingListener);
 
+        public static TheoryItemPromise StatefulServiceGenericListener
+            => new TheoryItemPromise("Stateful-GenericListener", TheoryItemSetup.AsStatefulGenericListener);
+
+        public static TheoryItemPromise StatelessServiceGenericListener
+            => new TheoryItemPromise("Stateless-GenericListener", TheoryItemSetup.AsStatelessGenericListener);
+
         public static IEnumerable<TheoryItemPromise> SupportDependencyInjection
         {
             get
             {
                 yield return StatefulServiceEventSource;
-                yield return StatelessServiceEventSource;
                 yield return StatefulServiceDelegate;
                 yield return StatefulServiceRemotingListener;
+                yield return StatefulServiceGenericListener;
+                yield return StatelessServiceEventSource;
                 yield return StatelessServiceDelegate;
                 yield return StatelessServiceRemotingListener;
+                yield return StatelessServiceGenericListener;
             }
         }
 
@@ -47,9 +55,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories
                 yield return StatefulServiceDelegate;
                 yield return StatefulServiceAspNetCoreListener;
                 yield return StatefulServiceRemotingListener;
+                yield return StatefulServiceGenericListener;
                 yield return StatelessServiceDelegate;
                 yield return StatelessServiceAspNetCoreListener;
                 yield return StatelessServiceRemotingListener;
+                yield return StatelessServiceGenericListener;
             }
         }
 
@@ -61,6 +71,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories
                 yield return StatefulServiceDelegate;
                 yield return StatefulServiceAspNetCoreListener;
                 yield return StatefulServiceRemotingListener;
+                yield return StatefulServiceGenericListener;
             }
         }
 
@@ -72,6 +83,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories
                 yield return StatelessServiceDelegate;
                 yield return StatelessServiceAspNetCoreListener;
                 yield return StatelessServiceRemotingListener;
+                yield return StatelessServiceGenericListener;
             }
         }
 
@@ -103,7 +115,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories
                 StatelessServiceRemotingListener
             };
 
-        public static IEnumerable<TheoryItemPromise> AllListenerItems => AspNetCoreListenerItems.Concat(RemotingListenerItems);
+        public static IEnumerable<TheoryItemPromise> GenericListenerItems
+            => new[]
+            {
+                StatefulServiceGenericListener,
+                StatelessServiceGenericListener
+            };
+
+        public static IEnumerable<TheoryItemPromise> AllListenerItems => AspNetCoreListenerItems.Concat(RemotingListenerItems).Concat(GenericListenerItems);
 
         public static IEnumerable<TheoryItemPromise> AllItems => StatefulItems.Concat(StatelessItems);
     }

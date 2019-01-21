@@ -4,10 +4,10 @@ using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public class ServiceHostRemotingListenerLogger : ServiceHostListenerLogger<ServiceListenerEventSourceData>
+    public class ServiceHostGenericListenerLogger : ServiceHostListenerLogger<ServiceListenerEventSourceData>
     {
-        public ServiceHostRemotingListenerLogger(
-            IServiceHostRemotingListenerInformation listenerInformation,
+        public ServiceHostGenericListenerLogger(
+            IServiceHostGenericListenerInformation listenerInformation,
             ServiceContext serviceContext,
             IServiceEventSource eventSource,
             string eventCategoryName,

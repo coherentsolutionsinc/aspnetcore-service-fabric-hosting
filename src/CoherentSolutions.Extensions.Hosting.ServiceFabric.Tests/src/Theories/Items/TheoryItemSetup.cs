@@ -21,6 +21,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
 
         AsStatefulRemotingListener,
 
-        AsStatelessRemotingListener
+        AsStatelessRemotingListener,
+
+        AsStatefulGenericListener,
+
+        AsStatelessGenericListener
     }
 }

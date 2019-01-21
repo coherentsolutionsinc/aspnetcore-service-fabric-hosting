@@ -560,6 +560,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
+        public static TCaller UseCommunicationListener<TCaller>(
+            this TCaller @this,
+            ServiceHostGenericCommunicationListenerFactory factoryFunc)
+            where TCaller : IConfigurableObject<IServiceHostGenericListenerReplicaTemplateConfigurator>
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseCommunicationListener(factoryFunc));
+
+            return @this;
+        }
+
         public static TCaller UseSettings<TCaller>(
             this TCaller @this,
             Func<FabricTransportRemotingListenerSettings> factoryFunc)
@@ -739,6 +750,26 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
         {
             @this.ConfigureObject(
                 configurator => configurator.UseRemotingListenerReplicaTemplate(factoryFunc));
+
+            return @this;
+        }
+
+        public static IStatefulServiceHostBuilder UseGenericListenerReplicaTemplate(
+            this IStatefulServiceHostBuilder @this,
+            Func<IStatefulServiceHostGenericListenerReplicaTemplate> factoryFunc)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseGenericListenerReplicaTemplate(factoryFunc));
+
+            return @this;
+        }
+
+        public static IStatelessServiceHostBuilder UseGenericListenerReplicaTemplate(
+            this IStatelessServiceHostBuilder @this,
+            Func<IStatelessServiceHostGenericListenerReplicaTemplate> factoryFunc)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseGenericListenerReplicaTemplate(factoryFunc));
 
             return @this;
         }
@@ -1099,16 +1130,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
-        public static IStatefulServiceHostBuilder DefineRemotingListener(
-            this IStatefulServiceHostBuilder @this,
-            Action<IStatefulServiceHostRemotingListenerReplicaTemplate> configAction)
-        {
-            @this.ConfigureObject(
-                configurator => configurator.DefineRemotingListener(configAction));
-
-            return @this;
-        }
-
         public static IStatelessServiceHostBuilder DefineAspNetCoreListener(
             this IStatelessServiceHostBuilder @this,
             Action<IStatelessServiceHostAspNetCoreListenerReplicaTemplate> configAction)
@@ -1119,12 +1140,42 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
+        public static IStatefulServiceHostBuilder DefineRemotingListener(
+            this IStatefulServiceHostBuilder @this,
+            Action<IStatefulServiceHostRemotingListenerReplicaTemplate> configAction)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.DefineRemotingListener(configAction));
+
+            return @this;
+        }
+
         public static IStatelessServiceHostBuilder DefineRemotingListener(
             this IStatelessServiceHostBuilder @this,
             Action<IStatelessServiceHostRemotingListenerReplicaTemplate> configAction)
         {
             @this.ConfigureObject(
                 configurator => configurator.DefineRemotingListener(configAction));
+
+            return @this;
+        }
+
+        public static IStatefulServiceHostBuilder DefineGenericListener(
+            this IStatefulServiceHostBuilder @this,
+            Action<IStatefulServiceHostGenericListenerReplicaTemplate> configAction)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.DefineGenericListener(configAction));
+
+            return @this;
+        }
+
+        public static IStatelessServiceHostBuilder DefineGenericListener(
+            this IStatelessServiceHostBuilder @this,
+            Action<IStatelessServiceHostGenericListenerReplicaTemplate> configAction)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.DefineGenericListener(configAction));
 
             return @this;
         }

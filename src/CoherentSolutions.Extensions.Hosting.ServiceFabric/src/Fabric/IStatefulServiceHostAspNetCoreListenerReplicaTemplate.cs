@@ -3,7 +3,6 @@
     public interface IStatefulServiceHostAspNetCoreListenerReplicaTemplate
         : IStatefulServiceHostListenerReplicableTemplate,
           IServiceHostAspNetCoreListenerReplicaTemplate<IStatefulServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
-
     {
     }
 }
