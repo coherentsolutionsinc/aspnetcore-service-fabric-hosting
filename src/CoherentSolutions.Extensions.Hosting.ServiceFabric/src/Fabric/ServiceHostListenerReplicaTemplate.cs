@@ -3,7 +3,6 @@ using System.Fabric;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
@@ -20,18 +19,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         {
             public string EndpointName { get; private set; }
 
-            public Func<IConfigurableObjectLoggerOptions> LoggerOptionsFunc { get; private set; }
-
-            public Func<IServiceCollection> DependenciesFunc { get; private set; }
-
-            public Action<IServiceCollection> DependenciesConfigAction { get; private set; }
-
             protected ListenerParameters()
             {
                 this.EndpointName = string.Empty;
-                this.LoggerOptionsFunc = DefaultLoggerOptionsFunc;
-                this.DependenciesFunc = DefaultDependenciesFunc;
-                this.DependenciesConfigAction = null;
             }
 
             public void UseEndpoint(
@@ -39,41 +29,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 this.EndpointName = endpointName
                  ?? throw new ArgumentNullException(nameof(endpointName));
-            }
-
-            public void UseLoggerOptions(
-                Func<IConfigurableObjectLoggerOptions> factoryFunc)
-            {
-                this.LoggerOptionsFunc = factoryFunc
-                 ?? throw new ArgumentNullException(nameof(factoryFunc));
-            }
-
-            public void UseDependencies(
-                Func<IServiceCollection> factoryFunc)
-            {
-                this.DependenciesFunc = factoryFunc
-                 ?? throw new ArgumentNullException(nameof(factoryFunc));
-            }
-
-            public void ConfigureDependencies(
-                Action<IServiceCollection> configAction)
-            {
-                if (configAction == null)
-                {
-                    throw new ArgumentNullException(nameof(configAction));
-                }
-
-                this.DependenciesConfigAction = this.DependenciesConfigAction.Chain(configAction);
-            }
-
-            private static IConfigurableObjectLoggerOptions DefaultLoggerOptionsFunc()
-            {
-                return ServiceHostLoggerOptions.Disabled;
-            }
-
-            private static IServiceCollection DefaultDependenciesFunc()
-            {
-                return new ServiceCollection();
             }
         }
 

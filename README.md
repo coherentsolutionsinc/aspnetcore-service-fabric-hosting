@@ -17,7 +17,7 @@ As usual, the easiest way to get started is to code something -> let's start fro
 
 In this section we would: 
 1. Configure one stateful service 
-2. Configure two endpoints (by configuring two listeners: aspnetcore and remoting) 
+2. Configure three endpoints (by configuring three listeners: aspnetcore, remoting and generic) 
 3. Configure one background job (by configuring a delegate to run in `RunAsync`).
 
 ### Initial setup
@@ -77,13 +77,15 @@ This code is now ready to run but unfortunately it quite useless.
 
 ### Configuring Endpoints
 
-Reliable Services can expose endpoints. This exposure is represented in form of service listeners configured when replica is build. The **CoherentSolutions.Extensions.Hosting.ServiceFabric** provides a simple way to configure both: ASP.NET Core based listeners (**AspNetCoreListener**) and Remoting Listeners (**RemotingListener**).
+Reliable Services can expose endpoints. This exposure is represented in form of service listeners configured when replica is build. The **CoherentSolutions.Extensions.Hosting.ServiceFabric** provides a simple way to configure: ASP.NET Core listeners, Service Fabric Remoting listeners and Generic listeners. 
+
+In general listeners are configured using the same approach as was deomnstrated for services.
  
  _You can find more details on [defining listeners](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/defining-listeners) wiki page._
 
 #### ASP.NET Core
 
-The configuration of **AspNetCoreListener** looks very similar to service configuration. Configuration starts with a call to `.DefineAspNetCoreListener(...)` method. This method accepts an action where all configuration is done.
+ASP.NET Core listener configuration starts with a call to `.DefineAspNetCoreListener(...)` method. This method accepts an action where all listener specific configuration is done.
 
 ``` csharp
 private static void Main(string[] args)
@@ -135,7 +137,7 @@ private static void Main(string[] args)
 }
 ```
 
-This listener is an infrastructure wrapper around the configuration process of `IWebHost`. The `IWebHost` configuration is done in `ConfigureWebHost(...)` method.
+The listener is an infrastructure wrapper around the configuration process of `IWebHost`. The `IWebHost` configuration is done in `ConfigureWebHost(...)` method.
 
 ``` csharp
 private static void Main(string[] args)
@@ -161,7 +163,7 @@ private static void Main(string[] args)
 
 #### Remoting
 
-The basics of **RemotingListener** configuration are the same as for **AspNetCoreListener**. The main difference is that we use `DefineRemotingListener(...)` instead of `DefineAspNetCoreListener(...)`. 
+Remoting listener has slightly different configuration curse than ASP.NET Core listener. The configuration starts from the call to `DefineRemotingListener(...)` and `UseEndpoint(...)` methods. 
 
 ``` csharp
 private static void Main(string[] args)
@@ -185,9 +187,9 @@ private static void Main(string[] args)
 }
 ```
 
-The real difference with the remoting is how the _remoting API interface_ and _remoting class_ are done.
+The remoting implementation consists from two parts: _remoting interface_ and _remoting implementation_. 
 
-The _remoting API interface_ defines the remoting endpoint API ...
+_remoting interface_ defines the API surface...
 
 ``` csharp
 public interface IApiService : IService
@@ -196,7 +198,7 @@ public interface IApiService : IService
 }
 ```
 
-... while _remoting class_ implements this API
+... while _remoting class_ implements the API.
 
 ``` csharp
 public class ApiServiceImpl : IApiService
@@ -208,7 +210,7 @@ public class ApiServiceImpl : IApiService
 }
 ```
 
-Configuration of the _remoting class_ is done with call to `UseImplementation<T>(...)` method.
+_Remoting implementations_ is configured using `UseImplementation<T>(...)` method.
 
 ``` csharp
 private static void Main(string[] args)
@@ -226,6 +228,38 @@ private static void Main(string[] args)
                             listenerBuilder
                                 .UseEndpoint("ServiceEndpoint2")
                                 .UseImplementation<ApiServiceImpl>()
+                        });
+            })
+        .Build()
+        .Run();
+}
+```
+
+#### Generic Implementation
+
+Generic listener allows custom listeners to be configured using the same approach as `DefineRemotingListener(...)` and `DefineAspNetCoreListener(...)`. 
+
+``` csharp
+private static void Main(string[] args)
+{
+    new HostBuilder()
+        .DefineStatefulService(
+            serviceBuilder =>
+            {
+                serviceBuilder
+                    .UseServiceType(...)
+                    .DefineAspNetCoreListener(...)
+                    .DefineRemotingListener(...)
+                    .DefineGenericListener(...)
+                        listenerBuilder =>
+                        {
+                            listenerBuilder
+                                .UseEndpoint("ServiceEndpoint3")
+                                .UseCommunicationListener(
+                                    (context, name, provider) =>
+                                    {
+                                        return /* ICommunicationListener */;
+                                    })
                         });
             })
         .Build()

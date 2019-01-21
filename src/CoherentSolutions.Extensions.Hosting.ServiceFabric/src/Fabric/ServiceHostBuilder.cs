@@ -23,6 +23,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             TListenerReplicableTemplate,
             TListenerAspNetCoreReplicaTemplate,
             TListenerRemotingReplicaTemplate,
+            TListenerGenericReplicaTemplate,
             TListenerReplicator>
         : ConfigurableObject<TConfigurator>,
           IServiceHostBuilder<TServiceHost, TConfigurator>
@@ -34,6 +35,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         IServiceHostBuilderDelegateReplicationParameters<TDelegateReplicableTemplate, TDelegateReplicator>,
         IServiceHostBuilderAspNetCoreListenerParameters<TListenerAspNetCoreReplicaTemplate>,
         IServiceHostBuilderRemotingListenerParameters<TListenerRemotingReplicaTemplate>,
+        IServiceHostBuilderGenericListenerParameters<TListenerGenericReplicaTemplate>,
         IServiceHostBuilderListenerReplicationParameters<TListenerReplicableTemplate, TListenerReplicator>
         where TConfigurator :
         IServiceHostBuilderConfigurator,
@@ -43,6 +45,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         IServiceHostBuilderDelegateReplicationConfigurator<TDelegateReplicableTemplate, TDelegateReplicator>,
         IServiceHostBuilderAspNetCoreListenerConfigurator<TListenerAspNetCoreReplicaTemplate>,
         IServiceHostBuilderRemotingListenerConfigurator<TListenerRemotingReplicaTemplate>,
+        IServiceHostBuilderGenericListenerConfigurator<TListenerGenericReplicaTemplate>,
         IServiceHostBuilderListenerReplicationConfigurator<TListenerReplicableTemplate, TListenerReplicator>
         where TEventSourceReplicaTemplate :
         TEventSourceReplicableTemplate,
@@ -58,6 +61,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         where TListenerRemotingReplicaTemplate :
         TListenerReplicableTemplate,
         IServiceHostRemotingListenerReplicaTemplate<IServiceHostRemotingListenerReplicaTemplateConfigurator>
+        where TListenerGenericReplicaTemplate :
+        TListenerReplicableTemplate,
+        IServiceHostGenericListenerReplicaTemplate<IServiceHostGenericListenerReplicaTemplateConfigurator>
         where TListenerReplicator : class
     {
         protected abstract class Parameters
@@ -75,6 +81,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
               IServiceHostBuilderAspNetCoreListenerConfigurator<TListenerAspNetCoreReplicaTemplate>,
               IServiceHostBuilderRemotingListenerParameters<TListenerRemotingReplicaTemplate>,
               IServiceHostBuilderRemotingListenerConfigurator<TListenerRemotingReplicaTemplate>,
+              IServiceHostBuilderGenericListenerParameters<TListenerGenericReplicaTemplate>,
+              IServiceHostBuilderGenericListenerConfigurator<TListenerGenericReplicaTemplate>,
               IServiceHostBuilderListenerReplicationParameters<TListenerReplicableTemplate, TListenerReplicator>,
               IServiceHostBuilderListenerReplicationConfigurator<TListenerReplicableTemplate, TListenerReplicator>
         {
@@ -98,6 +106,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             public Func<TListenerRemotingReplicaTemplate> RemotingListenerReplicaTemplateFunc { get; private set; }
 
+            public Func<TListenerGenericReplicaTemplate> GenericListenerReplicaTemplateFunc { get; private set; }
+
             public Func<TListenerReplicableTemplate, TListenerReplicator> ListenerReplicatorFunc { get; private set; }
 
             public Func<IServiceCollection> DependenciesFunc { get; private set; }
@@ -115,6 +125,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.DelegateReplicaTemplateFunc = null;
                 this.DelegateReplicatorFunc = null;
                 this.AspNetCoreListenerReplicaTemplateFunc = null;
+                this.GenericListenerReplicaTemplateFunc = null;
                 this.RemotingListenerReplicaTemplateFunc = null;
                 this.ListenerReplicatorFunc = null;
                 this.DependenciesFunc = DefaultDependenciesFunc;
@@ -167,6 +178,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 Func<TListenerRemotingReplicaTemplate> factoryFunc)
             {
                 this.RemotingListenerReplicaTemplateFunc = factoryFunc
+                 ?? throw new ArgumentNullException(nameof(factoryFunc));
+            }
+
+            public void UseGenericListenerReplicaTemplate(
+                Func<TListenerGenericReplicaTemplate> factoryFunc)
+            {
+                this.GenericListenerReplicaTemplateFunc = factoryFunc
                  ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
 
@@ -261,6 +279,25 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                     new ServiceHostListenerDescriptor(
                         ServiceHostListenerType.Remoting,
                         replicaTemplate => defineAction((TListenerRemotingReplicaTemplate) replicaTemplate)));
+            }
+
+            public void DefineGenericListener(
+                Action<TListenerGenericReplicaTemplate> defineAction)
+            {
+                if (defineAction == null)
+                {
+                    throw new ArgumentNullException(nameof(defineAction));
+                }
+
+                if (this.ListenerDescriptors == null)
+                {
+                    this.ListenerDescriptors = new List<IServiceHostListenerDescriptor>();
+                }
+
+                this.ListenerDescriptors.Add(
+                    new ServiceHostListenerDescriptor(
+                        ServiceHostListenerType.Generic,
+                        replicaTemplate => defineAction((TListenerGenericReplicaTemplate) replicaTemplate)));
             }
 
             private static IServiceCollection DefaultDependenciesFunc()
@@ -460,6 +497,36 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                         if (template == null)
                                         {
                                             throw new FactoryProducesNullInstanceException<TListenerRemotingReplicaTemplate>();
+                                        }
+
+                                        descriptor.ConfigAction(template);
+
+                                        template.ConfigureObject(
+                                            c =>
+                                            {
+                                                c.ConfigureDependencies(
+                                                    services =>
+                                                    {
+                                                        var ignore = new HashSet<Type>(services.Select(i => i.ServiceType));
+                                                        services.Proxinate(dependenciesCollection, dependencies, i => !ignore.Contains(i));
+                                                    });
+                                            });
+
+                                        replicableTemplate = template;
+                                    }
+                                    break;
+                                case ServiceHostListenerType.Generic:
+                                    {
+                                        if (parameters.GenericListenerReplicaTemplateFunc == null)
+                                        {
+                                            throw new InvalidOperationException(
+                                                $"No {nameof(parameters.GenericListenerReplicaTemplateFunc)} was configured");
+                                        }
+
+                                        var template = parameters.GenericListenerReplicaTemplateFunc();
+                                        if (template == null)
+                                        {
+                                            throw new FactoryProducesNullInstanceException<TListenerGenericReplicaTemplate>();
                                         }
 
                                         descriptor.ConfigAction(template);

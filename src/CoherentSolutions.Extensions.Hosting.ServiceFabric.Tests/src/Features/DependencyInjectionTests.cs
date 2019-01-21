@@ -156,6 +156,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                         };
                     }
 
+                    foreach (var item in TheoryItemsSet.GenericListenerItems)
+                    {
+                        yield return new object[]
+                        {
+                            new Case(item, typeof(IServiceHostGenericListenerInformation))
+                        };
+                    }
+
                     foreach (var item in TheoryItemsSet.StatefulItems)
                     {
                         yield return new object[]

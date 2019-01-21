@@ -38,6 +38,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             public Action<IWebHostBuilder> WebHostCommunicationListenerConfigAction { get; private set; }
 
+            public Func<IConfigurableObjectLoggerOptions> LoggerOptionsFunc { get; private set; }
+
             protected AspNetCoreListenerParameters()
             {
                 this.IntegrationOptions = ServiceFabricIntegrationOptions.None;
@@ -45,6 +47,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.WebHostBuilderFunc = DefaultWebHostBuilderFunc;
                 this.WebHostConfigAction = DefaultWebHostConfigAction;
                 this.WebHostCommunicationListenerConfigAction = DefaultWebHostCommunicationListenerConfigAction;
+                this.LoggerOptionsFunc = DefaultLoggerOptionsFunc;
             }
 
             public void UseIntegrationOptions(
@@ -82,6 +85,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.WebHostConfigAction = this.WebHostConfigAction.Chain(configAction);
             }
 
+            public void UseLoggerOptions(
+                Func<IConfigurableObjectLoggerOptions> factoryFunc)
+            {
+                this.LoggerOptionsFunc = factoryFunc
+                 ?? throw new ArgumentNullException(nameof(factoryFunc));
+            }
+
             private static AspNetCoreCommunicationListener DefaultAspNetCoreCommunicationListenerFunc(
                 ServiceContext serviceContext,
                 string endpointName,
@@ -105,6 +115,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 IWebHostBuilder builder)
             {
                 WebHostBuilderKestrelExtensions.UseKestrel(builder);
+            }
+
+            private static IConfigurableObjectLoggerOptions DefaultLoggerOptionsFunc()
+            {
+                return ServiceHostLoggerOptions.Disabled;
             }
         }
 
@@ -174,9 +189,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                             serviceEventSource,
                                             loggerOptions));
                                 });
-
-                            // Possible point of proxination
-                            parameters.DependenciesConfigAction?.Invoke(services);
 
                             var descriptor = services.FirstOrDefault(s => s.ServiceType == typeof(IStartup));
                             if (descriptor != null)
