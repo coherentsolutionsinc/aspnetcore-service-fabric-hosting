@@ -1,4 +1,4 @@
-# Services Lifecycle Events
+# Services Lifecycle: Routine Events
 
 This sample demonstrates how to configure actions to be triggered on service events for both `StatefulService` and `StatelessService`.
 
