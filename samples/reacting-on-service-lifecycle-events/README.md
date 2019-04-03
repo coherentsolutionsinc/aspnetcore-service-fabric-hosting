@@ -25,7 +25,20 @@ Files:
 
 **Program.cs**
 
-Both services register all events defined in `StatefulServiceLifecycleEvent` and `StatelessServiceLifecycleEvent` enumerations. 
+Both services register service lifecycle events (routine) defined in `StatefulServiceLifecycleEvent` and `StatelessServiceLifecycleEvent` enumerations. 
+
+For StatefulService these are:
+* `StatefulServiceLifecycleEvent.OnStartup`
+* `StatefulServiceLifecycleEvent.OnChangeRole`
+* `StatefulServiceLifecycleEvent.OnRun`
+* `StatefulServiceLifecycleEvent.OnShutdown`
+* `StatefulServiceLifecycleEvent.OnDataLoss`
+* `StatefulServiceLifecycleEvent.OnRestoreCompleted`
+
+For StatelessService these are:
+* `StatelessServiceLifecycleEvent.OnStartup`
+* `StatelessServiceLifecycleEvent.OnRun`
+* `StatelessServiceLifecycleEvent.OnShutdown`
 
 ``` csharp
 new HostBuilder()
