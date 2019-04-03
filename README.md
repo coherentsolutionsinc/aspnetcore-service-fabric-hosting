@@ -9,20 +9,20 @@
 
 ## Getting Started
 
-As usual, the easiest way to get started is to code something -> let's start from a new Reliable Service!
+As usual, the easiest way to get started is to code &rarr; a new Reliable Service!
 
 > **NOTE**
 >
-> Please note that current section doesn't explain all the aspects of the **CoherentSolutions.Extensions.Hosting.ServiceFabric**. The complete documentation is available on [project wiki][1]. 
+> This section doesn't present and explains all features / aspects of the **CoherentSolutions.Extensions.Hosting.ServiceFabric**. The complete documentation is available on [project wiki][1]. 
 
-In this section we would: 
+In this section we **will**: 
 1. Configure one stateful service 
-2. Configure three endpoints (by configuring three listeners: aspnetcore, remoting and generic) 
-3. Configure one background job (by configuring a delegate to run in `RunAsync`).
+2. Configure three endpoints (_by configuring three listeners: ASP.NET Core, Remoting and Generic_) 
+3. Configure one background job (_by configuring a delegate to run on `RunAsync` lifecycle event_).
 
 ### Initial setup
 
-Any program starts with the entry point and so does reliable services. When using **CoherentSolutions.Extensions.Hosting.ServiceFabric** the entry point setup starts with the new instance of the [HostBuilder](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-2.1) class and calls to `Build()` and `Run()` methods.
+All programs start from _entry point_ and so do Reliable Services. When using **CoherentSolutions.Extensions.Hosting.ServiceFabric** application entry point starts with new instance of the [HostBuilder](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-2.1) class followed by calls to `Build()` and `Run()` methods.
 
 ``` csharp
 private static void Main(string[] args)
@@ -33,9 +33,11 @@ private static void Main(string[] args)
 }
 ```
 
-The service configuration starts with a call to `DefineStatefulService(...)` extension method. This method accepts an action where all service configuration is done.
+Reliable Service's configuration is done within configuration action accepted by `DefineStatefulService(...)` or `DefineStatelessService(...)` extension methods.
 
- _You can find more details on [defining services](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/defining-services) wiki page._
+> **NOTE**
+>
+> _You can find more details on [defining services](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/defining-services) wiki page._
 
 ``` csharp
 private static void Main(string[] args)
@@ -47,7 +49,7 @@ private static void Main(string[] args)
 }
 ```
 
-The first step in configuration of any service (stateful or stateless) in **CoherentSolutions.Extensions.Hosting.ServiceFabric** is to link service configuration to one of the service service types defined in the `ServiceManifest.xml`. 
+The first step when configuring a service (_no matter stateful or stateless_) using **CoherentSolutions.Extensions.Hosting.ServiceFabric** is to "link" configurable service to one of the [ServiceTypes](https://olegkarasik.wordpress.com/2018/10/03/service-fabric-handbook/#object-model-service-type-and-service) declared in the `ServiceManifest.xml`. 
 
 ``` xml
 <ServiceManifest Name="ServicePkg" Version="1.0.0">
@@ -57,7 +59,7 @@ The first step in configuration of any service (stateful or stateless) in **Cohe
 </ServiceManifest>
 ```
 
-This link is create by using `UseServiceType(...)` method.
+The "link" is create using `UseServiceType(...)` method.
 
 ``` csharp
 private static void Main(string[] args)
@@ -73,15 +75,19 @@ private static void Main(string[] args)
 }
 ```
 
-This code is now ready to run but unfortunately it quite useless.
+This code is now ready to run. **CoherentSolutions.Extensions.Hosting.ServiceFabric** will do all the plumbing required to start the service.
+
+Unfortunatelly it's current implementation is empty and does nothing.
 
 ### Configuring Endpoints
 
-Reliable Services can expose endpoints. This exposure is represented in form of service listeners configured when replica is build. The **CoherentSolutions.Extensions.Hosting.ServiceFabric** provides a simple way to configure: ASP.NET Core listeners, Service Fabric Remoting listeners and Generic listeners. 
+Reliable Services can expose endpoints. This exposure is represented in form of listeners configured on replica startup. The **CoherentSolutions.Extensions.Hosting.ServiceFabric** provides a simple way to configure: ASP.NET Core, Remoting listeners and Generic listeners. 
 
-In general listeners are configured using the same approach as was deomnstrated for services.
+All listeners are configured using the same flow as was demonstrated for services.
  
- _You can find more details on [defining listeners](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/defining-listeners) wiki page._
+> **NOTE**
+>
+> _You can find more details on [defining listeners](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/defining-listeners) wiki page._
 
 #### ASP.NET Core
 
