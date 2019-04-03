@@ -46,9 +46,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 [typeof(CancellationToken)] = cancellationToken
             };
 
-            foreach (var tuple in this.UnwrapInvocationContext(invocationContext))
+            foreach (var (t, o) in this.UnwrapInvocationContext(invocationContext))
             {
-                replacements[tuple.t] = tuple.o;
+                replacements[t] = o;
             }
 
             var argumentsProvider = new ReplaceAwareServiceProvider(replacements, this.services);

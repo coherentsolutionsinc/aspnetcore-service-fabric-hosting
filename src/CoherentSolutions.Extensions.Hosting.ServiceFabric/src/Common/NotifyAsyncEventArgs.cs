@@ -21,12 +21,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Common
             this.CancellationToken = cancellationToken;
         }
 
-        public void Completed()
+        public void Complete()
         {
             this.completion();
         }
 
-        public void Failed(
+        public void Fail(
             Exception exception)
         {
             this.failure(exception);

@@ -3,7 +3,6 @@ using System.Fabric;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.DependencyInjection.Extensions;
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Mocks;
 
 using Microsoft.Extensions.DependencyInjection;
 

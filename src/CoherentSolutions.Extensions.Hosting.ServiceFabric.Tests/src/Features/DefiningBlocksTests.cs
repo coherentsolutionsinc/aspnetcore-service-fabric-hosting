@@ -27,7 +27,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 {
     public static class DefiningBlocksTests
     {
-        private static class Theories
+        public static class Theories
         {
             public class Case : IXunitSerializable
             {
@@ -134,7 +134,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(Theories.AllDelegateCases), MemberType = typeof(Theories))]
-        private static void Should_invoke_delegate_On_default_service_lifecycle_event(
+        public static void Should_invoke_delegate_On_default_service_lifecycle_event(
             Theories.Case @case)
         {
             // Arrange
@@ -157,7 +157,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(Theories.AllListenerCases), MemberType = typeof(Theories))]
-        private static void Should_use_endpoint_name_For_communication_listener(
+        public static void Should_use_endpoint_name_For_communication_listener(
             Theories.Case @case)
         {
             // Arrange
@@ -179,7 +179,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(Theories.AspNetCoreListenerCases), MemberType = typeof(Theories))]
-        private static void Should_use_custom_web_host_builder_For_web_server(
+        public static void Should_use_custom_web_host_builder_For_web_server(
             Theories.Case @case)
         {
             // Arrange
@@ -205,7 +205,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(Theories.AspNetCoreListenerCases), MemberType = typeof(Theories))]
-        private static void Should_use_custom_aspnetcore_communication_listener_For_communication_listener(
+        public static void Should_use_custom_aspnetcore_communication_listener_For_communication_listener(
             Theories.Case @case)
         {
             // Arrange
@@ -238,7 +238,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(Theories.RemotingListenerCases), MemberType = typeof(Theories))]
-        private static void Should_use_custom_remoting_communication_listener_For_communication_listener(
+        public static void Should_use_custom_remoting_communication_listener_For_communication_listener(
             Theories.Case @case)
         {
             // Arrange
@@ -276,7 +276,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(Theories.GenericListenerCases), MemberType = typeof(Theories))]
-        private static void Should_use_custom_generic_communication_listener_For_communication_listener(
+        public static void Should_use_custom_generic_communication_listener_For_communication_listener(
             Theories.Case @case)
         {
             // Arrange
@@ -308,7 +308,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(Theories.RemotingListenerCases), MemberType = typeof(Theories))]
-        private static void Should_inject_remoting_implementation_dependencies_When_remoting_implementation_type_is_set(
+        public static void Should_inject_remoting_implementation_dependencies_When_remoting_implementation_type_is_set(
             Theories.Case @case)
         {
             // Arrange
@@ -340,7 +340,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(Theories.RemotingListenerCases), MemberType = typeof(Theories))]
-        private static void Should_inject_remoting_serialization_provider_dependencies_When_remoting_serialization_provider_type_is_set(
+        public static void Should_inject_remoting_serialization_provider_dependencies_When_remoting_serialization_provider_type_is_set(
             Theories.Case @case)
         {
             // Arrange
@@ -372,7 +372,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(Theories.RemotingListenerCases), MemberType = typeof(Theories))]
-        private static void Should_inject_remoting_handler_dependencies_When_remoting_handler_type_is_set(
+        public static void Should_inject_remoting_handler_dependencies_When_remoting_handler_type_is_set(
             Theories.Case @case)
         {
             // Arrange
@@ -404,7 +404,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(Theories.RemotingListenerCases), MemberType = typeof(Theories))]
-        private static void Should_use_custom_remoting_implementation_For_communication_listener(
+        public static void Should_use_custom_remoting_implementation_For_communication_listener(
             Theories.Case @case)
         {
             // Arrange
@@ -426,7 +426,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(Theories.RemotingListenerCases), MemberType = typeof(Theories))]
-        private static void Should_use_custom_remoting_settings_For_communication_listener(
+        public static void Should_use_custom_remoting_settings_For_communication_listener(
             Theories.Case @case)
         {
             // Arrange
@@ -448,7 +448,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(Theories.RemotingListenerCases), MemberType = typeof(Theories))]
-        private static void Should_use_custom_remoting_serialization_provider_For_communication_listener(
+        public static void Should_use_custom_remoting_serialization_provider_For_communication_listener(
             Theories.Case @case)
         {
             // Arrange
@@ -472,7 +472,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(Theories.RemotingListenerCases), MemberType = typeof(Theories))]
-        private static void Should_use_custom_remoting_handler_For_communication_listener(
+        public static void Should_use_custom_remoting_handler_For_communication_listener(
             Theories.Case @case)
         {
             // Arrange
@@ -495,7 +495,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         }
 
         [Fact]
-        private static void Should_use_delegate_invoker_When_invoking_delegates_on_stateful_service_lifecycle_events()
+        public static void Should_use_delegate_invoker_When_invoking_delegates_on_stateful_service_lifecycle_events()
         {
             // Arrange
             var mockDelegateInvoker = new Mock<IServiceHostDelegateInvoker<IStatefulServiceDelegateInvocationContext>>();
@@ -522,7 +522,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         }
 
         [Fact]
-        private static void Should_use_delegate_invoker_When_invoking_delegates_on_stateless_service_lifecycle_events()
+        public static void Should_use_delegate_invoker_When_invoking_delegates_on_stateless_service_lifecycle_events()
         {
             // Arrange
             var mockDelegateInvoker = new Mock<IServiceHostDelegateInvoker<IStatelessServiceDelegateInvocationContext>>();
