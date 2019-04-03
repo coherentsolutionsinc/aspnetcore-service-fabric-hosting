@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Fabric;
 using System.Threading;
 using System.Threading.Tasks;
@@ -27,69 +28,83 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             return new StatefulServiceHostDelegateInvoker(@delegate, services);
         }
 
-        [Fact]
-        private async Task Should_resolve_on_changerole_payload_argument_When_shutdown_reacting_on_changerole_event()
+        public static IEnumerable<object[]> DelegateContexts()
         {
-            // Arrange 
-            IStatefulServiceEventPayloadOnChangeRole expectedPayload = new StatefulServiceEventPayloadOnChangeRole(ReplicaRole.Primary);
-            IStatefulServiceEventPayloadOnChangeRole actualPayload = default;
-
-            var mockServices = new Mock<IServiceProvider>();
-
-            var arrangeInvocationContext = new StatefulServiceDelegateInvocationContextOnChangeRole(expectedPayload);
-            var arrangeServices = mockServices.Object;
-            var arrangeAction = new Action<IStatefulServiceEventPayloadOnChangeRole>(payload => actualPayload = payload);
-
-            var arrangeInvoker = this.CreateInvokerInstance(arrangeAction, arrangeServices);
-
-            // Act
-            await arrangeInvoker.InvokeAsync(arrangeInvocationContext, CancellationToken.None);
-
-            // Assert
-            mockServices.VerifyNoOtherCalls();
-
-            Assert.Equal(expectedPayload, actualPayload);
+            yield return new object[]
+            {
+                new StatefulServiceDelegateInvocationContextOnCodePackageAdded(
+                    new ServiceEventPayloadOnPackageAdded<CodePackage>(null))
+            };
+            yield return new object[]
+            {
+                new StatefulServiceDelegateInvocationContextOnCodePackageModified(
+                    new ServiceEventPayloadOnPackageModified<CodePackage>(null, null))
+            };
+            yield return new object[]
+            {
+                new StatefulServiceDelegateInvocationContextOnCodePackageRemoved(
+                    new ServiceEventPayloadOnPackageRemoved<CodePackage>(null))
+            };
+            yield return new object[]
+            {
+                new StatefulServiceDelegateInvocationContextOnConfigPackageAdded(
+                    new ServiceEventPayloadOnPackageAdded<ConfigurationPackage>(null))
+            };
+            yield return new object[]
+            {
+                new StatefulServiceDelegateInvocationContextOnConfigPackageModified(
+                    new ServiceEventPayloadOnPackageModified<ConfigurationPackage>(null, null))
+            };
+            yield return new object[]
+            {
+                new StatefulServiceDelegateInvocationContextOnConfigPackageRemoved(
+                    new ServiceEventPayloadOnPackageRemoved<ConfigurationPackage>(null)),
+            };
+            yield return new object[]
+            {
+                new StatefulServiceDelegateInvocationContextOnDataPackageAdded(
+                    new ServiceEventPayloadOnPackageAdded<DataPackage>(null))
+            };
+            yield return new object[]
+            {
+                new StatefulServiceDelegateInvocationContextOnDataPackageModified(
+                    new ServiceEventPayloadOnPackageModified<DataPackage>(null, null))
+            };
+            yield return new object[]
+            {
+                new StatefulServiceDelegateInvocationContextOnDataPackageRemoved(
+                    new ServiceEventPayloadOnPackageRemoved<DataPackage>(null))
+            };
+            yield return new object[]
+            {
+                new StatefulServiceDelegateInvocationContextOnChangeRole(
+                    new StatefulServiceEventPayloadOnChangeRole(ReplicaRole.Primary))
+            };
+            yield return new object[]
+            {
+                new StatefulServiceDelegateInvocationContextOnDataLoss(
+                    new StatefulServiceEventPayloadOnDataLoss(new StatefulServiceRestoreContext(new RestoreContext())))
+            };
+            yield return new object[]
+            {
+                new StatefulServiceDelegateInvocationContextOnShutdown(new StatefulServiceEventPayloadOnShutdown(false))
+            };
         }
 
-        [Fact]
-        private async Task Should_resolve_on_dataloss_payload_argument_When_shutdown_reacting_on_dataloss_event()
+        [Theory]
+        [MemberData(nameof(DelegateContexts))]
+        public async Task Should_resolve_on_payload_argument_When_reacting_on_event<TPayload>(
+            StatefulServiceDelegateInvocationContext<TPayload> context)
         {
             // Arrange 
-            IStatefulServiceEventPayloadOnDataLoss expectedPayload = new StatefulServiceEventPayloadOnDataLoss(
-                new StatefulServiceRestoreContext(
-                    new RestoreContext()));
-
-            IStatefulServiceEventPayloadOnDataLoss actualPayload = default;
+            var expectedPayload = context.Payload;
+            TPayload actualPayload = default;
 
             var mockServices = new Mock<IServiceProvider>();
 
-            var arrangeInvocationContext = new StatefulServiceDelegateInvocationContextOnDataLoss(expectedPayload);
+            var arrangeInvocationContext = context;
             var arrangeServices = mockServices.Object;
-            var arrangeAction = new Action<IStatefulServiceEventPayloadOnDataLoss>(payload => actualPayload = payload);
-
-            var arrangeInvoker = this.CreateInvokerInstance(arrangeAction, arrangeServices);
-
-            // Act
-            await arrangeInvoker.InvokeAsync(arrangeInvocationContext, CancellationToken.None);
-
-            // Assert
-            mockServices.VerifyNoOtherCalls();
-
-            Assert.Equal(expectedPayload, actualPayload);
-        }
-
-        [Fact]
-        private async Task Should_resolve_on_shutdown_payload_argument_When_shutdown_reacting_on_shutdown_event()
-        {
-            // Arrange 
-            IStatefulServiceEventPayloadOnShutdown expectedPayload = new StatefulServiceEventPayloadOnShutdown(false);
-            IStatefulServiceEventPayloadOnShutdown actualPayload = default;
-
-            var mockServices = new Mock<IServiceProvider>();
-
-            var arrangeInvocationContext = new StatefulServiceDelegateInvocationContextOnShutdown(expectedPayload);
-            var arrangeServices = mockServices.Object;
-            var arrangeAction = new Action<IStatefulServiceEventPayloadOnShutdown>(payload => actualPayload = payload);
+            var arrangeAction = new Action<TPayload>(payload => actualPayload = payload);
 
             var arrangeInvoker = this.CreateInvokerInstance(arrangeAction, arrangeServices);
 
@@ -117,18 +132,73 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             return new StatelessServiceHostDelegateInvoker(@delegate, services);
         }
 
-        [Fact]
-        private async Task Should_resolve_on_shutdown_payload_argument_When_shutdown_reacting_on_shutdown_event()
+        public static IEnumerable<object[]> DelegateContexts()
+        {
+            yield return new object[]
+            {
+                new StatelessServiceDelegateInvocationContextOnCodePackageAdded(
+                    new ServiceEventPayloadOnPackageAdded<CodePackage>(null))
+            };
+            yield return new object[]
+            {
+                new StatelessServiceDelegateInvocationContextOnCodePackageModified(
+                    new ServiceEventPayloadOnPackageModified<CodePackage>(null, null))
+            };
+            yield return new object[]
+            {
+                new StatelessServiceDelegateInvocationContextOnCodePackageRemoved(
+                    new ServiceEventPayloadOnPackageRemoved<CodePackage>(null))
+            };
+            yield return new object[]
+            {
+                new StatelessServiceDelegateInvocationContextOnConfigPackageAdded(
+                    new ServiceEventPayloadOnPackageAdded<ConfigurationPackage>(null))
+            };
+            yield return new object[]
+            {
+                new StatelessServiceDelegateInvocationContextOnConfigPackageModified(
+                    new ServiceEventPayloadOnPackageModified<ConfigurationPackage>(null, null))
+            };
+            yield return new object[]
+            {
+                new StatelessServiceDelegateInvocationContextOnConfigPackageRemoved(
+                    new ServiceEventPayloadOnPackageRemoved<ConfigurationPackage>(null)),
+            };
+            yield return new object[]
+            {
+                new StatelessServiceDelegateInvocationContextOnDataPackageAdded(
+                    new ServiceEventPayloadOnPackageAdded<DataPackage>(null))
+            };
+            yield return new object[]
+            {
+                new StatelessServiceDelegateInvocationContextOnDataPackageModified(
+                    new ServiceEventPayloadOnPackageModified<DataPackage>(null, null))
+            };
+            yield return new object[]
+            {
+                new StatelessServiceDelegateInvocationContextOnDataPackageRemoved(
+                    new ServiceEventPayloadOnPackageRemoved<DataPackage>(null))
+            };
+            yield return new object[]
+            {
+                new StatelessServiceDelegateInvocationContextOnShutdown(new StatelessServiceEventPayloadOnShutdown(false))
+            };
+        }
+
+        [Theory]
+        [MemberData(nameof(DelegateContexts))]
+        public async Task Should_resolve_on_payload_argument_When_reacting_on_event<TPayload>(
+            StatelessServiceDelegateInvocationContext<TPayload> context)
         {
             // Arrange 
-            IStatelessServiceEventPayloadOnShutdown expectedPayload = new StatelessServiceEventPayloadOnShutdown(false);
-            IStatelessServiceEventPayloadOnShutdown actualPayload = default;
+            var expectedPayload = context.Payload;
+            TPayload actualPayload = default;
 
             var mockServices = new Mock<IServiceProvider>();
 
-            var arrangeInvocationContext = new StatelessServiceDelegateInvocationContextOnShutdown(expectedPayload);
+            var arrangeInvocationContext = context;
             var arrangeServices = mockServices.Object;
-            var arrangeAction = new Action<IStatelessServiceEventPayloadOnShutdown>(payload => actualPayload = payload);
+            var arrangeAction = new Action<TPayload>(payload => actualPayload = payload);
 
             var arrangeInvoker = this.CreateInvokerInstance(arrangeAction, arrangeServices);
 
@@ -163,7 +233,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             IServiceProvider services);
 
         [Fact]
-        private async Task Should_resolve_arguments_When_action_has_parameters()
+        public async Task Should_resolve_arguments_When_action_has_parameters()
         {
             // Arrange 
             var arrangeObject = new TestDependency();
@@ -203,24 +273,19 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
 
             // Assert
             mockServices.Verify();
-            mockServices.VerifyNoOtherCalls();
 
             Assert.Same(expectedByType, actualByType);
             Assert.Same(expectedByInterface, actualByInterface);
         }
 
         [Fact]
-        private async Task Should_resolve_cancellation_token_argument_When_action_has_cancellation_token_parameter()
+        public async Task Should_resolve_cancellation_token_argument_When_action_has_cancellation_token_parameter()
         {
             // Arrange 
             var arrangeCancellationTokenSource = new CancellationTokenSource();
             var arrangeCancellationToken = arrangeCancellationTokenSource.Token;
 
             var mockServices = new Mock<IServiceProvider>();
-            mockServices
-               .Setup(instance => instance.GetService(typeof(CancellationToken)))
-               .Returns(arrangeCancellationToken)
-               .Verifiable();
 
             var expectedCancellationToken = arrangeCancellationTokenSource.Token;
             CancellationToken actualCancellationToken = default;
@@ -232,26 +297,21 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             var arrangeInvoker = this.CreateInvokerInstance(arrangeAction, arrangeServices);
 
             // Act
-            await arrangeInvoker.InvokeAsync(arrangeInvocationContext, expectedCancellationToken);
+            await arrangeInvoker.InvokeAsync(arrangeInvocationContext, arrangeCancellationToken);
 
             // Assert
-            mockServices.Verify();
             mockServices.VerifyNoOtherCalls();
 
             Assert.Equal(expectedCancellationToken.GetHashCode(), actualCancellationToken.GetHashCode());
         }
 
         [Fact]
-        private async Task Should_resolve_invocation_context_argument_When_action_has_invocation_context_parameter()
+        public async Task Should_resolve_invocation_context_argument_When_action_has_invocation_context_parameter()
         {
             // Arrange 
             var arrangeInvocationContext = this.CreateInvocationContext();
 
             var mockServices = new Mock<IServiceProvider>();
-            mockServices
-               .Setup(instance => instance.GetService(typeof(TInvocationContext)))
-               .Returns(arrangeInvocationContext)
-               .Verifiable();
 
             var expectedInvocationContext = arrangeInvocationContext;
             TInvocationContext actualInvocationContext = default;
@@ -265,14 +325,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             await arrangeInvoker.InvokeAsync(arrangeInvocationContext, CancellationToken.None);
 
             // Assert
-            mockServices.Verify();
             mockServices.VerifyNoOtherCalls();
 
             Assert.Equal(expectedInvocationContext, actualInvocationContext);
         }
 
         [Fact]
-        private async Task Should_rethrow_original_exception_When_action_throws_exception()
+        public async Task Should_rethrow_original_exception_When_action_throws_exception()
         {
             // Arrange 
             var mockServices = new Mock<IServiceProvider>();
@@ -295,7 +354,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         }
 
         [Fact]
-        private async Task Should_return_original_task_When_function_returns_task()
+        public async Task Should_return_original_task_When_function_returns_task()
         {
             // Arrange 
             var arrangeTaskCompletionSource = new TaskCompletionSource<int>();
@@ -313,6 +372,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             var arrangeInvoker = this.CreateInvokerInstance(arrangeFunction, arrangeServices);
 
             // Act
+            arrangeTaskCompletionSource.SetResult(0);
+
             actualTask = arrangeInvoker.InvokeAsync(arrangeInvocationContext, CancellationToken.None);
             await actualTask;
 

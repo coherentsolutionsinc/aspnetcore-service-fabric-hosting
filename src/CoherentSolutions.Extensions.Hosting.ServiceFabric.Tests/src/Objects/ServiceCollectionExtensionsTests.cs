@@ -22,31 +22,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         {
         }
 
-        private class TestVariant : ITestInterface
-        {
-        }
-
-        private class TestVariantOne : ITestInterface
-        {
-        }
-
-        private class TestVariantTwo : ITestInterface
-        {
-        }
-
-        private class TestGenericVariant<T> : ITestGenericInterface<T>
-        {
-        }
-
-        private class TestGenericVariantOne<T> : ITestGenericInterface<T>
-        {
-        }
-
-        private class TestGenericVariantTwo<T> : ITestGenericInterface<T>
-        {
-        }
-
-        private static class Cases
+        public static class Cases
         {
             public class Case : IXunitSerializable
             {
@@ -130,9 +106,33 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             }
         }
 
+        private class TestVariant : ITestInterface
+        {
+        }
+
+        private class TestVariantOne : ITestInterface
+        {
+        }
+
+        private class TestVariantTwo : ITestInterface
+        {
+        }
+
+        private class TestGenericVariant<T> : ITestGenericInterface<T>
+        {
+        }
+
+        private class TestGenericVariantOne<T> : ITestGenericInterface<T>
+        {
+        }
+
+        private class TestGenericVariantTwo<T> : ITestGenericInterface<T>
+        {
+        }
+
         [Theory]
         [MemberData(nameof(Cases.EmitTypeCases), MemberType = typeof(Cases))]
-        private static void Should_proxinate_interface_types_and_keep_interface_to_type_mapping(
+        public static void Should_proxinate_interface_types_and_keep_interface_to_type_mapping(
             Cases.Case @case)
         {
             // Arrange

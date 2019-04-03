@@ -239,279 +239,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         {
         }
 
-        private class TestType : ITestType
-        {
-        }
-
-        private class TestTypeWithGetProperty : ITestTypeWithGetProperty
-        {
-            public int Value => throw new NotImplementedException();
-        }
-
-        private class TestTypeWithInheritedProperty : ITestTypeWithInheritedProperty
-        {
-            public int Value => throw new NotImplementedException();
-        }
-
-        private class TestTypeWithRefGetProperty : ITestTypeWithRefGetProperty
-        {
-            public ref int Value => throw new NotImplementedException();
-        }
-
-        private class TestTypeWithGetSetProperty : ITestTypeWithGetSetProperty
-        {
-            public int Value
-            {
-                get => throw new NotImplementedException();
-                set => throw new NotImplementedException();
-            }
-        }
-
-        private class TestTypeWithEvent : ITestTypeWithEvent
-        {
-            public event EventHandler<EventArgs> Event
-            {
-                add => throw new NotImplementedException();
-                remove => throw new NotImplementedException();
-            }
-        }
-
-        private class TestTypeWithInheritedEvent : ITestTypeWithInheritedEvent
-        {
-            public event EventHandler<EventArgs> Event
-            {
-                add => throw new NotImplementedException();
-                remove => throw new NotImplementedException();
-            }
-        }
-
-        private class TestTypeWithNonVoidMethodVoidParameters : ITestTypeWithNonVoidMethodVoidParameters
-        {
-            public int Method()
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        private class TestTypeWithInheritedNonVoidMethodVoidParameters : ITestTypeWithInheritedNonVoidMethodVoidParameters
-        {
-            public int Method()
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        private class TestTypeWithVoidMethodVoidParameters : ITestTypeWithVoidMethodVoidParameters
-        {
-            public void Method()
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        private class TestTypeWithVoidMethodWithParameters : ITestTypeWithVoidMethodWithParameters
-        {
-            public void Method(
-                int parameter)
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        private class TestTypeWithVoidMethodWithRefParameters : ITestTypeWithVoidMethodWithRefParameters
-        {
-            public void Method(
-                ref int parameter)
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        private class TestTypeWithVoidMethodWithOutParameters : ITestTypeWithVoidMethodWithOutParameters
-        {
-            public void Method(
-                out int parameter)
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        private class TestGenericType<T> : ITestGenericType<T>
-        {
-        }
-
-        private class TestGenericTypeWithMultipleParameters<T, K> : ITestGenericTypeWithMultipleParameters<T, K>
-        {
-        }
-
-        private class TestGenericTypeWithMultipleParametersAndDifferentConstraints<T, K> : ITestGenericTypeWithMultipleParametersAndDifferentConstraints<T, K>
-            where T : class
-            where K : struct
-        {
-        }
-
-        private class TestGenericTypeWithClassConstraints<T> : ITestGenericTypeWithClassConstraints<T>
-            where T : class
-        {
-        }
-
-        private class TestGenericTypeWithStructConstraints<T> : ITestGenericTypeWithStructConstraints<T>
-            where T : struct
-        {
-        }
-
-        private class TestGenericTypeWithBaseClassConstraints<T> : ITestGenericTypeWithBaseTypeConstraints<T>
-            where T : TestGenericType
-        {
-        }
-
-        private class TestGenericTypeWithInterfaceConstraints<T> : ITestGenericTypeWithInterfaceConstraints<T>
-            where T : ITestGenericType
-        {
-        }
-
-        private class TestGenericTypeWithGenericInterfaceConstraint<T, K> : ITestGenericTypeWithGenericInterfaceConstraint<T, K>
-            where T : ITestGenericType<K>
-        {
-        }
-
-        private class TestGenericTypeWithOutModifier<T> : ITestGenericTypeWithOutModifier<T>
-        {
-        }
-
-        private class TestGenericTypeWithInModifier<T> : ITestGenericTypeWithInModifier<T>
-        {
-        }
-
-        private class TestGenericTypeWithGenericGetProperty<T> : ITestGenericTypeWithGenericGetProperty<T>
-        {
-            public T Value => throw new NotImplementedException();
-        }
-
-        private class TestGenericTypeWithGenericGetSetProperty<T> : ITestGenericTypeWithGenericGetSetProperty<T>
-        {
-            public T Value
-            {
-                get => throw new NotImplementedException();
-                set => throw new NotImplementedException();
-            }
-        }
-
-        private class TestGenericTypeWithVoidMethodWithGenericParameters<T> : ITestGenericTypeWithVoidMethodWithGenericParameters<T>
-        {
-            public void Method(
-                T parameter)
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        private class TestGenericTypeWithVoidMethodWithGenericGenericParameters<T> : ITestGenericTypeWithVoidMethodWithGenericGenericParameters<T>
-        {
-            public void Method(
-                Action<T> parameter)
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        private class TestGenericTypeWithGenericReturnMethodVoidParameters<T> : ITestGenericTypeWithGenericReturnMethodVoidParameters<T>
-        {
-            public T Method()
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        private class TestGenericTypeWithIndependentGenericReturnMethodVoidParameters<T> : ITestGenericTypeWithIndependentGenericReturnMethodVoidParameters<T>
-        {
-            public K Method<K>()
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        private class TestGenericTypeWithVoidMethodWithIndependentGenericParameters<T> : ITestGenericTypeWithVoidMethodWithIndependentGenericParameters<T>
-        {
-            public void Method<K>(
-                K parameter)
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        private class TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithClassConstraints<T>
-            : ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithClassConstraints<T>
-        {
-            public void Method<K>(
-                K parameter)
-                where K : class
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        private class TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithStructConstraints<T>
-            : ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithStructConstraints<T>
-        {
-            public void Method<K>(
-                K parameter)
-                where K : struct
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        private class TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithNewConstraints<T>
-            : ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithNewConstraints<T>
-        {
-            public void Method<K>(
-                K parameter)
-                where K : new()
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        private class TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithBaseTypeConstraints<T>
-            : ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithBaseTypeConstraints<T>
-        {
-            public void Method<K>(
-                K parameter)
-                where K : TestGenericType
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        private class TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithBaseInterfaceConstraints<T>
-            : ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithBaseInterfaceConstraints<T>
-        {
-            public void Method<K>(
-                K parameter)
-                where K : ITestGenericType
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        private class TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithGenericInterfaceConstraints<T>
-            : ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithGenericInterfaceConstraints<T>
-        {
-            public void Method<K, X>(
-                K parameter)
-                where K : ITestGenericType<X>
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        private class TestGenericTypeWithNewConstraints<T> : ITestGenericTypeWithNewConstraints<T>
-            where T : new()
-        {
-        }
-
-        private static class Cases
+        public static class Cases
         {
             public class Case : IXunitSerializable
             {
@@ -831,10 +559,282 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             }
         }
 
+        private class TestType : ITestType
+        {
+        }
+
+        private class TestTypeWithGetProperty : ITestTypeWithGetProperty
+        {
+            public int Value => throw new NotImplementedException();
+        }
+
+        private class TestTypeWithInheritedProperty : ITestTypeWithInheritedProperty
+        {
+            public int Value => throw new NotImplementedException();
+        }
+
+        private class TestTypeWithRefGetProperty : ITestTypeWithRefGetProperty
+        {
+            public ref int Value => throw new NotImplementedException();
+        }
+
+        private class TestTypeWithGetSetProperty : ITestTypeWithGetSetProperty
+        {
+            public int Value
+            {
+                get => throw new NotImplementedException();
+                set => throw new NotImplementedException();
+            }
+        }
+
+        private class TestTypeWithEvent : ITestTypeWithEvent
+        {
+            public event EventHandler<EventArgs> Event
+            {
+                add => throw new NotImplementedException();
+                remove => throw new NotImplementedException();
+            }
+        }
+
+        private class TestTypeWithInheritedEvent : ITestTypeWithInheritedEvent
+        {
+            public event EventHandler<EventArgs> Event
+            {
+                add => throw new NotImplementedException();
+                remove => throw new NotImplementedException();
+            }
+        }
+
+        private class TestTypeWithNonVoidMethodVoidParameters : ITestTypeWithNonVoidMethodVoidParameters
+        {
+            public int Method()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class TestTypeWithInheritedNonVoidMethodVoidParameters : ITestTypeWithInheritedNonVoidMethodVoidParameters
+        {
+            public int Method()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class TestTypeWithVoidMethodVoidParameters : ITestTypeWithVoidMethodVoidParameters
+        {
+            public void Method()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class TestTypeWithVoidMethodWithParameters : ITestTypeWithVoidMethodWithParameters
+        {
+            public void Method(
+                int parameter)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class TestTypeWithVoidMethodWithRefParameters : ITestTypeWithVoidMethodWithRefParameters
+        {
+            public void Method(
+                ref int parameter)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class TestTypeWithVoidMethodWithOutParameters : ITestTypeWithVoidMethodWithOutParameters
+        {
+            public void Method(
+                out int parameter)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class TestGenericType<T> : ITestGenericType<T>
+        {
+        }
+
+        private class TestGenericTypeWithMultipleParameters<T, K> : ITestGenericTypeWithMultipleParameters<T, K>
+        {
+        }
+
+        private class TestGenericTypeWithMultipleParametersAndDifferentConstraints<T, K> : ITestGenericTypeWithMultipleParametersAndDifferentConstraints<T, K>
+            where T : class
+            where K : struct
+        {
+        }
+
+        private class TestGenericTypeWithClassConstraints<T> : ITestGenericTypeWithClassConstraints<T>
+            where T : class
+        {
+        }
+
+        private class TestGenericTypeWithStructConstraints<T> : ITestGenericTypeWithStructConstraints<T>
+            where T : struct
+        {
+        }
+
+        private class TestGenericTypeWithBaseClassConstraints<T> : ITestGenericTypeWithBaseTypeConstraints<T>
+            where T : TestGenericType
+        {
+        }
+
+        private class TestGenericTypeWithInterfaceConstraints<T> : ITestGenericTypeWithInterfaceConstraints<T>
+            where T : ITestGenericType
+        {
+        }
+
+        private class TestGenericTypeWithGenericInterfaceConstraint<T, K> : ITestGenericTypeWithGenericInterfaceConstraint<T, K>
+            where T : ITestGenericType<K>
+        {
+        }
+
+        private class TestGenericTypeWithOutModifier<T> : ITestGenericTypeWithOutModifier<T>
+        {
+        }
+
+        private class TestGenericTypeWithInModifier<T> : ITestGenericTypeWithInModifier<T>
+        {
+        }
+
+        private class TestGenericTypeWithGenericGetProperty<T> : ITestGenericTypeWithGenericGetProperty<T>
+        {
+            public T Value => throw new NotImplementedException();
+        }
+
+        private class TestGenericTypeWithGenericGetSetProperty<T> : ITestGenericTypeWithGenericGetSetProperty<T>
+        {
+            public T Value
+            {
+                get => throw new NotImplementedException();
+                set => throw new NotImplementedException();
+            }
+        }
+
+        private class TestGenericTypeWithVoidMethodWithGenericParameters<T> : ITestGenericTypeWithVoidMethodWithGenericParameters<T>
+        {
+            public void Method(
+                T parameter)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class TestGenericTypeWithVoidMethodWithGenericGenericParameters<T> : ITestGenericTypeWithVoidMethodWithGenericGenericParameters<T>
+        {
+            public void Method(
+                Action<T> parameter)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class TestGenericTypeWithGenericReturnMethodVoidParameters<T> : ITestGenericTypeWithGenericReturnMethodVoidParameters<T>
+        {
+            public T Method()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class TestGenericTypeWithIndependentGenericReturnMethodVoidParameters<T> : ITestGenericTypeWithIndependentGenericReturnMethodVoidParameters<T>
+        {
+            public K Method<K>()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class TestGenericTypeWithVoidMethodWithIndependentGenericParameters<T> : ITestGenericTypeWithVoidMethodWithIndependentGenericParameters<T>
+        {
+            public void Method<K>(
+                K parameter)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithClassConstraints<T>
+            : ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithClassConstraints<T>
+        {
+            public void Method<K>(
+                K parameter)
+                where K : class
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithStructConstraints<T>
+            : ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithStructConstraints<T>
+        {
+            public void Method<K>(
+                K parameter)
+                where K : struct
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithNewConstraints<T>
+            : ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithNewConstraints<T>
+        {
+            public void Method<K>(
+                K parameter)
+                where K : new()
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithBaseTypeConstraints<T>
+            : ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithBaseTypeConstraints<T>
+        {
+            public void Method<K>(
+                K parameter)
+                where K : TestGenericType
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithBaseInterfaceConstraints<T>
+            : ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithBaseInterfaceConstraints<T>
+        {
+            public void Method<K>(
+                K parameter)
+                where K : ITestGenericType
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class TestGenericTypeWithVoidMethodWithIndependentGenericParametersWithGenericInterfaceConstraints<T>
+            : ITestGenericTypeWithVoidMethodWithIndependentGenericParametersWithGenericInterfaceConstraints<T>
+        {
+            public void Method<K, X>(
+                K parameter)
+                where K : ITestGenericType<X>
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+        private class TestGenericTypeWithNewConstraints<T> : ITestGenericTypeWithNewConstraints<T>
+            where T : new()
+        {
+        }
+
         [Theory]
         [MemberData(nameof(Cases.EmitTypeCases), MemberType = typeof(Cases))]
         [MemberData(nameof(Cases.EmitGenericTypeCases), MemberType = typeof(Cases))]
-        private static void Should_generate_instance_proxy_with_dependency_injection_target_resolution_For_simple_type(
+        public static void Should_generate_instance_proxy_with_dependency_injection_target_resolution_For_simple_type(
             Cases.Case @case)
         {
             // Arrange
@@ -920,7 +920,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         [Theory]
         [MemberData(nameof(Cases.EmitTypeCases), MemberType = typeof(Cases))]
         [MemberData(nameof(Cases.EmitGenericTypeCases), MemberType = typeof(Cases))]
-        private static void Should_generate_dependency_injection_proxy_with_dependency_injection_target_resolution_For_open_generic_type(
+        public static void Should_generate_dependency_injection_proxy_with_dependency_injection_target_resolution_For_open_generic_type(
             Cases.Case @case)
         {
             // Arrange

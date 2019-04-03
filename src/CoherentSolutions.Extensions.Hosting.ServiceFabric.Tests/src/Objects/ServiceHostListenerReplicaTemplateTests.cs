@@ -43,7 +43,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         }
     }
 
-    public abstract class StatefulServiceHostListenerReplicaTemplateTests<TParameters, TConfigurator> 
+    public abstract class StatefulServiceHostListenerReplicaTemplateTests<TParameters, TConfigurator>
         : ServiceHostListenerReplicaTemplateTests<IStatefulService, TParameters, TConfigurator, ServiceReplicaListener>
         where TParameters : IServiceHostListenerReplicaTemplateParameters, IStatefulServiceHostListenerReplicaTemplateParameters
         where TConfigurator : IServiceHostListenerReplicaTemplateConfigurator, IStatefulServiceHostListenerReplicaTemplateConfigurator
@@ -79,32 +79,32 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         }
     }
 
-    public class StatefulServiceHostAspNetCoreListenerReplicaTemplateTests 
+    public class StatefulServiceHostAspNetCoreListenerReplicaTemplateTests
         : StatefulServiceHostListenerReplicaTemplateTests<
-            IStatefulServiceHostAspNetCoreListenerReplicaTemplateParameters, 
+            IStatefulServiceHostAspNetCoreListenerReplicaTemplateParameters,
             IStatefulServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
     {
         protected override ServiceHostListenerReplicaTemplate<
-            IStatefulService, 
-            IStatefulServiceHostAspNetCoreListenerReplicaTemplateParameters, 
-            IStatefulServiceHostAspNetCoreListenerReplicaTemplateConfigurator, 
-            ServiceReplicaListener> 
+                IStatefulService,
+                IStatefulServiceHostAspNetCoreListenerReplicaTemplateParameters,
+                IStatefulServiceHostAspNetCoreListenerReplicaTemplateConfigurator,
+                ServiceReplicaListener>
             CreateReplicaTemplateInstance()
         {
             return new StatefulServiceHostAspNetCoreListenerReplicaTemplate();
         }
     }
 
-    public class StatefulServiceHostRemotingListenerReplicaTemplateTests 
+    public class StatefulServiceHostRemotingListenerReplicaTemplateTests
         : StatefulServiceHostListenerReplicaTemplateTests<
-            IStatefulServiceHostRemotingListenerReplicaTemplateParameters, 
+            IStatefulServiceHostRemotingListenerReplicaTemplateParameters,
             IStatefulServiceHostRemotingListenerReplicaTemplateConfigurator>
     {
         protected override ServiceHostListenerReplicaTemplate<
-                IStatefulService, 
-                IStatefulServiceHostRemotingListenerReplicaTemplateParameters, 
-                IStatefulServiceHostRemotingListenerReplicaTemplateConfigurator, 
-                ServiceReplicaListener> 
+                IStatefulService,
+                IStatefulServiceHostRemotingListenerReplicaTemplateParameters,
+                IStatefulServiceHostRemotingListenerReplicaTemplateConfigurator,
+                ServiceReplicaListener>
             CreateReplicaTemplateInstance()
         {
             var replicaTemplate = new StatefulServiceHostRemotingListenerReplicaTemplate();
@@ -114,16 +114,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         }
     }
 
-    public class StatefulServiceHostGenericListenerReplicaTemplateTests 
+    public class StatefulServiceHostGenericListenerReplicaTemplateTests
         : StatefulServiceHostListenerReplicaTemplateTests<
-            IStatefulServiceHostGenericListenerReplicaTemplateParameters, 
+            IStatefulServiceHostGenericListenerReplicaTemplateParameters,
             IStatefulServiceHostGenericListenerReplicaTemplateConfigurator>
     {
         protected override ServiceHostListenerReplicaTemplate<
-                IStatefulService, 
-                IStatefulServiceHostGenericListenerReplicaTemplateParameters, 
-                IStatefulServiceHostGenericListenerReplicaTemplateConfigurator, 
-                ServiceReplicaListener> 
+                IStatefulService,
+                IStatefulServiceHostGenericListenerReplicaTemplateParameters,
+                IStatefulServiceHostGenericListenerReplicaTemplateConfigurator,
+                ServiceReplicaListener>
             CreateReplicaTemplateInstance()
         {
             var replicaTemplate = new StatefulServiceHostGenericListenerReplicaTemplate();
@@ -137,7 +137,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         }
     }
 
-    public abstract class StatelessServiceHostListenerReplicaTemplateTests<TParameters, TConfigurator> 
+    public abstract class StatelessServiceHostListenerReplicaTemplateTests<TParameters, TConfigurator>
         : ServiceHostListenerReplicaTemplateTests<IStatelessService, TParameters, TConfigurator, ServiceInstanceListener>
         where TParameters : IServiceHostListenerReplicaTemplateParameters, IStatelessServiceHostListenerReplicaTemplateParameters
         where TConfigurator : IServiceHostListenerReplicaTemplateConfigurator, IStatelessServiceHostListenerReplicaTemplateConfigurator
@@ -154,32 +154,32 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         }
     }
 
-    public class StatelessServiceHostAspNetCoreListenerReplicaTemplateTests 
+    public class StatelessServiceHostAspNetCoreListenerReplicaTemplateTests
         : StatelessServiceHostListenerReplicaTemplateTests<
-            IStatelessServiceHostAspNetCoreListenerReplicaTemplateParameters, 
+            IStatelessServiceHostAspNetCoreListenerReplicaTemplateParameters,
             IStatelessServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
     {
         protected override ServiceHostListenerReplicaTemplate<
-                IStatelessService, 
-                IStatelessServiceHostAspNetCoreListenerReplicaTemplateParameters, 
-                IStatelessServiceHostAspNetCoreListenerReplicaTemplateConfigurator, 
-                ServiceInstanceListener> 
+                IStatelessService,
+                IStatelessServiceHostAspNetCoreListenerReplicaTemplateParameters,
+                IStatelessServiceHostAspNetCoreListenerReplicaTemplateConfigurator,
+                ServiceInstanceListener>
             CreateReplicaTemplateInstance()
         {
             return new StatelessServiceHostAspNetCoreListenerReplicaTemplate();
         }
     }
 
-    public class StatelessServiceHostRemotingListenerReplicaTemplateTests 
+    public class StatelessServiceHostRemotingListenerReplicaTemplateTests
         : StatelessServiceHostListenerReplicaTemplateTests<
-            IStatelessServiceHostRemotingListenerReplicaTemplateParameters, 
+            IStatelessServiceHostRemotingListenerReplicaTemplateParameters,
             IStatelessServiceHostRemotingListenerReplicaTemplateConfigurator>
     {
         protected override ServiceHostListenerReplicaTemplate<
-                IStatelessService, 
-                IStatelessServiceHostRemotingListenerReplicaTemplateParameters, 
-                IStatelessServiceHostRemotingListenerReplicaTemplateConfigurator, 
-                ServiceInstanceListener> 
+                IStatelessService,
+                IStatelessServiceHostRemotingListenerReplicaTemplateParameters,
+                IStatelessServiceHostRemotingListenerReplicaTemplateConfigurator,
+                ServiceInstanceListener>
             CreateReplicaTemplateInstance()
         {
             var replicaTemplate = new StatelessServiceHostRemotingListenerReplicaTemplate();
@@ -189,16 +189,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         }
     }
 
-    public class StatelessServiceHostGenericListenerReplicaTemplateTests 
+    public class StatelessServiceHostGenericListenerReplicaTemplateTests
         : StatelessServiceHostListenerReplicaTemplateTests<
-            IStatelessServiceHostGenericListenerReplicaTemplateParameters, 
+            IStatelessServiceHostGenericListenerReplicaTemplateParameters,
             IStatelessServiceHostGenericListenerReplicaTemplateConfigurator>
     {
         protected override ServiceHostListenerReplicaTemplate<
-                IStatelessService, 
-                IStatelessServiceHostGenericListenerReplicaTemplateParameters, 
-                IStatelessServiceHostGenericListenerReplicaTemplateConfigurator, 
-                ServiceInstanceListener> 
+                IStatelessService,
+                IStatelessServiceHostGenericListenerReplicaTemplateParameters,
+                IStatelessServiceHostGenericListenerReplicaTemplateConfigurator,
+                ServiceInstanceListener>
             CreateReplicaTemplateInstance()
         {
             var replicaTemplate = new StatelessServiceHostGenericListenerReplicaTemplate();

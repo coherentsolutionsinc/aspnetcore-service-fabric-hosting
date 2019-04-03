@@ -37,7 +37,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             TReplicableTemplate replicableTemplate);
 
         [Fact]
-        private void Should_activate_replicable_template_When_replicating_for_service()
+        public void Should_activate_replicable_template_When_replicating_for_service()
         {
             // Arrange
             var mockService = new Mock<TService>();
@@ -57,7 +57,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
 
             // Assert
             mockReplicableTemplate.Verify();
-            mockReplicableTemplate.VerifyNoOtherCalls();
         }
     }
 }

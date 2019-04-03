@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Fabric;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,7 +19,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 {
     public static class StatefulServiceLifecycleTests
     {
-        private static IStatefulServiceHostEventSourceReplicator MockStatefulServiceHostEventSourceReplicator()
+        private static IStatefulServiceHostEventSourceReplicator MockEventSourceReplicator()
         {
             var mockEventSourceReplicator = new Mock<IStatefulServiceHostEventSourceReplicator>();
             mockEventSourceReplicator
@@ -28,7 +29,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             return mockEventSourceReplicator.Object;
         }
 
-        private static IStatefulServiceHostDelegateReplicator MockStatefulServiceHostDelegateReplicatorForEvent(
+        private static IStatefulServiceHostDelegateReplicator MockDelegateReplicatorForEvent(
             Action mockDelegate,
             StatefulServiceLifecycleEvent mockEvent)
         {
@@ -85,7 +86,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         }
 
         [Fact]
-        private static async Task Should_invoke_delegate_On_stateful_service_creation_demotion_promotion_cycle()
+        public static async Task Should_invoke_delegate_On_stateful_service_creation_demotion_promotion_cycle()
         {
             // Arrange
             var actualCallStack = new ConcurrentQueue<string>();
@@ -126,19 +127,19 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                .Callback(() => actualCallStack.Enqueue("listener.Close"))
                .Verifiable();
 
-            var mockEventSourceReplicator = MockStatefulServiceHostEventSourceReplicator();
+            var mockEventSourceReplicator = MockEventSourceReplicator();
             var mockDelegateReplicators = new[]
             {
-                MockStatefulServiceHostDelegateReplicatorForEvent(
+                MockDelegateReplicatorForEvent(
                     mockDelegateServiceStartup.Object,
                     StatefulServiceLifecycleEvent.OnStartup),
-                MockStatefulServiceHostDelegateReplicatorForEvent(
+                MockDelegateReplicatorForEvent(
                     mockDelegateServiceChangeRole.Object,
                     StatefulServiceLifecycleEvent.OnChangeRole),
-                MockStatefulServiceHostDelegateReplicatorForEvent(
+                MockDelegateReplicatorForEvent(
                     mockDelegateServiceRun.Object,
                     StatefulServiceLifecycleEvent.OnRun),
-                MockStatefulServiceHostDelegateReplicatorForEvent(
+                MockDelegateReplicatorForEvent(
                     mockDelegateServiceShutdown.Object,
                     StatefulServiceLifecycleEvent.OnShutdown)
             };
@@ -250,7 +251,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         }
 
         [Fact]
-        private static async Task Should_invoke_delegate_On_stateful_service_shutdown_cycle()
+        public static async Task Should_invoke_delegate_On_stateful_service_shutdown_cycle()
         {
             var actualCallStack = new ConcurrentQueue<string>();
 
@@ -272,13 +273,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                .Callback(() => actualCallStack.Enqueue("listener.Close"))
                .Verifiable();
 
-            var mockEventSourceReplicator = MockStatefulServiceHostEventSourceReplicator();
+            var mockEventSourceReplicator = MockEventSourceReplicator();
             var mockDelegateReplicators = new[]
             {
-                MockStatefulServiceHostDelegateReplicatorForEvent(
+                MockDelegateReplicatorForEvent(
                     mockDelegateServiceShutdown.Object,
                     StatefulServiceLifecycleEvent.OnShutdown),
-                MockStatefulServiceHostDelegateReplicatorForEvent(
+                MockDelegateReplicatorForEvent(
                     mockDelegateServiceChangeRole.Object,
                     StatefulServiceLifecycleEvent.OnChangeRole)
             };
@@ -326,7 +327,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         }
 
         [Fact]
-        private static async Task Should_invoke_delegate_On_stateful_service_startup_cycle()
+        public static async Task Should_invoke_delegate_On_stateful_service_startup_cycle()
         {
             // Arrange
             var actualCallStack = new ConcurrentQueue<string>();
@@ -355,16 +356,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                .Callback(() => actualCallStack.Enqueue("listener.Open"))
                .Verifiable();
 
-            var mockEventSourceReplicator = MockStatefulServiceHostEventSourceReplicator();
+            var mockEventSourceReplicator = MockEventSourceReplicator();
             var mockDelegateReplicators = new[]
             {
-                MockStatefulServiceHostDelegateReplicatorForEvent(
+                MockDelegateReplicatorForEvent(
                     mockDelegateServiceStartup.Object,
                     StatefulServiceLifecycleEvent.OnStartup),
-                MockStatefulServiceHostDelegateReplicatorForEvent(
+                MockDelegateReplicatorForEvent(
                     mockDelegateServiceChangeRoleAsync.Object,
                     StatefulServiceLifecycleEvent.OnChangeRole),
-                MockStatefulServiceHostDelegateReplicatorForEvent(
+                MockDelegateReplicatorForEvent(
                     mockDelegateServiceRun.Object,
                     StatefulServiceLifecycleEvent.OnRun),
             };
@@ -413,6 +414,203 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                     : null);
             Assert.Equal(
                 "service.Run",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
+        }
+
+        [Fact]
+        public static void Should_invoke_packages_events_On_stateless_service_package_activation_events()
+        {
+            // Arrange
+            var actualCallStack = new ConcurrentQueue<string>();
+
+            var mockCodePackageActivationContext = new Mock<ICodePackageActivationContext>();
+
+            var mockDelegateCodePackageAdded = new Mock<Action>();
+            mockDelegateCodePackageAdded
+               .Setup(instance => instance())
+               .Callback(() => actualCallStack.Enqueue("codepackage.added"))
+               .Verifiable();
+
+            var mockDelegateCodePackageModified = new Mock<Action>();
+            mockDelegateCodePackageModified
+               .Setup(instance => instance())
+               .Callback(() => actualCallStack.Enqueue("codepackage.modified"))
+               .Verifiable();
+
+            var mockDelegateCodePackageRemoved = new Mock<Action>();
+            mockDelegateCodePackageRemoved
+               .Setup(instance => instance())
+               .Callback(() => actualCallStack.Enqueue("codepackage.removed"))
+               .Verifiable();
+
+            var mockDelegateConfigPackageAdded = new Mock<Action>();
+            mockDelegateConfigPackageAdded
+               .Setup(instance => instance())
+               .Callback(() => actualCallStack.Enqueue("configpackage.added"))
+               .Verifiable();
+
+            var mockDelegateConfigPackageModified = new Mock<Action>();
+            mockDelegateConfigPackageModified
+               .Setup(instance => instance())
+               .Callback(() => actualCallStack.Enqueue("configpackage.modified"))
+               .Verifiable();
+
+            var mockDelegateConfigPackageRemoved = new Mock<Action>();
+            mockDelegateConfigPackageRemoved
+               .Setup(instance => instance())
+               .Callback(() => actualCallStack.Enqueue("configpackage.removed"))
+               .Verifiable();
+
+            var mockDelegateDataPackageAdded = new Mock<Action>();
+            mockDelegateDataPackageAdded
+               .Setup(instance => instance())
+               .Callback(() => actualCallStack.Enqueue("datapackage.added"))
+               .Verifiable();
+
+            var mockDelegateDataPackageModified = new Mock<Action>();
+            mockDelegateDataPackageModified
+               .Setup(instance => instance())
+               .Callback(() => actualCallStack.Enqueue("datapackage.modified"))
+               .Verifiable();
+
+            var mockDelegateDataPackageRemoved = new Mock<Action>();
+            mockDelegateDataPackageRemoved
+               .Setup(instance => instance())
+               .Callback(() => actualCallStack.Enqueue("datapackage.removed"))
+               .Verifiable();
+
+            var mockEventSourceReplicator = MockEventSourceReplicator();
+            var mockDelegateReplicators = new[]
+            {
+                MockDelegateReplicatorForEvent(
+                    mockDelegateCodePackageAdded.Object,
+                    StatefulServiceLifecycleEvent.OnCodePackageAdded),
+                MockDelegateReplicatorForEvent(
+                    mockDelegateCodePackageModified.Object,
+                    StatefulServiceLifecycleEvent.OnCodePackageModified),
+                MockDelegateReplicatorForEvent(
+                    mockDelegateCodePackageRemoved.Object,
+                    StatefulServiceLifecycleEvent.OnCodePackageRemoved),
+                MockDelegateReplicatorForEvent(
+                    mockDelegateConfigPackageAdded.Object,
+                    StatefulServiceLifecycleEvent.OnConfigPackageAdded),
+                MockDelegateReplicatorForEvent(
+                    mockDelegateConfigPackageModified.Object,
+                    StatefulServiceLifecycleEvent.OnConfigPackageModified),
+                MockDelegateReplicatorForEvent(
+                    mockDelegateConfigPackageRemoved.Object,
+                    StatefulServiceLifecycleEvent.OnConfigPackageRemoved),
+                MockDelegateReplicatorForEvent(
+                    mockDelegateDataPackageAdded.Object,
+                    StatefulServiceLifecycleEvent.OnDataPackageAdded),
+                MockDelegateReplicatorForEvent(
+                    mockDelegateDataPackageModified.Object,
+                    StatefulServiceLifecycleEvent.OnDataPackageModified),
+                MockDelegateReplicatorForEvent(
+                    mockDelegateDataPackageRemoved.Object,
+                    StatefulServiceLifecycleEvent.OnDataPackageRemoved)
+            };
+
+            var statefulContext = MockStatefulServiceContextFactory.Create(
+                mockCodePackageActivationContext.Object,
+                "Mock",
+                new Uri("fabric:/mock"),
+                Guid.NewGuid(),
+                0);
+
+            var statefulInstance = new StatefulService(
+                statefulContext,
+                mockEventSourceReplicator,
+                mockDelegateReplicators,
+                Array.Empty<IStatefulServiceHostListenerReplicator>());
+
+            // Act
+            mockCodePackageActivationContext
+               .Raise(instance => instance.CodePackageAddedEvent -= null, new PackageAddedEventArgs<CodePackage>());
+            mockCodePackageActivationContext
+               .Raise(instance => instance.CodePackageModifiedEvent -= null, new PackageModifiedEventArgs<CodePackage>());
+            mockCodePackageActivationContext
+               .Raise(instance => instance.CodePackageRemovedEvent -= null, new PackageRemovedEventArgs<CodePackage>());
+
+            mockCodePackageActivationContext
+               .Raise(instance => instance.ConfigurationPackageAddedEvent -= null, new PackageAddedEventArgs<ConfigurationPackage>());
+            mockCodePackageActivationContext
+               .Raise(instance => instance.ConfigurationPackageModifiedEvent -= null, new PackageModifiedEventArgs<ConfigurationPackage>());
+            mockCodePackageActivationContext
+               .Raise(instance => instance.ConfigurationPackageRemovedEvent -= null, new PackageRemovedEventArgs<ConfigurationPackage>());
+
+            mockCodePackageActivationContext
+               .Raise(instance => instance.DataPackageAddedEvent -= null, new PackageAddedEventArgs<DataPackage>());
+            mockCodePackageActivationContext
+               .Raise(instance => instance.DataPackageModifiedEvent -= null, new PackageModifiedEventArgs<DataPackage>());
+            mockCodePackageActivationContext
+               .Raise(instance => instance.DataPackageRemovedEvent -= null, new PackageRemovedEventArgs<DataPackage>());
+
+            // Assert
+            mockDelegateCodePackageAdded.Verify();
+            mockDelegateCodePackageModified.Verify();
+            mockDelegateCodePackageRemoved.Verify();
+            mockDelegateConfigPackageAdded.Verify();
+            mockDelegateConfigPackageModified.Verify();
+            mockDelegateConfigPackageRemoved.Verify();
+            mockDelegateDataPackageAdded.Verify();
+            mockDelegateDataPackageModified.Verify();
+            mockDelegateDataPackageRemoved.Verify();
+
+            Assert.Equal(9, actualCallStack.Count);
+
+            Assert.Equal(
+                "codepackage.added",
+                actualCallStack.TryDequeue(out var result)
+                    ? result
+                    : null);
+
+            Assert.Equal(
+                "codepackage.modified",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
+
+            Assert.Equal(
+                "codepackage.removed",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
+
+            Assert.Equal(
+                "configpackage.added",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
+
+            Assert.Equal(
+                "configpackage.modified",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
+
+            Assert.Equal(
+                "configpackage.removed",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
+
+            Assert.Equal(
+                "datapackage.added",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
+
+            Assert.Equal(
+                "datapackage.modified",
+                actualCallStack.TryDequeue(out result)
+                    ? result
+                    : null);
+
+            Assert.Equal(
+                "datapackage.removed",
                 actualCallStack.TryDequeue(out result)
                     ? result
                     : null);

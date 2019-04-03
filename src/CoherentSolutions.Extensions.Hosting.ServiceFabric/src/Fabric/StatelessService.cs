@@ -20,6 +20,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
     {
         private class ServiceEvents
         {
+            public ServiceEventBridgeCodePackage CodePackage { get; }
+
+            public ServiceEvents(
+                ServiceEventBridgeCodePackage eventBridgeCodePackage)
+            {
+                this.CodePackage = eventBridgeCodePackage ?? throw new ArgumentNullException(nameof(eventBridgeCodePackage));
+            }
+
             public event EventHandler<NotifyAsyncEventArgs> OnStartup;
 
             public event EventHandler<NotifyAsyncEventArgs> OnRun;
@@ -61,7 +69,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             IReadOnlyList<IStatelessServiceHostListenerReplicator> serviceListenerReplicators)
             : base(serviceContext)
         {
-            this.serviceEvents = new ServiceEvents();
+            this.serviceEvents = new ServiceEvents(
+                new ServiceEventBridgeCodePackage(serviceContext.CodePackageActivationContext));
 
             this.serviceEventSource = serviceEventSourceReplicator.ReplicateFor(this);
             if (this.serviceEventSource == null)
@@ -102,10 +111,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                         })
                    .ToList();
             }
-            else
-            {
-                this.serviceEvents = new ServiceEvents();
-            }
 
             this.serviceEvents.OnStartup += async (
                 sender,
@@ -113,15 +118,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 try
                 {
-                    var context = new StatelessServiceDelegateInvocationContext(StatelessServiceLifecycleEvent.OnStartup);
+                    await this.InvokeDelegates(
+                        new StatelessServiceDelegateInvocationContext(StatelessServiceLifecycleEvent.OnStartup),
+                        args.CancellationToken);
 
-                    await this.InvokeDelegates(context, args.CancellationToken);
-
-                    args.Completed();
+                    args.Complete();
                 }
                 catch (Exception e)
                 {
-                    args.Failed(e);
+                    args.Fail(e);
                 }
             };
             this.serviceEvents.OnRun += async (
@@ -130,15 +135,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 try
                 {
-                    var context = new StatelessServiceDelegateInvocationContext(StatelessServiceLifecycleEvent.OnRun);
+                    await this.InvokeDelegates(
+                        new StatelessServiceDelegateInvocationContext(StatelessServiceLifecycleEvent.OnRun),
+                        args.CancellationToken);
 
-                    await this.InvokeDelegates(context, args.CancellationToken);
-
-                    args.Completed();
+                    args.Complete();
                 }
                 catch (Exception e)
                 {
-                    args.Failed(e);
+                    args.Fail(e);
                 }
             };
             this.serviceEvents.OnShutdown += async (
@@ -147,15 +152,168 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 try
                 {
-                    var context = new StatelessServiceDelegateInvocationContextOnShutdown(args.Payload);
+                    await this.InvokeDelegates(
+                        new StatelessServiceDelegateInvocationContextOnShutdown(args.Payload),
+                        args.CancellationToken);
 
-                    await this.InvokeDelegates(context, args.CancellationToken);
-
-                    args.Completed();
+                    args.Complete();
                 }
                 catch (Exception e)
                 {
-                    args.Failed(e);
+                    args.Fail(e);
+                }
+            };
+            this.serviceEvents.CodePackage.OnCodePackageAdded += async (
+                sender,
+                args) =>
+            {
+                try
+                {
+                    await this.InvokeDelegates(
+                        new StatelessServiceDelegateInvocationContextOnCodePackageAdded(args.Payload),
+                        args.CancellationToken);
+
+                    args.Complete();
+                }
+                catch (Exception e)
+                {
+                    args.Fail(e);
+                }
+            };
+            this.serviceEvents.CodePackage.OnCodePackageModified += async (
+                sender,
+                args) =>
+            {
+                try
+                {
+                    await this.InvokeDelegates(
+                        new StatelessServiceDelegateInvocationContextOnCodePackageModified(args.Payload),
+                        args.CancellationToken);
+
+                    args.Complete();
+                }
+                catch (Exception e)
+                {
+                    args.Fail(e);
+                }
+            };
+            this.serviceEvents.CodePackage.OnCodePackageRemoved += async (
+                sender,
+                args) =>
+            {
+                try
+                {
+                    await this.InvokeDelegates(
+                        new StatelessServiceDelegateInvocationContextOnCodePackageRemoved(args.Payload),
+                        args.CancellationToken);
+
+                    args.Complete();
+                }
+                catch (Exception e)
+                {
+                    args.Fail(e);
+                }
+            };
+            this.serviceEvents.CodePackage.OnConfigPackageAdded += async (
+                sender,
+                args) =>
+            {
+                try
+                {
+                    await this.InvokeDelegates(
+                        new StatelessServiceDelegateInvocationContextOnConfigPackageAdded(args.Payload),
+                        args.CancellationToken);
+
+                    args.Complete();
+                }
+                catch (Exception e)
+                {
+                    args.Fail(e);
+                }
+            };
+            this.serviceEvents.CodePackage.OnConfigPackageModified += async (
+                sender,
+                args) =>
+            {
+                try
+                {
+                    await this.InvokeDelegates(
+                        new StatelessServiceDelegateInvocationContextOnConfigPackageModified(args.Payload),
+                        args.CancellationToken);
+
+                    args.Complete();
+                }
+                catch (Exception e)
+                {
+                    args.Fail(e);
+                }
+            };
+            this.serviceEvents.CodePackage.OnConfigPackageRemoved += async (
+                sender,
+                args) =>
+            {
+                try
+                {
+                    await this.InvokeDelegates(
+                        new StatelessServiceDelegateInvocationContextOnConfigPackageRemoved(args.Payload),
+                        args.CancellationToken);
+
+                    args.Complete();
+                }
+                catch (Exception e)
+                {
+                    args.Fail(e);
+                }
+            };
+            this.serviceEvents.CodePackage.OnDataPackageAdded += async (
+                sender,
+                args) =>
+            {
+                try
+                {
+                    await this.InvokeDelegates(
+                        new StatelessServiceDelegateInvocationContextOnDataPackageAdded(args.Payload),
+                        args.CancellationToken);
+
+                    args.Complete();
+                }
+                catch (Exception e)
+                {
+                    args.Fail(e);
+                }
+            };
+            this.serviceEvents.CodePackage.OnDataPackageModified += async (
+                sender,
+                args) =>
+            {
+                try
+                {
+                    await this.InvokeDelegates(
+                        new StatelessServiceDelegateInvocationContextOnDataPackageModified(args.Payload),
+                        args.CancellationToken);
+
+                    args.Complete();
+                }
+                catch (Exception e)
+                {
+                    args.Fail(e);
+                }
+            };
+            this.serviceEvents.CodePackage.OnDataPackageRemoved += async (
+                sender,
+                args) =>
+            {
+                try
+                {
+                    await this.InvokeDelegates(
+                        new StatelessServiceDelegateInvocationContextOnDataPackageRemoved(args.Payload),
+                        args.CancellationToken);
+
+                    args.Complete();
+                }
+                catch (Exception e)
+                {
+                    args.Fail(e);
                 }
             };
         }
@@ -227,14 +385,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
         private IEnumerable<ServiceInstanceListener> GetServiceListeners()
         {
-            return this.serviceListeners ?? Enumerable.Empty<ServiceInstanceListener>();
+            return this.serviceListeners ?? Array.Empty<ServiceInstanceListener>();
         }
 
         private IEnumerable<StatelessServiceDelegate> GetServiceDelegates(
             StatelessServiceLifecycleEvent @event)
         {
             return this.serviceDelegates == null
-                ? Enumerable.Empty<StatelessServiceDelegate>()
+                ? Array.Empty<StatelessServiceDelegate>()
                 : this.serviceDelegates[@event];
         }
 

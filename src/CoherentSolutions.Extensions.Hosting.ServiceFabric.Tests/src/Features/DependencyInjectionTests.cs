@@ -19,7 +19,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 {
     public static class DependencyInjectionTests
     {
-        private static class UseDependencies
+        public static class UseDependencies
         {
             public class Case : IXunitSerializable
             {
@@ -68,7 +68,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             }
         }
 
-        private static class AutomaticServicesRegistration
+        public static class AutomaticServicesRegistration
         {
             public class Case : IXunitSerializable
             {
@@ -216,7 +216,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             }
         }
 
-        private static class HierarchyServiceRegistration
+        public static class HierarchyServiceRegistration
         {
             public class Case : IXunitSerializable
             {
@@ -335,7 +335,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(UseDependencies.Cases), MemberType = typeof(UseDependencies))]
-        private static void Should_use_custom_collection_For_services_registrations(
+        public static void Should_use_custom_collection_For_services_registrations(
             UseDependencies.Case @case)
         {
             // Arrange
@@ -353,7 +353,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(AutomaticServicesRegistration.Cases), MemberType = typeof(AutomaticServicesRegistration))]
-        private static void Should_resolve_instance_From_auto_registered_types(
+        public static void Should_resolve_instance_From_auto_registered_types(
             AutomaticServicesRegistration.Case @case)
         {
             // Arrange
@@ -372,7 +372,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(HierarchyServiceRegistration.GeneralCases), MemberType = typeof(HierarchyServiceRegistration))]
-        private static void Should_resolve_lower_level_container_registration_When_lower_level_container_has_same_registration_as_upper_container(
+        public static void Should_resolve_lower_level_container_registration_When_lower_level_container_has_same_registration_as_upper_container(
             HierarchyServiceRegistration.Case @case)
         {
             // Arrange
@@ -418,7 +418,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(HierarchyServiceRegistration.GeneralCases), MemberType = typeof(HierarchyServiceRegistration))]
-        private static void Should_resolve_same_singleton_instance_From_hierarchy_singleton_instance_registration(
+        public static void Should_resolve_same_singleton_instance_From_hierarchy_singleton_instance_registration(
             HierarchyServiceRegistration.Case @case)
         {
             // Arrange
@@ -458,7 +458,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(HierarchyServiceRegistration.GeneralCases), MemberType = typeof(HierarchyServiceRegistration))]
-        private static void Should_resolve_same_singleton_instance_From_hierarchy_singleton_type_registration(
+        public static void Should_resolve_same_singleton_instance_From_hierarchy_singleton_type_registration(
             HierarchyServiceRegistration.Case @case)
         {
             // Arrange
@@ -498,7 +498,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(HierarchyServiceRegistration.GeneralCases), MemberType = typeof(HierarchyServiceRegistration))]
-        private static void Should_resolve_different_transient_instance_From_hierarchy_transient_type_registration(
+        public static void Should_resolve_different_transient_instance_From_hierarchy_transient_type_registration(
             HierarchyServiceRegistration.Case @case)
         {
             // Arrange
@@ -538,7 +538,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(HierarchyServiceRegistration.OpenGenericCases), MemberType = typeof(HierarchyServiceRegistration))]
-        private static void Should_resolve_same_open_generic_singleton_instance_From_hierarchy_open_generic_singleton_type_registration(
+        public static void Should_resolve_same_open_generic_singleton_instance_From_hierarchy_open_generic_singleton_type_registration(
             HierarchyServiceRegistration.OpenGenericCase @case)
         {
             // Arrange
@@ -581,7 +581,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
         [Theory]
         [MemberData(nameof(HierarchyServiceRegistration.OpenGenericCases), MemberType = typeof(HierarchyServiceRegistration))]
-        private static void Should_resolve_different_open_generic_transient_instance_From_hierarchy_open_generic_transient_type_registration(
+        public static void Should_resolve_different_open_generic_transient_instance_From_hierarchy_open_generic_transient_type_registration(
             HierarchyServiceRegistration.OpenGenericCase @case)
         {
             // Arrange
