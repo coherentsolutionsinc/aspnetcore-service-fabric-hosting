@@ -1,4 +1,4 @@
-# Service Lifecycle Package Events
+# Service Lifecycle: Package Events
 
 This sample demonstrates how to configure actions to be triggered on code package activation events for both `StatefulService` and `StatelessService`.
 
