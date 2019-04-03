@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<ServiceManifest Name="ServicePkg"
+                 Version="1.0.0"
+                 xmlns="http://schemas.microsoft.com/2011/01/fabric"
+                 xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <ServiceTypes>
+        <!-- This is the name of service type. It should match the name in .UseServiceName() call in Program.cs -->
+        <StatefulServiceType ServiceTypeName="StatefulServiceType" HasPersistedState="true" />
+        <StatelessServiceType ServiceTypeName="StatelessServiceType" />
+    </ServiceTypes>
+
+    <!-- Code package is your service executable. -->
+    <CodePackage Name="Code" Version="1.0.0">
+        <EntryPoint>
+            <ExeHost IsExternalExecutable="true">
+                <Program>dotnet</Program>
+                <Arguments>Service.dll</Arguments>
+                <WorkingFolder>CodePackage</WorkingFolder>
+            </ExeHost>
+        </EntryPoint>
+    </CodePackage>
+
+    <CodePackage Name="CodeNew" Version="1.0.0">
+        <EntryPoint>
+            <ExeHost IsExternalExecutable="true">
+                <Program>ping</Program>
+                <Arguments>localhost -t</Arguments>
+                <WorkingFolder>CodePackage</WorkingFolder>
+            </ExeHost>
+        </EntryPoint>
+    </CodePackage>
+
+    <ConfigPackage Name="Config" Version="1.0.0" />
+    <!--<ConfigPackage Name="ConfigNew" Version="1.0.0" />-->
+
+    <DataPackage Name="Data" Version="1.0.0" />
+    <!--<DataPackage Name="DataNew" Version="1.0.0" />-->
+
+</ServiceManifest>
