@@ -14,7 +14,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             Func<StatelessServiceContext, StatelessService> serviceFactory,
             CancellationToken cancellationToken)
         {
-            return ServiceRuntime.RegisterServiceAsync(serviceTypeName, serviceFactory, cancellationToken: cancellationToken);
+            return ServiceRuntime.RegisterServiceAsync(
+                serviceTypeName, 
+                serviceFactory, 
+                cancellationToken: cancellationToken);
         }
 
         public Task UnregisterAsync(

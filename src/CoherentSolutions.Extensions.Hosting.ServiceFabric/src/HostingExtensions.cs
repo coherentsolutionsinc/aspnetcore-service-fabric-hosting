@@ -4,7 +4,7 @@ using System.Linq;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator.Extensions;
-
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
@@ -24,7 +24,22 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             this IHostBuilder @this,
             Action<IStatelessServiceHostBuilder> configAction)
         {
-            var factoryFunc = new Func<IStatelessServiceHostBuilder>(() => new StatelessServiceHostBuilder());
+            var factoryFunc = new Func<IStatelessServiceHostBuilder>(
+                () =>
+                {
+                    var builder = new StatelessServiceHostBuilder();
+                    if (string.IsNullOrEmpty(Environment.GetEnvironmentVariable("Fabric_ApplicationName")))
+                    {
+                        builder.ConfigureObject(
+                            configurator =>
+                            {
+                                configurator.UseRuntimeRegistrant(
+                                    () => new StatelessServiceHostedRuntimeRegistrant());
+                            });
+                    }
+
+                    return builder;
+                });
             return @this.DefineReliableService(factoryFunc, configAction);
         }
 
@@ -64,10 +79,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
                                         dependencies =>
                                         {
                                             // We should ignore certain types.
-                                            var ignore = new HashSet<Type>(dependencies.Select(i => i.ServiceType));
+                                            var ignore = new HashSet<Type>(dependencies.Select(i => i.ServiceType))
+                                            {
 
-                                            // See https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/issues/30
-                                            ignore.Add(typeof(IHostedService));
+                                                // See https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/issues/30
+                                                typeof(IHostedService)
+                                            };
 
                                             dependencies.Proxinate(services, provider, type => !ignore.Contains(type));
                                         });
