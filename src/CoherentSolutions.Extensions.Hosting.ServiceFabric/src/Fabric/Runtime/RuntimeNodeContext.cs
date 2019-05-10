@@ -4,12 +4,12 @@ using System.Numerics;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
 {
-    public class DefaultNodeContext : NodeContext
+    public class RuntimeNodeContext : NodeContext
     {
         private const string LOCALHOST_NODE_TYPE = "LocalhostNodeType";
         private const string LOCALHOST_IPADDRESS_OR_FQDN = "localhost";
 
-        public DefaultNodeContext()
+        public RuntimeNodeContext()
             : base(
                 Environment.MachineName,
                 new NodeId(new BigInteger(1), new BigInteger(0)),

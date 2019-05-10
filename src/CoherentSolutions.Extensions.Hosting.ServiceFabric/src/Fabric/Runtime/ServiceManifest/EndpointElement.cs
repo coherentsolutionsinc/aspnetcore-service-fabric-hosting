@@ -1,5 +1,4 @@
-﻿using System.Fabric.Description;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceManifest
 {
@@ -19,6 +18,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
 
         [XmlAttribute(AttributeName = "Type")]
         public string Type
+        {
+            get; set;
+        }
+
+        [XmlAttribute(AttributeName = "CodePackageRef")]
+        public string CodePackageRef
         {
             get; set;
         }

@@ -44,12 +44,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
 
         private static NodeContext CreateDefaultNodeContext()
         {
-            return new DefaultNodeContext();
+            return new RuntimeNodeContext();
         }
 
         private static ICodePackageActivationContext CreateDefaultCodePackageActivationContext()
         {
-            return new DefaultCodePackageActivationContext(APPLICATION_NAME, APPLICATION_TYPE_NAME, CONTEXT);
+            return new RuntimeCodePackageActivationContext(APPLICATION_NAME, APPLICATION_TYPE_NAME, CONTEXT);
         }
 
         public NodeContext GetNodeContext()
