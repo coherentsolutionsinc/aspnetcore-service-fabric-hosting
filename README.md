@@ -344,8 +344,25 @@ This project is owned and maintained by [Coherent Solutions][4].
 
 This project is licensed under the MS-PL License - see the [LICENSE.md][5] for details.
 
+## See Also
+
+Besides this project [Coherent Solutions][4] also maintains a few more open source projects and workshops:
+
+**Projects**
+
+* [service-fabric-run-tests][6] - is a Docker image designed to run Service Fabric oriented unit-tests (.NET Core) on Linux.
+* [CoherentSolutions.Extensions.Configuration.AnyWhere][7] - is an extension to [Microsoft.Extensions.Configuration](https://www.nuget.org/packages/Microsoft.Extensions.Configuration). This extension allows application to configure it's configuration sources using environment variables.
+
+**Workshops**
+
+* [Building Self-Driving Car Architecture with Robot Operating System][8] - is a workshop to introduce attendee to [Robot Operating System][9] (ROS) design and create simple self-driving car architecture.
+
 [1]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki "wiki: Home"
 [2]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Version-History "wiki: Version History"
 [3]:  CONTRIBUTING.md "Contributing"
 [4]:  https://www.coherentsolutions.com/ "Coherent Solutions Inc."
 [5]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/blob/master/LICENSE.md "License"
+[6]:  https://github.com/coherentsolutionsinc/service-fabric-run-tests
+[7]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting "Service Fabric Hosting"
+[8]:  https://github.com/coherentsolutionsinc/issoft-insights-2019-sdc-carla-ros
+[9]:  http://wiki.ros.org/
