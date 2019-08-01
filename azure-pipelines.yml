@@ -10,10 +10,11 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- task: Bash@3
+  inputs:
+    targetType: 'inline'
+    script: 'echo -e ''FROM coherentsolutions/service-fabric-run-tests:latest\nWORKDIR .\nCOPY ./* ./\nRUN dotnet restore\nRUN dotnet build -c Release --no-restore\ndotnet test -c Test --no-build --no-restore'' >> /Dockerfile"'
+- task: Docker@2
+  inputs:
+    command: 'build'
+    Dockerfile: '**/Dockerfile'
