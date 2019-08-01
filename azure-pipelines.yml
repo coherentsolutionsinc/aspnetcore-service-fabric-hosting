@@ -10,11 +10,21 @@ pool:
   vmImage: 'ubuntu-latest'
 
 steps:
-- task: Bash@3
+- task: DotNetCoreCLI@2
   inputs:
-    targetType: 'inline'
-    script: 'echo -e ''FROM coherentsolutions/service-fabric-run-tests:latest\nWORKDIR .\nCOPY ./* ./\nRUN dotnet restore\nRUN dotnet build -c Release --no-restore\nRUN dotnet test -c Test --no-build --no-restore'' >> ./Dockerfile'
-- task: Docker@2
+    command: 'restore'
+    projects: 'src/CoherentSolutions.Extensions.Configuration.AnyWhere.sln'
+    feedsToUse: 'select'
+  displayName: 'Restore'
+- task: DotNetCoreCLI@2
   inputs:
     command: 'build'
-    Dockerfile: '**/Dockerfile'
+    projects: 'src/CoherentSolutions.Extensions.Configuration.AnyWhere.sln'
+    arguments: '-c Release --no-restore'
+  displayName: 'Build'
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'test'
+    projects: 'src/CoherentSolutions.Extensions.Configuration.AnyWhere.sln'
+    arguments: '-c Test --no-build --no-restore'
+  displayName: 'Test'
