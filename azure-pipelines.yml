@@ -13,18 +13,18 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'restore'
-    projects: 'src/CoherentSolutions.Extensions.Configuration.AnyWhere.sln'
+    projects: 'src/Code.sln'
     feedsToUse: 'select'
   displayName: 'Restore'
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
-    projects: 'src/CoherentSolutions.Extensions.Configuration.AnyWhere.sln'
+    projects: 'src/Code.sln'
     arguments: '-c Release --no-restore'
   displayName: 'Build'
 - task: DotNetCoreCLI@2
   inputs:
     command: 'test'
-    projects: 'src/CoherentSolutions.Extensions.Configuration.AnyWhere.sln'
+    projects: 'src/Code.sln'
     arguments: '-c Test --no-build --no-restore'
   displayName: 'Test'
