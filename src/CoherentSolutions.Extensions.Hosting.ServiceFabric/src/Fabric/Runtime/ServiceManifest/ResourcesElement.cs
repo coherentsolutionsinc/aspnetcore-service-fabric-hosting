@@ -8,7 +8,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
         [XmlArrayItem(ElementName = "Endpoint")]
         public EndpointElement[] Endpoints
         {
-            get; set;
+            get;
+            set;
         }
     }
 }

@@ -7,7 +7,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
 {
     public class CodePackageCollection : KeyedCollection<string, CodePackage>
     {
-        public CodePackageCollection(IEnumerable<CodePackage> packages)
+        public CodePackageCollection(
+            IEnumerable<CodePackage> packages)
         {
             if (packages is null)
             {
@@ -20,7 +21,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
             }
         }
 
-        protected override string GetKeyForItem(CodePackage item)
+        protected override string GetKeyForItem(
+            CodePackage item)
         {
             if (item is null)
             {

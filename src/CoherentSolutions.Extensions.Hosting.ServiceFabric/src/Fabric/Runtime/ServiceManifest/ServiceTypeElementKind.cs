@@ -3,7 +3,9 @@
     public enum ServiceTypeElementKind
     {
         Invalid,
+
         Stateful,
+
         Stateless
     }
 }

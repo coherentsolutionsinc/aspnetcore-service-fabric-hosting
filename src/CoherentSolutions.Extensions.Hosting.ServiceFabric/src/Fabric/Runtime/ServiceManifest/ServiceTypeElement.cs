@@ -7,7 +7,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
         [XmlAttribute(AttributeName = "ServiceTypeName")]
         public string ServiceTypeName
         {
-            get; set;
+            get;
+            set;
         }
 
         public abstract ServiceTypeElementKind Kind

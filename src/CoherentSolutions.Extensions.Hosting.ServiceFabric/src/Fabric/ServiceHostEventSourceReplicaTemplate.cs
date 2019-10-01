@@ -89,7 +89,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 serviceInformation =>
                 {
                     var dependenciesCollection = parameters.DependenciesFunc();
-                    if (dependenciesCollection == null)
+                    if (dependenciesCollection is null)
                     {
                         throw new FactoryProducesNullInstanceException<IServiceCollection>();
                     }

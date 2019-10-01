@@ -7,13 +7,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
         [XmlAttribute(AttributeName = "Name")]
         public string Name
         {
-            get; set;
+            get;
+            set;
         }
 
         [XmlAttribute(AttributeName = "Version")]
         public string Version
         {
-            get; set;
+            get;
+            set;
         }
     }
 }

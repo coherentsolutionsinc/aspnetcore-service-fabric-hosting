@@ -7,7 +7,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
 {
     public class EndpointResourceDescriptionCollection : KeyedCollection<string, EndpointResourceDescription>
     {
-        public EndpointResourceDescriptionCollection(IEnumerable<EndpointResourceDescription> endpointResourceDescriptions)
+        public EndpointResourceDescriptionCollection(
+            IEnumerable<EndpointResourceDescription> endpointResourceDescriptions)
         {
             if (endpointResourceDescriptions is null)
             {
@@ -20,7 +21,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
             }
         }
 
-        protected override string GetKeyForItem(EndpointResourceDescription item)
+        protected override string GetKeyForItem(
+            EndpointResourceDescription item)
         {
             if (item is null)
             {

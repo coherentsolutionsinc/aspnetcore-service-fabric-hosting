@@ -2,6 +2,12 @@
 {
     public class StatelessServiceTypeElement : ServiceTypeElement
     {
-        public override ServiceTypeElementKind Kind => ServiceTypeElementKind.Stateless;
+        public override ServiceTypeElementKind Kind
+        {
+            get
+            {
+                return ServiceTypeElementKind.Stateless;
+            }
+        }
     }
 }

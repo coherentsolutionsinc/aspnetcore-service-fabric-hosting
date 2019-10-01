@@ -7,7 +7,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
 {
     public class ServiceTypeDescriptionCollection : KeyedCollection<string, ServiceTypeDescription>
     {
-        public ServiceTypeDescriptionCollection(IEnumerable<ServiceTypeDescription> serviceTypeDescriptions)
+        public ServiceTypeDescriptionCollection(
+            IEnumerable<ServiceTypeDescription> serviceTypeDescriptions)
         {
             if (serviceTypeDescriptions is null)
             {
@@ -20,7 +21,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
             }
         }
 
-        protected override string GetKeyForItem(ServiceTypeDescription item)
+        protected override string GetKeyForItem(
+            ServiceTypeDescription item)
         {
             if (item is null)
             {

@@ -5,6 +5,7 @@ using System.Fabric;
 using System.Fabric.Description;
 using System.IO;
 using System.Xml.Serialization;
+
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceManifest.Objects.Collections;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceManifest.Objects.Factories;
 
@@ -13,10 +14,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
     public class ServiceManifest
     {
         private readonly ServiceTypeDescriptionCollection serviceTypeDescriptions;
+
         private readonly EndpointResourceDescriptionCollection endpointResourceDescriptions;
 
         private readonly CodePackageCollection codePackages;
+
         private readonly ConfigPackageCollection configPackages;
+
         private readonly DataPackageCollection dataPackages;
 
         public string PackageRoot
@@ -36,7 +40,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
 
         public ApplicationPrincipalsDescription ApplicationPrincipalsDescription
         {
-            get; private set;
+            get;
+            private set;
         }
 
         public KeyedCollection<string, ServiceTypeDescription> ServiceTypes
@@ -146,12 +151,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
         }
 
         private static IEnumerable<StatelessServiceTypeDescription> ReadServiceTypesDescriptions(
-           IEnumerable<ServiceTypeElement> elements)
+            IEnumerable<ServiceTypeElement> elements)
         {
             if (elements is null)
             {
                 yield break;
             }
+
             foreach (var element in elements)
             {
                 switch (element.Kind)
@@ -173,6 +179,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
             {
                 yield break;
             }
+
             foreach (var element in elements)
             {
                 var description = new EndpointResourceDescription()
@@ -185,6 +192,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
                 {
                     description.Protocol = protocol;
                 }
+
                 if (Enum.TryParse<EndpointType>(element.Type, out var type))
                 {
                     description.EndpointType = type;
@@ -197,12 +205,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
         private static IEnumerable<TPackage> ReadPackages<TElement, TPackage>(
             IEnumerable<TElement> elements,
             IPackageFactory<TElement, TPackage> factory)
-                where TElement : PackageElement
+            where TElement : PackageElement
         {
             if (elements is null)
             {
                 yield break;
             }
+
             foreach (var element in elements)
             {
                 yield return factory.Create(element);

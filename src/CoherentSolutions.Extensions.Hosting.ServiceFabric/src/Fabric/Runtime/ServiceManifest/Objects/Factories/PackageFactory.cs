@@ -8,9 +8,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
     public abstract class PackageFactory<TElement, TPackage> : IPackageFactory<TElement, TPackage>
     {
         private static readonly Lazy<PropertyInfo> descrPath;
+
         private static readonly Lazy<PropertyInfo> descrName;
+
         private static readonly Lazy<PropertyInfo> descrVersion;
+
         private static readonly Lazy<PropertyInfo> descrServiceManifestName;
+
         private static readonly Lazy<PropertyInfo> descrServiceManifestVersion;
 
         private readonly ServiceManifest manifest;
@@ -30,6 +34,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
             this.manifest = manifest ?? throw new ArgumentNullException(nameof(manifest));
         }
 
+        public abstract TPackage Create(
+            TElement element);
+
         protected void InitializePackageDescription(
             PackageElement element,
             PackageDescription description)
@@ -48,18 +55,22 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
             {
                 throw new MissingMemberException(nameof(CodePackageDescription), "Path");
             }
+
             if (descrName.Value is null)
             {
                 throw new MissingMemberException(nameof(CodePackageDescription), "Name");
             }
+
             if (descrVersion.Value is null)
             {
                 throw new MissingMemberException(nameof(CodePackageDescription), "Version");
             }
+
             if (descrServiceManifestName.Value is null)
             {
                 throw new MissingMemberException(nameof(CodePackageDescription), "ServiceManifestName");
             }
+
             if (descrServiceManifestVersion.Value is null)
             {
                 throw new MissingMemberException(nameof(CodePackageDescription), "ServiceManifestVersion");
@@ -73,7 +84,5 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
             descrServiceManifestName.Value.SetValue(description, this.manifest.Name);
             descrServiceManifestVersion.Value.SetValue(description, this.manifest.Version);
         }
-
-        public abstract TPackage Create(TElement element);
     }
 }

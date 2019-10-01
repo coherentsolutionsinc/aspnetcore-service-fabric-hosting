@@ -8,44 +8,51 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
         [XmlAttribute(AttributeName = "Name")]
         public string Name
         {
-            get; set;
+            get;
+            set;
         }
 
         [XmlAttribute(AttributeName = "Version")]
         public string Version
         {
-            get; set;
+            get;
+            set;
         }
 
         [XmlArray(ElementName = "ServiceTypes")]
         [XmlArrayItem(ElementName = "StatelessServiceType", Type = typeof(StatelessServiceTypeElement))]
         public ServiceTypeElement[] ServiceTypes
         {
-            get; set;
+            get;
+            set;
         }
 
         [XmlElement(ElementName = "CodePackage")]
         public CodePackageElement[] CodePackages
         {
-            get; set;
+            get;
+            set;
         }
 
         [XmlElement(ElementName = "ConfigPackage")]
         public ConfigPackageElement[] ConfigPackages
         {
-            get; set;
+            get;
+            set;
         }
 
         [XmlElement(ElementName = "DataPackage")]
         public DataPackageElement[] DataPackages
         {
-            get; set;
+            get;
+            set;
         }
 
         [XmlElement(ElementName = "Resources")]
         public ResourcesElement Resources
         {
-            get; set;
+            get;
+            set;
         }
     }
 }

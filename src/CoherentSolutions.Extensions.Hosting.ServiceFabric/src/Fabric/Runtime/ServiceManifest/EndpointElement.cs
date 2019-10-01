@@ -7,25 +7,29 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
         [XmlAttribute(AttributeName = "Name")]
         public string Name
         {
-            get; set;
+            get;
+            set;
         }
 
         [XmlAttribute(AttributeName = "Protocol")]
         public string Protocol
         {
-            get; set;
+            get;
+            set;
         }
 
         [XmlAttribute(AttributeName = "Type")]
         public string Type
         {
-            get; set;
+            get;
+            set;
         }
 
         [XmlAttribute(AttributeName = "CodePackageRef")]
         public string CodePackageRef
         {
-            get; set;
+            get;
+            set;
         }
     }
 }
