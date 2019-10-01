@@ -19,6 +19,7 @@ tests.log
 
 _ReSharper*/
 *.[Rr]e[Ss]harper
+*.DotSettings
 *.DotSettings.user
 
 publish/
