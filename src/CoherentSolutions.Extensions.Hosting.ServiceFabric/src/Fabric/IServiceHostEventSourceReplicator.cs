@@ -3,6 +3,6 @@
     public interface IServiceHostEventSourceReplicator<in TServiceInformation, out TEventSource>
     {
         TEventSource ReplicateFor(
-            TServiceInformation serviceContext);
+            TServiceInformation serviceInformation);
     }
 }
