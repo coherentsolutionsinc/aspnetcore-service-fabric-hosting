@@ -10,7 +10,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         public ServiceEventBridgeCodePackage(
             ICodePackageActivationContext context)
         {
-            if (context == null)
+            if (context is null)
             {
                 throw new ArgumentNullException(nameof(context));
             }
