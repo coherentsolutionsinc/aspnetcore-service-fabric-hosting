@@ -12,12 +12,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.DependencyIn
             this IServiceCollection @this,
             ServiceContext serviceContext)
         {
-            if (@this == null)
+            if (@this is null)
             {
                 throw new ArgumentNullException(nameof(@this));
             }
 
-            if (serviceContext == null)
+            if (serviceContext is null)
             {
                 throw new ArgumentNullException(nameof(serviceContext));
             }
@@ -39,12 +39,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.DependencyIn
             this IServiceCollection @this,
             IServicePartition servicePartition)
         {
-            if (@this == null)
+            if (@this is null)
             {
                 throw new ArgumentNullException(nameof(@this));
             }
 
-            if (servicePartition == null)
+            if (servicePartition is null)
             {
                 throw new ArgumentNullException(nameof(servicePartition));
             }
@@ -66,12 +66,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.DependencyIn
             this IServiceCollection @this,
             IServiceEventSource serviceEventSource)
         {
-            if (@this == null)
+            if (@this is null)
             {
                 throw new ArgumentNullException(nameof(@this));
             }
 
-            if (serviceEventSource == null)
+            if (serviceEventSource is null)
             {
                 throw new ArgumentNullException(nameof(serviceEventSource));
             }
@@ -93,12 +93,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.DependencyIn
             this IServiceCollection @this,
             IServiceHostAspNetCoreListenerInformation aspNetCoreListenerInformation)
         {
-            if (@this == null)
+            if (@this is null)
             {
                 throw new ArgumentNullException(nameof(@this));
             }
 
-            if (aspNetCoreListenerInformation == null)
+            if (aspNetCoreListenerInformation is null)
             {
                 throw new ArgumentNullException(nameof(aspNetCoreListenerInformation));
             }
@@ -111,12 +111,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.DependencyIn
             this IServiceCollection @this,
             IServiceHostRemotingListenerInformation remotingListenerInformation)
         {
-            if (@this == null)
+            if (@this is null)
             {
                 throw new ArgumentNullException(nameof(@this));
             }
 
-            if (remotingListenerInformation == null)
+            if (remotingListenerInformation is null)
             {
                 throw new ArgumentNullException(nameof(remotingListenerInformation));
             }
@@ -129,12 +129,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.DependencyIn
             this IServiceCollection @this,
             IServiceHostGenericListenerInformation genericListenerInformation)
         {
-            if (@this == null)
+            if (@this is null)
             {
                 throw new ArgumentNullException(nameof(@this));
             }
 
-            if (genericListenerInformation == null)
+            if (genericListenerInformation is null)
             {
                 throw new ArgumentNullException(nameof(genericListenerInformation));
             }
