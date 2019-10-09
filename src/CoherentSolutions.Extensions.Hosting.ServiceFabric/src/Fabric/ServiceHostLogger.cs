@@ -20,7 +20,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             private bool disposed;
 
-            public string Metadata { get; }
+            public string Metadata
+            {
+                get;
+            }
 
             public Scope(
                 AsyncLocal<Scope> current,
@@ -29,8 +32,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.current = current;
                 this.parent = current.Value;
 
-                this.Metadata = this.parent != null
-                    ? string.Join(Environment.NewLine, this.parent?.Metadata, state)
+                this.Metadata = this.parent is object
+                    ? string.Join(Environment.NewLine, this.parent.Metadata, state)
                     : state.ToString();
             }
 
@@ -105,12 +108,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             eventData.ApplicationTypeName = this.serviceContext.CodePackageActivationContext.ApplicationTypeName;
             eventData.NodeName = this.serviceContext.NodeContext.NodeName;
 
-            if (this.options.IncludeMetadata && this.scope.Value != null)
+            if (this.options.IncludeMetadata && this.scope.Value is object)
             {
                 eventData.EventMetadata = this.scope.Value.Metadata;
             }
 
-            if (this.options.IncludeExceptionStackTrace && exception != null)
+            if (this.options.IncludeExceptionStackTrace && exception is object)
             {
                 eventData.EventStackTrace = exception.StackTrace;
             }
