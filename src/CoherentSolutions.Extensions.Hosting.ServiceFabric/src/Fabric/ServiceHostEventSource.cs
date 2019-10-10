@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.Tracing;
+﻿using System;
+using System.Diagnostics.Tracing;
 using System.Fabric;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
@@ -12,9 +13,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
         public ServiceHostEventSource(
             ServiceContext serviceContext)
-            : base(
-                $"{serviceContext?.CodePackageActivationContext?.ApplicationTypeName}.{serviceContext?.ServiceTypeName}",
-                EventSourceSettings.EtwSelfDescribingEventFormat)
+            : base(CreateEventSourceName(serviceContext), EventSourceSettings.EtwSelfDescribingEventFormat)
         {
         }
 
@@ -32,6 +31,21 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                     Keywords = Keywords.APPLICATION_TRACE
                 },
                 eventData);
+        }
+
+        private static string CreateEventSourceName(
+            ServiceContext serviceContext)
+        {
+            if (serviceContext is null)
+            {
+                throw new ArgumentNullException(nameof(serviceContext));
+            }
+            if (serviceContext.CodePackageActivationContext is null)
+            {
+                throw new ArgumentException(nameof(serviceContext.CodePackageActivationContext));
+            }
+
+            return $"{serviceContext.CodePackageActivationContext.ApplicationTypeName}.{serviceContext.ServiceTypeName}";
         }
     }
 }
