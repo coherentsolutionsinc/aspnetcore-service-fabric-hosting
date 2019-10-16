@@ -19,7 +19,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         public TEventSource ReplicateFor(
             TServiceInformation serviceInformation)
         {
-            if (serviceInformation == null)
+            if (serviceInformation is null)
             {
                 throw new ArgumentNullException(nameof(serviceInformation));
             }

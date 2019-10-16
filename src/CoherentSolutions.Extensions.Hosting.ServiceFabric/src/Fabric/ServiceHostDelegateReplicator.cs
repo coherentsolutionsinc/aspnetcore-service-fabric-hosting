@@ -18,7 +18,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         public TDelegate ReplicateFor(
             TService service)
         {
-            if (service == null)
+            if (service is null)
             {
                 throw new ArgumentNullException(nameof(service));
             }
