@@ -6,8 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common;
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Exceptions;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Extensions;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Exceptions;
 
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 
@@ -69,23 +69,28 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             IReadOnlyList<IStatelessServiceHostListenerReplicator> serviceListenerReplicators)
             : base(serviceContext)
         {
+            if (serviceEventSourceReplicator is null)
+            {
+                throw new ArgumentNullException(nameof(serviceEventSourceReplicator));
+            }
+
             this.serviceEvents = new ServiceEvents(
                 new ServiceEventBridgeCodePackage(serviceContext.CodePackageActivationContext));
 
             this.serviceEventSource = serviceEventSourceReplicator.ReplicateFor(this);
-            if (this.serviceEventSource == null)
+            if (this.serviceEventSource is null)
             {
                 throw new ReplicatorProducesNullInstanceException<StatelessServiceEventSource>();
             }
 
-            if (serviceDelegateReplicators != null)
+            if (serviceDelegateReplicators is object)
             {
                 this.serviceDelegates = serviceDelegateReplicators
                    .SelectMany(
                         replicator =>
                         {
                             var @delegate = replicator.ReplicateFor(this);
-                            if (@delegate == null)
+                            if (@delegate is null)
                             {
                                 throw new ReplicatorProducesNullInstanceException<StatelessServiceDelegate>();
                             }
@@ -95,14 +100,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                    .ToLookup(kv => kv.v, kv => kv.@delegate);
             }
 
-            if (serviceListenerReplicators != null)
+            if (serviceListenerReplicators is object)
             {
                 this.serviceListeners = serviceListenerReplicators
                    .Select(
                         replicator =>
                         {
                             var listener = replicator.ReplicateFor(this);
-                            if (listener == null)
+                            if (listener is null)
                             {
                                 throw new ReplicatorProducesNullInstanceException<ServiceInstanceListener>();
                             }
@@ -322,7 +327,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         {
             this.serviceEvents.NotifyStartupAsync(default).GetAwaiter().GetResult();
 
-            return this.GetServiceListeners();
+            return this.serviceListeners;
         }
 
         protected override async Task RunAsync(
@@ -351,19 +356,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             return this.Context;
         }
 
-        public IServiceEventSource GetEventSource()
-        {
-            return this.CreateEventSource();
-        }
-
         public IServicePartition GetPartition()
         {
             return this.Partition;
         }
 
-        private IServiceEventSource CreateEventSource()
+        public IServiceEventSource GetEventSource()
         {
-            return this.GetServiceEventSource().CreateEventSourceFunc();
+            return this.serviceEventSource.CreateEventSource();
         }
 
         private async Task InvokeDelegates(
@@ -372,33 +372,25 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var delegates = this.GetServiceDelegates(context.Event);
+            if (this.serviceDelegates is null)
+            {
+                return;
+            }
+
+            var delegates = this.serviceDelegates[context.Event];
+            if (delegates is null)
+            {
+                return;
+            }
+
             foreach (var @delegate in delegates)
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var invoker = @delegate.CreateDelegateInvokerFunc();
+                var invoker = @delegate.CreateDelegateInvoker();
 
-                await invoker.InvokeAsync(context, cancellationToken);
+                await invoker.InvokeAsync(@delegate.Delegate, context, cancellationToken);
             }
-        }
-
-        private IEnumerable<ServiceInstanceListener> GetServiceListeners()
-        {
-            return this.serviceListeners ?? Array.Empty<ServiceInstanceListener>();
-        }
-
-        private IEnumerable<StatelessServiceDelegate> GetServiceDelegates(
-            StatelessServiceLifecycleEvent @event)
-        {
-            return this.serviceDelegates == null
-                ? Array.Empty<StatelessServiceDelegate>()
-                : this.serviceDelegates[@event];
-        }
-
-        private StatelessServiceEventSource GetServiceEventSource()
-        {
-            return this.serviceEventSource;
         }
     }
 }

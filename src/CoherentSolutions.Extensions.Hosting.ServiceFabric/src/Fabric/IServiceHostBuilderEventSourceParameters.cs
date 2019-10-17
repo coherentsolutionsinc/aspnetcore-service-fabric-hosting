@@ -2,9 +2,17 @@
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public interface IServiceHostBuilderEventSourceParameters<out TReplicaTemplate>
+    public interface IServiceHostBuilderEventSourceParameters<TReplicaTemplate>
         where TReplicaTemplate : IServiceHostEventSourceReplicaTemplate<IServiceHostEventSourceReplicaTemplateConfigurator>
     {
-        Func<TReplicaTemplate> EventSourceReplicaTemplateFunc { get; }
+        Func<TReplicaTemplate> EventSourceReplicaTemplateFunc
+        {
+            get;
+        }
+
+        Action<TReplicaTemplate> EventSourceSetupAction
+        {
+            get;
+        }
     }
 }

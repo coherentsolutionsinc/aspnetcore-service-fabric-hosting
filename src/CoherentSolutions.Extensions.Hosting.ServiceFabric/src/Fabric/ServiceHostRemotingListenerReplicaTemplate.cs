@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Fabric;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.DependencyInjection;
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Exceptions;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.DependencyInjection.Extensions;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Exceptions;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator.DependencyInjection;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Validation.DataAnnotations;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -33,6 +34,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         {
             public ServiceHostRemotingCommunicationListenerFactory RemotingCommunicationListenerFunc { get; private set; }
 
+            [RequiredConfiguration(nameof(UseImplementation))]
             public Func<IServiceProvider, IRemotingImplementation> RemotingImplementationFunc { get; private set; }
 
             public Func<FabricTransportRemotingListenerSettings> RemotingSettingsFunc { get; private set; }
@@ -41,10 +43,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             public Func<IServiceProvider, IServiceRemotingMessageHandler> RemotingHandlerFunc { get; private set; }
 
+            [RequiredConfiguration(nameof(UseDependencies))]
             public Func<IServiceCollection> DependenciesFunc { get; private set; }
 
             public Action<IServiceCollection> DependenciesConfigAction { get; private set; }
 
+            [RequiredConfiguration(nameof(UseLoggerOptions))]
             public Func<IConfigurableObjectLoggerOptions> LoggerOptionsFunc { get; private set; }
 
             protected RemotingListenerParameters()
@@ -54,9 +58,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.RemotingSettingsFunc = DefaultRemotingSettingsFunc;
                 this.RemotingSerializationProviderFunc = null;
                 this.RemotingHandlerFunc = DefaultRemotingHandlerFunc;
-                this.DependenciesFunc = DefaultDependenciesFunc;
+                this.DependenciesFunc = null;
                 this.DependenciesConfigAction = null;
-                this.LoggerOptionsFunc = DefaultLoggerOptionsFunc;
+                this.LoggerOptionsFunc = null;
             }
 
             public void UseCommunicationListener(
@@ -70,7 +74,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 Func<IServiceProvider, TImplementation> factoryFunc)
                 where TImplementation : IRemotingImplementation
             {
-                if (factoryFunc == null)
+                if (factoryFunc is null)
                 {
                     throw new ArgumentNullException(nameof(factoryFunc));
                 }
@@ -89,7 +93,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 Func<IServiceProvider, TSerializationProvider> factoryFunc)
                 where TSerializationProvider : IServiceRemotingMessageSerializationProvider
             {
-                if (factoryFunc == null)
+                if (factoryFunc is null)
                 {
                     throw new ArgumentNullException(nameof(factoryFunc));
                 }
@@ -101,7 +105,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 Func<IServiceProvider, THandler> factoryFunc)
                 where THandler : IServiceRemotingMessageHandler
             {
-                if (factoryFunc == null)
+                if (factoryFunc is null)
                 {
                     throw new ArgumentNullException(nameof(factoryFunc));
                 }
@@ -119,7 +123,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             public void ConfigureDependencies(
                 Action<IServiceCollection> configAction)
             {
-                if (configAction == null)
+                if (configAction is null)
                 {
                     throw new ArgumentNullException(nameof(configAction));
                 }
@@ -163,122 +167,105 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                     serviceImplementation,
                     serviceRemotingMessageBodyFactory);
             }
-
-            private static IServiceCollection DefaultDependenciesFunc()
-            {
-                return new ServiceCollection();
-            }
-
-            private static IConfigurableObjectLoggerOptions DefaultLoggerOptionsFunc()
-            {
-                return ServiceHostLoggerOptions.Disabled;
-            }
         }
 
-        protected override Func<ServiceContext, ICommunicationListener> CreateCommunicationListenerFunc(
-            TService service,
+        protected override Func<TService, ICommunicationListener> CreateFactory(
             TParameters parameters)
         {
-            if (parameters == null)
+            this.ValidateUpstreamConfiguration(parameters);
+
+            return service =>
             {
-                throw new ArgumentNullException(nameof(parameters));
-            }
+                var listenerInformation = new ServiceHostRemotingListenerInformation(parameters.EndpointName);
 
-            if (parameters.RemotingImplementationFunc == null)
-            {
-                throw new InvalidOperationException(
-                    $"No {nameof(parameters.RemotingImplementationFunc)} was configured");
-            }
-
-            var listenerInformation = new ServiceHostRemotingListenerInformation(parameters.EndpointName);
-
-            var build = new ServiceHostRemotingCommunicationListenerComponentsFactory(
-                context =>
-                {
-                    var serviceContext = service.GetContext();
-                    var servicePartition = service.GetPartition();
-                    var serviceEventSource = service.GetEventSource();
-
-                    var dependenciesCollection = parameters.DependenciesFunc();
-                    if (dependenciesCollection == null)
+                var build = new ServiceHostRemotingCommunicationListenerComponentsFactory(
+                    context =>
                     {
-                        throw new FactoryProducesNullInstanceException<IServiceCollection>();
-                    }
+                        var serviceContext = service.GetContext();
+                        var servicePartition = service.GetPartition();
+                        var serviceEventSource = service.GetEventSource();
 
-                    // We need register all level dependencies first in order to make
-                    // sure that no level dependencies will be ignore during proxination
-                    dependenciesCollection.Add(serviceContext);
-                    dependenciesCollection.Add(servicePartition);
-                    dependenciesCollection.Add(serviceEventSource);
-                    dependenciesCollection.Add(listenerInformation);
-
-                    var loggerOptions = parameters.LoggerOptionsFunc();
-                    if (loggerOptions == null)
-                    {
-                        throw new FactoryProducesNullInstanceException<IConfigurableObjectLoggerOptions>();
-                    }
-
-                    dependenciesCollection.AddLogging(
-                        builder =>
+                        var dependenciesCollection = parameters.DependenciesFunc();
+                        if (dependenciesCollection is null)
                         {
-                            builder.AddProvider(
-                                new ServiceHostRemotingListenerLoggerProvider(
-                                    listenerInformation,
-                                    serviceContext,
-                                    serviceEventSource,
-                                    loggerOptions));
-                        });
-
-                    // Possible point of proxination
-                    parameters.DependenciesConfigAction?.Invoke(dependenciesCollection);
-
-                    // Adding open-generic proxies
-                    IServiceProvider provider = new ProxynatorAwareServiceProvider(dependenciesCollection.BuildServiceProvider());
-
-                    var implementation = parameters.RemotingImplementationFunc(provider);
-                    if (implementation == null)
-                    {
-                        throw new FactoryProducesNullInstanceException<IRemotingImplementation>();
-                    }
-
-                    var implementationType = implementation.GetType();
-                    var replacements = new Dictionary<Type, object>
-                    {
-                        [implementationType] = implementation,
-                        [typeof(IRemotingImplementation)] = implementation
-                    };
-
-                    // Adding implementation as singleton
-                    provider = new ReplaceAwareServiceProvider(replacements, provider);
-
-                    var serializer = (IServiceRemotingMessageSerializationProvider) null;
-                    if (parameters.RemotingSerializationProviderFunc != null)
-                    {
-                        serializer = parameters.RemotingSerializationProviderFunc(provider);
-                        if (serializer == null)
-                        {
-                            throw new FactoryProducesNullInstanceException<IServiceRemotingMessageSerializationProvider>();
+                            throw new FactoryProducesNullInstanceException<IServiceCollection>();
                         }
-                    }
 
-                    var settings = parameters.RemotingSettingsFunc();
-                    if (settings == null)
-                    {
-                        throw new FactoryProducesNullInstanceException<FabricTransportRemotingListenerSettings>();
-                    }
+                        // We need register all level dependencies first in order to make
+                        // sure that no level dependencies will be ignore during proxination
+                        dependenciesCollection.Add(serviceContext);
+                        dependenciesCollection.Add(servicePartition);
+                        dependenciesCollection.Add(serviceEventSource);
+                        dependenciesCollection.Add(listenerInformation);
 
-                    settings.EndpointResourceName = parameters.EndpointName;
+                        var loggerOptions = parameters.LoggerOptionsFunc();
+                        if (loggerOptions is null)
+                        {
+                            throw new FactoryProducesNullInstanceException<IConfigurableObjectLoggerOptions>();
+                        }
 
-                    var logger = (ILogger) provider.GetService(typeof(ILogger<>).MakeGenericType(implementation.GetType()));
-                    var handler = parameters.RemotingHandlerFunc(provider);
+                        dependenciesCollection.AddLogging(
+                            builder =>
+                            {
+                                builder.AddProvider(
+                                    new ServiceHostRemotingListenerLoggerProvider(
+                                        listenerInformation,
+                                        serviceContext,
+                                        serviceEventSource,
+                                        loggerOptions));
+                            });
 
-                    return new ServiceHostRemotingCommunicationListenerComponents(
-                        new ServiceHostRemotingListenerMessageHandler(handler, logger),
-                        serializer,
-                        settings);
-                });
+                        // Possible point of proxination
+                        parameters.DependenciesConfigAction?.Invoke(dependenciesCollection);
 
-            return context => parameters.RemotingCommunicationListenerFunc(context, build);
+                        // Adding open-generic proxies
+                        IServiceProvider provider = new ProxynatorAwareServiceProvider(dependenciesCollection.BuildServiceProvider());
+
+                        var implementation = parameters.RemotingImplementationFunc(provider);
+                        if (implementation is null)
+                        {
+                            throw new FactoryProducesNullInstanceException<IRemotingImplementation>();
+                        }
+
+                        var implementationType = implementation.GetType();
+                        var replacements = new Dictionary<Type, object>
+                        {
+                            [implementationType] = implementation,
+                            [typeof(IRemotingImplementation)] = implementation
+                        };
+
+                        // Adding implementation as singleton
+                        provider = new ReplaceAwareServiceProvider(replacements, provider);
+
+                        var serializer = (IServiceRemotingMessageSerializationProvider)null;
+                        if (parameters.RemotingSerializationProviderFunc != null)
+                        {
+                            serializer = parameters.RemotingSerializationProviderFunc(provider);
+                            if (serializer == null)
+                            {
+                                throw new FactoryProducesNullInstanceException<IServiceRemotingMessageSerializationProvider>();
+                            }
+                        }
+
+                        var settings = parameters.RemotingSettingsFunc();
+                        if (settings == null)
+                        {
+                            throw new FactoryProducesNullInstanceException<FabricTransportRemotingListenerSettings>();
+                        }
+
+                        settings.EndpointResourceName = parameters.EndpointName;
+
+                        var logger = (ILogger)provider.GetService(typeof(ILogger<>).MakeGenericType(implementation.GetType()));
+                        var handler = parameters.RemotingHandlerFunc(provider);
+
+                        return new ServiceHostRemotingCommunicationListenerComponents(
+                            new ServiceHostRemotingListenerMessageHandler(handler, logger),
+                            serializer,
+                            settings);
+                    });
+
+                return parameters.RemotingCommunicationListenerFunc(service.GetContext(), build);
+            };
         }
     }
 }

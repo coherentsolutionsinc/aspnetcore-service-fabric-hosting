@@ -8,6 +8,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         : IConfigurableObjectDependenciesParameters,
           IConfigurableObjectLoggerParameters
     {
-        Delegate Delegate { get; }
+        Delegate Delegate
+        {
+            get;
+        }
+
+        Func<IServiceProvider, IServiceDelegateInvoker> DelegateInvokerFunc
+        {
+            get;
+        }
     }
 }

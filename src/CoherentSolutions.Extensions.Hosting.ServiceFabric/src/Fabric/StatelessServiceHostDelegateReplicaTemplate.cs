@@ -1,4 +1,5 @@
 ﻿using System;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
@@ -7,7 +8,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
               IStatelessService,
               IStatelessServiceHostDelegateReplicaTemplateParameters,
               IStatelessServiceHostDelegateReplicaTemplateConfigurator,
-              IStatelessServiceHostDelegateInvoker,
               StatelessServiceDelegate>,
           IStatelessServiceHostDelegateReplicaTemplate
     {
@@ -18,42 +18,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         {
             public StatelessServiceLifecycleEvent Event { get; private set; }
 
-            public Func<Delegate, IServiceProvider, IStatelessServiceHostDelegateInvoker> DelegateInvokerFunc { get; private set; }
-
             public StatelessDelegateParameters()
             {
                 this.Event = StatelessServiceLifecycleEvent.OnRun;
-                this.DelegateInvokerFunc = DefaultDelegateInvokerFunc;
             }
 
             public void UseEvent(
                 StatelessServiceLifecycleEvent @event)
             {
                 this.Event = @event;
-            }
-
-            public void UseDelegateInvoker(
-                Func<Delegate, IServiceProvider, IStatelessServiceHostDelegateInvoker> factoryFunc)
-            {
-                this.DelegateInvokerFunc = factoryFunc
-                 ?? throw new ArgumentNullException(nameof(factoryFunc));
-            }
-
-            private static IStatelessServiceHostDelegateInvoker DefaultDelegateInvokerFunc(
-                Delegate @delegate,
-                IServiceProvider services)
-            {
-                if (@delegate == null)
-                {
-                    throw new ArgumentNullException(nameof(@delegate));
-                }
-
-                if (services == null)
-                {
-                    throw new ArgumentNullException(nameof(services));
-                }
-
-                return new StatelessServiceHostDelegateInvoker(@delegate, services);
             }
         }
 
@@ -62,11 +35,18 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         {
             var parameters = new StatelessDelegateParameters();
 
+            parameters.ConfigureDependencies(
+                dependencies =>
+                {
+                    // Include specific context registrants
+                    dependencies.AddTransient<IServiceDelegateInvocationContextRegistrant, StatelessServiceDelegateInvocationContextRegistrant>();
+                });
+
             this.UpstreamConfiguration(parameters);
 
-            var factory = this.CreateDelegateInvokerFunc(service, parameters);
+            var factory = this.CreateFactory(parameters);
 
-            return new StatelessServiceDelegate(() => factory(parameters.DelegateInvokerFunc), parameters.Event);
+            return new StatelessServiceDelegate(parameters.Event, parameters.Delegate, () => factory(service));
         }
     }
 }

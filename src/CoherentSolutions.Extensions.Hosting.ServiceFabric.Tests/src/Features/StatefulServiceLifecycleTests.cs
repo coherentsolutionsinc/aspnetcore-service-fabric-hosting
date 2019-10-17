@@ -37,12 +37,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             mockDelegateReplicator.Setup(instance => instance.ReplicateFor(It.IsAny<IStatefulService>()))
                .Returns(
                     new StatefulServiceDelegate(
+                        mockEvent,
+                        mockDelegate,
                         () =>
                         {
                             var mockTask = new TaskCompletionSource<bool>();
-                            var mockDelegateInvoker = new Mock<IStatefulServiceHostDelegateInvoker>();
-                            mockDelegateInvoker.Setup(
-                                    instance => instance.InvokeAsync(It.IsAny<IStatefulServiceDelegateInvocationContext>(), It.IsAny<CancellationToken>()))
+                            var mockDelegateInvoker = new Mock<IServiceDelegateInvoker>();
+                            mockDelegateInvoker.Setup(instance => instance.InvokeAsync(It.IsAny<Delegate>(), It.IsAny<IStatefulServiceDelegateInvocationContext>(), It.IsAny<CancellationToken>()))
                                .Callback(
                                     () =>
                                     {
@@ -52,8 +53,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
                                .Returns(mockTask.Task);
 
                             return mockDelegateInvoker.Object;
-                        },
-                        mockEvent));
+                        }));
 
             return mockDelegateReplicator.Object;
         }

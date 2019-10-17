@@ -1,5 +1,5 @@
 ﻿using System;
-
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Validation.DataAnnotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.ServiceFabric.Data;
 
@@ -10,7 +10,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
               IStatefulService,
               IStatefulServiceHostDelegateReplicaTemplateParameters,
               IStatefulServiceHostDelegateReplicaTemplateConfigurator,
-              IStatefulServiceHostDelegateInvoker,
               StatefulServiceDelegate>,
           IStatefulServiceHostDelegateReplicaTemplate
     {
@@ -19,44 +18,18 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
               IStatefulServiceHostDelegateReplicaTemplateParameters,
               IStatefulServiceHostDelegateReplicaTemplateConfigurator
         {
+            [RequiredConfiguration(nameof(UseEvent))]
             public StatefulServiceLifecycleEvent Event { get; private set; }
-
-            public Func<Delegate, IServiceProvider, IStatefulServiceHostDelegateInvoker> DelegateInvokerFunc { get; private set; }
 
             public StatefulDelegateParameters()
             {
                 this.Event = StatefulServiceLifecycleEvent.OnRun;
-                this.DelegateInvokerFunc = DefaultDelegateInvokerFunc;
             }
 
             public void UseEvent(
                 StatefulServiceLifecycleEvent @event)
             {
                 this.Event = @event;
-            }
-
-            public void UseDelegateInvoker(
-                Func<Delegate, IServiceProvider, IStatefulServiceHostDelegateInvoker> factoryFunc)
-            {
-                this.DelegateInvokerFunc = factoryFunc
-                 ?? throw new ArgumentNullException(nameof(factoryFunc));
-            }
-
-            private static IStatefulServiceHostDelegateInvoker DefaultDelegateInvokerFunc(
-                Delegate @delegate,
-                IServiceProvider services)
-            {
-                if (@delegate == null)
-                {
-                    throw new ArgumentNullException(nameof(@delegate));
-                }
-
-                if (services == null)
-                {
-                    throw new ArgumentNullException(nameof(services));
-                }
-
-                return new StatefulServiceHostDelegateInvoker(@delegate, services);
             }
         }
 
@@ -68,14 +41,18 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             parameters.ConfigureDependencies(
                 dependencies =>
                 {
+                    // Include reliable state manager
                     dependencies.Add(new ServiceDescriptor(typeof(IReliableStateManager), service.GetReliableStateManager()));
+
+                    // Include specific context registrants
+                    dependencies.AddTransient<IServiceDelegateInvocationContextRegistrant, StatefulServiceDelegateInvocationContextRegistrant>();
                 });
 
             this.UpstreamConfiguration(parameters);
 
-            var factory = this.CreateDelegateInvokerFunc(service, parameters);
+            var factory = this.CreateFactory(parameters);
 
-            return new StatefulServiceDelegate(() => factory(parameters.DelegateInvokerFunc), parameters.Event);
+            return new StatefulServiceDelegate(parameters.Event, parameters.Delegate, () => factory(service));
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Fabric;
-
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Validation.DataAnnotations;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
@@ -8,7 +8,7 @@ using Microsoft.ServiceFabric.Services.Communication.Runtime;
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public abstract class ServiceHostListenerReplicaTemplate<TService, TParameters, TConfigurator, TListener>
-        : ConfigurableObject<TConfigurator>, IServiceHostListenerReplicaTemplate<TConfigurator>
+        : ValidateableConfigurableObject<TParameters, TConfigurator>, IServiceHostListenerReplicaTemplate<TConfigurator>
         where TService : IService
         where TParameters : IServiceHostListenerReplicaTemplateParameters
         where TConfigurator : IServiceHostListenerReplicaTemplateConfigurator
@@ -17,11 +17,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             : IServiceHostListenerReplicaTemplateParameters,
               IServiceHostListenerReplicaTemplateConfigurator
         {
+            [RequiredConfiguration(nameof(UseEndpoint))]
             public string EndpointName { get; private set; }
 
             protected ListenerParameters()
             {
-                this.EndpointName = string.Empty;
+                this.EndpointName = null;
             }
 
             public void UseEndpoint(
@@ -35,8 +36,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         public abstract TListener Activate(
             TService service);
 
-        protected abstract Func<ServiceContext, ICommunicationListener> CreateCommunicationListenerFunc(
-            TService service,
+        protected abstract Func<TService, ICommunicationListener> CreateFactory(
             TParameters parameters);
     }
 }

@@ -310,11 +310,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
                 config =>
                 {
                     config.UseEventSourceReplicator(factory.Object);
-                    config.DefineAspNetCoreListener(
-                        c =>
-                        {
-                        });
-                    config.DefineRemotingListener(
+                    config.SetupEventSource(
                         c =>
                         {
                         });

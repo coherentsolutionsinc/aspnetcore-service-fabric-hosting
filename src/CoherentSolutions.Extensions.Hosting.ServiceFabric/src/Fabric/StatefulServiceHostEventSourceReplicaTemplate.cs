@@ -31,7 +31,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             this.UpstreamConfiguration(parameters);
 
-            var factory = this.CreateEventSourceFunc(parameters);
+            var factory = this.CreateFactory(parameters);
 
             return new StatefulServiceEventSource(() => factory(serviceInformation));
         }

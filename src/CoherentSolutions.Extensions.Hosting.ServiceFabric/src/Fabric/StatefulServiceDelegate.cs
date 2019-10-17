@@ -4,17 +4,33 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public class StatefulServiceDelegate
     {
-        public StatefulServiceLifecycleEvent Event { get; }
+        public StatefulServiceLifecycleEvent Event
+        {
+            get;
+        }
 
-        public Func<IStatefulServiceHostDelegateInvoker> CreateDelegateInvokerFunc { get; }
+        public Delegate Delegate
+        {
+            get;
+        }
+
+        public Func<IServiceDelegateInvoker> CreateDelegateInvoker
+        {
+            get;
+        }
 
         public StatefulServiceDelegate(
-            Func<IStatefulServiceHostDelegateInvoker> delegateInvokerFunc,
-            StatefulServiceLifecycleEvent @event)
+            StatefulServiceLifecycleEvent @event,
+            Delegate @delegate,
+            Func<IServiceDelegateInvoker> factory)
         {
             this.Event = @event;
-            this.CreateDelegateInvokerFunc = delegateInvokerFunc
-             ?? throw new ArgumentNullException(nameof(delegateInvokerFunc));
+
+            this.Delegate = @delegate
+                ?? throw new ArgumentNullException(nameof(@delegate));
+
+            this.CreateDelegateInvoker = factory
+                ?? throw new ArgumentNullException(nameof(factory));
         }
     }
 }

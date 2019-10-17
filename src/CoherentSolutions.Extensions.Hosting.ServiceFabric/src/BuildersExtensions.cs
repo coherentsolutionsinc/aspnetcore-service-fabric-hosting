@@ -84,19 +84,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
-        public static IStatefulServiceHostDelegateReplicaTemplate UseDelegateInvoker(
-            this IStatefulServiceHostDelegateReplicaTemplate @this,
-            Func<Delegate, IServiceProvider, IStatefulServiceHostDelegateInvoker> factoryFunc)
-        {
-            @this.ConfigureObject(
-                configurator => configurator.UseDelegateInvoker(factoryFunc));
-
-            return @this;
-        }
-
-        public static IStatelessServiceHostDelegateReplicaTemplate UseDelegateInvoker(
-            this IStatelessServiceHostDelegateReplicaTemplate @this,
-            Func<Delegate, IServiceProvider, IStatelessServiceHostDelegateInvoker> factoryFunc)
+        public static TCaller UseDelegateInvoker<TCaller>(
+            this TCaller @this,
+            Func<IServiceProvider, IServiceDelegateInvoker> factoryFunc)
+            where TCaller : IConfigurableObject<IServiceHostDelegateReplicaTemplateConfigurator>
         {
             @this.ConfigureObject(
                 configurator => configurator.UseDelegateInvoker(factoryFunc));
@@ -816,10 +807,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
-        public static IStatefulServiceHostEventSourceReplicaTemplate UseImplementation<TImplementation>(
+        public static IStatefulServiceHostEventSourceReplicaTemplate UseImplementation(
             this IStatefulServiceHostEventSourceReplicaTemplate @this,
-            Func<TImplementation> factoryFunc)
-            where TImplementation : IServiceEventSource
+            Func<IServiceEventSource> factoryFunc)
         {
             @this.ConfigureObject(
                 configurator => configurator.UseImplementation(provider => factoryFunc()));
@@ -827,10 +817,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
-        public static IStatelessServiceHostEventSourceReplicaTemplate UseImplementation<TImplementation>(
+        public static IStatelessServiceHostEventSourceReplicaTemplate UseImplementation(
             this IStatelessServiceHostEventSourceReplicaTemplate @this,
-            Func<TImplementation> factoryFunc)
-            where TImplementation : IServiceEventSource
+            Func<IServiceEventSource> factoryFunc)
         {
             @this.ConfigureObject(
                 configurator => configurator.UseImplementation(provider => factoryFunc()));
@@ -838,10 +827,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
-        public static IStatefulServiceHostEventSourceReplicaTemplate UseImplementation<TImplementation>(
+        public static IStatefulServiceHostEventSourceReplicaTemplate UseImplementation(
             this IStatefulServiceHostEventSourceReplicaTemplate @this,
-            Func<IServiceProvider, TImplementation> factoryFunc)
-            where TImplementation : IServiceEventSource
+            Func<IServiceProvider, IServiceEventSource> factoryFunc)
         {
             @this.ConfigureObject(
                 configurator => configurator.UseImplementation(factoryFunc));
@@ -849,10 +837,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             return @this;
         }
 
-        public static IStatelessServiceHostEventSourceReplicaTemplate UseImplementation<TImplementation>(
+        public static IStatelessServiceHostEventSourceReplicaTemplate UseImplementation(
             this IStatelessServiceHostEventSourceReplicaTemplate @this,
-            Func<IServiceProvider, TImplementation> factoryFunc)
-            where TImplementation : IServiceEventSource
+            Func<IServiceProvider, IServiceEventSource> factoryFunc)
         {
             @this.ConfigureObject(
                 configurator => configurator.UseImplementation(factoryFunc));

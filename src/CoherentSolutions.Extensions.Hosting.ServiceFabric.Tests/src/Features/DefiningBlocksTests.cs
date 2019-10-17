@@ -498,9 +498,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         public static void Should_use_delegate_invoker_When_invoking_delegates_on_stateful_service_lifecycle_events()
         {
             // Arrange
-            var mockDelegateInvoker = new Mock<IServiceHostDelegateInvoker<IStatefulServiceDelegateInvocationContext>>();
+            var mockDelegateInvoker = new Mock<IServiceDelegateInvoker>();
             mockDelegateInvoker
-               .Setup(instance => instance.InvokeAsync(It.IsAny<IStatefulServiceDelegateInvocationContext>(), It.IsAny<CancellationToken>()))
+               .Setup(instance => instance.InvokeAsync(It.IsAny<Delegate>(), It.IsAny<IStatefulServiceDelegateInvocationContext>(), It.IsAny<CancellationToken>()))
                .Returns(Task.CompletedTask)
                .Verifiable();
 
@@ -510,10 +510,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
             // Act
             theoryItem.SetupExtension(
-                new UseStatefulDelegateInvokerTheoryExtension().Setup(
-                    (
-                        @delegate,
-                        provider) => arrangeDelegateInvoker));
+                new UseDelegateInvokerTheoryExtension().Setup(provider => arrangeDelegateInvoker));
 
             theoryItem.Try();
 
@@ -525,9 +522,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
         public static void Should_use_delegate_invoker_When_invoking_delegates_on_stateless_service_lifecycle_events()
         {
             // Arrange
-            var mockDelegateInvoker = new Mock<IServiceHostDelegateInvoker<IStatelessServiceDelegateInvocationContext>>();
+            var mockDelegateInvoker = new Mock<IServiceDelegateInvoker>();
             mockDelegateInvoker
-               .Setup(instance => instance.InvokeAsync(It.IsAny<IStatelessServiceDelegateInvocationContext>(), It.IsAny<CancellationToken>()))
+               .Setup(instance => instance.InvokeAsync(It.IsAny<Delegate>(), It.IsAny<IStatelessServiceDelegateInvocationContext>(), It.IsAny<CancellationToken>()))
                .Returns(Task.CompletedTask)
                .Verifiable();
 
@@ -537,10 +534,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
 
             // Act
             theoryItem.SetupExtension(
-                new UseStatelessDelegateInvokerTheoryExtension().Setup(
-                    (
-                        @delegate,
-                        provider) => arrangeDelegateInvoker));
+                new UseDelegateInvokerTheoryExtension().Setup(provider => arrangeDelegateInvoker));
 
             theoryItem.Try();
 

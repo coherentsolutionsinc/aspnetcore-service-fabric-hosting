@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2018
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.202
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoherentSolutions.Extensions.Hosting.ServiceFabric", "CoherentSolutions.Extensions.Hosting.ServiceFabric\CoherentSolutions.Extensions.Hosting.ServiceFabric.csproj", "{A501A897-6BC0-4233-83EC-B71654152529}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests", "CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests\CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.csproj", "{DB757D07-65BE-4E71-BE71-687521BE0E76}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{CAFE5F96-9E11-416E-9166-43ED0F028A66}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

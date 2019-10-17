@@ -22,7 +22,7 @@
 
             this.UpstreamConfiguration(parameters);
 
-            var factory = this.CreateEventSourceFunc(parameters);
+            var factory = this.CreateFactory(parameters);
 
             return new StatelessServiceEventSource(() => factory(serviceInformation));
         }

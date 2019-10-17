@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Fabric;
 using System.Fabric.Description;
-using System.IO;
 using System.Reflection;
+
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Extensions;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceManifest.Objects.Factories
@@ -10,18 +10,25 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
     public class DataPackageFactory : PackageFactory<DataPackageElement, DataPackage>
     {
         private static readonly Lazy<ConstructorInfo> ctor;
+
         private static readonly Lazy<PropertyInfo> path;
+
         private static readonly Lazy<PropertyInfo> descr;
 
         private static readonly Lazy<ConstructorInfo> descrCtor;
 
         static DataPackageFactory()
         {
-            ctor = new Lazy<ConstructorInfo>(() => typeof(DataPackage).GetNonPublicConstructor(), true);
-            path = new Lazy<PropertyInfo>(() => typeof(DataPackage).GetProperty("Path"), true);
-            descr = new Lazy<PropertyInfo>(() => typeof(DataPackage).GetProperty("Description"), true);
+            ctor = typeof(DataPackage).Query().Constructor().NonPublic().Instance().GetLazy();
 
-            descrCtor = new Lazy<ConstructorInfo>(() => typeof(DataPackageDescription).GetNonPublicConstructor(), true);
+
+            // typeof(DataPackage).Query().Public().Instance().Constructor().ExecuteLazy();
+
+
+            path = typeof(DataPackage).Query().Property(nameof(DataPackage.Path)).Public().Instance().GetLazy();
+            descr = typeof(DataPackage).Query().Property(nameof(DataPackage.Description)).Public().Instance().GetLazy();
+
+            descrCtor = typeof(DataPackage).Query().Constructor().NonPublic().Instance().GetLazy();
         }
 
         public DataPackageFactory(
@@ -30,7 +37,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
         {
         }
 
-        public override DataPackage Create(DataPackageElement element)
+        public override DataPackage Create(
+            DataPackageElement element)
         {
             if (element is null)
             {
@@ -41,6 +49,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
             {
                 throw new MissingMemberException(nameof(DataPackage), ".ctor()");
             }
+
             if (path.Value is null)
             {
                 throw new MissingMemberException(nameof(DataPackage), "Path");

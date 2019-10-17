@@ -6,7 +6,5 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         : IServiceHostDelegateReplicaTemplateParameters
     {
         StatefulServiceLifecycleEvent Event { get; }
-
-        Func<Delegate, IServiceProvider, IStatefulServiceHostDelegateInvoker> DelegateInvokerFunc { get; }
     }
 }

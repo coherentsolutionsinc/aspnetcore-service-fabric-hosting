@@ -7,8 +7,5 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
     {
         void UseEvent(
             StatelessServiceLifecycleEvent @event);
-
-        void UseDelegateInvoker(
-            Func<Delegate, IServiceProvider, IStatelessServiceHostDelegateInvoker> factoryFunc);
     }
 }

@@ -25,19 +25,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             IReadOnlyList<IStatelessServiceHostListenerReplicator> serviceListenerReplicators)
         {
             this.serviceTypeName = serviceTypeName
-             ?? throw new ArgumentNullException(nameof(serviceTypeName));
+                ?? throw new ArgumentNullException(nameof(serviceTypeName));
 
             this.serviceRuntimeRegistrant = serviceRuntimeRegistrant
-             ?? throw new ArgumentNullException(nameof(serviceRuntimeRegistrant));
+                ?? throw new ArgumentNullException(nameof(serviceRuntimeRegistrant));
 
-            this.serviceEventSourceReplicator = serviceEventSourceReplicator
-             ?? throw new ArgumentNullException(nameof(serviceEventSourceReplicator));
+            this.serviceEventSourceReplicator = serviceEventSourceReplicator 
+                ?? throw new ArgumentNullException(nameof(serviceEventSourceReplicator));
 
-            this.serviceDelegateReplicators = serviceDelegateReplicators
-             ?? throw new ArgumentNullException(nameof(serviceDelegateReplicators));
-
-            this.serviceListenerReplicators = serviceListenerReplicators
-             ?? Array.Empty<IStatelessServiceHostListenerReplicator>();
+            this.serviceDelegateReplicators = serviceDelegateReplicators;
+            this.serviceListenerReplicators = serviceListenerReplicators;
         }
 
         public Task StartAsync(

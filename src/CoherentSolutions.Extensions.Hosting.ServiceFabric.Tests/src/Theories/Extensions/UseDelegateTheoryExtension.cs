@@ -8,10 +8,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Exte
 
         public UseDelegateTheoryExtension()
         {
-            this.Delegate = new Action(
-                () =>
-                {
-                });
+            this.Delegate = new Action(() => { });
         }
 
         public UseDelegateTheoryExtension Setup(

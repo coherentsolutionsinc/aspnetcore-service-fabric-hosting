@@ -43,9 +43,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             this.UpstreamConfiguration(parameters);
 
-            var factory = this.CreateCommunicationListenerFunc(service, parameters);
+            var factory = this.CreateFactory(parameters);
 
-            return new ServiceReplicaListener(factory, parameters.EndpointName, parameters.ListenerOnSecondary);
+            return new ServiceReplicaListener(context => factory(service), parameters.EndpointName, parameters.ListenerOnSecondary);
         }
     }
 }

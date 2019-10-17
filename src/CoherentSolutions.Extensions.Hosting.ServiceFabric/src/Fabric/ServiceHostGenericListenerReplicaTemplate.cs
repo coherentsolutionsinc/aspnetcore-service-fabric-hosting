@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Fabric;
 
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Exceptions;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.DependencyInjection.Extensions;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Exceptions;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator.DependencyInjection;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Validation.DataAnnotations;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -23,20 +24,23 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
               IServiceHostGenericListenerReplicaTemplateParameters,
               IServiceHostGenericListenerReplicaTemplateConfigurator
         {
+            [RequiredConfiguration(nameof(UseCommunicationListener))]
             public ServiceHostGenericCommunicationListenerFactory GenericCommunicationListenerFunc { get; private set; }
 
+            [RequiredConfiguration(nameof(UseDependencies))]
             public Func<IServiceCollection> DependenciesFunc { get; private set; }
 
             public Action<IServiceCollection> DependenciesConfigAction { get; private set; }
 
+            [RequiredConfiguration(nameof(UseLoggerOptions))]
             public Func<IConfigurableObjectLoggerOptions> LoggerOptionsFunc { get; private set; }
 
             protected GenericListenerParameters()
             {
                 this.GenericCommunicationListenerFunc = null;
-                this.DependenciesFunc = DefaultDependenciesFunc;
+                this.DependenciesFunc = null;
                 this.DependenciesConfigAction = null;
-                this.LoggerOptionsFunc = DefaultLoggerOptionsFunc;
+                this.LoggerOptionsFunc = null;
             }
 
             public void UseCommunicationListener(
@@ -56,7 +60,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             public void ConfigureDependencies(
                 Action<IServiceCollection> configAction)
             {
-                if (configAction == null)
+                if (configAction is null)
                 {
                     throw new ArgumentNullException(nameof(configAction));
                 }
@@ -70,42 +74,23 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.LoggerOptionsFunc = factoryFunc
                  ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
-
-            private static IServiceCollection DefaultDependenciesFunc()
-            {
-                return new ServiceCollection();
-            }
-
-            private static IConfigurableObjectLoggerOptions DefaultLoggerOptionsFunc()
-            {
-                return ServiceHostLoggerOptions.Disabled;
-            }
         }
 
-        protected override Func<ServiceContext, ICommunicationListener> CreateCommunicationListenerFunc(
-            TService service,
+        protected override Func<TService, ICommunicationListener> CreateFactory(
             TParameters parameters)
         {
-            if (parameters == null)
-            {
-                throw new ArgumentNullException(nameof(parameters));
-            }
+            this.ValidateUpstreamConfiguration(parameters);
 
-            if (parameters.GenericCommunicationListenerFunc == null)
-            {
-                throw new InvalidOperationException(
-                    $"No {nameof(parameters.GenericCommunicationListenerFunc)} was configured");
-            }
-
-            var listenerInformation = new ServiceHostGenericListenerInformation(parameters.EndpointName);
-            return context =>
+            return service =>
             {
                 var serviceContext = service.GetContext();
                 var servicePartition = service.GetPartition();
                 var serviceEventSource = service.GetEventSource();
 
+                var listenerInformation = new ServiceHostGenericListenerInformation(parameters.EndpointName);
+
                 var dependenciesCollection = parameters.DependenciesFunc();
-                if (dependenciesCollection == null)
+                if (dependenciesCollection is null)
                 {
                     throw new FactoryProducesNullInstanceException<IServiceCollection>();
                 }
@@ -118,7 +103,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 dependenciesCollection.Add(listenerInformation);
 
                 var loggerOptions = parameters.LoggerOptionsFunc();
-                if (loggerOptions == null)
+                if (loggerOptions is null)
                 {
                     throw new FactoryProducesNullInstanceException<IConfigurableObjectLoggerOptions>();
                 }
@@ -138,10 +123,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 parameters.DependenciesConfigAction?.Invoke(dependenciesCollection);
 
                 // Adding open-generic proxies
-                IServiceProvider provider = new ProxynatorAwareServiceProvider(dependenciesCollection.BuildServiceProvider());
+                var provider = new ProxynatorAwareServiceProvider(
+                    dependenciesCollection.BuildServiceProvider());
 
                 // Create instance of ICommunicationListener
-                return parameters.GenericCommunicationListenerFunc(context, parameters.EndpointName, provider);
+                return parameters.GenericCommunicationListenerFunc(service.GetContext(), parameters.EndpointName, provider);
             };
         }
     }

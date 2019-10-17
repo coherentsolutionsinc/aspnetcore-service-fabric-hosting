@@ -2,9 +2,10 @@
 using System.Fabric;
 using System.Linq;
 
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Exceptions;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.DependencyInjection.Extensions;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Exceptions;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator.AspNetCore;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Validation.DataAnnotations;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 using Microsoft.AspNetCore;
@@ -28,17 +29,38 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
               IServiceHostAspNetCoreListenerReplicaTemplateParameters,
               IServiceHostAspNetCoreListenerReplicaTemplateConfigurator
         {
-            public ServiceFabricIntegrationOptions IntegrationOptions { get; private set; }
+            public ServiceFabricIntegrationOptions IntegrationOptions
+            {
+                get; private set;
+            }
 
-            public ServiceHostAspNetCoreCommunicationListenerFactory AspNetCoreCommunicationListenerFunc { get; private set; }
+            public Func<IWebHostBuilder> WebHostBuilderFunc
+            {
+                get; private set;
+            }
 
-            public Func<IWebHostBuilder> WebHostBuilderFunc { get; private set; }
+            public Action<IWebHostBuilder> WebHostConfigAction
+            {
+                get; private set;
+            }
 
-            public Action<IWebHostBuilder> WebHostConfigAction { get; private set; }
+            [RequiredConfiguration(nameof(UseCommunicationListener))]
+            public ServiceHostAspNetCoreCommunicationListenerFactory AspNetCoreCommunicationListenerFunc
+            {
+                get; private set;
+            }
 
-            public Action<IWebHostBuilder> WebHostCommunicationListenerConfigAction { get; private set; }
+            [RequiredConfiguration(nameof(UseCommunicationListener))]
+            public Action<IWebHostBuilder> WebHostCommunicationListenerConfigAction
+            {
+                get; private set;
+            }
 
-            public Func<IConfigurableObjectLoggerOptions> LoggerOptionsFunc { get; private set; }
+            [RequiredConfiguration(nameof(UseLoggerOptions))]
+            public Func<IConfigurableObjectLoggerOptions> LoggerOptionsFunc
+            {
+                get; private set;
+            }
 
             protected AspNetCoreListenerParameters()
             {
@@ -47,7 +69,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.WebHostBuilderFunc = DefaultWebHostBuilderFunc;
                 this.WebHostConfigAction = DefaultWebHostConfigAction;
                 this.WebHostCommunicationListenerConfigAction = DefaultWebHostCommunicationListenerConfigAction;
-                this.LoggerOptionsFunc = DefaultLoggerOptionsFunc;
+                this.LoggerOptionsFunc = null;
             }
 
             public void UseIntegrationOptions(
@@ -116,124 +138,101 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 WebHostBuilderKestrelExtensions.UseKestrel(builder);
             }
-
-            private static IConfigurableObjectLoggerOptions DefaultLoggerOptionsFunc()
-            {
-                return ServiceHostLoggerOptions.Disabled;
-            }
         }
 
-        protected override Func<ServiceContext, ICommunicationListener> CreateCommunicationListenerFunc(
-            TService service,
+        protected override Func<TService, ICommunicationListener> CreateFactory(
             TParameters parameters)
         {
-            if (service == null)
-            {
-                throw new ArgumentNullException(nameof(service));
-            }
+            this.ValidateUpstreamConfiguration(parameters);
 
-            if (parameters == null)
-            {
-                throw new ArgumentNullException(nameof(parameters));
-            }
-
-            var build = new Func<string, AspNetCoreCommunicationListener, IWebHost>(
-                (
-                    url,
-                    listener) =>
+            return new Func<TService, ICommunicationListener>(
+                service =>
                 {
-                    var serviceContext = service.GetContext();
-                    var servicePartition = service.GetPartition();
-                    var serviceEventSource = service.GetEventSource();
-
-                    var builder = parameters.WebHostBuilderFunc();
-                    if (builder == null)
-                    {
-                        throw new FactoryProducesNullInstanceException<IWebHostBuilder>();
-                    }
-
-                    parameters.WebHostConfigAction(builder);
-                    parameters.WebHostCommunicationListenerConfigAction(builder);
-
-                    builder.UseServiceFabricIntegration(listener, parameters.IntegrationOptions);
-                    builder.UseUrls(url);
-
-                    // This is important to let UseServiceFabricIntegration execute first - otherwise listener.UrlSuffix would be an empty string.
-                    var listenerInformation = new ServiceHostAspNetCoreListenerInformation(
-                        parameters.EndpointName,
-                        listener.UrlSuffix);
-
-                    builder.ConfigureServices(
-                        services =>
+                    var build = new Func<string, AspNetCoreCommunicationListener, IWebHost>(
+                        (url, listener) =>
                         {
-                            // We need register all level dependencies first in order to make
-                            // sure that no level dependencies will be ignore during proxination
-                            services.Add(serviceContext);
-                            services.Add(servicePartition);
-                            services.Add(serviceEventSource);
-                            services.Add(listenerInformation);
+                            var serviceContext = service.GetContext();
+                            var servicePartition = service.GetPartition();
+                            var serviceEventSource = service.GetEventSource();
 
-                            var loggerOptions = parameters.LoggerOptionsFunc();
-                            if (loggerOptions == null)
+                            var builder = parameters.WebHostBuilderFunc();
+                            if (builder is null)
                             {
-                                throw new FactoryProducesNullInstanceException<IConfigurableObjectLoggerOptions>();
+                                throw new FactoryProducesNullInstanceException<IWebHostBuilder>();
                             }
 
-                            services.AddLogging(
-                                config =>
+                            parameters.WebHostConfigAction(builder);
+                            parameters.WebHostCommunicationListenerConfigAction(builder);
+
+                            builder.UseServiceFabricIntegration(listener, parameters.IntegrationOptions);
+                            builder.UseUrls(url);
+
+                            // This is important to let UseServiceFabricIntegration execute first - otherwise listener.UrlSuffix would be an empty string.
+                            var listenerInformation = new ServiceHostAspNetCoreListenerInformation(
+                                parameters.EndpointName,
+                                listener.UrlSuffix);
+
+                            builder.ConfigureServices(
+                                services =>
                                 {
-                                    config.AddProvider(
-                                        new ServiceHostAspNetCoreListenerLoggerProvider(
-                                            listenerInformation,
-                                            serviceContext,
-                                            serviceEventSource,
-                                            loggerOptions));
+                                    // We need register all level dependencies first in order to make
+                                    // sure that no level dependencies will be ignore during proxination
+                                    services.Add(serviceContext);
+                                    services.Add(servicePartition);
+                                    services.Add(serviceEventSource);
+                                    services.Add(listenerInformation);
+
+                                    var loggerOptions = parameters.LoggerOptionsFunc();
+                                    if (loggerOptions is null)
+                                    {
+                                        throw new FactoryProducesNullInstanceException<IConfigurableObjectLoggerOptions>();
+                                    }
+
+                                    services.AddLogging(
+                                        config =>
+                                        {
+                                            config.AddProvider(
+                                                new ServiceHostAspNetCoreListenerLoggerProvider(
+                                                    listenerInformation,
+                                                    serviceContext,
+                                                    serviceEventSource,
+                                                    loggerOptions));
+                                        });
+
+                                    var descriptor = services.FirstOrDefault(s => s.ServiceType == typeof(IStartup));
+                                    if (descriptor is object)
+                                    {
+                                        var replacement = descriptor switch
+                                        {
+                                            _ when descriptor.ImplementationFactory is object => new ServiceDescriptor(
+                                                typeof(IStartup),
+                                                provider =>
+                                                {
+                                                    var impl = descriptor.ImplementationFactory(provider);
+                                                    return new ProxynatorAwareStartup((IStartup)impl);
+                                                },
+                                                ServiceLifetime.Singleton),
+                                            _ when descriptor.ImplementationInstance is object => new ServiceDescriptor(
+                                                typeof(IStartup),
+                                                new ProxynatorAwareStartup((IStartup)descriptor.ImplementationInstance)),
+                                            _ => new ServiceDescriptor(
+                                                typeof(IStartup),
+                                                provider =>
+                                                {
+                                                    var impl = ActivatorUtilities.CreateInstance(provider, descriptor.ImplementationType);
+                                                    return new ProxynatorAwareStartup((IStartup)impl);
+                                                },
+                                                ServiceLifetime.Singleton),
+                                        };
+                                        services.Replace(replacement);
+                                    }
                                 });
 
-                            var descriptor = services.FirstOrDefault(s => s.ServiceType == typeof(IStartup));
-                            if (descriptor != null)
-                            {
-                                ServiceDescriptor replacement;
-                                if (descriptor.ImplementationFactory != null)
-                                {
-                                    replacement =
-                                        new ServiceDescriptor(
-                                            typeof(IStartup),
-                                            provider =>
-                                            {
-                                                var impl = descriptor.ImplementationFactory(provider);
-                                                return new ProxynatorAwareStartup((IStartup) impl);
-                                            },
-                                            ServiceLifetime.Singleton);
-                                }
-                                else if (descriptor.ImplementationInstance != null)
-                                {
-                                    replacement =
-                                        new ServiceDescriptor(
-                                            typeof(IStartup),
-                                            new ProxynatorAwareStartup((IStartup) descriptor.ImplementationInstance));
-                                }
-                                else
-                                {
-                                    replacement =
-                                        new ServiceDescriptor(
-                                            typeof(IStartup),
-                                            provider =>
-                                            {
-                                                var impl = ActivatorUtilities.CreateInstance(provider, descriptor.ImplementationType);
-                                                return new ProxynatorAwareStartup((IStartup) impl);
-                                            },
-                                            ServiceLifetime.Singleton);
-                                }
-
-                                services.Replace(replacement);
-                            }
+                            return builder.Build();
                         });
 
-                    return builder.Build();
+                    return parameters.AspNetCoreCommunicationListenerFunc(service.GetContext(), parameters.EndpointName, build);
                 });
-
-            return context => parameters.AspNetCoreCommunicationListenerFunc(context, parameters.EndpointName, build);
         }
     }
 }

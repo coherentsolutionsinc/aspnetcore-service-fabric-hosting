@@ -7,8 +7,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
     public interface IServiceHostEventSourceReplicaTemplateConfigurator
         : IConfigurableObjectDependenciesConfigurator
     {
-        void UseImplementation<TImplementation>(
-            Func<IServiceProvider, TImplementation> factoryFunc)
-            where TImplementation : IServiceEventSource;
+        void UseImplementation(
+            Func<IServiceProvider, IServiceEventSource> factoryFunc);
     }
 }

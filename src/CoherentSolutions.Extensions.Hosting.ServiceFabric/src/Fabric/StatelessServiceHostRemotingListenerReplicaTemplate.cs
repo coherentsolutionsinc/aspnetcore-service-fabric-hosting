@@ -24,9 +24,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             this.UpstreamConfiguration(parameters);
 
-            var factoryFunc = this.CreateCommunicationListenerFunc(service, parameters);
+            var factoryFunc = this.CreateFactory(parameters);
 
-            return new ServiceInstanceListener(factoryFunc, parameters.EndpointName);
+            return new ServiceInstanceListener(context => factoryFunc(service), parameters.EndpointName);
         }
     }
 }

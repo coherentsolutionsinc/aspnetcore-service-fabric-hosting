@@ -10,5 +10,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
     {
         void UseDelegate(
             Delegate @delegate);
+
+        void UseDelegateInvoker(
+            Func<IServiceProvider, IServiceDelegateInvoker> factoryFunc);
     }
 }

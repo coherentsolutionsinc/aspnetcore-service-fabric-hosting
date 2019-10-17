@@ -1,6 +1,6 @@
 ﻿namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public interface IStatelessServiceDelegateInvocationContext
+    public interface IStatelessServiceDelegateInvocationContext : IServiceDelegateInvocationContext
     {
         StatelessServiceLifecycleEvent Event { get; }
     }

@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
-
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Exceptions;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator.Extensions;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Exceptions;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 using Microsoft.Extensions.DependencyInjection;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Validation.DataAnnotations;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
@@ -25,9 +26,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             TListenerRemotingReplicaTemplate,
             TListenerGenericReplicaTemplate,
             TListenerReplicator>
-        : ConfigurableObject<TConfigurator>,
+        : ValidateableConfigurableObject<TParameters, TConfigurator>,
           IServiceHostBuilder<TServiceHost, TConfigurator>
         where TParameters :
+        class,
         IServiceHostBuilderParameters,
         IServiceHostBuilderEventSourceParameters<TEventSourceReplicaTemplate>,
         IServiceHostBuilderEventSourceReplicationParameters<TEventSourceReplicableTemplate, TEventSourceReplicator>,
@@ -38,6 +40,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         IServiceHostBuilderGenericListenerParameters<TListenerGenericReplicaTemplate>,
         IServiceHostBuilderListenerReplicationParameters<TListenerReplicableTemplate, TListenerReplicator>
         where TConfigurator :
+        class,
         IServiceHostBuilderConfigurator,
         IServiceHostBuilderEventSourceConfigurator<TEventSourceReplicaTemplate>,
         IServiceHostBuilderEventSourceReplicationConfigurator<TEventSourceReplicableTemplate, TEventSourceReplicator>,
@@ -48,20 +51,25 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         IServiceHostBuilderGenericListenerConfigurator<TListenerGenericReplicaTemplate>,
         IServiceHostBuilderListenerReplicationConfigurator<TListenerReplicableTemplate, TListenerReplicator>
         where TEventSourceReplicaTemplate :
+        class,
         TEventSourceReplicableTemplate,
         IServiceHostEventSourceReplicaTemplate<IServiceHostEventSourceReplicaTemplateConfigurator>
         where TEventSourceReplicator : class
         where TDelegateReplicaTemplate :
+        class,
         TDelegateReplicableTemplate,
         IServiceHostDelegateReplicaTemplate<IServiceHostDelegateReplicaTemplateConfigurator>
         where TDelegateReplicator : class
         where TListenerAspNetCoreReplicaTemplate :
+        class,
         TListenerReplicableTemplate,
         IServiceHostAspNetCoreListenerReplicaTemplate<IServiceHostAspNetCoreListenerReplicaTemplateConfigurator>
         where TListenerRemotingReplicaTemplate :
+        class,
         TListenerReplicableTemplate,
         IServiceHostRemotingListenerReplicaTemplate<IServiceHostRemotingListenerReplicaTemplateConfigurator>
         where TListenerGenericReplicaTemplate :
+        class,
         TListenerReplicableTemplate,
         IServiceHostGenericListenerReplicaTemplate<IServiceHostGenericListenerReplicaTemplateConfigurator>
         where TListenerReplicator : class
@@ -88,15 +96,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         {
             public string ServiceTypeName { get; private set; }
 
-            public IServiceHostEventSourceDescriptor EventSourceDescriptor { get; private set; }
-
             public List<IServiceHostListenerDescriptor> ListenerDescriptors { get; private set; }
 
             public List<IServiceHostDelegateDescriptor> DelegateDescriptors { get; private set; }
 
+            [RequiredConfiguration(nameof(UseEventSourceReplicaTemplate))]
             public Func<TEventSourceReplicaTemplate> EventSourceReplicaTemplateFunc { get; private set; }
 
+            [RequiredConfiguration(nameof(UseEventSourceReplicator))]
             public Func<TEventSourceReplicableTemplate, TEventSourceReplicator> EventSourceReplicatorFunc { get; private set; }
+
+            public Action<TEventSourceReplicaTemplate> EventSourceSetupAction { get; private set; }
 
             public Func<TDelegateReplicaTemplate> DelegateReplicaTemplateFunc { get; private set; }
 
@@ -117,18 +127,20 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             protected Parameters()
             {
                 this.ServiceTypeName = string.Empty;
-                this.EventSourceDescriptor = null;
                 this.ListenerDescriptors = null;
                 this.DelegateDescriptors = null;
+
                 this.EventSourceReplicaTemplateFunc = null;
                 this.EventSourceReplicatorFunc = null;
+                this.EventSourceSetupAction = null;
+
                 this.DelegateReplicaTemplateFunc = null;
                 this.DelegateReplicatorFunc = null;
                 this.AspNetCoreListenerReplicaTemplateFunc = null;
                 this.GenericListenerReplicaTemplateFunc = null;
                 this.RemotingListenerReplicaTemplateFunc = null;
                 this.ListenerReplicatorFunc = null;
-                this.DependenciesFunc = DefaultDependenciesFunc;
+                this.DependenciesFunc = null;
                 this.DependenciesConfigAction = null;
             }
 
@@ -216,13 +228,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             public void SetupEventSource(
                 Action<TEventSourceReplicaTemplate> setupAction)
             {
-                if (setupAction == null)
-                {
-                    throw new ArgumentNullException(nameof(setupAction));
-                }
-
-                this.EventSourceDescriptor = new ServiceHostEventSourceDescriptor(
-                    replicaTemplate => setupAction((TEventSourceReplicaTemplate) replicaTemplate));
+                this.EventSourceSetupAction = setupAction 
+                    ?? throw new ArgumentNullException(nameof(setupAction));
             }
 
             public void DefineDelegate(
@@ -299,11 +306,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                         ServiceHostListenerType.Generic,
                         replicaTemplate => defineAction((TListenerGenericReplicaTemplate) replicaTemplate)));
             }
-
-            private static IServiceCollection DefaultDependenciesFunc()
-            {
-                return new ServiceCollection();
-            }
         }
 
         protected class Compilation
@@ -319,14 +321,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 IReadOnlyList<TDelegateReplicator> delegateReplicators,
                 IReadOnlyList<TListenerReplicator> listenerReplicators)
             {
-                this.EventSourceReplicator = eventSourceReplicator
-                 ?? throw new ArgumentNullException(nameof(eventSourceReplicator));
-
-                this.DelegateReplicators = delegateReplicators
-                 ?? throw new ArgumentNullException(nameof(delegateReplicators));
-
-                this.ListenerReplicators = listenerReplicators
-                 ?? throw new ArgumentNullException(nameof(listenerReplicators));
+                this.EventSourceReplicator = eventSourceReplicator;
+                this.DelegateReplicators = delegateReplicators;
+                this.ListenerReplicators = listenerReplicators;
             }
         }
 
@@ -335,86 +332,43 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         protected Compilation CompileParameters(
             TParameters parameters)
         {
-            if (parameters == null)
-            {
-                throw new ArgumentNullException(nameof(parameters));
-            }
-
-            if (parameters.ListenerReplicatorFunc == null)
-            {
-                throw new InvalidOperationException(
-                    $"No {nameof(parameters.ListenerReplicatorFunc)} was configured");
-            }
+            this.ValidateUpstreamConfiguration(parameters);
 
             // Initialize service dependencies
             var dependenciesCollection = parameters.DependenciesFunc();
-            if (dependenciesCollection == null)
+            if (dependenciesCollection is null)
             {
                 throw new FactoryProducesNullInstanceException<IServiceCollection>();
             }
 
             parameters.DependenciesConfigAction?.Invoke(dependenciesCollection);
 
-            var dependencies = new DefaultServiceProviderFactory().CreateServiceProvider(dependenciesCollection);
+            var dependencies = dependenciesCollection.BuildServiceProvider();
 
-            if (parameters.EventSourceReplicaTemplateFunc == null)
+            var eventSourceReplicator = ConfigureEventSourceReplicator(parameters, dependenciesCollection, dependencies);
+
+            TDelegateReplicator[] delegateReplicators = null;
+
+            if (parameters.DelegateDescriptors != null)
             {
-                throw new InvalidOperationException(
-                    $"No {nameof(parameters.EventSourceReplicaTemplateFunc)} was configured");
-            }
-
-            if (parameters.EventSourceReplicatorFunc == null)
-            {
-                throw new InvalidOperationException(
-                    $"No {nameof(parameters.EventSourceReplicaTemplateFunc)} was configured");
-            }
-
-            var eventSourceReplicaTemplate = parameters.EventSourceReplicaTemplateFunc();
-            if (eventSourceReplicaTemplate == null)
-            {
-                throw new FactoryProducesNullInstanceException<TEventSourceReplicaTemplate>();
-            }
-
-            eventSourceReplicaTemplate
-               .ConfigureObject(
-                    c =>
-                    {
-                        c.ConfigureDependencies(
-                            services =>
-                            {
-                                var ignore = new HashSet<Type>(services.Select(i => i.ServiceType));
-                                services.Proxinate(dependenciesCollection, dependencies, i => !ignore.Contains(i));
-                            });
-                    });
-
-            parameters.EventSourceDescriptor?.ConfigAction(eventSourceReplicaTemplate);
-
-            var eventSourceReplicator = parameters.EventSourceReplicatorFunc(eventSourceReplicaTemplate);
-            if (eventSourceReplicator == null)
-            {
-                throw new FactoryProducesNullInstanceException<TEventSourceReplicator>();
-            }
-
-            var delegateReplicators = parameters.DelegateDescriptors == null
-                ? Array.Empty<TDelegateReplicator>()
-                : parameters.DelegateDescriptors
+                delegateReplicators = parameters.DelegateDescriptors
                    .Select(
                         descriptor =>
                         {
-                            if (parameters.DelegateReplicaTemplateFunc == null)
+                            if (parameters.DelegateReplicaTemplateFunc is null)
                             {
                                 throw new InvalidOperationException(
                                     $"No {nameof(parameters.DelegateReplicaTemplateFunc)} was configured");
                             }
 
-                            if (parameters.DelegateReplicatorFunc == null)
+                            if (parameters.DelegateReplicatorFunc is null)
                             {
                                 throw new InvalidOperationException(
                                     $"No {nameof(parameters.DelegateReplicatorFunc)} was configured");
                             }
 
                             var template = parameters.DelegateReplicaTemplateFunc();
-                            if (template == null)
+                            if (template is null)
                             {
                                 throw new FactoryProducesNullInstanceException<TDelegateReplicaTemplate>();
                             }
@@ -427,13 +381,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                     c.ConfigureDependencies(
                                         services =>
                                         {
-                                            var ignore = new HashSet<Type>(services.Select(i => i.ServiceType));
-                                            services.Proxinate(dependenciesCollection, dependencies, i => !ignore.Contains(i));
+                                            services.Proxinate(dependenciesCollection, dependencies);
                                         });
                                 });
 
                             var replicator = parameters.DelegateReplicatorFunc(template);
-                            if (replicator == null)
+                            if (replicator is null)
                             {
                                 throw new FactoryProducesNullInstanceException<TDelegateReplicator>();
                             }
@@ -441,10 +394,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                             return replicator;
                         })
                    .ToArray();
+            }
 
-            var listenerReplicators = parameters.ListenerDescriptors == null
-                ? Array.Empty<TListenerReplicator>()
-                : parameters.ListenerDescriptors
+            TListenerReplicator[] listenerReplicators = null;
+
+            if (parameters.ListenerDescriptors != null)
+            {
+                listenerReplicators = parameters.ListenerDescriptors
                    .Select(
                         descriptor =>
                         {
@@ -453,14 +409,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                             {
                                 case ServiceHostListenerType.AspNetCore:
                                     {
-                                        if (parameters.AspNetCoreListenerReplicaTemplateFunc == null)
+                                        if (parameters.AspNetCoreListenerReplicaTemplateFunc is null)
                                         {
                                             throw new InvalidOperationException(
                                                 $"No {nameof(parameters.AspNetCoreListenerReplicaTemplateFunc)} was configured");
                                         }
 
                                         var template = parameters.AspNetCoreListenerReplicaTemplateFunc();
-                                        if (template == null)
+                                        if (template is null)
                                         {
                                             throw new FactoryProducesNullInstanceException<TListenerAspNetCoreReplicaTemplate>();
                                         }
@@ -476,8 +432,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                                         builder.ConfigureServices(
                                                             services =>
                                                             {
-                                                                var ignore = new HashSet<Type>(services.Select(i => i.ServiceType));
-                                                                services.Proxinate(dependenciesCollection, dependencies, i => !ignore.Contains(i));
+                                                                services.Proxinate(dependenciesCollection, dependencies);
                                                             });
                                                     });
                                             });
@@ -487,14 +442,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                     break;
                                 case ServiceHostListenerType.Remoting:
                                     {
-                                        if (parameters.RemotingListenerReplicaTemplateFunc == null)
+                                        if (parameters.RemotingListenerReplicaTemplateFunc is null)
                                         {
                                             throw new InvalidOperationException(
                                                 $"No {nameof(parameters.RemotingListenerReplicaTemplateFunc)} was configured");
                                         }
 
                                         var template = parameters.RemotingListenerReplicaTemplateFunc();
-                                        if (template == null)
+                                        if (template is null)
                                         {
                                             throw new FactoryProducesNullInstanceException<TListenerRemotingReplicaTemplate>();
                                         }
@@ -507,8 +462,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                                 c.ConfigureDependencies(
                                                     services =>
                                                     {
-                                                        var ignore = new HashSet<Type>(services.Select(i => i.ServiceType));
-                                                        services.Proxinate(dependenciesCollection, dependencies, i => !ignore.Contains(i));
+                                                        services.Proxinate(dependenciesCollection, dependencies);
                                                     });
                                             });
 
@@ -517,14 +471,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                     break;
                                 case ServiceHostListenerType.Generic:
                                     {
-                                        if (parameters.GenericListenerReplicaTemplateFunc == null)
+                                        if (parameters.GenericListenerReplicaTemplateFunc is null)
                                         {
                                             throw new InvalidOperationException(
                                                 $"No {nameof(parameters.GenericListenerReplicaTemplateFunc)} was configured");
                                         }
 
                                         var template = parameters.GenericListenerReplicaTemplateFunc();
-                                        if (template == null)
+                                        if (template is null)
                                         {
                                             throw new FactoryProducesNullInstanceException<TListenerGenericReplicaTemplate>();
                                         }
@@ -537,8 +491,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                                 c.ConfigureDependencies(
                                                     services =>
                                                     {
-                                                        var ignore = new HashSet<Type>(services.Select(i => i.ServiceType));
-                                                        services.Proxinate(dependenciesCollection, dependencies, i => !ignore.Contains(i));
+                                                        services.Proxinate(dependenciesCollection, dependencies);
                                                     });
                                             });
 
@@ -549,14 +502,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                     throw new ArgumentOutOfRangeException(nameof(descriptor.ListenerType));
                             }
 
-                            if (parameters.ListenerReplicatorFunc == null)
+                            if (parameters.ListenerReplicatorFunc is null)
                             {
                                 throw new InvalidOperationException(
                                     $"No {nameof(parameters.ListenerReplicatorFunc)} was configured");
                             }
 
                             var replicator = parameters.ListenerReplicatorFunc(replicableTemplate);
-                            if (replicator == null)
+                            if (replicator is null)
                             {
                                 throw new FactoryProducesNullInstanceException<TListenerReplicator>();
                             }
@@ -564,8 +517,42 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                             return replicator;
                         })
                    .ToArray();
+            }
 
             return new Compilation(eventSourceReplicator, delegateReplicators, listenerReplicators);
+        }
+
+        private static TEventSourceReplicator ConfigureEventSourceReplicator(
+            TParameters parameters, 
+            IServiceCollection dependenciesCollection, 
+            IServiceProvider dependenciesProvider)
+        {
+            var replicaTemplate = parameters.EventSourceReplicaTemplateFunc();
+            if (replicaTemplate is null)
+            {
+                throw new FactoryProducesNullInstanceException<TEventSourceReplicaTemplate>();
+            }
+
+            parameters.EventSourceSetupAction?.Invoke(replicaTemplate);
+
+            replicaTemplate
+                .ConfigureObject(
+                    config =>
+                    {
+                        config.ConfigureDependencies(
+                            dependencies =>
+                            {
+                                dependencies.Proxinate(dependenciesCollection, dependenciesProvider);
+                            });
+                    });
+
+            var replicator = parameters.EventSourceReplicatorFunc(replicaTemplate);
+            if (replicator is null)
+            {
+                throw new FactoryProducesNullInstanceException<TEventSourceReplicator>();
+            }
+
+            return replicator;
         }
     }
 }

@@ -2,26 +2,28 @@
 using System.Fabric;
 using System.Fabric.Description;
 using System.Reflection;
+
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Extensions;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceManifest.Objects.Factories
 {
-
     public class ConfigurationPackageFactory : PackageFactory<ConfigPackageElement, ConfigurationPackage>
     {
         private static readonly Lazy<ConstructorInfo> ctor;
+
         private static readonly Lazy<PropertyInfo> path;
+
         private static readonly Lazy<PropertyInfo> descr;
 
         private static readonly Lazy<ConstructorInfo> descrCtor;
 
         static ConfigurationPackageFactory()
         {
-            ctor = new Lazy<ConstructorInfo>(() => typeof(ConfigurationPackage).GetNonPublicConstructor(), true);
-            path = new Lazy<PropertyInfo>(() => typeof(ConfigurationPackage).GetProperty("Path"), true);
-            descr = new Lazy<PropertyInfo>(() => typeof(ConfigurationPackage).GetProperty("Description"), true);
+            ctor = typeof(ConfigurationPackage).Query().Constructor().NonPublic().Instance().GetLazy();
+            path = typeof(ConfigurationPackage).Query().Property(nameof(ConfigurationPackage.Path)).Public().Instance().GetLazy();
+            descr = typeof(ConfigurationPackage).Query().Property(nameof(ConfigurationPackage.Description)).Public().Instance().GetLazy();
 
-            descrCtor = new Lazy<ConstructorInfo>(() => typeof(ConfigurationPackageDescription).GetNonPublicConstructor(), true);
+            descrCtor = typeof(ConfigurationPackageDescription).Query().Constructor().NonPublic().Instance().GetLazy();
         }
 
         public ConfigurationPackageFactory(
@@ -42,6 +44,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
             {
                 throw new MissingMemberException(nameof(ConfigurationPackage), ".ctor()");
             }
+
             if (path.Value is null)
             {
                 throw new MissingMemberException(nameof(ConfigurationPackage), "Path");

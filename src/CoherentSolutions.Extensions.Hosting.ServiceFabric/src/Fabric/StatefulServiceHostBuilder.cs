@@ -1,6 +1,5 @@
 ﻿using System;
-
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Exceptions;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Exceptions;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {

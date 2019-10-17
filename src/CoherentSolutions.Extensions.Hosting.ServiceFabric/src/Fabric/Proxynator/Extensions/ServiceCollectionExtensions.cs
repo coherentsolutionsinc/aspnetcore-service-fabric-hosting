@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator.DependencyInjection;
@@ -11,49 +12,39 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator.E
     {
         public static void Proxinate(
             this IServiceCollection @this,
-            IServiceCollection collection,
-            IServiceProvider services,
-            Func<Type, bool> predicate = null)
+            IServiceCollection servicesCollection,
+            IServiceProvider servicesProvider,
+            params Type[] forbidden)
         {
-            if (@this == null)
+            if (@this is null)
             {
                 throw new ArgumentNullException(nameof(@this));
             }
 
-            if (collection == null)
+            if (servicesCollection is null)
             {
-                throw new ArgumentNullException(nameof(collection));
+                throw new ArgumentNullException(nameof(servicesCollection));
             }
 
-            if (services == null)
+            if (servicesProvider is null)
             {
-                throw new ArgumentNullException(nameof(services));
+                throw new ArgumentNullException(nameof(servicesProvider));
             }
 
-            if (predicate == null)
-            {
-                predicate = type => true;
-            }
-
-            if (collection.Count == 0)
+            if (servicesCollection.Count == 0)
             {
                 return;
             }
 
+            // We shouldn't override local registration or proxinate forbidden types.
+            var local = new HashSet<Type>(@this.Select(i => i.ServiceType).Concat(forbidden));
+
+            // In case we have open-generic types we has to generate special
+            // dependency injection provider - this would be the type.
             Type providerType = null;
 
-            foreach (var descriptor in collection.Where(i => predicate(i.ServiceType)))
+            foreach (var descriptor in servicesCollection.Where(i => !local.Contains(i.ServiceType)))
             {
-                // Create provider only when there are new open-generics
-                if (providerType == null
-                 && descriptor.Lifetime == ServiceLifetime.Singleton
-                 && descriptor.ServiceType.IsInterface
-                 && descriptor.ImplementationType != null
-                 && typeof(IProxynatorProxy).IsAssignableFrom(descriptor.ImplementationType) == false)
-                {
-                    providerType = Proxynator.CreateInstanceProxy(typeof(IServiceProvider));
-                }
-
                 ServiceDescriptor updateDescriptor;
                 switch (descriptor.Lifetime)
                 {
@@ -73,6 +64,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator.E
                                 }
                                 else
                                 {
+                                    if (providerType is null)
+                                    {
+                                        providerType = Proxynator.CreateInstanceProxy(typeof(IServiceProvider));
+                                    }
                                     updateDescriptor =
                                         new ServiceDescriptor(
                                             descriptor.ServiceType,
@@ -102,12 +97,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator.E
                 @this.Add(updateDescriptor);
             }
 
-            if (providerType != null)
+            if (providerType is object)
             {
                 @this.Add(
                     new ServiceDescriptor(
                         providerType,
-                        Activator.CreateInstance(providerType, new ProxynatorAwareServiceProvider(services))));
+                        Activator.CreateInstance(providerType, new ProxynatorAwareServiceProvider(servicesProvider))));
             }
         }
     }

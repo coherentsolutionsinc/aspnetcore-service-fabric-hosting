@@ -53,7 +53,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
         private readonly IServiceEventSource eventSource;
 
-        private readonly string eventCategoryName;
+        private readonly string categoryName;
 
         private readonly AsyncLocal<Scope> scope;
 
@@ -62,7 +62,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         protected ServiceHostLogger(
             ServiceContext serviceContext,
             IServiceEventSource eventSource,
-            string eventCategoryName,
+            string categoryName,
             IConfigurableObjectLoggerOptions options)
         {
             this.serviceContext = serviceContext
@@ -71,8 +71,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             this.eventSource = eventSource
              ?? throw new ArgumentNullException(nameof(eventSource));
 
-            this.eventCategoryName = eventCategoryName
-             ?? throw new ArgumentNullException(nameof(eventCategoryName));
+            this.categoryName = categoryName
+             ?? throw new ArgumentNullException(nameof(categoryName));
 
             this.scope = new AsyncLocal<Scope>();
 
@@ -99,7 +99,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             eventData.EventName = eventId.Name;
             eventData.EventLevel = GetEventLevel(logLevel);
             eventData.EventMessage = formatter(state, exception);
-            eventData.EventCategoryName = this.eventCategoryName;
+            eventData.EventCategoryName = this.categoryName;
             eventData.ServiceName = this.serviceContext.ServiceName.AbsoluteUri;
             eventData.ServiceTypeName = this.serviceContext.ServiceTypeName;
             eventData.ReplicaOrInstanceId = this.serviceContext.ReplicaOrInstanceId;

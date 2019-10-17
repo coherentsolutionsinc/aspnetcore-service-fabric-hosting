@@ -62,7 +62,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             this TheoryItem @this)
         {
             return @this
-               .SetupExtension(new UseStatefulDelegateInvokerTheoryExtension())
+               .SetupExtension(new UseDelegateInvokerTheoryExtension())
                .SetupExtension(new UseStatefulDelegateEventTheoryExtension())
                .SetupExtensionsAsDelegate();
         }
@@ -71,7 +71,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             this TheoryItem @this)
         {
             return @this
-               .SetupExtension(new UseStatelessDelegateInvokerTheoryExtension())
+               .SetupExtension(new UseDelegateInvokerTheoryExtension())
                .SetupExtension(new UseStatelessDelegateEventTheoryExtension())
                .SetupExtensionsAsDelegate();
         }

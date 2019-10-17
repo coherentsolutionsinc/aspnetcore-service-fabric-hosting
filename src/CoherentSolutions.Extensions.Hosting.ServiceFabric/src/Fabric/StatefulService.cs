@@ -6,8 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common;
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Exceptions;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Extensions;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Exceptions;
 
 using Microsoft.ServiceFabric.Data;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
@@ -490,9 +490,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                var invoker = @delegate.CreateDelegateInvokerFunc();
+                var invoker = @delegate.CreateDelegateInvoker();
 
-                await invoker.InvokeAsync(context, cancellationToken);
+                await invoker.InvokeAsync(@delegate.Delegate, context, cancellationToken);
             }
         }
 
