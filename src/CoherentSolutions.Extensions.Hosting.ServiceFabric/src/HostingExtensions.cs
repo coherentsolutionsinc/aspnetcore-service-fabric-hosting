@@ -81,6 +81,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
                                                 return new KestrelCommunicationListener(serviceContext, endpointName, @delegate);
                                             },
                                             builder => builder.UseKestrel());
+                                        cfg.UseWebHostBuilder(() => WebHost.CreateDefaultBuilder());
 
                                         cfg.UseLoggerOptions(() => ServiceHostLoggerOptions.Disabled);
                                     });
@@ -200,6 +201,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
                                                 return new KestrelCommunicationListener(serviceContext, endpointName, @delegate);
                                             },
                                             builder => builder.UseKestrel());
+                                        cfg.UseWebHostBuilder(() => WebHost.CreateDefaultBuilder());
 
                                         cfg.UseLoggerOptions(() => ServiceHostLoggerOptions.Disabled);
                                     });

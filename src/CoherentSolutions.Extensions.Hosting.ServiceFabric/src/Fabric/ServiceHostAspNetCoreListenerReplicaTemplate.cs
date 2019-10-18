@@ -34,6 +34,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 get; private set;
             }
 
+            [RequiredConfiguration(nameof(UseWebHostBuilder))]
             public Func<IWebHostBuilder> WebHostBuilderFunc
             {
                 get; private set;
@@ -59,10 +60,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             protected AspNetCoreListenerParameters()
             {
                 this.IntegrationOptions = ServiceFabricIntegrationOptions.None;
-                this.AspNetCoreCommunicationListenerFunc = DefaultAspNetCoreCommunicationListenerFunc;
-                this.WebHostBuilderFunc = DefaultWebHostBuilderFunc;
-                this.WebHostConfigAction = DefaultWebHostConfigAction;
-                this.WebHostCommunicationListenerConfigAction = DefaultWebHostCommunicationListenerConfigAction;
+                this.AspNetCoreCommunicationListenerFunc = null;
+                this.WebHostBuilderFunc = null;
+                this.WebHostConfigAction = null;
+                this.WebHostCommunicationListenerConfigAction = null;
             }
 
             public void UseIntegrationOptions(
@@ -98,31 +99,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 }
 
                 this.WebHostConfigAction = this.WebHostConfigAction.Chain(configAction);
-            }
-
-            private static AspNetCoreCommunicationListener DefaultAspNetCoreCommunicationListenerFunc(
-                ServiceContext serviceContext,
-                string endpointName,
-                Func<string, AspNetCoreCommunicationListener, IWebHost> build)
-            {
-                var @delegate = new Func<string, AspNetCoreCommunicationListener, IWebHost>(build);
-                return new KestrelCommunicationListener(serviceContext, endpointName, @delegate);
-            }
-
-            private static IWebHostBuilder DefaultWebHostBuilderFunc()
-            {
-                return WebHost.CreateDefaultBuilder();
-            }
-
-            private static void DefaultWebHostConfigAction(
-                IWebHostBuilder builder)
-            {
-            }
-
-            private static void DefaultWebHostCommunicationListenerConfigAction(
-                IWebHostBuilder builder)
-            {
-                WebHostBuilderKestrelExtensions.UseKestrel(builder);
             }
         }
 
