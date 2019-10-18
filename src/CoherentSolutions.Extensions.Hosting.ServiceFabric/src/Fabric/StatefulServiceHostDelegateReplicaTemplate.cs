@@ -18,7 +18,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
               IStatefulServiceHostDelegateReplicaTemplateParameters,
               IStatefulServiceHostDelegateReplicaTemplateConfigurator
         {
-            [RequiredConfiguration(nameof(UseEvent))]
             public StatefulServiceLifecycleEvent Event { get; private set; }
 
             public StatefulDelegateParameters()
