@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Fabric;
 using System.Linq;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
@@ -10,6 +11,12 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
+using Microsoft.ServiceFabric.Services.Remoting.FabricTransport.Runtime;
+using Microsoft.ServiceFabric.Services.Remoting.V2;
+using Microsoft.ServiceFabric.Services.Remoting.V2.FabricTransport.Runtime;
+using Microsoft.ServiceFabric.Services.Remoting.V2.Runtime;
+
+using IRemotingImplementation = Microsoft.ServiceFabric.Services.Remoting.IService;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
 {
@@ -155,6 +162,31 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
                                     cfg =>
                                     {
                                         cfg.UseEndpoint(string.Empty);
+                                        cfg.UseDependencies(() => new ServiceCollection());
+                                        cfg.UseCommunicationListener(
+                                            (serviceContext, build) =>
+                                            {
+                                                var components = build(serviceContext);
+                                                return new FabricTransportServiceRemotingListener(
+                                                    serviceContext,
+                                                    components.MessageHandler,
+                                                    components.ListenerSettings,
+                                                    components.MessageSerializationProvider);
+                                            });
+                                        cfg.UseSettings(() => new FabricTransportRemotingListenerSettings());
+                                        cfg.UseHandler(provider =>
+                                        {
+                                            var serviceContext = provider.GetService<ServiceContext>();
+                                            var serviceImplementation = provider.GetService<IRemotingImplementation>();
+                                            var serviceRemotingMessageBodyFactory = provider.GetService<IServiceRemotingMessageBodyFactory>();
+
+                                            return new ServiceRemotingMessageDispatcher(
+                                                serviceContext,
+                                                serviceImplementation,
+                                                serviceRemotingMessageBodyFactory);
+                                        });
+
+                                        cfg.UseLoggerOptions(() => ServiceHostLoggerOptions.Disabled);
                                     });
                                 return template;
                             });
@@ -165,6 +197,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
                                     cfg =>
                                     {
                                         cfg.UseEndpoint(string.Empty);
+                                        cfg.UseDependencies(() => new ServiceCollection());
 
                                         cfg.UseLoggerOptions(() => ServiceHostLoggerOptions.Disabled);
                                     });
