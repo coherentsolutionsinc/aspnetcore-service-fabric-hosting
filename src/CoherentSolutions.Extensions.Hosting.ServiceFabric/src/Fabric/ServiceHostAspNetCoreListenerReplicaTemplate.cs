@@ -56,12 +56,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 get; private set;
             }
 
-            [RequiredConfiguration(nameof(UseLoggerOptions))]
-            public Func<IConfigurableObjectLoggerOptions> LoggerOptionsFunc
-            {
-                get; private set;
-            }
-
             protected AspNetCoreListenerParameters()
             {
                 this.IntegrationOptions = ServiceFabricIntegrationOptions.None;
@@ -69,7 +63,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.WebHostBuilderFunc = DefaultWebHostBuilderFunc;
                 this.WebHostConfigAction = DefaultWebHostConfigAction;
                 this.WebHostCommunicationListenerConfigAction = DefaultWebHostCommunicationListenerConfigAction;
-                this.LoggerOptionsFunc = null;
             }
 
             public void UseIntegrationOptions(
@@ -105,13 +98,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 }
 
                 this.WebHostConfigAction = this.WebHostConfigAction.Chain(configAction);
-            }
-
-            public void UseLoggerOptions(
-                Func<IConfigurableObjectLoggerOptions> factoryFunc)
-            {
-                this.LoggerOptionsFunc = factoryFunc
-                 ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
 
             private static AspNetCoreCommunicationListener DefaultAspNetCoreCommunicationListenerFunc(

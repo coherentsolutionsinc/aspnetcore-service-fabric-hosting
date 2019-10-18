@@ -32,15 +32,18 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
               IServiceHostRemotingListenerReplicaTemplateParameters,
               IServiceHostRemotingListenerReplicaTemplateConfigurator
         {
+            [RequiredConfiguration(nameof(UseCommunicationListener))]
             public ServiceHostRemotingCommunicationListenerFactory RemotingCommunicationListenerFunc { get; private set; }
 
             [RequiredConfiguration(nameof(UseImplementation))]
             public Func<IServiceProvider, IRemotingImplementation> RemotingImplementationFunc { get; private set; }
 
+            [RequiredConfiguration(nameof(UseSettings))]
             public Func<FabricTransportRemotingListenerSettings> RemotingSettingsFunc { get; private set; }
 
             public Func<IServiceProvider, IServiceRemotingMessageSerializationProvider> RemotingSerializationProviderFunc { get; private set; }
 
+            [RequiredConfiguration(nameof(UseHandler))]
             public Func<IServiceProvider, IServiceRemotingMessageHandler> RemotingHandlerFunc { get; private set; }
 
             [RequiredConfiguration(nameof(UseDependencies))]
@@ -48,19 +51,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             public Action<IServiceCollection> DependenciesConfigAction { get; private set; }
 
-            [RequiredConfiguration(nameof(UseLoggerOptions))]
-            public Func<IConfigurableObjectLoggerOptions> LoggerOptionsFunc { get; private set; }
-
             protected RemotingListenerParameters()
             {
-                this.RemotingCommunicationListenerFunc = DefaultRemotingCommunicationListenerFunc;
+                this.RemotingCommunicationListenerFunc = null;
                 this.RemotingImplementationFunc = null;
-                this.RemotingSettingsFunc = DefaultRemotingSettingsFunc;
+                this.RemotingSettingsFunc = null;
                 this.RemotingSerializationProviderFunc = null;
-                this.RemotingHandlerFunc = DefaultRemotingHandlerFunc;
+                this.RemotingHandlerFunc = null;
                 this.DependenciesFunc = null;
                 this.DependenciesConfigAction = null;
-                this.LoggerOptionsFunc = null;
             }
 
             public void UseCommunicationListener(
@@ -129,43 +128,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 }
 
                 this.DependenciesConfigAction = this.DependenciesConfigAction.Chain(configAction);
-            }
-
-            public void UseLoggerOptions(
-                Func<IConfigurableObjectLoggerOptions> factoryFunc)
-            {
-                this.LoggerOptionsFunc = factoryFunc
-                 ?? throw new ArgumentNullException(nameof(factoryFunc));
-            }
-
-            private static FabricTransportServiceRemotingListener DefaultRemotingCommunicationListenerFunc(
-                ServiceContext serviceContext,
-                ServiceHostRemotingCommunicationListenerComponentsFactory build)
-            {
-                var components = build(serviceContext);
-                return new FabricTransportServiceRemotingListener(
-                    serviceContext,
-                    components.MessageHandler,
-                    components.ListenerSettings,
-                    components.MessageSerializationProvider);
-            }
-
-            private static FabricTransportRemotingListenerSettings DefaultRemotingSettingsFunc()
-            {
-                return new FabricTransportRemotingListenerSettings();
-            }
-
-            private static IServiceRemotingMessageHandler DefaultRemotingHandlerFunc(
-                IServiceProvider provider)
-            {
-                var serviceContext = provider.GetService<ServiceContext>();
-                var serviceImplementation = provider.GetService<IRemotingImplementation>();
-                var serviceRemotingMessageBodyFactory = provider.GetService<IServiceRemotingMessageBodyFactory>();
-
-                return new ServiceRemotingMessageDispatcher(
-                    serviceContext,
-                    serviceImplementation,
-                    serviceRemotingMessageBodyFactory);
             }
         }
 
@@ -238,17 +200,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                         provider = new ReplaceAwareServiceProvider(replacements, provider);
 
                         var serializer = (IServiceRemotingMessageSerializationProvider)null;
-                        if (parameters.RemotingSerializationProviderFunc != null)
+                        if (parameters.RemotingSerializationProviderFunc is object)
                         {
                             serializer = parameters.RemotingSerializationProviderFunc(provider);
-                            if (serializer == null)
+                            if (serializer is null)
                             {
                                 throw new FactoryProducesNullInstanceException<IServiceRemotingMessageSerializationProvider>();
                             }
                         }
 
                         var settings = parameters.RemotingSettingsFunc();
-                        if (settings == null)
+                        if (settings is null)
                         {
                             throw new FactoryProducesNullInstanceException<FabricTransportRemotingListenerSettings>();
                         }

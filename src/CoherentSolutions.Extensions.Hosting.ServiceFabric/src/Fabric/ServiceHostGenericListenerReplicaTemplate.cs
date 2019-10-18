@@ -32,15 +32,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             public Action<IServiceCollection> DependenciesConfigAction { get; private set; }
 
-            [RequiredConfiguration(nameof(UseLoggerOptions))]
-            public Func<IConfigurableObjectLoggerOptions> LoggerOptionsFunc { get; private set; }
-
             protected GenericListenerParameters()
             {
                 this.GenericCommunicationListenerFunc = null;
                 this.DependenciesFunc = null;
                 this.DependenciesConfigAction = null;
-                this.LoggerOptionsFunc = null;
             }
 
             public void UseCommunicationListener(
@@ -66,13 +62,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 }
 
                 this.DependenciesConfigAction = this.DependenciesConfigAction.Chain(configAction);
-            }
-
-            public void UseLoggerOptions(
-                Func<IConfigurableObjectLoggerOptions> factoryFunc)
-            {
-                this.LoggerOptionsFunc = factoryFunc
-                 ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
         }
 

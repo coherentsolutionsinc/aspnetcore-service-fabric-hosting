@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Fabric;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Validation.DataAnnotations;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
@@ -18,11 +17,21 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
               IServiceHostListenerReplicaTemplateConfigurator
         {
             [RequiredConfiguration(nameof(UseEndpoint))]
-            public string EndpointName { get; private set; }
+            public string EndpointName
+            {
+                get; private set;
+            }
+
+            [RequiredConfiguration(nameof(UseLoggerOptions))]
+            public Func<IConfigurableObjectLoggerOptions> LoggerOptionsFunc
+            {
+                get; private set;
+            }
 
             protected ListenerParameters()
             {
                 this.EndpointName = null;
+                this.LoggerOptionsFunc = null;
             }
 
             public void UseEndpoint(
@@ -30,6 +39,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 this.EndpointName = endpointName
                  ?? throw new ArgumentNullException(nameof(endpointName));
+            }
+
+            public void UseLoggerOptions(
+                Func<IConfigurableObjectLoggerOptions> factoryFunc)
+            {
+                this.LoggerOptionsFunc = factoryFunc
+                 ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
         }
 

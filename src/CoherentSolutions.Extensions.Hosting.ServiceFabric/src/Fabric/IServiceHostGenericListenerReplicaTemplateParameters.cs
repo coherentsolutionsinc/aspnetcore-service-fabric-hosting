@@ -4,8 +4,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public interface IServiceHostGenericListenerReplicaTemplateParameters
         : IServiceHostListenerReplicaTemplateParameters,
-          IConfigurableObjectDependenciesParameters,
-          IConfigurableObjectLoggerParameters
+          IConfigurableObjectDependenciesParameters
     {
         ServiceHostGenericCommunicationListenerFactory GenericCommunicationListenerFunc { get; }
     }

@@ -8,8 +8,7 @@ using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public interface IServiceHostAspNetCoreListenerReplicaTemplateParameters
-        : IServiceHostListenerReplicaTemplateParameters,
-          IConfigurableObjectLoggerParameters
+        : IServiceHostListenerReplicaTemplateParameters
     {
         ServiceFabricIntegrationOptions IntegrationOptions { get; }
 

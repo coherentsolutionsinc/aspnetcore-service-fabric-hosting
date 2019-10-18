@@ -12,8 +12,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public interface IServiceHostRemotingListenerReplicaTemplateConfigurator
         : IServiceHostListenerReplicaTemplateConfigurator,
-          IConfigurableObjectDependenciesConfigurator,
-          IConfigurableObjectLoggerConfigurator
+          IConfigurableObjectDependenciesConfigurator
     {
         void UseCommunicationListener(
             ServiceHostRemotingCommunicationListenerFactory factoryFunc);
