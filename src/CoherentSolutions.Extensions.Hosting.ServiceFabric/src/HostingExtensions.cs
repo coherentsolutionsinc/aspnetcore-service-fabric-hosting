@@ -22,73 +22,123 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
 {
     public static class HostingExtensions
     {
-        private static class StatelessServiceDefaults
-        {
-            public static IServiceCollection Dependencies()
-            {
-                return new ServiceCollection();
-            }
-
-            public static IServiceEventSource EventSource(
-                IServiceProvider serviceProvider)
-            {
-                if (serviceProvider is null)
-                {
-                    throw new ArgumentNullException(nameof(serviceProvider));
-                }
-
-                return ActivatorUtilities.CreateInstance<ServiceEventSource>(serviceProvider);
-            }
-
-            public static IStatelessServiceRuntimeRegistrant RuntimeRegistrant()
-            {
-                return new StatelessServiceRuntimeRegistrant();
-            }
-
-            public static IStatelessServiceHostDelegateReplicator DelegateReplicator(
-                IStatelessServiceHostDelegateReplicableTemplate template)
-            {
-                if (template is null)
-                {
-                    throw new ArgumentNullException(nameof(template));
-                }
-
-                return new StatelessServiceHostDelegateReplicator(template);
-            }
-
-            public static IStatelessServiceHostAspNetCoreListenerReplicaTemplate AspNetCoreListenerReplicaTemplate()
-            {
-                return new StatelessServiceHostAspNetCoreListenerReplicaTemplate();
-            }
-
-            public static IStatelessServiceHostRemotingListenerReplicaTemplate RemotingListenerReplicaTemplate()
-            {
-                return new StatelessServiceHostRemotingListenerReplicaTemplate();
-            }
-
-            public static IStatelessServiceHostGenericListenerReplicaTemplate GenericListenerReplicaTemplate()
-            {
-                return new StatelessServiceHostGenericListenerReplicaTemplate();
-            }
-
-            public static IStatelessServiceHostListenerReplicator ListenerReplicator(
-                IStatelessServiceHostListenerReplicableTemplate template)
-            {
-                if (template is null)
-                {
-                    throw new ArgumentNullException(nameof(template));
-                }
-
-                return new StatelessServiceHostListenerReplicator(template);
-            }
-        }
-
         public static IHostBuilder DefineStatefulService(
             this IHostBuilder @this,
             Action<IStatefulServiceHostBuilder> configAction)
         {
-            var factoryFunc = new Func<IStatefulServiceHostBuilder>(() => new StatefulServiceHostBuilder());
-            return @this.DefineReliableService(factoryFunc, configAction);
+            return @this.DefineReliableService(
+                () => new StatefulServiceHostBuilder(),
+                builder =>
+                {
+                    builder.ConfigureObject(
+                        configurator =>
+                        {
+                            configurator.UseDependencies(() => new ServiceCollection());
+                            configurator.UseRuntimeRegistrant(() => new StatefulServiceRuntimeRegistrant());
+
+                            // Configure Event Source support
+                            configurator.UseEventSourceReplicaTemplate(() =>
+                            {
+                                var template = new StatefulServiceHostEventSourceReplicaTemplate();
+                                template.ConfigureObject(
+                                    cfg =>
+                                    {
+                                        cfg.UseDependencies(() => new ServiceCollection());
+                                        cfg.UseImplementation(provider => ActivatorUtilities.CreateInstance<ServiceEventSource>(provider));
+                                    });
+
+                                return template;
+                            });
+                            configurator.UseEventSourceReplicator(template => new StatefulServiceHostEventSourceReplicator(template));
+
+                            // Configure Delegates support
+                            configurator.UseDelegateReplicaTemplate(() =>
+                            {
+                                var template = new StatefulServiceHostDelegateReplicaTemplate();
+                                template.ConfigureObject(
+                                    cfg =>
+                                    {
+                                        cfg.UseDelegateInvoker(provider => ActivatorUtilities.CreateInstance<ServiceDelegateInvoker>(provider));
+                                        cfg.UseDependencies(() => new ServiceCollection());
+                                        cfg.UseLoggerOptions(() => ServiceHostLoggerOptions.Disabled);
+                                    });
+                                return template;
+                            });
+                            configurator.UseDelegateReplicator(template => new StatefulServiceHostDelegateReplicator(template));
+
+                            // Configure Listeners support
+                            configurator.UseAspNetCoreListenerReplicaTemplate(() =>
+                            {
+                                var template = new StatefulServiceHostAspNetCoreListenerReplicaTemplate();
+                                template.ConfigureObject(
+                                    cfg =>
+                                    {
+                                        cfg.UseEndpoint(string.Empty);
+                                        cfg.UseCommunicationListener(
+                                            (serviceContext, endpointName, build) =>
+                                            {
+                                                var @delegate = new Func<string, AspNetCoreCommunicationListener, IWebHost>(build);
+                                                return new KestrelCommunicationListener(serviceContext, endpointName, @delegate);
+                                            },
+                                            builder => builder.UseKestrel());
+
+                                        cfg.UseLoggerOptions(() => ServiceHostLoggerOptions.Disabled);
+                                    });
+                                return template;
+                            });
+                            configurator.UseRemotingListenerReplicaTemplate(() =>
+                            {
+                                var template = new StatefulServiceHostRemotingListenerReplicaTemplate();
+                                template.ConfigureObject(
+                                    cfg =>
+                                    {
+                                        cfg.UseEndpoint(string.Empty);
+                                        cfg.UseDependencies(() => new ServiceCollection());
+                                        cfg.UseCommunicationListener(
+                                            (serviceContext, build) =>
+                                            {
+                                                var components = build(serviceContext);
+                                                return new FabricTransportServiceRemotingListener(
+                                                    serviceContext,
+                                                    components.MessageHandler,
+                                                    components.ListenerSettings,
+                                                    components.MessageSerializationProvider);
+                                            });
+                                        cfg.UseSettings(() => new FabricTransportRemotingListenerSettings());
+                                        cfg.UseHandler(provider =>
+                                        {
+                                            var serviceContext = provider.GetService<ServiceContext>();
+                                            var serviceImplementation = provider.GetService<IRemotingImplementation>();
+                                            var serviceRemotingMessageBodyFactory = provider.GetService<IServiceRemotingMessageBodyFactory>();
+
+                                            return new ServiceRemotingMessageDispatcher(
+                                                serviceContext,
+                                                serviceImplementation,
+                                                serviceRemotingMessageBodyFactory);
+                                        });
+
+                                        cfg.UseLoggerOptions(() => ServiceHostLoggerOptions.Disabled);
+                                    });
+                                return template;
+                            });
+                            configurator.UseGenericListenerReplicaTemplate(() =>
+                            {
+                                var template = new StatefulServiceHostGenericListenerReplicaTemplate();
+                                template.ConfigureObject(
+                                    cfg =>
+                                    {
+                                        cfg.UseEndpoint(string.Empty);
+                                        cfg.UseDependencies(() => new ServiceCollection());
+
+                                        cfg.UseLoggerOptions(() => ServiceHostLoggerOptions.Disabled);
+                                    });
+                                return template;
+                            });
+                            configurator.UseListenerReplicator(template => new StatefulServiceHostListenerReplicator(template));
+                        });
+
+                    configAction(builder);
+                });
         }
 
         public static IHostBuilder DefineStatelessService(
@@ -102,8 +152,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
                     builder.ConfigureObject(
                         configurator =>
                         {
-                            configurator.UseDependencies(StatelessServiceDefaults.Dependencies);
-                            configurator.UseRuntimeRegistrant(StatelessServiceDefaults.RuntimeRegistrant);
+                            configurator.UseDependencies(() => new ServiceCollection());
+                            configurator.UseRuntimeRegistrant(() => new StatelessServiceRuntimeRegistrant());
                             
                             // Configure Event Source support
                             configurator.UseEventSourceReplicaTemplate(() =>
@@ -205,6 +255,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
                             });
                             configurator.UseListenerReplicator(template => new StatelessServiceHostListenerReplicator(template));
                         });
+
+                    configAction(builder);
 
                     // still experimental
                     var useGhost = string.IsNullOrEmpty(Environment.GetEnvironmentVariable("Fabric_ApplicationName"));
