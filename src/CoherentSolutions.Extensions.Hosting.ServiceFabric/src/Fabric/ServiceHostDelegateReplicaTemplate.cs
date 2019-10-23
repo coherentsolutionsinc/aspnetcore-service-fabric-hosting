@@ -10,14 +10,14 @@ using Microsoft.Extensions.Logging;
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public abstract class ServiceHostDelegateReplicaTemplate<TService, TParameters, TConfigurator, TDelegate>
-        : ValidateableConfigurableObject<TParameters, TConfigurator>, IServiceHostDelegateReplicaTemplate<TConfigurator>
+        : ServiceHostBuilderBlock<TParameters, TConfigurator>, IServiceHostDelegateReplicaTemplate<TConfigurator>
         where TService : IService
         where TParameters : IServiceHostDelegateReplicaTemplateParameters
         where TConfigurator : IServiceHostDelegateReplicaTemplateConfigurator
     {
-        protected abstract class DelegateParameters
-            : IServiceHostDelegateReplicaTemplateParameters,
-              IServiceHostDelegateReplicaTemplateConfigurator
+        protected abstract class DelegateParameters : BlockParameters,
+            IServiceHostDelegateReplicaTemplateParameters,
+            IServiceHostDelegateReplicaTemplateConfigurator
         {
             [RequiredConfiguration(nameof(UseDelegate))]
             public Delegate Delegate
@@ -31,30 +31,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 get; private set;
             }
 
-            [RequiredConfiguration(nameof(UseLoggerOptions))]
-            public Func<IConfigurableObjectLoggerOptions> LoggerOptionsFunc
-            {
-                get; private set;
-            }
-
-            [RequiredConfiguration(nameof(UseDependencies))]
-            public Func<IServiceCollection> DependenciesFunc
-            {
-                get; private set;
-            }
-
-            public Action<IServiceCollection> DependenciesConfigAction
-            {
-                get; private set;
-            }
-
             protected DelegateParameters()
             {
                 this.Delegate = null;
                 this.DelegateInvokerFunc = null;
-                this.LoggerOptionsFunc = null;
-                this.DependenciesFunc = null;
-                this.DependenciesConfigAction = null;
             }
 
             public void UseDelegate(
@@ -69,31 +49,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 this.DelegateInvokerFunc = factoryFunc
                  ?? throw new ArgumentNullException(nameof(factoryFunc));
-            }
-
-            public void UseLoggerOptions(
-                Func<IConfigurableObjectLoggerOptions> factoryFunc)
-            {
-                this.LoggerOptionsFunc = factoryFunc
-                 ?? throw new ArgumentNullException(nameof(factoryFunc));
-            }
-
-            public void UseDependencies(
-                Func<IServiceCollection> factoryFunc)
-            {
-                this.DependenciesFunc = factoryFunc
-                 ?? throw new ArgumentNullException(nameof(factoryFunc));
-            }
-
-            public void ConfigureDependencies(
-                Action<IServiceCollection> configAction)
-            {
-                if (configAction is null)
-                {
-                    throw new ArgumentNullException(nameof(configAction));
-                }
-
-                this.DependenciesConfigAction = this.DependenciesConfigAction.Chain(configAction);
             }
         }
 

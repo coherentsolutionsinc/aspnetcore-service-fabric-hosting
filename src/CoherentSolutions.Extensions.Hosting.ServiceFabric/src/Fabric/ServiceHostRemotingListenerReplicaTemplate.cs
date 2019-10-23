@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Fabric;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.DependencyInjection;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.DependencyInjection.Extensions;
@@ -14,13 +13,13 @@ using Microsoft.Extensions.Logging;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting.FabricTransport.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting.V2;
-using Microsoft.ServiceFabric.Services.Remoting.V2.FabricTransport.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting.V2.Runtime;
 
 using IRemotingImplementation = Microsoft.ServiceFabric.Services.Remoting.IService;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
+
     public abstract class ServiceHostRemotingListenerReplicaTemplate<TService, TParameters, TConfigurator, TListener>
         : ServiceHostListenerReplicaTemplate<TService, TParameters, TConfigurator, TListener>
         where TService : IService
@@ -33,23 +32,33 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
               IServiceHostRemotingListenerReplicaTemplateConfigurator
         {
             [RequiredConfiguration(nameof(UseCommunicationListener))]
-            public ServiceHostRemotingCommunicationListenerFactory RemotingCommunicationListenerFunc { get; private set; }
+            public ServiceHostRemotingCommunicationListenerFactory RemotingCommunicationListenerFunc
+            {
+                get; private set;
+            }
 
             [RequiredConfiguration(nameof(UseImplementation))]
-            public Func<IServiceProvider, IRemotingImplementation> RemotingImplementationFunc { get; private set; }
+            public Func<IServiceProvider, IRemotingImplementation> RemotingImplementationFunc
+            {
+                get; private set;
+            }
 
             [RequiredConfiguration(nameof(UseSettings))]
-            public Func<FabricTransportRemotingListenerSettings> RemotingSettingsFunc { get; private set; }
+            public Func<FabricTransportRemotingListenerSettings> RemotingSettingsFunc
+            {
+                get; private set;
+            }
 
-            public Func<IServiceProvider, IServiceRemotingMessageSerializationProvider> RemotingSerializationProviderFunc { get; private set; }
+            public Func<IServiceProvider, IServiceRemotingMessageSerializationProvider> RemotingSerializationProviderFunc
+            {
+                get; private set;
+            }
 
             [RequiredConfiguration(nameof(UseHandler))]
-            public Func<IServiceProvider, IServiceRemotingMessageHandler> RemotingHandlerFunc { get; private set; }
-
-            [RequiredConfiguration(nameof(UseDependencies))]
-            public Func<IServiceCollection> DependenciesFunc { get; private set; }
-
-            public Action<IServiceCollection> DependenciesConfigAction { get; private set; }
+            public Func<IServiceProvider, IServiceRemotingMessageHandler> RemotingHandlerFunc
+            {
+                get; private set;
+            }
 
             protected RemotingListenerParameters()
             {
@@ -58,8 +67,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.RemotingSettingsFunc = null;
                 this.RemotingSerializationProviderFunc = null;
                 this.RemotingHandlerFunc = null;
-                this.DependenciesFunc = null;
-                this.DependenciesConfigAction = null;
             }
 
             public void UseCommunicationListener(
@@ -110,24 +117,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 }
 
                 this.RemotingHandlerFunc = provider => factoryFunc(provider);
-            }
-
-            public void UseDependencies(
-                Func<IServiceCollection> factoryFunc)
-            {
-                this.DependenciesFunc = factoryFunc
-                 ?? throw new ArgumentNullException(nameof(factoryFunc));
-            }
-
-            public void ConfigureDependencies(
-                Action<IServiceCollection> configAction)
-            {
-                if (configAction is null)
-                {
-                    throw new ArgumentNullException(nameof(configAction));
-                }
-
-                this.DependenciesConfigAction = this.DependenciesConfigAction.Chain(configAction);
             }
         }
 

@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Fabric;
 using System.Linq;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.DependencyInjection.Extensions;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Exceptions;
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator.AspNetCore;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator.DependencyInjection;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Validation.DataAnnotations;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
-
-using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -24,6 +22,35 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         where TParameters : IServiceHostAspNetCoreListenerReplicaTemplateParameters
         where TConfigurator : IServiceHostAspNetCoreListenerReplicaTemplateConfigurator
     {
+        private class SmartStartup : IStartup
+        {
+            private readonly IServiceCollection dependenciesCollection;
+            private readonly IStartup impl;
+
+            public SmartStartup(
+                IServiceCollection dependenciesCollection,
+                IStartup impl)
+            {
+                this.dependenciesCollection = dependenciesCollection
+                    ?? throw new ArgumentNullException(nameof(dependenciesCollection));
+
+                this.impl = impl
+                    ?? throw new ArgumentNullException(nameof(impl));
+            }
+
+            public IServiceProvider ConfigureServices(
+                IServiceCollection services)
+            {
+                return new ProxynatorAwareServiceProvider(this.impl.ConfigureServices(this.dependenciesCollection));
+            }
+
+            public void Configure(
+                IApplicationBuilder app)
+            {
+                this.impl.Configure(app);
+            }
+        }
+
         protected abstract class AspNetCoreListenerParameters
             : ListenerParameters,
               IServiceHostAspNetCoreListenerReplicaTemplateParameters,
@@ -161,33 +188,48 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                                                     loggerOptions));
                                         });
 
-                                    var descriptor = services.FirstOrDefault(s => s.ServiceType == typeof(IStartup));
-                                    if (descriptor is object)
+                                    var dependenciesCollection = parameters.DependenciesFunc();
+                                    if (dependenciesCollection is null)
                                     {
-                                        var replacement = descriptor switch
+                                        throw new FactoryProducesNullInstanceException<IServiceCollection>();
+                                    }
+
+                                    var startup = services.FirstOrDefault(s => s.ServiceType == typeof(IStartup));
+                                    if (startup is object)
+                                    {
+                                        var replacement = startup switch
                                         {
-                                            _ when descriptor.ImplementationFactory is object => new ServiceDescriptor(
+                                            _ when startup.ImplementationFactory is object => new ServiceDescriptor(
                                                 typeof(IStartup),
                                                 provider =>
                                                 {
-                                                    var impl = descriptor.ImplementationFactory(provider);
-                                                    return new ProxynatorAwareStartup((IStartup)impl);
+                                                    var impl = startup.ImplementationFactory(provider);
+                                                    return new SmartStartup(dependenciesCollection, (IStartup)impl);
                                                 },
                                                 ServiceLifetime.Singleton),
-                                            _ when descriptor.ImplementationInstance is object => new ServiceDescriptor(
+                                            _ when startup.ImplementationInstance is object => new ServiceDescriptor(
                                                 typeof(IStartup),
-                                                new ProxynatorAwareStartup((IStartup)descriptor.ImplementationInstance)),
+                                                new SmartStartup(dependenciesCollection, (IStartup)startup.ImplementationInstance)),
                                             _ => new ServiceDescriptor(
                                                 typeof(IStartup),
                                                 provider =>
                                                 {
-                                                    var impl = ActivatorUtilities.CreateInstance(provider, descriptor.ImplementationType);
-                                                    return new ProxynatorAwareStartup((IStartup)impl);
+                                                    var impl = ActivatorUtilities.CreateInstance(provider, startup.ImplementationType);
+                                                    return new SmartStartup(dependenciesCollection, (IStartup)impl);
                                                 },
                                                 ServiceLifetime.Singleton),
                                         };
                                         services.Replace(replacement);
                                     }
+
+                                    // Copy all services to custom dependency collection
+                                    foreach (var service in services)
+                                    {
+                                        dependenciesCollection.Add(service);
+                                    }
+
+                                    // Possible point of proxination
+                                    parameters.DependenciesConfigAction?.Invoke(dependenciesCollection);
                                 });
 
                             return builder.Build();

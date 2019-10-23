@@ -3,7 +3,7 @@
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public interface IServiceHostListenerReplicaTemplateParameters :
-          IConfigurableObjectLoggerParameters
+          IServiceHostBuilderBlockParameters
     {
         string EndpointName { get; }
     }

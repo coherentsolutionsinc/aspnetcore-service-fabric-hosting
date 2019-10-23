@@ -27,16 +27,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             [RequiredConfiguration(nameof(UseCommunicationListener))]
             public ServiceHostGenericCommunicationListenerFactory GenericCommunicationListenerFunc { get; private set; }
 
-            [RequiredConfiguration(nameof(UseDependencies))]
-            public Func<IServiceCollection> DependenciesFunc { get; private set; }
-
-            public Action<IServiceCollection> DependenciesConfigAction { get; private set; }
-
             protected GenericListenerParameters()
             {
                 this.GenericCommunicationListenerFunc = null;
-                this.DependenciesFunc = null;
-                this.DependenciesConfigAction = null;
             }
 
             public void UseCommunicationListener(
@@ -44,24 +37,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 this.GenericCommunicationListenerFunc = factoryFunc
                  ?? throw new ArgumentNullException(nameof(factoryFunc));
-            }
-
-            public void UseDependencies(
-                Func<IServiceCollection> factoryFunc)
-            {
-                this.DependenciesFunc = factoryFunc
-                 ?? throw new ArgumentNullException(nameof(factoryFunc));
-            }
-
-            public void ConfigureDependencies(
-                Action<IServiceCollection> configAction)
-            {
-                if (configAction is null)
-                {
-                    throw new ArgumentNullException(nameof(configAction));
-                }
-
-                this.DependenciesConfigAction = this.DependenciesConfigAction.Chain(configAction);
             }
         }
 
