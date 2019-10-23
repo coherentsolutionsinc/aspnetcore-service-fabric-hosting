@@ -39,7 +39,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             string name)
         {
             this.name = name
-             ?? throw new ArgumentNullException(nameof(name));
+                ?? throw new ArgumentNullException(nameof(name));
 
             this.extensions = new Dictionary<Type, object>();
             this.configActions = new LinkedList<Action<HostBuilder, TheoryItemExtensionProvider>>();
@@ -82,7 +82,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
         public TheoryItem SetupConfig(
             Action<HostBuilder, TheoryItemExtensionProvider> configAction)
         {
-            if (configAction == null)
+            if (configAction is null)
             {
                 throw new ArgumentNullException(nameof(configAction));
             }
@@ -95,7 +95,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
         public TheoryItem SetupCheck(
             Action<IHost> checkAction)
         {
-            if (checkAction == null)
+            if (checkAction is null)
             {
                 throw new ArgumentNullException(nameof(checkAction));
             }
