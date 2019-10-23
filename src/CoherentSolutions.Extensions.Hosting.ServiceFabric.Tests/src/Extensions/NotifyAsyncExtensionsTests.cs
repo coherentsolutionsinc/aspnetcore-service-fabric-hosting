@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common;
-
+using Moq;
 using Xunit;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Extensions
@@ -18,9 +18,18 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Extensions
         [Fact]
         public async Task Should_await_all_event_handlers_When_event_handlers_are_async()
         {
-            // Arrange
-            var value = 0L;
+            // Mock
+            var mockActionOne = new Mock<Action>();
+            mockActionOne
+                .Setup(instance => instance()).Verifiable();
 
+            var mockActionTwo = new Mock<Action>();
+            mockActionTwo
+                .Setup(instance => instance()).Verifiable();
+
+            // Arrange
+            var arrangeActionOne = mockActionOne.Object;
+            var arrangeActionTwo = mockActionTwo.Object;
             var arrangeClass = new TestClass();
             arrangeClass.Event += async (
                 sender,
@@ -30,7 +39,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Extensions
                 {
                     await Task.Delay(1);
 
-                    Interlocked.Increment(ref value);
+                    arrangeActionOne();
 
                     args.Complete();
                 }
@@ -47,7 +56,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Extensions
                 {
                     await Task.Delay(1);
 
-                    Interlocked.Increment(ref value);
+                    arrangeActionTwo();
 
                     args.Complete();
                 }
@@ -61,15 +70,25 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Extensions
             await arrangeClass.Event.NotifyAsync(null);
 
             // Assert
-            Assert.Equal(2, value);
+            mockActionOne.Verify();
+            mockActionTwo.Verify();
         }
 
         [Fact]
         public async Task Should_await_all_event_handlers_When_event_handlers_are_mix_of_async_and_sync()
         {
-            // Arrange
-            var value = 0L;
+            // Mock
+            var mockActionOne = new Mock<Action>();
+            mockActionOne
+                .Setup(instance => instance()).Verifiable();
 
+            var mockActionTwo = new Mock<Action>();
+            mockActionTwo
+                .Setup(instance => instance()).Verifiable();
+
+            // Arrange
+            var arrangeActionOne = mockActionOne.Object;
+            var arrangeActionTwo = mockActionTwo.Object;
             var arrangeClass = new TestClass();
             arrangeClass.Event += async (
                 sender,
@@ -79,7 +98,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Extensions
                 {
                     await Task.Delay(1);
 
-                    Interlocked.Increment(ref value);
+                    arrangeActionOne();
 
                     args.Complete();
                 }
@@ -96,7 +115,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Extensions
                 {
                     Thread.Sleep(1);
 
-                    Interlocked.Increment(ref value);
+                    arrangeActionTwo();
 
                     args.Complete();
                 }
@@ -110,15 +129,25 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Extensions
             await arrangeClass.Event.NotifyAsync(null);
 
             // Assert
-            Assert.Equal(2, value);
+            mockActionOne.Verify();
+            mockActionTwo.Verify();
         }
 
         [Fact]
         public async Task Should_await_all_event_handlers_When_event_handlers_are_sync()
         {
-            // Arrange
-            var value = 0L;
+            // Mock
+            var mockActionOne = new Mock<Action>();
+            mockActionOne
+                .Setup(instance => instance()).Verifiable();
 
+            var mockActionTwo = new Mock<Action>();
+            mockActionTwo
+                .Setup(instance => instance()).Verifiable();
+
+            // Arrange
+            var arrangeActionOne = mockActionOne.Object;
+            var arrangeActionTwo = mockActionTwo.Object;
             var arrangeClass = new TestClass();
             arrangeClass.Event += (
                 sender,
@@ -128,7 +157,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Extensions
                 {
                     Thread.Sleep(1);
 
-                    Interlocked.Increment(ref value);
+                    arrangeActionOne();
 
                     args.Complete();
                 }
@@ -145,7 +174,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Extensions
                 {
                     Thread.Sleep(1);
 
-                    Interlocked.Increment(ref value);
+                    arrangeActionTwo();
 
                     args.Complete();
                 }
@@ -159,7 +188,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Extensions
             await arrangeClass.Event.NotifyAsync(null);
 
             // Assert
-            Assert.Equal(2, value);
+            mockActionOne.Verify();
+            mockActionTwo.Verify();
         }
 
         [Fact]
@@ -191,9 +221,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Extensions
         [Fact]
         public async Task Should_await_event_handler_When_event_handler_is_async()
         {
-            // Arrange
-            var executed = false;
+            // Mock
+            var mockAction = new Mock<Action>();
+            mockAction
+                .Setup(instance => instance()).Verifiable();
 
+            // Arrange
+            var arrangeAction = mockAction.Object;
             var arrangeClass = new TestClass();
             arrangeClass.Event += async (
                 sender,
@@ -203,7 +237,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Extensions
                 {
                     await Task.Delay(1);
 
-                    executed = true;
+                    arrangeAction();
 
                     args.Complete();
                 }
@@ -217,15 +251,19 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Extensions
             await arrangeClass.Event.NotifyAsync(null);
 
             // Assert
-            Assert.True(executed);
+            mockAction.Verify();
         }
 
         [Fact]
         public async Task Should_await_event_handler_When_event_handler_is_sync()
         {
-            // Arrange
-            var executed = false;
+            // Mock
+            var mockAction = new Mock<Action>();
+            mockAction
+                .Setup(instance => instance()).Verifiable();
 
+            // Arrange
+            var arrangeAction = mockAction.Object;
             var arrangeClass = new TestClass();
             arrangeClass.Event += (
                 sender,
@@ -235,7 +273,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Extensions
                 {
                     Thread.Sleep(1);
 
-                    executed = true;
+                    arrangeAction();
 
                     args.Complete();
                 }
@@ -249,7 +287,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Extensions
             await arrangeClass.Event.NotifyAsync(null);
 
             // Assert
-            Assert.True(executed);
+            mockAction.Verify();
         }
 
         [Fact]
