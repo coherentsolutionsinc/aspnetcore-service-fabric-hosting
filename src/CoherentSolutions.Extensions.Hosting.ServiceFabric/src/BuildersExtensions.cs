@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 using Microsoft.AspNetCore.Hosting;
@@ -1076,6 +1077,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
         {
             @this.ConfigureObject(
                 configurator => configurator.ConfigureWebHost(configAction));
+
+            return @this;
+        }
+
+        public static IStatelessServiceHostBuilder UseLocalRuntime(
+            this IStatelessServiceHostBuilder @this)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseRuntimeRegistrant(() => new GhostStatelessServiceRuntimeRegistrant()));
 
             return @this;
         }
