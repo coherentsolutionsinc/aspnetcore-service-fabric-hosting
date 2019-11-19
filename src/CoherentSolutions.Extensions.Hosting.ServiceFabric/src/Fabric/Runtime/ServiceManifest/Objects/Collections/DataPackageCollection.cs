@@ -7,6 +7,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
 {
     public class DataPackageCollection : KeyedCollection<string, DataPackage>
     {
+        public DataPackageCollection()
+        {
+        }
+
         public DataPackageCollection(
             IEnumerable<DataPackage> packages)
         {

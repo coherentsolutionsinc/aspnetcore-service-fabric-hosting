@@ -5,9 +5,13 @@ using System.Fabric;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceManifest.Objects.Collections
 {
-    public class ConfigPackageCollection : KeyedCollection<string, ConfigurationPackage>
+    public class ConfigurationPackageCollection : KeyedCollection<string, ConfigurationPackage>
     {
-        public ConfigPackageCollection(
+        public ConfigurationPackageCollection()
+        {
+        }
+
+        public ConfigurationPackageCollection(
             IEnumerable<ConfigurationPackage> packages)
         {
             if (packages is null)

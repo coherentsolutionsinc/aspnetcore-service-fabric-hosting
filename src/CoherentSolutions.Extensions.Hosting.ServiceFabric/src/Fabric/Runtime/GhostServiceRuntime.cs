@@ -1,74 +1,100 @@
 ﻿using System;
 using System.Fabric;
+using System.Fabric.Description;
+using System.IO;
+using System.Reflection;
 using System.Threading;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceManifest.Objects;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceManifest.Extensions;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceManifest.Objects.Factories;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceManifest;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
 {
-    public class GhostServiceRuntime
+    public static class GhostServiceRuntime
     {
-        private const string APPLICATION_NAME = "fabric:/ApplicationName";
+        private const string CODE_PACKAGE_NAME = "Code";
 
-        private const string APPLICATION_TYPE_NAME = "ApplicationTypeName";
-
-        private const string CONTEXT = "366B8CCC-8CC3-4EAA-8B90-938000A5EF52";
+        private const string CODE_PACKAGE_VERSION = "1.0.0";
 
         private const string SERVICE_NAME = "ServiceName";
 
-        private readonly Lazy<NodeContext> nodeContext;
-
-        private readonly Lazy<ICodePackageActivationContext> codePackageActivationContext;
-
-        private long serviceIndex;
-
-        private long instanceId;
-
-        public static GhostServiceRuntime Default
-        {
-            get;
-        }
+        private readonly static byte[] initializationData;
 
         static GhostServiceRuntime()
         {
-            Default = new GhostServiceRuntime();
+            initializationData = new byte[0];
         }
 
-        private GhostServiceRuntime()
+        public static StatelessServiceContext CreateStatelessServiceContext(
+            string serviceTypeName)
         {
-            this.nodeContext = new Lazy<NodeContext>(CreateDefaultNodeContext, true);
-            this.codePackageActivationContext = new Lazy<ICodePackageActivationContext>(CreateDefaultCodePackageActivationContext, true);
+            var servicePackage = LoadServicePackage();
 
-            this.serviceIndex = 0;
-            this.instanceId = 0;
+            var activeCodePackage = new CodePackageFactory()
+                .Create(new CodePackageElement
+                {
+                    Manifest = servicePackage.Manifest,
+                    Name = CODE_PACKAGE_NAME,
+                    Version = CODE_PACKAGE_VERSION
+                });
+
+            var nodeContext = new GhostNodeContext();
+            var activationContext = new GhostCodePackageActivationContext(
+                servicePackage.Manifest.Name,
+                servicePackage.Manifest.Version,
+                activeCodePackage,
+                new ApplicationPrincipalsDescription(),
+                servicePackage.Manifest.ReadConfigurationPackages(),
+                servicePackage.Manifest.ReadDataPackages(),
+                servicePackage.Manifest.ReadServiceTypesDescriptions(),
+                servicePackage.Manifest.ReadServiceEndpoints());
+
+            var servicePartition = new GhostStatelessServiceSingletonPartition();
+
+            return new StatelessServiceContext(
+                nodeContext,
+                activationContext,
+                serviceTypeName,
+                new Uri($"{activationContext.ApplicationName}/{SERVICE_NAME}"),
+                initializationData,
+                Guid.NewGuid(),
+                1);
         }
 
-        public NodeContext GetNodeContext()
+        public static IServicePartition GetPartition(
+            Guid parititionId)
         {
-            return this.nodeContext.Value;
+            return new GhostStatelessServiceSingletonPartition();
         }
 
-        public ICodePackageActivationContext GetCodePackageActivationContext()
+        private static ServicePackage LoadServicePackage()
         {
-            return this.codePackageActivationContext.Value;
-        }
+            var location = Assembly.GetExecutingAssembly().Location;
+            var current = location;
 
-        public Uri CreateServiceName()
-        {
-            return new Uri($"{APPLICATION_NAME}/{SERVICE_NAME}{Interlocked.Increment(ref this.serviceIndex)}");
-        }
+            var br = false;
+            for (; !br;)
+            {
+                current = Path.GetDirectoryName(current);
+                if (current is null)
+                {
+                    current = Path.GetPathRoot(location);
+                    br = true;
+                }
 
-        public long CreateInstanceId()
-        {
-            return Interlocked.Increment(ref this.instanceId);
-        }
+                var path = Path.Combine(current, "PackageRoot");
+                if (Directory.Exists(path))
+                {
+                    return ServicePackage.Load(path);
+                }
+            }
 
-        private static NodeContext CreateDefaultNodeContext()
-        {
-            return new GhostNodeContext();
-        }
-
-        private static ICodePackageActivationContext CreateDefaultCodePackageActivationContext()
-        {
-            return new GhostCodePackageActivationContext(APPLICATION_NAME, APPLICATION_TYPE_NAME, CONTEXT);
+            throw new InvalidOperationException(
+                string.Format(
+                    "Could not locate 'PackageRoot' directory inside {0} -> {0}{1}..{1} directory tree.", 
+                    current, 
+                    Path.DirectorySeparatorChar));
         }
     }
 }

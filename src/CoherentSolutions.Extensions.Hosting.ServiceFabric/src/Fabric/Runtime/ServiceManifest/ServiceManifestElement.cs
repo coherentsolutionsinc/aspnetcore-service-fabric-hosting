@@ -5,6 +5,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
     [XmlRoot(ElementName = "ServiceManifest")]
     public class ServiceManifestElement
     {
+        [XmlIgnore]
+        public string PackageRoot
+        {
+            get;
+            set;
+        }
+
         [XmlAttribute(AttributeName = "Name")]
         public string Name
         {

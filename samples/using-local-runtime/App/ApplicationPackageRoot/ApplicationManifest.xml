@@ -6,9 +6,9 @@
   </ServiceManifestImport>
   <DefaultServices>
     <Service Name="Service" ServicePackageActivationMode="ExclusiveProcess">
-      <StatefulService ServiceTypeName="ServiceType">
+      <StatelessService ServiceTypeName="ServiceType">
         <SingletonPartition />
-      </StatefulService>
+      </StatelessService>
     </Service>
   </DefaultServices>
 </ApplicationManifest>

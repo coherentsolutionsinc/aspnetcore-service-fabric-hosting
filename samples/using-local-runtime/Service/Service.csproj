@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="PackageRoot\Code1\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 

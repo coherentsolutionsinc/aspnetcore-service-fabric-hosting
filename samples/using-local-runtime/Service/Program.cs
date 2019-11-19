@@ -15,7 +15,7 @@ namespace Service
                     {
                         serviceBuilder
                             .UseServiceType("ServiceType")
-                            .UseLocalRuntime()
+                            //.UseLocalRuntime()
                             .DefineAspNetCoreListener(
                                 listenerBuilder =>
                                 {

@@ -14,8 +14,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
 {
     public class GhostStatelessServiceInstance
     {
-        private static readonly Lazy<Action<StatelessService, IStatelessServicePartition>> setPartition;
-
         private static readonly Lazy<Func<StatelessService, IEnumerable<ServiceInstanceListener>>> createInstanceListeners;
 
         private static readonly Lazy<Func<StatelessService, CancellationToken, Task>> runAsync;
@@ -30,36 +28,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
 
         static GhostStatelessServiceInstance()
         {
-            setPartition = new Lazy<Action<StatelessService, IStatelessServicePartition>>(
-                () =>
-                {
-                    const string NAME = "Partition";
-                    const BindingFlags FLAGS = BindingFlags.NonPublic | BindingFlags.Instance;
-
-                    var p = typeof(StatelessService).GetProperty(NAME, FLAGS);
-                    if (p?.SetMethod is null)
-                    {
-                        if (p?.DeclaringType is null)
-                        {
-                            throw new MissingMemberException(nameof(StatelessService), NAME);
-                        }
-
-                        p = p.DeclaringType.GetProperty(NAME, FLAGS);
-                    }
-
-                    if (p is null)
-                    {
-                        throw new MissingMemberException(nameof(StatelessService), NAME);
-                    }
-
-                    return (
-                        service,
-                        partition) =>
-                    {
-                        p.SetValue(service, partition);
-                    };
-                },
-                true);
             createInstanceListeners = new Lazy<Func<StatelessService, IEnumerable<ServiceInstanceListener>>>(
                 () =>
                 {
@@ -87,33 +55,20 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
 
         public GhostStatelessServiceInstance(
             StatelessService service,
-            IStatelessServicePartition partition,
             ILogger logger)
         {
             this.service = service ?? throw new ArgumentNullException(nameof(service));
-            this.partition = partition ?? throw new ArgumentNullException(nameof(partition));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task StartupAsync()
         {
-            this.SetPartition();
-
             await this.OpenCommunicationListeners();
 
             var runAsyncTask = Task.Run(this.ExecuteRunAsync);
             var openAsyncTask = Task.Run(this.ExecuteOpenAsync);
 
             await Task.WhenAll(openAsyncTask, runAsyncTask);
-        }
-
-        private void SetPartition()
-        {
-            this.logger.LogInformation("Injecting partition information");
-
-            setPartition.Value(this.service, this.partition);
-
-            this.logger.LogInformation("Done injecting partition information");
         }
 
         private async Task OpenCommunicationListeners()

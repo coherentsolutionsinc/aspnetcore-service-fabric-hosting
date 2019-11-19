@@ -7,6 +7,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
 {
     public class ServiceTypeDescriptionCollection : KeyedCollection<string, ServiceTypeDescription>
     {
+        public ServiceTypeDescriptionCollection()
+        {
+        }
+
         public ServiceTypeDescriptionCollection(
             IEnumerable<ServiceTypeDescription> serviceTypeDescriptions)
         {

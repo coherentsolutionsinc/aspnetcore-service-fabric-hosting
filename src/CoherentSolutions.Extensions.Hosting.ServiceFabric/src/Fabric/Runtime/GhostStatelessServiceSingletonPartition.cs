@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Fabric;
 using System.Fabric.Health;
 
@@ -7,6 +8,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
     public class GhostStatelessServiceSingletonPartition : IStatelessServicePartition
     {
         public ServicePartitionInformation PartitionInfo => new SingletonPartitionInformation();
+
+        public GhostStatelessServiceSingletonPartition(
+            Guid id)
+        {
+            var info = new SingletonPartitionInformation();
+        }
 
         public void ReportFault(
             FaultType faultType)

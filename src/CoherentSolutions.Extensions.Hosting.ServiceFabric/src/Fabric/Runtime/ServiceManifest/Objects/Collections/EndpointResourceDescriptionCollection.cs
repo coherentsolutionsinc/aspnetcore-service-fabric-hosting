@@ -7,6 +7,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
 {
     public class EndpointResourceDescriptionCollection : KeyedCollection<string, EndpointResourceDescription>
     {
+        public EndpointResourceDescriptionCollection()
+        {
+        }
+
         public EndpointResourceDescriptionCollection(
             IEnumerable<EndpointResourceDescription> endpointResourceDescriptions)
         {

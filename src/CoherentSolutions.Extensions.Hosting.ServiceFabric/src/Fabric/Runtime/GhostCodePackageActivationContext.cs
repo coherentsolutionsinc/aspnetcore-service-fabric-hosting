@@ -6,103 +6,112 @@ using System.Fabric.Description;
 using System.Fabric.Health;
 using System.IO;
 using System.Linq;
-using System.Reflection;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceManifest.Objects.Collections;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
 {
     public class GhostCodePackageActivationContext : ICodePackageActivationContext
     {
-        private const string WORK_DIRECTORY = "work";
+        private const string APPLICATION_NAME = "fabric:/ApplicationName";
 
-        private const string LOG_DIRECTORY = "log";
+        private const string APPLICATION_TYPE_NAME = "ApplicationTypeName";
 
-        private const string TEMP_DIRECTORY = "temp";
+        private const string CONTEXT_ID = "366B8CCC-8CC3-4EAA-8B90-938000A5EF52";
 
-        private readonly CodePackage codePackage;
+        private const string LOG_DIRECTORY = "Log";
 
-        private readonly ServiceManifest.Objects.ServiceManifest manifest;
+        private const string WORK_DIRECTORY = "Work";
 
-        public string ApplicationName
-        {
-            get;
-        }
+        private const string TEMP_DIRECTORY = "Temp";
 
-        public string ApplicationTypeName
-        {
-            get;
-        }
+        private readonly ApplicationPrincipalsDescription applicationPrincipalsDescription;
+        private readonly string serviceManifestName;
+        private readonly string serviceManifestVersion;
+        private readonly CodePackage activeCodePackage;
 
-        public string ContextId
-        {
-            get;
-        }
+        private readonly CodePackageCollection codePackages;
+
+        private readonly ConfigurationPackageCollection configurationPackages;
+
+        private readonly DataPackageCollection dataPackages;
+
+        private readonly ServiceTypeDescriptionCollection serviceTypeDescriptions;
+
+        private readonly EndpointResourceDescriptionCollection endpointResourceDescriptions;
+
+        public string ApplicationName => APPLICATION_NAME;
+
+        public string ApplicationTypeName => APPLICATION_TYPE_NAME;
+
+        public string ContextId => CONTEXT_ID;
 
         public string WorkDirectory
         {
-            get
-            {
-                return Path.Combine(Environment.CurrentDirectory, WORK_DIRECTORY);
-            }
+            get;
         }
 
         public string LogDirectory
         {
-            get
-            {
-                return Path.Combine(Environment.CurrentDirectory, LOG_DIRECTORY);
-            }
+            get;
         }
 
         public string TempDirectory
         {
-            get
-            {
-                return Path.Combine(Environment.CurrentDirectory, TEMP_DIRECTORY);
-            }
+            get;
         }
 
-        public string CodePackageName
-        {
-            get
-            {
-                return this.codePackage.Description.Name;
-            }
-        }
+        public string CodePackageName => this.activeCodePackage.Description.Name;
 
-        public string CodePackageVersion
-        {
-            get
-            {
-                return this.codePackage.Description.Version;
-            }
-        }
+        public string CodePackageVersion => this.activeCodePackage.Description.Version;
 
         public GhostCodePackageActivationContext(
-            string applicationName,
-            string applicationTypename,
-            string contextId)
+            string serviceManifestName,
+            string serviceManifestVersion,
+            CodePackage activeCodePackage,
+            ApplicationPrincipalsDescription applicationPrincipalsDescription,
+            IEnumerable<ConfigurationPackage> configurationPackages,
+            IEnumerable<DataPackage> dataPackages,
+            IEnumerable<ServiceTypeDescription> serviceTypeDescriptions,
+            IEnumerable<EndpointResourceDescription> endpointResourceDescriptions)
         {
-            if (string.IsNullOrWhiteSpace(applicationName))
+            if (configurationPackages is null)
             {
-                throw new ArgumentException(nameof(applicationName));
+                throw new ArgumentNullException(nameof(configurationPackages));
             }
 
-            if (string.IsNullOrWhiteSpace(applicationTypename))
+            if (dataPackages is null)
             {
-                throw new ArgumentException(nameof(applicationTypename));
+                throw new ArgumentNullException(nameof(dataPackages));
             }
 
-            if (string.IsNullOrWhiteSpace(contextId))
+            if (serviceTypeDescriptions is null)
             {
-                throw new ArgumentException(nameof(contextId));
+                throw new ArgumentNullException(nameof(serviceTypeDescriptions));
             }
 
-            this.ApplicationName = applicationName;
-            this.ApplicationTypeName = applicationTypename;
-            this.ContextId = contextId;
+            if (endpointResourceDescriptions is null)
+            {
+                throw new ArgumentNullException(nameof(endpointResourceDescriptions));
+            }
 
-            this.manifest = GetManifest();
-            this.codePackage = null;
+            this.LogDirectory = Path.Combine(activeCodePackage.Path, LOG_DIRECTORY);
+            this.WorkDirectory = Path.Combine(activeCodePackage.Path, WORK_DIRECTORY);
+            this.TempDirectory = Path.Combine(activeCodePackage.Path, TEMP_DIRECTORY);
+
+            this.serviceManifestName = serviceManifestName;
+            this.serviceManifestVersion = serviceManifestVersion;
+            this.applicationPrincipalsDescription = applicationPrincipalsDescription ?? throw new ArgumentNullException(nameof(applicationPrincipalsDescription));
+            this.activeCodePackage = activeCodePackage ?? throw new ArgumentNullException(nameof(activeCodePackage));
+
+            this.codePackages = new CodePackageCollection()
+            {
+                activeCodePackage
+            };
+
+            this.configurationPackages = new ConfigurationPackageCollection(configurationPackages);
+            this.dataPackages = new DataPackageCollection(dataPackages);
+            this.serviceTypeDescriptions = new ServiceTypeDescriptionCollection(serviceTypeDescriptions);
+            this.endpointResourceDescriptions = new EndpointResourceDescriptionCollection(endpointResourceDescriptions);
         }
 
         public event EventHandler<PackageAddedEventArgs<CodePackage>> CodePackageAddedEvent;
@@ -130,61 +139,55 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
 
         public ApplicationPrincipalsDescription GetApplicationPrincipals()
         {
-            return this.manifest.ApplicationPrincipalsDescription;
+            return this.applicationPrincipalsDescription;
         }
 
         public IList<string> GetCodePackageNames()
         {
-            return this.manifest.CodePackages.Select(package => package.Description.Name).ToArray();
+            return this.codePackages.Select(package => package.Description.Name).ToArray();
         }
 
         public CodePackage GetCodePackageObject(
             string packageName)
         {
-            return this.manifest.CodePackages[packageName];
+            return this.codePackages[packageName];
         }
 
         public IList<string> GetConfigurationPackageNames()
         {
-            return this.manifest.ConfigPackages.Select(package => package.Description.Name).ToArray();
+            return this.configurationPackages.Select(package => package.Description.Name).ToArray();
         }
 
         public ConfigurationPackage GetConfigurationPackageObject(
             string packageName)
         {
-            return this.manifest.ConfigPackages[packageName];
+            return this.configurationPackages[packageName];
         }
 
         public IList<string> GetDataPackageNames()
         {
-            return this.manifest.DataPackages.Select(package => package.Description.Name).ToArray();
+            return this.dataPackages.Select(package => package.Description.Name).ToArray();
         }
 
         public DataPackage GetDataPackageObject(
             string packageName)
         {
-            return this.manifest.DataPackages[packageName];
-        }
-
-        public EndpointResourceDescription GetEndpoint(
-            string endpointName)
-        {
-            return this.manifest.EndpointResources[endpointName];
+            return this.dataPackages[packageName];
         }
 
         public string GetServiceManifestName()
         {
-            return this.manifest.Name;
+            return this.serviceManifestName;
         }
 
         public string GetServiceManifestVersion()
         {
-            return this.manifest.Version;
+            return this.serviceManifestVersion;
         }
 
         public KeyedCollection<string, ServiceTypeDescription> GetServiceTypes()
         {
-            return this.manifest.ServiceTypes;
+            return this.serviceTypeDescriptions;
         }
 
         public KeyedCollection<string, ServiceGroupTypeDescription> GetServiceGroupTypes()
@@ -192,9 +195,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
             return null;
         }
 
+        public EndpointResourceDescription GetEndpoint(
+            string endpointName)
+        {
+            return this.endpointResourceDescriptions[endpointName];
+        }
+
         public KeyedCollection<string, EndpointResourceDescription> GetEndpoints()
         {
-            return this.manifest.EndpointResources;
+            return this.endpointResourceDescriptions;
         }
 
         public void ReportApplicationHealth(
@@ -228,32 +237,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
             HealthInformation healthInfo,
             HealthReportSendOptions sendOptions)
         {
-        }
-
-        private static ServiceManifest.Objects.ServiceManifest GetManifest()
-        {
-            var location = Assembly.GetExecutingAssembly().Location;
-            var current = location;
-
-            var br = false;
-            for (; !br;)
-            {
-                current = Path.GetDirectoryName(current);
-                if (current is null)
-                {
-                    current = Path.GetPathRoot(location);
-                    br = true;
-                }
-
-                var fi = new FileInfo(Path.Combine(current, "PackageRoot", "ServiceManifest.xml"));
-                if (fi.Exists)
-                {
-                    return new ServiceManifest.Objects.ServiceManifest(fi.FullName);
-                }
-            }
-
-            throw new InvalidOperationException(
-                string.Format("Could not find 'ServiceManifest.xml' in {0} -> {0}{1}..{1}.", current, Path.DirectorySeparatorChar));
         }
     }
 }

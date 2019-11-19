@@ -20,9 +20,26 @@
         <WorkingFolder>CodePackage</WorkingFolder>
       </ExeHost>
     </EntryPoint>
+    <EnvironmentVariables>
+      <EnvironmentVariable Name="Test" Value="TestValue" />
+    </EnvironmentVariables>
+  </CodePackage>
+
+  <CodePackage Name="Code1" Version="1.0.0">
+    <EntryPoint>
+      <ExeHost IsExternalExecutable="true">
+        <!-- We are using dotnet cli to launch our Service.dll -->
+        <Program>dotnet</Program>
+        <WorkingFolder>CodePackage</WorkingFolder>
+      </ExeHost>
+    </EntryPoint>
+    <EnvironmentVariables>
+      <EnvironmentVariable Name="Test1" Value="TestValue1" />
+    </EnvironmentVariables>
   </CodePackage>
 
   <ConfigPackage Name="Config" Version="1.0.0" />
+  <ConfigPackage Name="Config1" Version="1.0.0" />
 
   <Resources>
     <Endpoints>
