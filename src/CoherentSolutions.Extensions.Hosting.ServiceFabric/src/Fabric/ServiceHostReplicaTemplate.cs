@@ -6,28 +6,14 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
-    public interface IServiceHostBuilderBlockParameters :
-        IConfigurableObjectDependenciesParameters,
-        IConfigurableObjectLoggerParameters
-    {
-    
-    }
-
-    public interface IServiceHostBuilderBlockConfigurator :
-        IConfigurableObjectDependenciesConfigurator,
-        IConfigurableObjectLoggerConfigurator
-    {
-    
-    }
-
-    public abstract class ServiceHostBuilderBlock<TParameters, TConfigurator>
+    public abstract class ServiceHostReplicaTemplate<TInput, TOutput, TParameters, TConfigurator>
         : ValidateableConfigurableObject<TParameters, TConfigurator>
-        where TParameters : IServiceHostBuilderBlockParameters
-        where TConfigurator : IServiceHostBuilderBlockConfigurator
+        where TParameters : IServiceHostReplicaTemplateParameters
+        where TConfigurator : IServiceHostReplicaTemplateConfigurator
     {
-        protected class BlockParameters :
-            IServiceHostBuilderBlockParameters,
-            IServiceHostBuilderBlockConfigurator
+        protected class ReplicaTemplateParameters :
+            IServiceHostReplicaTemplateParameters,
+            IServiceHostReplicaTemplateConfigurator
         {
             [RequiredConfiguration(nameof(UseDependencies))]
             public Func<IServiceCollection> DependenciesFunc
@@ -71,5 +57,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                  ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
         }
+
+        public abstract TOutput Activate(
+            TInput service);
     }
 }

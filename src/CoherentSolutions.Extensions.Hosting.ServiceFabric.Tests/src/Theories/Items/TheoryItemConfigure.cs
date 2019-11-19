@@ -75,10 +75,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                 IEnumerable<Action<IServiceProvider>> pickActions,
                 IServiceDelegateInvoker target)
             {
-                this.pickActions = pickActions 
+                this.pickActions = pickActions
                     ?? throw new ArgumentNullException(nameof(pickActions));
 
-                this.target = target 
+                this.target = target
                     ?? throw new ArgumentNullException(nameof(target));
             }
 
@@ -208,7 +208,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
 
                             c.UseEvent(useDelegateEvent.Event);
                             c.UseDelegateInvoker(provider => new ServiceDelegateInvokerDecorator(
-                                pickDependency.PickActions, 
+                                pickDependency.PickActions,
                                 useDelegateInvoker.Factory(provider)));
                         });
                 });
@@ -311,17 +311,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             IServiceHostEventSourceReplicaTemplateConfigurator configurator,
             TheoryItem.TheoryItemExtensionProvider extensions)
         {
-            var useDependencies = extensions.GetExtension<IUseDependenciesTheoryExtension>();
+            ConfigureReplicaTemplateExtensions(configurator, extensions);
+
             var useEventSourceImplementation = extensions.GetExtension<IUseEventSourceImplementationTheoryExtension>();
-            var configureDependencies = extensions.GetExtension<IConfigureDependenciesTheoryExtension>();
             var pickDependency = extensions.GetExtension<IPickDependencyTheoryExtension>();
 
-            configurator.UseDependencies(useDependencies.Factory);
-            configurator.ConfigureDependencies(
-                dependencies =>
-                {
-                    configureDependencies.ConfigAction(dependencies);
-                });
             configurator.UseImplementation(
                 provider =>
                 {
@@ -338,23 +332,19 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             IServiceHostDelegateReplicaTemplateConfigurator configurator,
             TheoryItem.TheoryItemExtensionProvider extensions)
         {
-            var useDelegate = extensions.GetExtension<IUseDelegateTheoryExtension>();
-            var useDependencies = extensions.GetExtension<IUseDependenciesTheoryExtension>();
-            var configureDependencies = extensions.GetExtension<IConfigureDependenciesTheoryExtension>();
+            ConfigureReplicaTemplateExtensions(configurator, extensions);
 
-            configurator.UseDependencies(useDependencies.Factory);
+            var useDelegate = extensions.GetExtension<IUseDelegateTheoryExtension>();
+
             configurator.UseDelegate(useDelegate.Delegate);
-            configurator.ConfigureDependencies(
-                dependencies =>
-                {
-                    configureDependencies.ConfigAction(dependencies);
-                });
         }
 
         private static void ConfigureAspNetCoreListenerExtensions(
             IServiceHostAspNetCoreListenerReplicaTemplateConfigurator configurator,
             TheoryItem.TheoryItemExtensionProvider extensions)
         {
+            ConfigureReplicaTemplateExtensions(configurator, extensions);
+
             var useListenerEndpoint = extensions.GetExtension<IUseListenerEndpointTheoryExtension>();
             var useAspNetCoreListenerCommunicationListener = extensions.GetExtension<IUseAspNetCoreListenerCommunicationListenerTheoryExtension>();
             var useAspNetCoreWebHostBuilder = extensions.GetExtension<IUseAspNetCoreListenerWebHostBuilderTheoryExtension>();
@@ -401,14 +391,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             IServiceHostRemotingListenerReplicaTemplateConfigurator configurator,
             TheoryItem.TheoryItemExtensionProvider extensions)
         {
+            ConfigureReplicaTemplateExtensions(configurator, extensions);
+
             var useListenerEndpoint = extensions.GetExtension<IUseListenerEndpointTheoryExtension>();
             var useRemotingCommunicationListener = extensions.GetExtension<IUseRemotingListenerCommunicationListenerTheoryExtension>();
             var useRemotingImplementation = extensions.GetExtension<IUseRemotingListenerImplementationTheoryExtension>();
             var useRemotingSettings = extensions.GetExtension<IUseRemotingListenerSettingsTheoryExtension>();
             var useRemotingSerializationProvider = extensions.GetExtension<IUseRemotingListenerSerializerTheoryExtension>();
             var useRemotingHandler = extensions.GetExtension<IUseRemotingListenerHandlerTheoryExtension>();
-            var useDependencies = extensions.GetExtension<IUseDependenciesTheoryExtension>();
-            var configureDependencies = extensions.GetExtension<IConfigureDependenciesTheoryExtension>();
             var pickDependency = extensions.GetExtension<IPickDependencyTheoryExtension>();
             var pickListenerEndpoint = extensions.GetExtension<IPickListenerEndpointTheoryExtension>();
             var pickRemotingImplementation = extensions.GetExtension<IPickRemotingListenerImplementationTheoryExtension>();
@@ -417,7 +407,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
             var pickRemotingHandler = extensions.GetExtension<IPickRemotingListenerHandlerTheoryExtension>();
 
             configurator.UseEndpoint(useListenerEndpoint.Endpoint);
-            configurator.UseDependencies(useDependencies.Factory);
             configurator.UseHandler(
                 provider =>
                 {
@@ -454,26 +443,20 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                 });
             configurator.UseSerializationProvider(useRemotingSerializationProvider.Factory);
             configurator.UseSettings(useRemotingSettings.Factory);
-            configurator.ConfigureDependencies(
-                dependencies =>
-                {
-                    configureDependencies.ConfigAction(dependencies);
-                });
         }
 
         private static void ConfigureGenericListenerExtensions(
             IServiceHostGenericListenerReplicaTemplateConfigurator configurator,
             TheoryItem.TheoryItemExtensionProvider extensions)
         {
+            ConfigureReplicaTemplateExtensions(configurator, extensions);
+
             var useListenerEndpoint = extensions.GetExtension<IUseListenerEndpointTheoryExtension>();
             var useGenericCommunicationListener = extensions.GetExtension<IUseGenericListenerCommunicationListenerTheoryExtension>();
-            var useDependencies = extensions.GetExtension<IUseDependenciesTheoryExtension>();
-            var configureDependencies = extensions.GetExtension<IConfigureDependenciesTheoryExtension>();
             var pickDependency = extensions.GetExtension<IPickDependencyTheoryExtension>();
             var pickListenerEndpoint = extensions.GetExtension<IPickListenerEndpointTheoryExtension>();
 
             configurator.UseEndpoint(useListenerEndpoint.Endpoint);
-            configurator.UseDependencies(useDependencies.Factory);
             configurator.UseCommunicationListener(
                 (
                     context,
@@ -489,11 +472,27 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
 
                     return useGenericCommunicationListener.Factory(context, endpointName, provider);
                 });
+        }
+
+        private static void ConfigureReplicaTemplateExtensions(
+            IServiceHostReplicaTemplateConfigurator configurator,
+            TheoryItem.TheoryItemExtensionProvider extensions)
+        {
+            var useDependencies = extensions.GetExtension<IUseDependenciesTheoryExtension>();
+            var configureDependencies = extensions.GetExtension<IConfigureDependenciesTheoryExtension>();
+
+            configurator.UseDependencies(useDependencies.Factory);
             configurator.ConfigureDependencies(
                 dependencies =>
                 {
                     configureDependencies.ConfigAction(dependencies);
                 });
         }
+
+
+
+
+
+
     }
 }

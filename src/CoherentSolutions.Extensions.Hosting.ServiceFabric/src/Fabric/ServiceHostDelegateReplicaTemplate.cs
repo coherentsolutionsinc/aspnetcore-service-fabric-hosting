@@ -10,12 +10,12 @@ using Microsoft.Extensions.Logging;
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public abstract class ServiceHostDelegateReplicaTemplate<TService, TParameters, TConfigurator, TDelegate>
-        : ServiceHostBuilderBlock<TParameters, TConfigurator>, IServiceHostDelegateReplicaTemplate<TConfigurator>
+        : ServiceHostReplicaTemplate<TService, TDelegate, TParameters, TConfigurator>, IServiceHostDelegateReplicaTemplate<TConfigurator>
         where TService : IService
         where TParameters : IServiceHostDelegateReplicaTemplateParameters
         where TConfigurator : IServiceHostDelegateReplicaTemplateConfigurator
     {
-        protected abstract class DelegateParameters : BlockParameters,
+        protected abstract class DelegateParameters : ReplicaTemplateParameters,
             IServiceHostDelegateReplicaTemplateParameters,
             IServiceHostDelegateReplicaTemplateConfigurator
         {
@@ -51,9 +51,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                  ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
         }
-
-        public abstract TDelegate Activate(
-            TService service);
 
         protected Func<TService, IServiceDelegateInvoker> CreateFactory(
             TParameters parameters)

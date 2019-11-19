@@ -3,7 +3,7 @@
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public interface IServiceHostListenerReplicaTemplateConfigurator : 
-        IServiceHostBuilderBlockConfigurator
+        IServiceHostReplicaTemplateConfigurator
     {
         void UseEndpoint(
             string endpointName);

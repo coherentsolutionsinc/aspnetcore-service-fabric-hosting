@@ -1,5 +1,5 @@
 ﻿using System;
-
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Items;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Extensions

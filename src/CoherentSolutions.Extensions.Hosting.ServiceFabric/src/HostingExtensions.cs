@@ -259,18 +259,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
                         });
 
                     configAction(builder);
-
-                    // still experimental
-                    var useGhost = string.IsNullOrEmpty(Environment.GetEnvironmentVariable("Fabric_ApplicationName"));
-                    if (useGhost)
-                    {
-                        builder.ConfigureObject(
-                            configurator =>
-                            {
-                                configurator.UseRuntimeRegistrant(
-                                    () => new GhostStatelessServiceRuntimeRegistrant());
-                            });
-                    }
                 });
         }
 

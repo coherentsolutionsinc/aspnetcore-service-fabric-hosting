@@ -9,14 +9,14 @@ using Microsoft.Extensions.DependencyInjection;
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public abstract class ServiceHostEventSourceReplicaTemplate<TServiceInformation, TParameters, TConfigurator, TEventSource>
-        : ValidateableConfigurableObject<TParameters, TConfigurator>, IServiceHostEventSourceReplicaTemplate<TConfigurator>
+        : ServiceHostReplicaTemplate<TServiceInformation, TEventSource, TParameters, TConfigurator>, IServiceHostEventSourceReplicaTemplate<TConfigurator>
         where TServiceInformation : IServiceInformation
         where TParameters : IServiceHostEventSourceReplicaTemplateParameters
         where TConfigurator : IServiceHostEventSourceReplicaTemplateConfigurator
     {
-        protected abstract class EventSourceParameters
-            : IServiceHostEventSourceReplicaTemplateParameters,
-              IServiceHostEventSourceReplicaTemplateConfigurator
+        protected abstract class EventSourceParameters : ReplicaTemplateParameters,
+            IServiceHostEventSourceReplicaTemplateParameters,
+            IServiceHostEventSourceReplicaTemplateConfigurator
         {
             [RequiredConfiguration(nameof(UseImplementation))]
             public Func<IServiceProvider, IServiceEventSource> ImplementationFunc
@@ -24,52 +24,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 get; private set;
             }
 
-            [RequiredConfiguration(nameof(UseDependencies))]
-            public Func<IServiceCollection> DependenciesFunc
-            {
-                get; private set;
-            }
-
-            public Action<IServiceCollection> DependenciesConfigAction
-            {
-                get; private set;
-            }
-
             protected EventSourceParameters()
             {
                 this.ImplementationFunc = null;
-                this.DependenciesFunc = null;
-                this.DependenciesConfigAction = null;
             }
-
             public void UseImplementation(
                 Func<IServiceProvider, IServiceEventSource> factoryFunc)
             {
                 this.ImplementationFunc = factoryFunc
                     ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
-
-            public void UseDependencies(
-                Func<IServiceCollection> factoryFunc)
-            {
-                this.DependenciesFunc = factoryFunc
-                    ?? throw new ArgumentNullException(nameof(factoryFunc));
-            }
-
-            public void ConfigureDependencies(
-                Action<IServiceCollection> configAction)
-            {
-                if (configAction is null)
-                {
-                    throw new ArgumentNullException(nameof(configAction));
-                }
-
-                this.DependenciesConfigAction = this.DependenciesConfigAction.Chain(configAction);
-            }
         }
-
-        public abstract TEventSource Activate(
-            TServiceInformation serviceInformation);
 
         protected Func<TServiceInformation, IServiceEventSource> CreateFactory(
             TParameters parameters)

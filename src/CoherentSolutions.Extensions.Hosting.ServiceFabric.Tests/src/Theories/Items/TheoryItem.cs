@@ -1,11 +1,175 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Extensions;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Items
 {
+    public interface ITheoryItem
+    {
+        ITheoryItem SetupExtension(
+            ITheoryExtension extension);
+
+        void Verify();
+    }
+
+    public interface ITheoryExtension
+    {
+    }
+
+    public interface ITheoryExtensionsCollection
+    {
+        T Get<T>()
+            where T : class, ITheoryExtension;
+    }
+
+    public sealed class TheoryItemEx<T> : ITheoryItem
+        where T : class
+    {
+        private sealed class TheoryItemExtensionsCollection : ITheoryExtensionsCollection
+        {
+            private readonly Dictionary<Type, ITheoryExtension> extensions;
+
+            public TheoryItemExtensionsCollection()
+            {
+                this.extensions = new Dictionary<Type, ITheoryExtension>();
+            }
+
+            public TExtension Get<TExtension>()
+                where TExtension : class, ITheoryExtension
+            {
+                return this.extensions.TryGetValue(typeof(TExtension), out var extension)
+                    ? (TExtension)extension
+                    : null;
+            }
+
+            public void Set(
+                ITheoryExtension extension)
+            {
+                if (extension is null)
+                {
+                    throw new ArgumentNullException(nameof(extension));
+                }
+
+                this.extensions[extension.GetType()] = extension;
+            }
+        }
+
+        private readonly TheoryItemExtensionsCollection extensions;
+        private readonly LinkedList<Action<T>> extensionConfigActions;
+
+        private Action verify;
+
+        public TheoryItemEx()
+        {
+            this.extensions = new TheoryItemExtensionsCollection();
+            this.extensionConfigActions = new LinkedList<Action<T>>();
+        }
+
+        public TheoryItemEx<T> UseExtension<TExtension>(
+            TExtension extension,
+            Action<T, TExtension> extensionConfigAction)
+            where TExtension : class, ITheoryExtension
+        {
+            this.extensions.Set(extension);
+            this.extensionConfigActions.AddLast(
+                target =>
+                {
+                    var ext = this.extensions.Get<TExtension>();
+                    extensionConfigAction(target, ext);
+                });
+
+            return this;
+        }
+
+        public TheoryItemEx<T> UseTarget(
+            T target,
+            Action<T> targetActivateAction)
+        {
+            if (target is null)
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
+
+            if (targetActivateAction is null)
+            {
+                throw new ArgumentNullException(nameof(targetActivateAction));
+            }
+
+            this.verify = new Action(
+                () =>
+                {
+                    foreach (var extensionConfigAction in this.extensionConfigActions)
+                    {
+                        extensionConfigAction(target);
+                    }
+
+                    targetActivateAction(target);
+                });
+
+            return this;
+        }
+
+        public ITheoryItem SetupExtension(
+            ITheoryExtension extension)
+        {
+            this.extensions.Set(extension);
+
+            return this;
+        }
+
+        public void Verify()
+        {
+            this.verify();
+        }
+    }
+
+    public static class A
+    {
+        public static void BB()
+        {
+            var item = new TheoryItemEx<StatelessServiceHostDelegateReplicaTemplate>()
+                .UseExtension(
+                    new UseDependenciesTheoryExtension(),
+                    (host, extension) =>
+                    {
+                        host.ConfigureObject(
+                            c =>
+                            {
+                                c.UseDependencies(extension.Factory);
+                            });
+                    })
+                .UseExtension(
+                    new PickDependencyTheoryExtension(),
+                    (host, extension) =>
+                    {
+                        host.ConfigureObject(
+                            c =>
+                            {
+                                c.UseDelegateInvoker(provider =>
+                                {
+                                    foreach (var pick in extension.PickActions)
+                                    {
+                                        pick(provider);
+                                    }
+                                    return null;
+                                });
+                            });
+                    })
+                .UseTarget(
+                    new StatelessServiceHostDelegateReplicaTemplate(),
+                    replicaTemplate =>
+                    {
+                        var instance = replicaTemplate.Activate(null);
+                        instance.CreateDelegateInvoker().InvokeAsync(instance.Delegate, null, default);
+                    });
+            item.Verify();
+        }
+    }
+
     public class TheoryItem
     {
         public sealed class TheoryItemExtensionProvider
