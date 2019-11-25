@@ -15,7 +15,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
         {
             return @this is null 
                 ? Enumerable.Empty<ConfigurationPackage>()
-                : ReadPackages(@this.ConfigPackages, new ConfigPackageFactory());
+                : ReadPackages(@this.ConfigPackages, new ConfigurationPackageFactory());
         }
 
         public static IEnumerable<DataPackage> ReadDataPackages(

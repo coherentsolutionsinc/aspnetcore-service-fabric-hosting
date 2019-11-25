@@ -1,4 +1,5 @@
-﻿using System.Xml.Serialization;
+﻿using System.Collections.Generic;
+using System.Xml.Serialization;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceManifest
 {
@@ -28,28 +29,28 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
 
         [XmlArray(ElementName = "ServiceTypes")]
         [XmlArrayItem(ElementName = "StatelessServiceType", Type = typeof(StatelessServiceTypeElement))]
-        public ServiceTypeElement[] ServiceTypes
+        public ICollection<ServiceTypeElement> ServiceTypes
         {
             get;
             set;
         }
 
         [XmlElement(ElementName = "CodePackage")]
-        public PackageElementCollection<CodePackageElement> CodePackages
+        public ICollection<CodePackageElement> CodePackages
         {
             get;
             set;
         }
 
         [XmlElement(ElementName = "ConfigPackage")]
-        public PackageElementCollection<ConfigPackageElement> ConfigPackages
+        public ICollection<ConfigurationPackageElement> ConfigPackages
         {
             get;
             set;
         }
 
         [XmlElement(ElementName = "DataPackage")]
-        public PackageElementCollection<DataPackageElement> DataPackages
+        public ICollection<DataPackageElement> DataPackages
         {
             get;
             set;
@@ -65,7 +66,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
         public ServiceManifestElement()
         {
             this.CodePackages = new PackageElementCollection<CodePackageElement>(this);
-            this.ConfigPackages = new PackageElementCollection<ConfigPackageElement>(this);
+            this.ConfigPackages = new PackageElementCollection<ConfigurationPackageElement>(this);
             this.DataPackages = new PackageElementCollection<DataPackageElement>(this);
         }
     }

@@ -1,4 +1,5 @@
-﻿using System.Xml.Serialization;
+﻿using System.Collections.Generic;
+using System.Xml.Serialization;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceManifest
 {
@@ -6,7 +7,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
     {
         [XmlArray(ElementName = "Endpoints")]
         [XmlArrayItem(ElementName = "Endpoint")]
-        public EndpointElement[] Endpoints
+        public ICollection<EndpointElement> Endpoints
         {
             get;
             set;

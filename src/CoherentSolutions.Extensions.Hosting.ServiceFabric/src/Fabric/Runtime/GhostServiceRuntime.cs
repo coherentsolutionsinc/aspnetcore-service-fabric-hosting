@@ -8,6 +8,7 @@ using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceM
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceManifest.Extensions;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceManifest.Objects.Factories;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceManifest;
+using System.Linq;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
 {
@@ -26,10 +27,25 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
             initializationData = new byte[0];
         }
 
-        public static StatelessServiceContext CreateStatelessServiceContext(
+        public static (StatelessServiceContext, IStatelessServicePartition) CreateStatelessServiceContextAndPartition(
             string serviceTypeName)
         {
+            if (serviceTypeName is null)
+            {
+                throw new ArgumentNullException(nameof(serviceTypeName));
+            }
+
             var servicePackage = LoadServicePackage();
+
+            var serviceTypeDescriptor = servicePackage.Manifest.ServiceTypes.FirstOrDefault(i => i.ServiceTypeName == serviceTypeName);
+            if (serviceTypeDescriptor is null)
+            {
+                throw new InvalidOperationException("");
+            }
+            if (serviceTypeDescriptor.Kind != ServiceTypeElementKind.Stateless)
+            {
+                throw new InvalidOperationException("");
+            }
 
             var activeCodePackage = new CodePackageFactory()
                 .Create(new CodePackageElement
@@ -50,22 +66,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
                 servicePackage.Manifest.ReadServiceTypesDescriptions(),
                 servicePackage.Manifest.ReadServiceEndpoints());
 
-            var servicePartition = new GhostStatelessServiceSingletonPartition();
-
-            return new StatelessServiceContext(
+            var servicePartition = new GhostStatelessServiceSingletonPartition(Guid.NewGuid());
+            var serviceContext = new StatelessServiceContext(
                 nodeContext,
                 activationContext,
                 serviceTypeName,
                 new Uri($"{activationContext.ApplicationName}/{SERVICE_NAME}"),
                 initializationData,
-                Guid.NewGuid(),
+                servicePartition.PartitionInfo.Id,
                 1);
-        }
 
-        public static IServicePartition GetPartition(
-            Guid parititionId)
-        {
-            return new GhostStatelessServiceSingletonPartition();
+            return (serviceContext, servicePartition);
         }
 
         private static ServicePackage LoadServicePackage()
@@ -84,9 +95,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
                 }
 
                 var path = Path.Combine(current, "PackageRoot");
-                if (Directory.Exists(path))
+                if (ServicePackage.TryLoad(path, out var package))
                 {
-                    return ServicePackage.Load(path);
+                    return package;
                 }
             }
 

@@ -2,17 +2,18 @@
 using System.Collections.Generic;
 using System.Fabric;
 using System.Fabric.Health;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceManifest.Objects.Factories;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
 {
     public class GhostStatelessServiceSingletonPartition : IStatelessServicePartition
     {
-        public ServicePartitionInformation PartitionInfo => new SingletonPartitionInformation();
+        public ServicePartitionInformation PartitionInfo { get; private set; }
 
         public GhostStatelessServiceSingletonPartition(
             Guid id)
         {
-            var info = new SingletonPartitionInformation();
+            this.PartitionInfo = new SingletonPartitionInformationAccessor(new SingletonPartitionInformation()) { Id = id }.Instance;
         }
 
         public void ReportFault(

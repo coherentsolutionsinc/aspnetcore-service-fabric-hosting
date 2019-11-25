@@ -7,7 +7,7 @@ using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Extensions;
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceManifest.Objects.Factories
 {
 
-    public abstract class PackageAccessor<TPackage, TPackageDescription>
+    public class PackageAccessor<TPackage, TPackageDescription> : Accessor<TPackage>
         where TPackage : class
         where TPackageDescription : PackageDescription
     {
@@ -21,8 +21,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
             description = typeof(TPackage).QueryProperty("Description");
         }
 
-        public TPackage Instance { get; }
-
         public string Path
         {
             get => (string)path.Value.GetValue(this.Instance);
@@ -35,10 +33,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
             set => description.Value.SetValue(this.Instance, value);
         }
 
-        protected PackageAccessor(
+        public PackageAccessor(
             TPackage package)
+            : base(package)
         {
-            this.Instance = package ?? throw new ArgumentNullException(nameof(package));
         }
     }
 }

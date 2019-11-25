@@ -4,16 +4,5 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
 {
     public class CodePackageFactory : PackageFactory<CodePackageElement, CodePackage, CodePackageDescription>
     {
-        protected override PackageAccessor<CodePackage, CodePackageDescription> CreatePackage(
-            CodePackage package)
-        {
-            return new CodePackageAccessor(package);
-        }
-
-        protected override PackageDescriptionAccessor<CodePackageDescription> CreatePackageDescription(
-            CodePackageDescription packageDescription)
-        {
-            return new CodePackageDescriptionAccessor(packageDescription);
-        }
     }
 }

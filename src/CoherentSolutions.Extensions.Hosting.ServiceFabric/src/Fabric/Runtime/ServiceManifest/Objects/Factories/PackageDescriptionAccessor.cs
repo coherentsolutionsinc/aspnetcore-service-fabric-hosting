@@ -1,34 +1,12 @@
 ﻿using System;
-using System.Fabric;
 using System.Fabric.Description;
 using System.Reflection;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Extensions;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceManifest.Objects.Factories
 {
-    public abstract class ServicePartitionInformationAccessor<TPartitionInformation>
-        where TPartitionInformation : ServicePartitionInformation
-    {
-        private static readonly Lazy<PropertyInfo> id;
 
-        static ServicePartitionInformationAccessor()
-        {
-            id = typeof(ServicePartitionInformation).QueryProperty(nameof(ServicePartitionInformation.Id));
-        }
-
-        public TPartitionInformation Instance
-        {
-            get;
-        }
-
-        public Guid Id
-        {
-            get => this.Instance.Id;
-            set => id.Value.SetValue(this.Instance, value);
-        }
-    }
-
-    public abstract class PackageDescriptionAccessor<TPackageDescription>
+    public class PackageDescriptionAccessor<TPackageDescription> : Accessor<TPackageDescription>
         where TPackageDescription : PackageDescription
     {
         private static readonly Lazy<PropertyInfo> path;
@@ -49,8 +27,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
             serviceManifestName = typeof(PackageDescription).QueryProperty(nameof(PackageDescription.ServiceManifestName));
             serviceManifestVersion = typeof(PackageDescription).QueryProperty(nameof(PackageDescription.ServiceManifestVersion));
         }
-
-        public TPackageDescription Instance { get; }
 
         public string Path
         {
@@ -82,10 +58,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
             set => serviceManifestVersion.Value.SetValue(this.Instance, value);
         }
 
-        protected PackageDescriptionAccessor(
+        public PackageDescriptionAccessor(
             TPackageDescription packageDescription)
+            : base(packageDescription)
         {
-            this.Instance = packageDescription ?? throw new ArgumentNullException(nameof(packageDescription));
         }
     }
 }

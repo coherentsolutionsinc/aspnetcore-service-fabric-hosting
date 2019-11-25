@@ -18,15 +18,21 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
 
         static PackageFactory()
         {
-            packageCtor = typeof(TPackage).Query().Constructor().NonPublic().Instance().GetLazy();
-            packageDescrCtor = typeof(TPackageDescription).Query().Constructor().NonPublic().Instance().GetLazy();
+            packageCtor = typeof(TPackage).QueryConstructor(@public: false);
+            packageDescrCtor = typeof(TPackageDescription).QueryConstructor(@public: false);
         }
 
-        protected abstract PackageAccessor<TPackage, TPackageDescription> CreatePackage(
-            TPackage package);
+        protected virtual void InitializePackageDescription(
+            TPackageDescription packageDescription,
+            TPackageElement element)
+        {
+        }
 
-        protected abstract PackageDescriptionAccessor<TPackageDescription> CreatePackageDescription(
-            TPackageDescription packageDescription);
+        protected virtual void InitializePackage(
+            TPackage package,
+            TPackageElement element)
+        {
+        }
 
         public TPackage Create(
             TPackageElement element)
@@ -36,20 +42,28 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
                 throw new ArgumentNullException(nameof(element));
             }
 
-            var packageDescription = this.CreatePackageDescription(
-                (TPackageDescription)packageDescrCtor.Value.Invoke(null));
+            var packageDescriptionAccessor = new PackageDescriptionAccessor<TPackageDescription>(
+                (TPackageDescription)packageDescrCtor.Value.Invoke(null))
+            {
+                Path = System.IO.Path.Combine(element.Manifest.PackageRoot, element.Name),
+                Name = element.Name,
+                Version = element.Version,
+                ServiceManifestName = element.Manifest.Name,
+                ServiceManifestVersion = element.Manifest.Version
+            };
 
-            packageDescription.Name = element.Name;
-            packageDescription.Version = element.Version;
-            packageDescription.ServiceManifestName = element.Manifest.Name;
-            packageDescription.ServiceManifestVersion = element.Manifest.Version;
+            this.InitializePackageDescription(packageDescriptionAccessor.Instance, element);
 
-            var package = this.CreatePackage(
-                (TPackage)packageCtor.Value.Invoke(null));
-            
-            package.Description = packageDescription.Instance;
+            var packageAccess = new PackageAccessor<TPackage, TPackageDescription>(
+                (TPackage)packageCtor.Value.Invoke(null))
+            {
+                Path = packageDescriptionAccessor.Path,
+                Description = packageDescriptionAccessor.Instance
+            };
 
-            return package.Instance;
+            this.InitializePackage(packageAccess.Instance, element);
+
+            return packageAccess.Instance;
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Extensions;
-
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceManifest.Objects.Factories;
 using Microsoft.Extensions.Logging;
 using Microsoft.ServiceFabric.Services.Communication.Runtime;
 
@@ -55,20 +55,30 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
 
         public GhostStatelessServiceInstance(
             StatelessService service,
+            IStatelessServicePartition partition,
             ILogger logger)
         {
             this.service = service ?? throw new ArgumentNullException(nameof(service));
+            this.partition = partition ?? throw new ArgumentNullException(nameof(partition));
             this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task StartupAsync()
         {
+            this.SetPartition();
+
             await this.OpenCommunicationListeners();
 
             var runAsyncTask = Task.Run(this.ExecuteRunAsync);
             var openAsyncTask = Task.Run(this.ExecuteOpenAsync);
 
             await Task.WhenAll(openAsyncTask, runAsyncTask);
+        }
+
+        private void SetPartition()
+        {
+            this.logger.LogInformation("Set partition");
+            new StatelessServiceAccessor(this.service).Partition = this.partition;
         }
 
         private async Task OpenCommunicationListeners()
