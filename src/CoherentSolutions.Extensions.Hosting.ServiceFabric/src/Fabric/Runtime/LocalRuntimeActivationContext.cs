@@ -10,7 +10,7 @@ using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceM
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
 {
-    public class GhostCodePackageActivationContext : ICodePackageActivationContext
+    public class LocalRuntimeActivationContext : ICodePackageActivationContext
     {
         private const string APPLICATION_NAME = "fabric:/ApplicationName";
 
@@ -64,7 +64,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
 
         public string CodePackageVersion => this.activeCodePackage.Description.Version;
 
-        public GhostCodePackageActivationContext(
+        public LocalRuntimeActivationContext(
             string serviceManifestName,
             string serviceManifestVersion,
             CodePackage activeCodePackage,

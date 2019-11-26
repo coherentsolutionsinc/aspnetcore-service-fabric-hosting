@@ -15,13 +15,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Extensions
                 Type target,
                 string name)
             {
-                if (string.IsNullOrWhiteSpace(name))
-                {
-                    throw new ArgumentException("message", nameof(name));
-                }
-
                 this.target = target ?? throw new ArgumentNullException(nameof(target));
-                this.name = name;
+                this.name = name ?? throw new ArgumentNullException(nameof(name));
             }
 
             public PropertyInfo Get()

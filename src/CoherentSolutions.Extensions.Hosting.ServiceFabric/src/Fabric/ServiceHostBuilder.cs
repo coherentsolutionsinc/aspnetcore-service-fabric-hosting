@@ -14,6 +14,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             TServiceHost,
             TParameters,
             TConfigurator,
+            TRuntimeRegistrant,
             TEventSourceReplicableTemplate,
             TEventSourceReplicaTemplate,
             TEventSourceReplicator,
@@ -29,6 +30,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
           IServiceHostBuilder<TServiceHost, TConfigurator>
         where TParameters :
         IServiceHostBuilderParameters,
+        IServiceHostBuilderRuntimeParameters<TRuntimeRegistrant>,
         IServiceHostBuilderEventSourceParameters<TEventSourceReplicaTemplate>,
         IServiceHostBuilderEventSourceReplicationParameters<TEventSourceReplicableTemplate, TEventSourceReplicator>,
         IServiceHostBuilderDelegateParameters<TDelegateReplicaTemplate>,
@@ -39,6 +41,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         IServiceHostBuilderListenerReplicationParameters<TListenerReplicableTemplate, TListenerReplicator>
         where TConfigurator :
         IServiceHostBuilderConfigurator,
+        IServiceHostBuilderRuntimeConfigurator<TRuntimeRegistrant>,
         IServiceHostBuilderEventSourceConfigurator<TEventSourceReplicaTemplate>,
         IServiceHostBuilderEventSourceReplicationConfigurator<TEventSourceReplicableTemplate, TEventSourceReplicator>,
         IServiceHostBuilderDelegateConfigurator<TDelegateReplicaTemplate>,
@@ -47,6 +50,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         IServiceHostBuilderRemotingListenerConfigurator<TListenerRemotingReplicaTemplate>,
         IServiceHostBuilderGenericListenerConfigurator<TListenerGenericReplicaTemplate>,
         IServiceHostBuilderListenerReplicationConfigurator<TListenerReplicableTemplate, TListenerReplicator>
+        where TRuntimeRegistrant : class
         where TEventSourceReplicaTemplate :
         TEventSourceReplicableTemplate,
         IServiceHostEventSourceReplicaTemplate<IServiceHostEventSourceReplicaTemplateConfigurator>
@@ -69,6 +73,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         protected abstract class Parameters
             : IServiceHostBuilderParameters,
               IServiceHostBuilderConfigurator,
+              IServiceHostBuilderRuntimeParameters<TRuntimeRegistrant>,
+              IServiceHostBuilderRuntimeConfigurator<TRuntimeRegistrant>,
               IServiceHostBuilderEventSourceParameters<TEventSourceReplicaTemplate>,
               IServiceHostBuilderEventSourceConfigurator<TEventSourceReplicaTemplate>,
               IServiceHostBuilderEventSourceReplicationParameters<TEventSourceReplicableTemplate, TEventSourceReplicator>,
@@ -92,7 +98,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             public List<IServiceHostListenerDescriptor> ListenerDescriptors { get; private set; }
 
-            public List<IServiceHostDelegateDescriptor> DelegateDescriptors { get; private set; }
+            public List<IServiceHostDelegateDescriptor> DelegateDescriptors { get; private set;
+            }
+            public Func<TRuntimeRegistrant> RuntimeRegistrantFunc { get; private set; }
 
             public Func<TEventSourceReplicaTemplate> EventSourceReplicaTemplateFunc { get; private set; }
 
@@ -120,6 +128,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.EventSourceDescriptor = null;
                 this.ListenerDescriptors = null;
                 this.DelegateDescriptors = null;
+                this.RuntimeRegistrantFunc = null;
                 this.EventSourceReplicaTemplateFunc = null;
                 this.EventSourceReplicatorFunc = null;
                 this.DelegateReplicaTemplateFunc = null;
@@ -137,6 +146,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 this.ServiceTypeName = serviceName
                  ?? throw new ArgumentNullException(nameof(serviceName));
+            }
+
+            public void UseRuntimeRegistrant(
+                Func<TRuntimeRegistrant> factoryFunc)
+            {
+                this.RuntimeRegistrantFunc = factoryFunc
+                 ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
 
             public void UseEventSourceReplicaTemplate(
@@ -308,6 +324,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
         protected class Compilation
         {
+            public TRuntimeRegistrant RuntimeRegistrant { get; }
+
             public TEventSourceReplicator EventSourceReplicator { get; }
 
             public IReadOnlyList<TDelegateReplicator> DelegateReplicators { get; }
@@ -315,10 +333,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             public IReadOnlyList<TListenerReplicator> ListenerReplicators { get; }
 
             public Compilation(
+                TRuntimeRegistrant runtimeRegistrant,
                 TEventSourceReplicator eventSourceReplicator,
                 IReadOnlyList<TDelegateReplicator> delegateReplicators,
                 IReadOnlyList<TListenerReplicator> listenerReplicators)
             {
+                this.RuntimeRegistrant = runtimeRegistrant;
+
                 this.EventSourceReplicator = eventSourceReplicator
                  ?? throw new ArgumentNullException(nameof(eventSourceReplicator));
 
@@ -357,6 +378,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             var dependencies = new DefaultServiceProviderFactory().CreateServiceProvider(dependenciesCollection);
 
+            if (parameters.RuntimeRegistrantFunc is null)
+            {
+                throw new InvalidOperationException(
+                    $"No {nameof(parameters.RuntimeRegistrantFunc)} was configured");
+            }
+
             if (parameters.EventSourceReplicaTemplateFunc == null)
             {
                 throw new InvalidOperationException(
@@ -367,6 +394,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             {
                 throw new InvalidOperationException(
                     $"No {nameof(parameters.EventSourceReplicaTemplateFunc)} was configured");
+            }
+
+            var runtimeRegistrant = parameters.RuntimeRegistrantFunc();
+            if (runtimeRegistrant is null)
+            {
+                throw new FactoryProducesNullInstanceException<TRuntimeRegistrant>();
             }
 
             var eventSourceReplicaTemplate = parameters.EventSourceReplicaTemplateFunc();
@@ -565,7 +598,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                         })
                    .ToArray();
 
-            return new Compilation(eventSourceReplicator, delegateReplicators, listenerReplicators);
+            return new Compilation(runtimeRegistrant, eventSourceReplicator, delegateReplicators, listenerReplicators);
         }
     }
 }

@@ -9,6 +9,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
               IStatefulServiceHost,
               IStatefulServiceHostBuilderParameters,
               IStatefulServiceHostBuilderConfigurator,
+              IStatefulServiceRuntimeRegistrant,
               IStatefulServiceHostEventSourceReplicableTemplate,
               IStatefulServiceHostEventSourceReplicaTemplate,
               IStatefulServiceHostEventSourceReplicator,
@@ -27,12 +28,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
               IStatefulServiceHostBuilderParameters,
               IStatefulServiceHostBuilderConfigurator
         {
-            public Func<IStatefulServiceRuntimeRegistrant> RuntimeRegistrantFunc { get; private set; }
-
             public StatefulParameters()
             {
-                this.RuntimeRegistrantFunc = DefaultRuntimeRegistrant;
-
+                this.UseRuntimeRegistrant(DefaultRuntimeRegistrant);
                 this.UseEventSourceReplicaTemplate(DefaultEventSourceReplicaTemplateFunc);
                 this.UseEventSourceReplicator(DefaultEventSourceReplicatorFunc);
                 this.UseDelegateReplicaTemplate(DefaultDelegateReplicaTemplateFunc);
@@ -41,13 +39,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.UseRemotingListenerReplicaTemplate(DefaultRemotingListenerReplicaTemplateFunc);
                 this.UseGenericListenerReplicaTemplate(DefaultGenericListenerReplicaTemplateFunc);
                 this.UseListenerReplicator(DefaultListenerReplicatorFunc);
-            }
-
-            public void UseRuntimeRegistrant(
-                Func<IStatefulServiceRuntimeRegistrant> factoryFunc)
-            {
-                this.RuntimeRegistrantFunc = factoryFunc
-                 ?? throw new ArgumentNullException(nameof(factoryFunc));
             }
 
             private static IStatefulServiceRuntimeRegistrant DefaultRuntimeRegistrant()
@@ -105,17 +96,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             this.UpstreamConfiguration(parameters);
 
-            var registrant = parameters.RuntimeRegistrantFunc();
-            if (registrant == null)
-            {
-                throw new FactoryProducesNullInstanceException<IStatefulServiceRuntimeRegistrant>();
-            }
-
             var compilation = this.CompileParameters(parameters);
 
             return new StatefulServiceHost(
                 parameters.ServiceTypeName,
-                registrant,
+                compilation.RuntimeRegistrant,
                 compilation.EventSourceReplicator,
                 compilation.DelegateReplicators,
                 compilation.ListenerReplicators);

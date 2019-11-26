@@ -17,13 +17,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Extensions
                 Type target,
                 string name)
             {
-                if (string.IsNullOrWhiteSpace(name))
-                {
-                    throw new ArgumentException("message", nameof(name));
-                }
-
                 this.target = target ?? throw new ArgumentNullException(nameof(target));
-                this.name = name;
+                this.name = name ?? throw new ArgumentNullException(nameof(name));
             }
 
             public Method Params(
@@ -36,11 +31,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Extensions
 
             public MethodInfo Get()
             {
-                if (string.IsNullOrWhiteSpace(this.name))
-                {
-                    throw new ArgumentException("Value cannot be null or whitespace.", nameof(name));
-                }
-
                 var m = this.target.GetMethod(this.name, this.BindingFlags, null, this.parameters ?? Type.EmptyTypes, null);
                 if (m is null)
                 {

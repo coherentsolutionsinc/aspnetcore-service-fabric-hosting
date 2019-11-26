@@ -7,7 +7,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
     {
         [XmlArray(ElementName = "Endpoints")]
         [XmlArrayItem(ElementName = "Endpoint")]
-        public ICollection<EndpointElement> Endpoints
+        public List<EndpointElement> Endpoints
         {
             get;
             set;

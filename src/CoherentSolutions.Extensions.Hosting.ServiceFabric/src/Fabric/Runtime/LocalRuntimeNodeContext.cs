@@ -4,9 +4,9 @@ using System.Numerics;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
 {
-    public class GhostNodeContext : NodeContext
+    public class LocalRuntimeNodeContext : NodeContext
     {
-        public GhostNodeContext()
+        public LocalRuntimeNodeContext()
             : base(
                 Environment.MachineName,
                 new NodeId(new BigInteger(1), new BigInteger(0)),

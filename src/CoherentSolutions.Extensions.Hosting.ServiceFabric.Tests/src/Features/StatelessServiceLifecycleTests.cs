@@ -230,7 +230,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Features
             // Arrange
             var actualCallStack = new ConcurrentQueue<string>();
 
-            var mockCodePackageActivationContext = new Mock<ICodePackageActivationContext>();
+            var mockCodePackageActivationContext = new Mock<ICodePackageActivationContext>(
+                MockCodePackageActivationContext.Default);
 
             var mockDelegateCodePackageAdded = new Mock<Action>();
             mockDelegateCodePackageAdded

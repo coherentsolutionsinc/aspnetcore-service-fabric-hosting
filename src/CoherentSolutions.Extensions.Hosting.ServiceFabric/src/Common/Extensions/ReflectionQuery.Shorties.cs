@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Reflection;
-using System.Text;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Extensions
 {
@@ -30,6 +28,20 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Extensions
                 : query.NonPublic();
 
             return query.Instance().GetLazy();
+        }
+
+        public static Lazy<MethodInfo> QueryMethod(
+            this Type @this,
+            string name,
+            bool @public = true,
+            params Type[] @params)
+        {
+            var query = @this.Query().Method(name);
+            query = @public
+                ? query.Public()
+                : query.NonPublic();
+
+            return query.Params(@params).Instance().GetLazy();
         }
     }
 }

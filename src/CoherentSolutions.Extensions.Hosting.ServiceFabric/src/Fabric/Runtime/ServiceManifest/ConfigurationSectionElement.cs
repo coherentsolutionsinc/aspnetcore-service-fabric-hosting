@@ -5,7 +5,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
 {
     public class ConfigurationSectionElement
     {
-        [XmlElement(ElementName = "Name")]
+        [XmlAttribute(AttributeName = "Name")]
         public string Name
         {
             get; 
@@ -13,7 +13,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
         }
 
         [XmlElement(ElementName = "Parameter")]
-        public ICollection<ConfigurationParameterElement> Parameters
+        public List<ConfigurationParameterElement> Parameters
         {
             get;
             set;

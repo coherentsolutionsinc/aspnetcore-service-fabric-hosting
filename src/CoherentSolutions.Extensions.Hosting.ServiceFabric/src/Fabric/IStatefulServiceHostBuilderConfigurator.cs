@@ -4,6 +4,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public interface IStatefulServiceHostBuilderConfigurator
         : IServiceHostBuilderConfigurator,
+          IServiceHostBuilderRuntimeConfigurator<IStatefulServiceRuntimeRegistrant>,
           IServiceHostBuilderEventSourceConfigurator<IStatefulServiceHostEventSourceReplicaTemplate>,
           IServiceHostBuilderEventSourceReplicationConfigurator<IStatefulServiceHostEventSourceReplicableTemplate, IStatefulServiceHostEventSourceReplicator>,
           IServiceHostBuilderDelegateConfigurator<IStatefulServiceHostDelegateReplicaTemplate>,
@@ -13,7 +14,5 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
           IServiceHostBuilderGenericListenerConfigurator<IStatefulServiceHostGenericListenerReplicaTemplate>,
           IServiceHostBuilderListenerReplicationConfigurator<IStatefulServiceHostListenerReplicableTemplate, IStatefulServiceHostListenerReplicator>
     {
-        void UseRuntimeRegistrant(
-            Func<IStatefulServiceRuntimeRegistrant> factoryFunc);
     }
 }

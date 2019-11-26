@@ -1085,7 +1085,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             this IStatelessServiceHostBuilder @this)
         {
             @this.ConfigureObject(
-                configurator => configurator.UseRuntimeRegistrant(() => new GhostStatelessServiceRuntimeRegistrant()));
+                configurator => configurator.UseRuntimeRegistrant(() => new LocalRuntimeStatelessServiceRuntimeRegistrant()));
 
             return @this;
         }

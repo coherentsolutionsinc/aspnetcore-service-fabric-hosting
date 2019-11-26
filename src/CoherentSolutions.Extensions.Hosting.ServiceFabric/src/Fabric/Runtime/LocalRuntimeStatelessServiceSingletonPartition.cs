@@ -6,14 +6,15 @@ using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceM
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
 {
-    public class GhostStatelessServiceSingletonPartition : IStatelessServicePartition
+    public class LocalRuntimeStatelessServiceSingletonPartition : IStatelessServicePartition
     {
         public ServicePartitionInformation PartitionInfo { get; private set; }
 
-        public GhostStatelessServiceSingletonPartition(
+        public LocalRuntimeStatelessServiceSingletonPartition(
             Guid id)
         {
-            this.PartitionInfo = new SingletonPartitionInformationAccessor(new SingletonPartitionInformation()) { Id = id }.Instance;
+            this.PartitionInfo = new SingletonPartitionInformationAccessor(
+                new SingletonPartitionInformation()) { Id = id }.Instance;
         }
 
         public void ReportFault(

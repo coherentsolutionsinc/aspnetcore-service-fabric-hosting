@@ -14,7 +14,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
         }
 
         [XmlElement(ElementName = "Section")]
-        public ICollection<ConfigurationSectionElement> Sections
+        public List<ConfigurationSectionElement> Sections
         {
             get;
             set;
