@@ -84,7 +84,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
 
             foreach (var element in manifest.Resources.Endpoints)
             {
-                var description = new EndpointResourceDescription()
+                var description = new EndpointResourceDescriptionAccessor(new EndpointResourceDescription())
                 {
                     Name = element.Name ?? string.Empty,
                     CodePackageName = element.CodePackageRef
@@ -100,7 +100,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
                     description.EndpointType = type;
                 }
 
-                yield return description;
+                if (int.TryParse(element.Port, out var port))
+                {
+                    description.Port = port;    
+                }
+
+                yield return description.Instance;
             }
         }
 

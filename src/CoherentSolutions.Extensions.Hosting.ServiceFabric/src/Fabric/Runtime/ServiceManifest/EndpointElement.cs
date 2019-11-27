@@ -18,6 +18,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
             set;
         }
 
+        [XmlAttribute(AttributeName = "Port")]
+        public string Port
+        {
+            get;
+            set;
+        }
+
         [XmlAttribute(AttributeName = "Type")]
         public string Type
         {

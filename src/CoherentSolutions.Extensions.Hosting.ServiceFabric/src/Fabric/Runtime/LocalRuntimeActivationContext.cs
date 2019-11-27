@@ -25,8 +25,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
         private const string TEMP_DIRECTORY = "Temp";
 
         private readonly ApplicationPrincipalsDescription applicationPrincipalsDescription;
+
         private readonly string serviceManifestName;
+
         private readonly string serviceManifestVersion;
+
         private readonly CodePackage activeCodePackage;
 
         private readonly CodePackageCollection codePackages;
