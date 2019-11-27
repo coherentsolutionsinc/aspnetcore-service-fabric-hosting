@@ -247,7 +247,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator
 
                 fieldBuilder = typeBuilder.DefineField(
                     "target",
-                    this.interfaceType.IsGenericType
+                    this.interfaceType.IsGenericTypeDefinition
                         ? this.interfaceType.MakeGenericType(Utils.CreateGenericParametersFrom(typeBuilder, this.interfaceType))
                         : this.interfaceType,
                     FieldAttributes.Private | FieldAttributes.InitOnly);
