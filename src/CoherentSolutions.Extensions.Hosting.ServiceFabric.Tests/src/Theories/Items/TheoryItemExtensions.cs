@@ -25,7 +25,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                                    .ConfigureObject(
                                         c =>
                                         {
-                                            c.UseRuntimeRegistrant(() => new MockStatefulServiceRuntimeRegistrant());
+                                            c.UseRuntimeRegistrant(provider => new MockStatefulServiceRuntimeRegistrant());
 
                                             configAction(c, extensions);
                                         });
@@ -41,7 +41,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                .SetupConfig(
                     (
                         builder,
-                        provider) =>
+                        extensions) =>
                     {
                         builder.DefineStatelessService(
                             serviceBuilder =>
@@ -50,9 +50,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Theories.Item
                                    .ConfigureObject(
                                         c =>
                                         {
-                                            c.UseRuntimeRegistrant(() => new MockStatelessServiceRuntimeRegistrant());
+                                            c.UseRuntimeRegistrant(provider => new MockStatelessServiceRuntimeRegistrant());
 
-                                            configAction(c, provider);
+                                            configAction(c, extensions);
                                         });
                             });
                     });

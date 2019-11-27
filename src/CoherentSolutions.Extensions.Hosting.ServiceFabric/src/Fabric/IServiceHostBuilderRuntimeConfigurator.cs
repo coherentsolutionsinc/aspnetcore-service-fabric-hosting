@@ -6,6 +6,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
         where TRuntimeRegistrant : class
     {
         void UseRuntimeRegistrant(
-            Func<TRuntimeRegistrant> factoryFunc);
+            Func<IServiceProvider, TRuntimeRegistrant> factoryFunc);
     }
 }

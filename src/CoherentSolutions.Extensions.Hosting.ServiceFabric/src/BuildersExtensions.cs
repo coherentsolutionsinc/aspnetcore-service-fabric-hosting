@@ -620,6 +620,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             Func<IStatefulServiceRuntimeRegistrant> factoryFunc)
         {
             @this.ConfigureObject(
+                configurator => configurator.UseRuntimeRegistrant(provider => factoryFunc()));
+
+            return @this;
+        }
+
+        public static IStatefulServiceHostBuilder UseRuntimeRegistrant(
+            this IStatefulServiceHostBuilder @this,
+            Func<IServiceProvider, IStatefulServiceRuntimeRegistrant> factoryFunc)
+        {
+            @this.ConfigureObject(
                 configurator => configurator.UseRuntimeRegistrant(factoryFunc));
 
             return @this;
@@ -628,6 +638,16 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
         public static IStatelessServiceHostBuilder UseRuntimeRegistrant(
             this IStatelessServiceHostBuilder @this,
             Func<IStatelessServiceRuntimeRegistrant> factoryFunc)
+        {
+            @this.ConfigureObject(
+                configurator => configurator.UseRuntimeRegistrant(provider => factoryFunc()));
+
+            return @this;
+        }
+
+        public static IStatelessServiceHostBuilder UseRuntimeRegistrant(
+            this IStatelessServiceHostBuilder @this,
+            Func<IServiceProvider, IStatelessServiceRuntimeRegistrant> factoryFunc)
         {
             @this.ConfigureObject(
                 configurator => configurator.UseRuntimeRegistrant(factoryFunc));
@@ -1085,7 +1105,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             this IStatelessServiceHostBuilder @this)
         {
             @this.ConfigureObject(
-                configurator => configurator.UseRuntimeRegistrant(() => new LocalRuntimeStatelessServiceRuntimeRegistrant()));
+                configurator => configurator.UseRuntimeRegistrant(
+                    provider => new LocalRuntimeStatelessServiceRuntimeRegistrant()));
 
             return @this;
         }

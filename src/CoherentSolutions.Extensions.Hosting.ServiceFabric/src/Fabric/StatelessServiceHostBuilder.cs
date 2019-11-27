@@ -41,7 +41,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.UseListenerReplicator(DefaultListenerReplicatorFunc);
             }
 
-            private static IStatelessServiceRuntimeRegistrant DefaultRuntimeRegistrant()
+            private static IStatelessServiceRuntimeRegistrant DefaultRuntimeRegistrant(
+                IServiceProvider provider)
             {
                 return new StatelessServiceRuntimeRegistrant();
             }

@@ -100,7 +100,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             public List<IServiceHostDelegateDescriptor> DelegateDescriptors { get; private set;
             }
-            public Func<TRuntimeRegistrant> RuntimeRegistrantFunc { get; private set; }
+            public Func<IServiceProvider, TRuntimeRegistrant> RuntimeRegistrantFunc { get; private set; }
 
             public Func<TEventSourceReplicaTemplate> EventSourceReplicaTemplateFunc { get; private set; }
 
@@ -149,7 +149,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             }
 
             public void UseRuntimeRegistrant(
-                Func<TRuntimeRegistrant> factoryFunc)
+                Func<IServiceProvider, TRuntimeRegistrant> factoryFunc)
             {
                 this.RuntimeRegistrantFunc = factoryFunc
                  ?? throw new ArgumentNullException(nameof(factoryFunc));
@@ -396,7 +396,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                     $"No {nameof(parameters.EventSourceReplicaTemplateFunc)} was configured");
             }
 
-            var runtimeRegistrant = parameters.RuntimeRegistrantFunc();
+            var runtimeRegistrant = parameters.RuntimeRegistrantFunc(dependencies);
             if (runtimeRegistrant is null)
             {
                 throw new FactoryProducesNullInstanceException<TRuntimeRegistrant>();
