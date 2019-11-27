@@ -4,6 +4,7 @@ using System.Fabric.Description;
 using System.Threading.Tasks;
 using System.Threading;
 using Microsoft.Extensions.Logging.Console;
+using Microsoft.Extensions.Logging;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
 {
@@ -12,16 +13,19 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
         private readonly static byte[] initializationData;
 
         private static int instanceOrReplicaId;
+        private static Guid partitionId;
 
         static LocalRuntime()
         {
             initializationData = Array.Empty<byte>();
             instanceOrReplicaId = 0;
+            partitionId = new Guid(0x30fb9439, 0x4624, 0x492d, new byte[] { 0xa9, 0x8, 0x9b, 0x16, 0x9f, 0x93, 0xef, 0x28 });
         }
 
         public static async Task RegisterServiceAsync(
             string serviceTypeName,
             Func<StatelessServiceContext, StatelessService> serviceFactory,
+            ILogger logger,
             TimeSpan timeout = default,
             CancellationToken cancellationToken = default)
         {
@@ -49,20 +53,20 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
                 throw new InvalidOperationException();
             }
 
-            var servicePartition = new LocalRuntimeStatelessServiceSingletonPartition(Guid.NewGuid());
+            var servicePartition = new LocalRuntimeStatelessServiceSingletonPartition(partitionId);
             var serviceContext = new StatelessServiceContext(
                 nodeContext,
                 activationContext,
                 serviceTypeName,
                 new Uri($"{activationContext.ApplicationName}/{Guid.NewGuid().ToString("N")}"),
                 initializationData,
-                servicePartition.PartitionInfo.Id,
+                partitionId,
                 Interlocked.Increment(ref instanceOrReplicaId));
 
             var serviceAdapter = new LocalRuntimeStatelessServiceAdapter(
                 serviceFactory(serviceContext), 
                 servicePartition,
-                new ConsoleLogger("asd", null, true));
+                logger);
 
             await serviceAdapter.OpenAsync();
         }

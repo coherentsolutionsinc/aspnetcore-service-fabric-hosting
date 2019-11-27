@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.HttpSys;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 using Microsoft.ServiceFabric.Services.Remoting.FabricTransport.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting.V2;
@@ -1105,8 +1106,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
             this IStatelessServiceHostBuilder @this)
         {
             @this.ConfigureObject(
-                configurator => configurator.UseRuntimeRegistrant(
-                    provider => new LocalRuntimeStatelessServiceRuntimeRegistrant()));
+                configurator =>
+                {
+                    configurator.ConfigureDependencies(
+                        dependencies => dependencies.AddLogging(logging => logging.AddConsole()));
+
+                    configurator.UseRuntimeRegistrant(
+                        provider => ActivatorUtilities.CreateInstance<LocalRuntimeStatelessServiceRuntimeRegistrant>(provider));
+                });
 
             return @this;
         }
