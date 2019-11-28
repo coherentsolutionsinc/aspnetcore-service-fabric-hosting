@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Fabric;
 using System.Threading.Tasks;
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ServiceManifest.Objects.Factories;
+
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Services;
+
 using Microsoft.Extensions.Logging;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime

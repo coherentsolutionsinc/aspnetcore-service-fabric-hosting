@@ -1,32 +1,60 @@
 ﻿using System;
 using System.Fabric;
 using System.Fabric.Description;
-using System.Threading.Tasks;
 using System.Threading;
-using Microsoft.Extensions.Logging.Console;
+using System.Threading.Tasks;
+
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ActivationContexts;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.NodeContexts;
+
 using Microsoft.Extensions.Logging;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
 {
-    public static class LocalRuntime
+    public class LocalRuntime : ILocalRuntime
     {
-        private readonly static byte[] initializationData;
+        private readonly INodeContextProvider nodeContextProvider;
+
+        private readonly ICodePackageActivationContextProvider activationContextProvider;
+
+        private static readonly byte[] initializationData;
 
         private static int instanceOrReplicaId;
+
         private static Guid partitionId;
 
         static LocalRuntime()
         {
             initializationData = Array.Empty<byte>();
             instanceOrReplicaId = 0;
-            partitionId = new Guid(0x30fb9439, 0x4624, 0x492d, new byte[] { 0xa9, 0x8, 0x9b, 0x16, 0x9f, 0x93, 0xef, 0x28 });
+            partitionId = new Guid(
+                0x30fb9439,
+                0x4624,
+                0x492d,
+                new byte[]
+                {
+                    0xa9,
+                    0x8,
+                    0x9b,
+                    0x16,
+                    0x9f,
+                    0x93,
+                    0xef,
+                    0x28
+                });
         }
 
-        public static async Task RegisterServiceAsync(
+        public LocalRuntime(
+            INodeContextProvider nodeContextProvider,
+            ICodePackageActivationContextProvider activationContextProvider)
+        {
+            this.nodeContextProvider = nodeContextProvider ?? throw new ArgumentNullException(nameof(nodeContextProvider));
+            this.activationContextProvider = activationContextProvider ?? throw new ArgumentNullException(nameof(activationContextProvider));
+        }
+
+        public async Task RegisterServiceAsync(
             string serviceTypeName,
             Func<StatelessServiceContext, StatelessService> serviceFactory,
-            ILogger logger,
-            TimeSpan timeout = default,
             CancellationToken cancellationToken = default)
         {
             if (serviceTypeName is null)
@@ -47,6 +75,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
             {
                 throw new InvalidOperationException();
             }
+
             var serviceDescription = serviceDescriptions[serviceTypeName];
             if (serviceDescription.ServiceTypeKind != ServiceDescriptionKind.Stateless)
             {
@@ -64,7 +93,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
                 Interlocked.Increment(ref instanceOrReplicaId));
 
             var serviceAdapter = new LocalRuntimeStatelessServiceAdapter(
-                serviceFactory(serviceContext), 
+                serviceFactory(serviceContext),
                 servicePartition,
                 logger);
 
