@@ -1128,6 +1128,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
                             dependencies.AddSingleton<ILocalRuntime, LocalRuntime>();
                         });
 
+                    configurator.UseRemotingListenerReplicaTemplate(() => new LocalRuntimeRemotingListenerReplicaTemplate());
                     configurator.UseRuntimeRegistrant(
                         provider => ActivatorUtilities.CreateInstance<LocalRuntimeStatelessServiceRuntimeRegistrant>(provider));
                 });
