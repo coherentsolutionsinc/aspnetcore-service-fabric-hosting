@@ -4,10 +4,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Conf
 {
     public interface IServicePackage
     {
-        string Path
-        {
-            get;
-        }
+        string Path { get; }
 
         Stream GetManifestStream();
 

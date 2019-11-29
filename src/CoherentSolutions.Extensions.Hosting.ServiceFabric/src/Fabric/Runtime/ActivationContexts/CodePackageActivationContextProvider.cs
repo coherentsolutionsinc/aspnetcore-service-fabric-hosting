@@ -7,22 +7,25 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
 {
     public class CodePackageActivationContextProvider : ICodePackageActivationContextProvider
     {
-        private readonly IServiceManifestProvider manifestProvider;
+        private readonly ServiceManifestElement manifest;
+
+        private readonly IServiceActivationContext activationContext;
 
         private readonly ICodePackageActivationContextReader activationContextReader;
 
         public CodePackageActivationContextProvider(
-            IServiceManifestProvider manifestProvider,
+            ServiceManifestElement manifest,
+            IServiceActivationContext activationContext,
             ICodePackageActivationContextReader activationContextReader)
         {
-            this.manifestProvider = manifestProvider ?? throw new ArgumentNullException(nameof(manifestProvider));
+            this.manifest = manifest ?? throw new ArgumentNullException(nameof(manifest));
+            this.activationContext = activationContext ?? throw new ArgumentNullException(nameof(activationContext));
             this.activationContextReader = activationContextReader ?? throw new ArgumentNullException(nameof(activationContextReader));
         }
 
         public ICodePackageActivationContext GetActivationContext()
         {
-            return this.activationContextReader.Read(
-                this.manifestProvider.GetManifest());
+            return this.activationContextReader.Read(this.activationContext, this.manifest);
         }
     }
 }

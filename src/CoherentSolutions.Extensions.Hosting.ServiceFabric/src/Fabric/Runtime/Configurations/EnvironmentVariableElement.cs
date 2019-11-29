@@ -5,17 +5,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Conf
     public class EnvironmentVariableElement
     {
         [XmlAttribute(AttributeName = "Name")]
-        public string Name
-        {
-            get;
-            set;
-        }
+        public string Name { get; set; }
 
         [XmlAttribute(AttributeName = "Value")]
-        public string Value
-        {
-            get;
-            set;
-        }
+        public string Value { get; set; }
     }
 }

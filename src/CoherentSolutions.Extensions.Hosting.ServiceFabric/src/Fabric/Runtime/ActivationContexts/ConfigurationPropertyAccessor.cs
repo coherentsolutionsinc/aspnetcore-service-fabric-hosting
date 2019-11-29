@@ -18,10 +18,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
 
         private static readonly Lazy<PropertyInfo> type;
 
-        public ConfigurationProperty Instance
-        {
-            get;
-        }
+        public ConfigurationProperty Instance { get; }
 
         public string Name
         {

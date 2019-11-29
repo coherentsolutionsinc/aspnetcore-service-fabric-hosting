@@ -32,7 +32,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
             }
 
             var packageDescriptionAccessor = new PackageDescriptionAccessor<TPackageDescription>(
-                (TPackageDescription)packageDescrCtor.Value.Invoke(null))
+                (TPackageDescription) packageDescrCtor.Value.Invoke(null))
             {
                 Path = System.IO.Path.Combine(element.Manifest.PackageRoot, element.Name),
                 Name = element.Name,
@@ -44,7 +44,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
             this.InitializePackageDescription(packageDescriptionAccessor.Instance, element);
 
             var packageAccess = new PackageAccessor<TPackage, TPackageDescription>(
-                (TPackage)packageCtor.Value.Invoke(null))
+                (TPackage) packageCtor.Value.Invoke(null))
             {
                 Path = packageDescriptionAccessor.Path,
                 Description = packageDescriptionAccessor.Instance

@@ -7,6 +7,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
     public interface ICodePackageActivationContextReader
     {
         ICodePackageActivationContext Read(
+            IServiceActivationContext activationContext,
             ServiceManifestElement manifest);
     }
 }

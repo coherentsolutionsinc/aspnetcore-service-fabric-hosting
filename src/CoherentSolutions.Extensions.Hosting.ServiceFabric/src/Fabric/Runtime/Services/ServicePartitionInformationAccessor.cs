@@ -11,10 +11,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
     {
         private static readonly Lazy<PropertyInfo> id;
 
-        public TPartitionInformation Instance
-        {
-            get;
-        }
+        public TPartitionInformation Instance { get; }
 
         public Guid Id
         {

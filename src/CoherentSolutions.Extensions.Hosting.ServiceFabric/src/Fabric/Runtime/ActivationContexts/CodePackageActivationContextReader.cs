@@ -11,13 +11,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
 {
     public class CodePackageActivationContextReader : ICodePackageActivationContextReader
     {
-        private const string CODE_PACKAGE_NAME = "Code";
-
-        private const string CODE_PACKAGE_VERSION = "1.0.0";
-
         public ICodePackageActivationContext Read(
+            IServiceActivationContext activationContext,
             ServiceManifestElement manifest)
         {
+            if (activationContext is null)
+            {
+                throw new ArgumentNullException(nameof(activationContext));
+            }
+
             if (manifest is null)
             {
                 throw new ArgumentNullException(nameof(manifest));
@@ -34,15 +36,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
              * So to avoid unnecessary complexity we simple create custom
              * code package with the name Code.
              */
-            var activeCodePackage = new CodePackageAccessor(
-                new CodePackageFactory()
-                   .Create(
-                        new CodePackageElement
-                        {
-                            Manifest = manifest,
-                            Name = CODE_PACKAGE_NAME,
-                            Version = CODE_PACKAGE_VERSION
-                        }))
+            var codePackage = new CodePackageAccessor(
+                    new CodePackageFactory()
+                       .Create(
+                            new CodePackageElement
+                            {
+                                Manifest = manifest,
+                                Name = activationContext.CodePackageName,
+                                Version = activationContext.CodePackageVersion
+                            }))
                 {
                     /*
                      * Here we override path relative to PackageRoot directory with the path
@@ -56,10 +58,21 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
                .Instance;
 
             return new CodePackageActivationContext(
+                activationContext.ApplicationName,
+                activationContext.ApplicationTypeName,
+                activationContext.ActivationContextId,
+                activationContext.LogDirectory,
+                activationContext.TempDirectory,
+                activationContext.WorkDirectory,
+                activationContext.CodePackageName,
+                activationContext.CodePackageVersion,
                 manifest.Name,
                 manifest.Version,
-                activeCodePackage,
                 new ApplicationPrincipalsDescription(),
+                new[]
+                {
+                    codePackage
+                },
                 CreatePackagesFrom(manifest.ConfigurationPackages, new ConfigurationPackageFactory()),
                 CreatePackagesFrom(manifest.DataPackages, new DataPackageFactory()),
                 CreateServiceTypesDescriptionsFrom(manifest.ServiceTypes),

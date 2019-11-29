@@ -7,17 +7,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Conf
     public class ConfigurationSettingsElement
     {
         [XmlElement(ElementName = "Name")]
-        public string Name
-        {
-            get;
-            set;
-        }
+        public string Name { get; set; }
 
         [XmlElement(ElementName = "Section")]
-        public List<ConfigurationSectionElement> Sections
-        {
-            get;
-            set;
-        }
+        public List<ConfigurationSectionElement> Sections { get; set; }
     }
 }

@@ -5,24 +5,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Conf
     public abstract class PackageElement
     {
         [XmlIgnore]
-        public ServiceManifestElement Manifest
-        {
-            get;
-            set;
-        }
+        public ServiceManifestElement Manifest { get; set; }
 
         [XmlAttribute(AttributeName = "Name")]
-        public string Name
-        {
-            get;
-            set;
-        }
+        public string Name { get; set; }
 
         [XmlAttribute(AttributeName = "Version")]
-        public string Version
-        {
-            get;
-            set;
-        }
+        public string Version { get; set; }
     }
 }

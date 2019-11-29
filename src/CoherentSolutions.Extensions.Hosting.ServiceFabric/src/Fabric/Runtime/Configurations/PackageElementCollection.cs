@@ -12,7 +12,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Conf
 
         public int Count => this.collection.Count;
 
-        public bool IsReadOnly => ((ICollection<T>)this.collection).IsReadOnly;
+        public bool IsReadOnly => ((ICollection<T>) this.collection).IsReadOnly;
 
         public PackageElementCollection(
             ServiceManifestElement parent)
@@ -54,7 +54,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Conf
 
         public IEnumerator<T> GetEnumerator()
         {
-            return ((ICollection<T>)this.collection).GetEnumerator();
+            return ((ICollection<T>) this.collection).GetEnumerator();
         }
 
         public bool Remove(
@@ -71,7 +71,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Conf
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return ((ICollection<T>)this.collection).GetEnumerator();
+            return ((ICollection<T>) this.collection).GetEnumerator();
         }
     }
 }

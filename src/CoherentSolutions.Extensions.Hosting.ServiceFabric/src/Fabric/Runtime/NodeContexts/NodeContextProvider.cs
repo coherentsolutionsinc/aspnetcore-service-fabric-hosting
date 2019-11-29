@@ -14,6 +14,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Node
                 new BigInteger(1),
                 Environment.MachineName,
                 Environment.MachineName);
-            }
+        }
     }
 }

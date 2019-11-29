@@ -5,15 +5,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Conf
     public abstract class ServiceTypeElement
     {
         [XmlAttribute(AttributeName = "ServiceTypeName")]
-        public string ServiceTypeName
-        {
-            get;
-            set;
-        }
+        public string ServiceTypeName { get; set; }
 
-        public abstract ServiceTypeElementKind Kind
-        {
-            get;
-        }
+        public abstract ServiceTypeElementKind Kind { get; }
     }
 }

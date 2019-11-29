@@ -7,10 +7,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Conf
     {
         [XmlArray(ElementName = "EnvironmentVariables")]
         [XmlArrayItem(ElementName = "EnvironmentVariable")]
-        public List<EnvironmentVariableElement> EnvironmentVariables
-        {
-            get;
-            set;
-        }
+        public List<EnvironmentVariableElement> EnvironmentVariables { get; set; }
     }
 }

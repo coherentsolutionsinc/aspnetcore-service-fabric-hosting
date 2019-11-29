@@ -39,7 +39,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Conf
             Stream stream)
         {
             var slz = new XmlSerializer(typeof(T), XML_NS);
-            return (T)slz.Deserialize(stream);
+            return (T) slz.Deserialize(stream);
         }
     }
 }

@@ -5,38 +5,18 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Conf
     public class ConfigurationParameterElement
     {
         [XmlAttribute(AttributeName = "Name")]
-        public string Name
-        {
-            get;
-            set;
-        }
+        public string Name { get; set; }
 
         [XmlAttribute(AttributeName = "Value")]
-        public string Value
-        {
-            get;
-            set;
-        }
+        public string Value { get; set; }
 
         [XmlAttribute(AttributeName = "MustOverride")]
-        public bool MustOverride
-        {
-            get;
-            set;
-        }
+        public bool MustOverride { get; set; }
 
         [XmlAttribute(AttributeName = "IsEncrypted")]
-        public bool IsEncrypted
-        {
-            get;
-            set;
-        }
+        public bool IsEncrypted { get; set; }
 
         [XmlAttribute(AttributeName = "Type")]
-        public string Type
-        {
-            get;
-            set;
-        }
+        public string Type { get; set; }
     }
 }

@@ -24,7 +24,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
                 throw new ArgumentNullException(nameof(element));
             }
 
-            var instance = (ConfigurationSettings)ctor.Value.Invoke(null);
+            var instance = (ConfigurationSettings) ctor.Value.Invoke(null);
 
             var sectionFactory = new ConfigurationSectionFactory();
             foreach (var item in element.Sections)

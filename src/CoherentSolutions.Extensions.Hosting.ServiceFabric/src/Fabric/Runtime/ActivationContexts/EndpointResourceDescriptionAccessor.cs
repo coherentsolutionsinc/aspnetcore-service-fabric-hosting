@@ -10,10 +10,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
     {
         private static readonly Lazy<PropertyInfo> port;
 
-        public EndpointResourceDescription Instance
-        {
-            get;
-        }
+        public EndpointResourceDescription Instance { get; }
 
         public string Name
         {

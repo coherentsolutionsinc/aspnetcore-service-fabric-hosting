@@ -7,61 +7,29 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Conf
     public class ServiceManifestElement
     {
         [XmlIgnore]
-        public string PackageRoot
-        {
-            get;
-            set;
-        }
+        public string PackageRoot { get; set; }
 
         [XmlAttribute(AttributeName = "Name")]
-        public string Name
-        {
-            get;
-            set;
-        }
+        public string Name { get; set; }
 
         [XmlAttribute(AttributeName = "Version")]
-        public string Version
-        {
-            get;
-            set;
-        }
+        public string Version { get; set; }
 
         [XmlArray(ElementName = "ServiceTypes")]
         [XmlArrayItem(ElementName = "StatelessServiceType", Type = typeof(StatelessServiceTypeElement))]
-        public List<ServiceTypeElement> ServiceTypes
-        {
-            get;
-            set;
-        }
+        public List<ServiceTypeElement> ServiceTypes { get; set; }
 
         [XmlElement(ElementName = "CodePackage")]
-        public PackageElementCollection<CodePackageElement> CodePackages
-        {
-            get;
-            set;
-        }
+        public PackageElementCollection<CodePackageElement> CodePackages { get; set; }
 
         [XmlElement(ElementName = "ConfigPackage")]
-        public PackageElementCollection<ConfigurationPackageElement> ConfigurationPackages
-        {
-            get;
-            set;
-        }
+        public PackageElementCollection<ConfigurationPackageElement> ConfigurationPackages { get; set; }
 
         [XmlElement(ElementName = "DataPackage")]
-        public PackageElementCollection<DataPackageElement> DataPackages
-        {
-            get;
-            set;
-        }
+        public PackageElementCollection<DataPackageElement> DataPackages { get; set; }
 
         [XmlElement(ElementName = "Resources")]
-        public ResourcesElement Resources
-        {
-            get;
-            set;
-        }
+        public ResourcesElement Resources { get; set; }
 
         public ServiceManifestElement()
         {

@@ -10,10 +10,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Conf
 
         private readonly IReadOnlyDictionary<string, string> settingsXmls;
 
-        public string Path
-        {
-            get;
-        }
+        public string Path { get; }
 
         public ServicePackage(
             string packageRoot,

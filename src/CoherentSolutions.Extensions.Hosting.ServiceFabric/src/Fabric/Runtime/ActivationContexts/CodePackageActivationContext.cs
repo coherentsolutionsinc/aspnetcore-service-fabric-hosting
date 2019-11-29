@@ -4,32 +4,17 @@ using System.Collections.ObjectModel;
 using System.Fabric;
 using System.Fabric.Description;
 using System.Fabric.Health;
-using System.IO;
 using System.Linq;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ActivationContexts
 {
     public class CodePackageActivationContext : ICodePackageActivationContext
     {
-        private const string APPLICATION_NAME = "fabric:/ApplicationName";
-
-        private const string APPLICATION_TYPE_NAME = "ApplicationTypeName";
-
-        private const string CONTEXT_ID = "366B8CCC-8CC3-4EAA-8B90-938000A5EF52";
-
-        private const string LOG_DIRECTORY = "Log";
-
-        private const string WORK_DIRECTORY = "Work";
-
-        private const string TEMP_DIRECTORY = "Temp";
-
         private readonly ApplicationPrincipalsDescription applicationPrincipalsDescription;
 
         private readonly string serviceManifestName;
 
         private readonly string serviceManifestVersion;
-
-        private readonly CodePackage activeCodePackage;
 
         private readonly CodePackageCollection codePackages;
 
@@ -41,11 +26,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
 
         private readonly EndpointResourceDescriptionCollection endpointResourceDescriptions;
 
-        public string ApplicationName => APPLICATION_NAME;
+        public string ApplicationName { get; }
 
-        public string ApplicationTypeName => APPLICATION_TYPE_NAME;
+        public string ApplicationTypeName { get; }
 
-        public string ContextId => CONTEXT_ID;
+        public string ContextId { get; }
 
         public string WorkDirectory { get; }
 
@@ -53,15 +38,23 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
 
         public string TempDirectory { get; }
 
-        public string CodePackageName => this.activeCodePackage.Description.Name;
+        public string CodePackageName { get; }
 
-        public string CodePackageVersion => this.activeCodePackage.Description.Version;
+        public string CodePackageVersion { get; }
 
         public CodePackageActivationContext(
+            string applicationName,
+            string applicationTypeName,
+            string contextId,
+            string logDirectory,
+            string tempDirectory,
+            string workDirectory,
+            string codePackageName,
+            string codePackageVersion,
             string serviceManifestName,
             string serviceManifestVersion,
-            CodePackage activeCodePackage,
             ApplicationPrincipalsDescription applicationPrincipalsDescription,
+            IEnumerable<CodePackage> codePackages,
             IEnumerable<ConfigurationPackage> configurationPackages,
             IEnumerable<DataPackage> dataPackages,
             IEnumerable<ServiceTypeDescription> serviceTypeDescriptions,
@@ -87,22 +80,70 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
                 throw new ArgumentNullException(nameof(endpointResourceDescriptions));
             }
 
-            var currentTemp = Path.GetTempPath();
+            if (string.IsNullOrWhiteSpace(applicationName))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(applicationName));
+            }
 
-            this.LogDirectory = Path.Combine(currentTemp, CONTEXT_ID, LOG_DIRECTORY);
-            this.WorkDirectory = Path.Combine(currentTemp, CONTEXT_ID, WORK_DIRECTORY);
-            this.TempDirectory = Path.Combine(currentTemp, CONTEXT_ID, TEMP_DIRECTORY);
+            if (string.IsNullOrWhiteSpace(applicationTypeName))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(applicationTypeName));
+            }
+
+            if (string.IsNullOrWhiteSpace(contextId))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(contextId));
+            }
+
+            if (string.IsNullOrWhiteSpace(logDirectory))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(logDirectory));
+            }
+
+            if (string.IsNullOrWhiteSpace(tempDirectory))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(tempDirectory));
+            }
+
+            if (string.IsNullOrWhiteSpace(workDirectory))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(workDirectory));
+            }
+
+            if (string.IsNullOrWhiteSpace(codePackageName))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(codePackageName));
+            }
+
+            if (string.IsNullOrWhiteSpace(codePackageVersion))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(codePackageVersion));
+            }
+
+            if (string.IsNullOrWhiteSpace(serviceManifestName))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(serviceManifestName));
+            }
+
+            if (string.IsNullOrWhiteSpace(serviceManifestVersion))
+            {
+                throw new ArgumentException("Value cannot be null or whitespace.", nameof(serviceManifestVersion));
+            }
+
+            this.ApplicationName = applicationName;
+            this.ApplicationTypeName = applicationTypeName;
+            this.ContextId = contextId;
+            this.LogDirectory = logDirectory;
+            this.TempDirectory = tempDirectory;
+            this.WorkDirectory = workDirectory;
+            this.CodePackageName = codePackageName;
+            this.CodePackageVersion = codePackageVersion;
 
             this.serviceManifestName = serviceManifestName;
             this.serviceManifestVersion = serviceManifestVersion;
             this.applicationPrincipalsDescription = applicationPrincipalsDescription ?? throw new ArgumentNullException(nameof(applicationPrincipalsDescription));
-            this.activeCodePackage = activeCodePackage ?? throw new ArgumentNullException(nameof(activeCodePackage));
 
-            this.codePackages = new CodePackageCollection()
-            {
-                activeCodePackage
-            };
-
+            this.codePackages = new CodePackageCollection(codePackages);
             this.configurationPackages = new ConfigurationPackageCollection(configurationPackages);
             this.dataPackages = new DataPackageCollection(dataPackages);
             this.serviceTypeDescriptions = new ServiceTypeDescriptionCollection(serviceTypeDescriptions);

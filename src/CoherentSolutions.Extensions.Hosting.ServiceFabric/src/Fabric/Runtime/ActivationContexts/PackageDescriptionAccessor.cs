@@ -19,10 +19,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
 
         private static readonly Lazy<PropertyInfo> serviceManifestVersion;
 
-        public TPackageDescription Instance
-        {
-            get;
-        }
+        public TPackageDescription Instance { get; }
 
         public string Path
         {

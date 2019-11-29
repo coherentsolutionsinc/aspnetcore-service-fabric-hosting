@@ -7,10 +7,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Conf
     {
         [XmlArray(ElementName = "Endpoints")]
         [XmlArrayItem(ElementName = "Endpoint")]
-        public List<EndpointElement> Endpoints
-        {
-            get;
-            set;
-        }
+        public List<EndpointElement> Endpoints { get; set; }
     }
 }

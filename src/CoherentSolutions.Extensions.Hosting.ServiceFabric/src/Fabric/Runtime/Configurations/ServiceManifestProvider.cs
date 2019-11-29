@@ -4,22 +4,21 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Conf
 {
     public class ServiceManifestProvider : IServiceManifestProvider
     {
-        private readonly IServicePackageProvider packageProvider;
+        private readonly IServicePackage package;
 
         private readonly IServiceManifestReader manifestReader;
 
         public ServiceManifestProvider(
-            IServicePackageProvider packageProvider,
+            IServicePackage package,
             IServiceManifestReader manifestReader)
         {
-            this.packageProvider = packageProvider ?? throw new ArgumentNullException(nameof(packageProvider));
+            this.package = package ?? throw new ArgumentNullException(nameof(package));
             this.manifestReader = manifestReader ?? throw new ArgumentNullException(nameof(manifestReader));
         }
 
         public ServiceManifestElement GetManifest()
         {
-            return this.manifestReader.Read(
-                this.packageProvider.GetPackage());
+            return this.manifestReader.Read(this.package);
         }
     }
 }

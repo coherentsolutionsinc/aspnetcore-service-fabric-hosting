@@ -5,8 +5,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ActivationContexts;
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.NodeContexts;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Services;
 
 using Microsoft.Extensions.Logging;
@@ -15,15 +13,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
 {
     public class LocalRuntime : ILocalRuntime
     {
-        private readonly INodeContextProvider nodeContextProvider;
-
-        private readonly ICodePackageActivationContextProvider activationContextProvider;
-
-        private readonly ILoggerProvider loggerProvider;
-
         private static readonly byte[] initializationData;
 
         private static int instanceOrReplicaId;
+
+        private readonly NodeContext nodeContext;
+
+        private readonly ICodePackageActivationContext codePackageActivationContext;
+
+        private readonly ILoggerProvider loggerProvider;
 
         static LocalRuntime()
         {
@@ -32,12 +30,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
         }
 
         public LocalRuntime(
-            INodeContextProvider nodeContextProvider,
-            ICodePackageActivationContextProvider activationContextProvider,
+            NodeContext nodeContext,
+            ICodePackageActivationContext codePackageActivationContext,
             ILoggerProvider loggerProvider)
         {
-            this.nodeContextProvider = nodeContextProvider ?? throw new ArgumentNullException(nameof(nodeContextProvider));
-            this.activationContextProvider = activationContextProvider ?? throw new ArgumentNullException(nameof(activationContextProvider));
+            this.nodeContext = nodeContext ?? throw new ArgumentNullException(nameof(nodeContext));
+            this.codePackageActivationContext = codePackageActivationContext ?? throw new ArgumentNullException(nameof(codePackageActivationContext));
             this.loggerProvider = loggerProvider ?? throw new ArgumentNullException(nameof(loggerProvider));
         }
 
@@ -56,10 +54,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
                 throw new ArgumentNullException(nameof(serviceFactory));
             }
 
-            var nodeContext = this.nodeContextProvider.GetNodeContext();
-            var activationContext = this.activationContextProvider.GetActivationContext();
-
-            var found = activationContext
+            var found = this.codePackageActivationContext
                .GetServiceTypes()
                .Any(i => i.ServiceTypeKind == ServiceDescriptionKind.Stateless && i.ServiceTypeName == serviceTypeName);
 
@@ -70,22 +65,43 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
 
             var servicePartitionId = Guid.NewGuid();
             var serviceInstanceId = Interlocked.Increment(ref instanceOrReplicaId);
-            var serviceName = $"{serviceTypeName}-{serviceInstanceId}";
+            var serviceName = $"{this.codePackageActivationContext.ApplicationName}/{serviceTypeName}-{serviceInstanceId}";
             var servicePartition = new LocalRuntimeStatelessServiceSingletonPartition(servicePartitionId);
             var serviceContext = new StatelessServiceContext(
-                nodeContext,
-                activationContext,
+                this.nodeContext,
+                this.codePackageActivationContext,
                 serviceTypeName,
-                new Uri($"{activationContext.ApplicationName}/{serviceName}"),
+                new Uri(serviceName),
                 initializationData,
                 servicePartitionId,
                 serviceInstanceId);
+
+            Environment.SetEnvironmentVariable("Fabric_ApplicationName", this.codePackageActivationContext.ApplicationName);
+            Environment.SetEnvironmentVariable("Fabric_Folder_App_Log", this.codePackageActivationContext.LogDirectory);
+            Environment.SetEnvironmentVariable("Fabric_Folder_App_Temp", this.codePackageActivationContext.TempDirectory);
+            Environment.SetEnvironmentVariable("Fabric_Folder_App_Work", this.codePackageActivationContext.WorkDirectory);
+            Environment.SetEnvironmentVariable("Fabric_ServicePackageActivationId", this.codePackageActivationContext.ContextId);
+            Environment.SetEnvironmentVariable("Fabric_ServiceName", serviceName);
+            Environment.SetEnvironmentVariable("Fabric_IsContainerHost", bool.FalseString);
+
+            Environment.SetEnvironmentVariable("Fabric_CodePackageName", this.codePackageActivationContext.CodePackageName);
+
+            foreach (var endpoint in this.codePackageActivationContext.GetEndpoints())
+            {
+                Environment.SetEnvironmentVariable($"Fabric_Endpoint_{endpoint.Name}", endpoint.Port.ToString());
+                Environment.SetEnvironmentVariable($"Fabric_Endpoint_IPOrFQDN_{endpoint.Name}", endpoint.IpAddressOrFqdn);
+            }
+
+            Environment.SetEnvironmentVariable("Fabric_NodeId", this.nodeContext.NodeId.ToString());
+            Environment.SetEnvironmentVariable("Fabric_NodeIPOrFQDN", this.nodeContext.IPAddressOrFQDN);
+            Environment.SetEnvironmentVariable("Fabric_NodeName", this.nodeContext.NodeName);
 
             var service = serviceFactory(serviceContext);
             if (service is null)
             {
                 throw new InvalidOperationException($"No stateless service instance was created");
             }
+
             var serviceAdapter = new LocalRuntimeStatelessServiceAdapter(
                 new StatelessServiceAccessor<StatelessService>(service)
                 {

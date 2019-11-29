@@ -25,7 +25,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
             }
 
             return new ConfigurationPropertyAccessor(
-                    (ConfigurationProperty)ctor.Value.Invoke(null))
+                    (ConfigurationProperty) ctor.Value.Invoke(null))
                 {
                     Name = element.Name,
                     Value = element.Value,

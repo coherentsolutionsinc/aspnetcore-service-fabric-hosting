@@ -1108,6 +1108,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
         public static IStatelessServiceHostBuilder UseLocalRuntime(
             this IStatelessServiceHostBuilder @this)
         {
+            /*
+             * UseLocalRuntime should do nothing when code is executed inside Service Fabric service
+             */
+            if (Environment.GetEnvironmentVariable("Fabric_ApplicationName") is object)
+            {
+                return @this;
+            }
+
             @this.ConfigureObject(
                 configurator =>
                 {
@@ -1116,14 +1124,19 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
                         {
                             dependencies.AddLogging(logging => logging.AddConsole());
 
-                            dependencies.AddSingleton<INodeContextProvider, NodeContextProvider>();
-                            dependencies.AddSingleton<IServicePackageProvider, ServicePackageProvider>();
+                            dependencies.AddSingleton(
+                                provider => ActivatorUtilities.CreateInstance<ServiceActivationContextProvider>(provider).GetActivationContext());
+                            dependencies.AddSingleton(
+                                provider => ActivatorUtilities.CreateInstance<NodeContextProvider>(provider).GetNodeContext());
+                            dependencies.AddSingleton(
+                                provider => ActivatorUtilities.CreateInstance<ServicePackageProvider>(provider).GetPackage());
+                            dependencies.AddSingleton(
+                                provider => ActivatorUtilities.CreateInstance<ServiceManifestProvider>(provider).GetManifest());
+                            dependencies.AddSingleton(
+                                provider => ActivatorUtilities.CreateInstance<CodePackageActivationContextProvider>(provider).GetActivationContext());
                             
                             dependencies.AddTransient<IServiceManifestReader, ServiceManifestReader>();
-                            dependencies.AddSingleton<IServiceManifestProvider, ServiceManifestProvider>();
-                            
                             dependencies.AddTransient<ICodePackageActivationContextReader, CodePackageActivationContextReader>();
-                            dependencies.AddSingleton<ICodePackageActivationContextProvider, CodePackageActivationContextProvider>();
 
                             dependencies.AddSingleton<ILocalRuntime, LocalRuntime>();
                         });

@@ -24,14 +24,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
 
         private static readonly Lazy<MethodInfo> onOpenAsync;
 
-        public TService Instance
-        {
-            get;
-        }
+        public TService Instance { get; }
 
         public IStatelessServicePartition Partition
         {
-            get => (IStatelessServicePartition)partition.Value.GetValue(this.Instance);
+            get => (IStatelessServicePartition) partition.Value.GetValue(this.Instance);
             set => partition.Value.SetValue(this.Instance, value);
         }
 
@@ -51,13 +48,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
 
         public IEnumerable<ServiceInstanceListener> CreateServiceInstanceListeners()
         {
-            return (IEnumerable<ServiceInstanceListener>)createInstanceListeners.Value.Invoke(this.Instance, null);
+            return (IEnumerable<ServiceInstanceListener>) createInstanceListeners.Value.Invoke(this.Instance, null);
         }
 
         public Task OpenAsync(
             CancellationToken cancellationToken)
         {
-            return (Task)onOpenAsync.Value.Invoke(
+            return (Task) onOpenAsync.Value.Invoke(
                 this.Instance,
                 new object[]
                 {
@@ -68,7 +65,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Serv
         public Task RunAsync(
             CancellationToken cancellationToken)
         {
-            return (Task)runAsync.Value.Invoke(
+            return (Task) runAsync.Value.Invoke(
                 this.Instance,
                 new object[]
                 {

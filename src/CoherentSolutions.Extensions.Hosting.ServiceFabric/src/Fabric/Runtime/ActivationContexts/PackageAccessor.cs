@@ -14,20 +14,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
 
         private static readonly Lazy<PropertyInfo> description;
 
-        public TPackage Instance
-        {
-            get;
-        }
+        public TPackage Instance { get; }
 
         public string Path
         {
-            get => (string)path.Value.GetValue(this.Instance);
+            get => (string) path.Value.GetValue(this.Instance);
             set => path.Value.SetValue(this.Instance, value);
         }
 
         public TPackageDescription Description
         {
-            get => (TPackageDescription)description.Value.GetValue(this.Instance);
+            get => (TPackageDescription) description.Value.GetValue(this.Instance);
             set => description.Value.SetValue(this.Instance, value);
         }
 

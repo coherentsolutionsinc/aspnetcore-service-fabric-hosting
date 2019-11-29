@@ -9,16 +9,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
 {
     public class LocalRuntimeStatelessServiceSingletonPartition : IStatelessServicePartition
     {
-        public ServicePartitionInformation PartitionInfo
-        {
-            get;
-        }
+        public ServicePartitionInformation PartitionInfo { get; }
 
         public LocalRuntimeStatelessServiceSingletonPartition(
             Guid id)
         {
             this.PartitionInfo = new ServicePartitionInformationAccessor<SingletonPartitionInformation>(
-                new SingletonPartitionInformation())
+                    new SingletonPartitionInformation())
                 {
                     Id = id
                 }

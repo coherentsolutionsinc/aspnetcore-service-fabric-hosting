@@ -5,38 +5,18 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Conf
     public class EndpointElement
     {
         [XmlAttribute(AttributeName = "Name")]
-        public string Name
-        {
-            get;
-            set;
-        }
+        public string Name { get; set; }
 
         [XmlAttribute(AttributeName = "Protocol")]
-        public string Protocol
-        {
-            get;
-            set;
-        }
+        public string Protocol { get; set; }
 
         [XmlAttribute(AttributeName = "Port")]
-        public string Port
-        {
-            get;
-            set;
-        }
+        public string Port { get; set; }
 
         [XmlAttribute(AttributeName = "Type")]
-        public string Type
-        {
-            get;
-            set;
-        }
+        public string Type { get; set; }
 
         [XmlAttribute(AttributeName = "CodePackageRef")]
-        public string CodePackageRef
-        {
-            get;
-            set;
-        }
+        public string CodePackageRef { get; set; }
     }
 }

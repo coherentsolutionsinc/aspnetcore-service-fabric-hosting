@@ -25,7 +25,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
             }
 
             var instance = new ConfigurationSectionAccessor(
-                    (ConfigurationSection)ctor.Value.Invoke(null))
+                    (ConfigurationSection) ctor.Value.Invoke(null))
                 {
                     Name = element.Name
                 }

@@ -5,10 +5,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Conf
     public class ConfigurationPackageElement : PackageElement
     {
         [XmlIgnore]
-        public ConfigurationSettingsElement Settings
-        {
-            get;
-            set;
-        }
+        public ConfigurationSettingsElement Settings { get; set; }
     }
 }
