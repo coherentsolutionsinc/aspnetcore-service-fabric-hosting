@@ -135,7 +135,7 @@ private static void Main(string[] args)
                     .DefineAspNetCoreListener(
                         listenerBuilder =>
                         {
-                            listenerBuilder.UseEndpoint("ServiceEndpoint")
+                            listenerBuilder.UseEndpoint("ServiceEndpoint");
                         });
             })
         .Build()
@@ -185,7 +185,7 @@ private static void Main(string[] args)
                         listenerBuilder =>
                         {
                             listenerBuilder
-                                .UseEndpoint("ServiceEndpoint2")
+                                .UseEndpoint("ServiceEndpoint2");
                         });
             })
         .Build()
@@ -233,7 +233,7 @@ private static void Main(string[] args)
                         {
                             listenerBuilder
                                 .UseEndpoint("ServiceEndpoint2")
-                                .UseImplementation<ApiServiceImpl>()
+                                .UseImplementation<ApiServiceImpl>();
                         });
             })
         .Build()
@@ -290,7 +290,7 @@ private static void Main(string[] args)
                     .UseServiceType(...)
                     .DefineAspNetCoreListener(...)
                     .DefineRemotingListener(...)
-                    .DefineDelegate(delegateBuilder => { })
+                    .DefineDelegate(delegateBuilder => { });
             })
         .Build()
         .Run();
