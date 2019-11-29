@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ActivationContexts
 {
@@ -7,8 +8,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
         private const string APPLICATION_NAME = "fabric:/ApplicationName";
 
         private const string APPLICATION_TYPE_NAME = "ApplicationTypeName";
-
-        private const string ACTIVATION_CONTEXT_ID = "366B8CCC-8CC3-4EAA-8B90-938000A5EF52";
 
         private const string CODE_PACKAGE_NAME = "Code";
 
@@ -22,16 +21,17 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
 
         public IServiceActivationContext GetActivationContext()
         {
-            var tempPath = Path.GetTempPath();
+            var id = Guid.NewGuid().ToString();
+            var path = Path.GetTempPath();
             return new ServiceActivationContext(
                 APPLICATION_NAME,
                 APPLICATION_TYPE_NAME,
-                ACTIVATION_CONTEXT_ID,
+                id,
                 CODE_PACKAGE_NAME,
                 CODE_PACKAGE_VERSION,
-                Path.Combine(tempPath, ACTIVATION_CONTEXT_ID, LOG_DIRECTORY),
-                Path.Combine(tempPath, ACTIVATION_CONTEXT_ID, TEMP_DIRECTORY),
-                Path.Combine(tempPath, ACTIVATION_CONTEXT_ID, WORK_DIRECTORY));
+                Path.Combine(path, id, LOG_DIRECTORY),
+                Path.Combine(path, id, TEMP_DIRECTORY),
+                Path.Combine(path, id, WORK_DIRECTORY));
         }
     }
 }
