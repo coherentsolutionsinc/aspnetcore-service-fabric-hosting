@@ -5,6 +5,7 @@ using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ActivationContexts;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Configurations;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.NodeContexts;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 using Microsoft.AspNetCore.Hosting;
@@ -1115,6 +1116,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
                         {
                             dependencies.AddLogging(logging => logging.AddConsole());
 
+                            dependencies.AddSingleton<INodeContextProvider, NodeContextProvider>();
                             dependencies.AddSingleton<IServicePackageProvider, ServicePackageProvider>();
                             
                             dependencies.AddTransient<IServiceManifestReader, ServiceManifestReader>();
@@ -1122,6 +1124,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
                             
                             dependencies.AddTransient<ICodePackageActivationContextReader, CodePackageActivationContextReader>();
                             dependencies.AddSingleton<ICodePackageActivationContextProvider, CodePackageActivationContextProvider>();
+
+                            dependencies.AddSingleton<ILocalRuntime, LocalRuntime>();
                         });
 
                     configurator.UseRuntimeRegistrant(

@@ -18,13 +18,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Conf
 
         public ServiceManifestElement GetManifest()
         {
-            var package = this.packageProvider.GetPackage();
-            if (package is null)
-            {
-                throw new InvalidOperationException();
-            }
-
-            return this.manifestReader.Read(package);
+            return this.manifestReader.Read(
+                this.packageProvider.GetPackage());
         }
     }
 }

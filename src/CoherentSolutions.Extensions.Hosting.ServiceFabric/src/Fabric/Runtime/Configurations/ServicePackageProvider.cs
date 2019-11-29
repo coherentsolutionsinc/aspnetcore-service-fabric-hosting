@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 
@@ -49,7 +50,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Conf
                        .ToDictionary(i => i.name, i => i.settings));
             }
 
-            return null;
+            throw new InvalidOperationException(
+                $"Cannot find '{PACKAGE_DIRECTORY_NAME}{Path.DirectorySeparatorChar}{MANIFEST_FILE_NAME}'. "
+              + $"Searched paths: {current} -> {Path.GetDirectoryName(location) ?? Path.GetPathRoot(location)}");
         }
     }
 }

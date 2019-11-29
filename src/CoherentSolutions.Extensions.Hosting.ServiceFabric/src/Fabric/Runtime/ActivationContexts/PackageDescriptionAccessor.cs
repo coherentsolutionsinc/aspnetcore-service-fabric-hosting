@@ -6,7 +6,7 @@ using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Extensions;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ActivationContexts
 {
-    public class PackageDescriptionAccessor<TPackageDescription> : Accessor<TPackageDescription>
+    public class PackageDescriptionAccessor<TPackageDescription>
         where TPackageDescription : PackageDescription
     {
         private static readonly Lazy<PropertyInfo> path;
@@ -18,6 +18,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
         private static readonly Lazy<PropertyInfo> serviceManifestName;
 
         private static readonly Lazy<PropertyInfo> serviceManifestVersion;
+
+        public TPackageDescription Instance
+        {
+            get;
+        }
 
         public string Path
         {
@@ -59,9 +64,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
         }
 
         public PackageDescriptionAccessor(
-            TPackageDescription packageDescription)
-            : base(packageDescription)
+            TPackageDescription instance)
         {
+            this.Instance = instance ?? throw new ArgumentNullException(nameof(instance));
         }
     }
 }

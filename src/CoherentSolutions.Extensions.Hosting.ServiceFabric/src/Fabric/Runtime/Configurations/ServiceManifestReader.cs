@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Xml.Serialization;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Configurations
@@ -10,6 +11,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Conf
         public ServiceManifestElement Read(
             IServicePackage package)
         {
+            if (package is null)
+            {
+                throw new ArgumentNullException(nameof(package));
+            }
+
             using var manifestStream = package.GetManifestStream();
 
             var manifest = DeserializeElement<ServiceManifestElement>(manifestStream);

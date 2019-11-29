@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Fabric;
 using System.Fabric.Description;
+using System.IO;
+using System.Reflection;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Configurations;
 
@@ -21,14 +23,22 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
                 throw new ArgumentNullException(nameof(manifest));
             }
 
-            var activeCodePackage = new CodePackageFactory()
-               .Create(
-                    new CodePackageElement
-                    {
-                        Manifest = manifest,
-                        Name = CODE_PACKAGE_NAME,
-                        Version = CODE_PACKAGE_VERSION
-                    });
+            var location = Assembly.GetExecutingAssembly().Location;
+            var path = Path.GetDirectoryName(location) ?? Path.GetPathRoot(location);
+
+            var activeCodePackage = new CodePackageAccessor(
+                new CodePackageFactory()
+                   .Create(
+                        new CodePackageElement
+                        {
+                            Manifest = manifest,
+                            Name = CODE_PACKAGE_NAME,
+                            Version = CODE_PACKAGE_VERSION
+                        }))
+                {
+                    Path = path
+                }
+               .Instance;
 
             return new CodePackageActivationContext(
                 manifest.Name,

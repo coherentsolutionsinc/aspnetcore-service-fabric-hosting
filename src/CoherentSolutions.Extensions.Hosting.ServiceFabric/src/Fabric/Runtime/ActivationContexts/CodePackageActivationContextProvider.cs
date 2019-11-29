@@ -21,13 +21,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
 
         public ICodePackageActivationContext GetActivationContext()
         {
-            var manifest = this.manifestProvider.GetManifest();
-            if (manifest is null)
-            {
-                throw new InvalidOperationException();
-            }
-
-            return this.activationContextReader.Read(manifest);
+            return this.activationContextReader.Read(
+                this.manifestProvider.GetManifest());
         }
     }
 }
