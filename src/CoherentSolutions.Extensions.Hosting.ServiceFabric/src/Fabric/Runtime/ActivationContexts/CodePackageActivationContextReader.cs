@@ -26,6 +26,14 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
             var location = Assembly.GetExecutingAssembly().Location;
             var path = Path.GetDirectoryName(location) ?? Path.GetPathRoot(location);
 
+            /*
+             * We don't read real code packages because there is no
+             * easy and reliable way to find out inside what code package
+             * current service is located.
+             *
+             * So to avoid unnecessary complexity we simple create custom
+             * code package with the name Code.
+             */
             var activeCodePackage = new CodePackageAccessor(
                 new CodePackageFactory()
                    .Create(
@@ -36,6 +44,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
                             Version = CODE_PACKAGE_VERSION
                         }))
                 {
+                    /*
+                     * Here we override path relative to PackageRoot directory with the path
+                     * where actual binaries are located.
+                     *
+                     * This is required to make sure all file searches relative to CodePackage
+                     * are done in the binaries directory
+                     */
                     Path = path
                 }
                .Instance;

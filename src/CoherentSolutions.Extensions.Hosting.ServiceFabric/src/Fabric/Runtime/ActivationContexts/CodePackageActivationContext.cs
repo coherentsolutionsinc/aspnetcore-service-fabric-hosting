@@ -47,20 +47,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
 
         public string ContextId => CONTEXT_ID;
 
-        public string WorkDirectory
-        {
-            get;
-        }
+        public string WorkDirectory { get; }
 
-        public string LogDirectory
-        {
-            get;
-        }
+        public string LogDirectory { get; }
 
-        public string TempDirectory
-        {
-            get;
-        }
+        public string TempDirectory { get; }
 
         public string CodePackageName => this.activeCodePackage.Description.Name;
 
@@ -96,14 +87,15 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
                 throw new ArgumentNullException(nameof(endpointResourceDescriptions));
             }
 
-            this.LogDirectory = Path.Combine(activeCodePackage.Path, LOG_DIRECTORY);
-            this.WorkDirectory = Path.Combine(activeCodePackage.Path, WORK_DIRECTORY);
-            this.TempDirectory = Path.Combine(activeCodePackage.Path, TEMP_DIRECTORY);
+            var currentTemp = Path.GetTempPath();
+
+            this.LogDirectory = Path.Combine(currentTemp, CONTEXT_ID, LOG_DIRECTORY);
+            this.WorkDirectory = Path.Combine(currentTemp, CONTEXT_ID, WORK_DIRECTORY);
+            this.TempDirectory = Path.Combine(currentTemp, CONTEXT_ID, TEMP_DIRECTORY);
 
             this.serviceManifestName = serviceManifestName;
             this.serviceManifestVersion = serviceManifestVersion;
-            this.applicationPrincipalsDescription =
-                applicationPrincipalsDescription ?? throw new ArgumentNullException(nameof(applicationPrincipalsDescription));
+            this.applicationPrincipalsDescription = applicationPrincipalsDescription ?? throw new ArgumentNullException(nameof(applicationPrincipalsDescription));
             this.activeCodePackage = activeCodePackage ?? throw new ArgumentNullException(nameof(activeCodePackage));
 
             this.codePackages = new CodePackageCollection()

@@ -29,11 +29,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Conf
                 }
 
                 var packageRootDirectory = Path.Combine(current, PACKAGE_DIRECTORY_NAME);
-                if (!Directory.Exists(packageRootDirectory))
-                {
-                    continue;
-                }
-
                 var serviceManifestXmlFile = Path.Combine(packageRootDirectory, MANIFEST_FILE_NAME);
                 if (!File.Exists(serviceManifestXmlFile))
                 {
