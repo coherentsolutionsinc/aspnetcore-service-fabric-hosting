@@ -20,12 +20,11 @@
         <WorkingFolder>CodePackage</WorkingFolder>
       </ExeHost>
     </EntryPoint>
-    <EnvironmentVariables>
-      <EnvironmentVariable Name="Test" Value="TestValue" />
-    </EnvironmentVariables>
   </CodePackage>
 
   <ConfigPackage Name="Config" Version="1.0.0" />
+
+  <DataPackage Name="Data" Version="1.0.0"/>
 
   <Resources>
     <Endpoints>

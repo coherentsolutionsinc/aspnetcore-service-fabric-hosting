@@ -5,6 +5,7 @@
       "launchBrowser": true,
       "launchUrl": "api/me",
       "environmentVariables": {
+        "CS_EHSF_RUNTIME": "Local",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:50564/"
