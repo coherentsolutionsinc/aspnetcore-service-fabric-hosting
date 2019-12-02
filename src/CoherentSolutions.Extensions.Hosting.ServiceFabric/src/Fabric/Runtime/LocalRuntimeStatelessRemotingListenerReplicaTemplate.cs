@@ -12,7 +12,7 @@ using Microsoft.ServiceFabric.Services.Remoting.V2.Runtime;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
 {
-    public class LocalRuntimeRemotingListenerReplicaTemplate
+    public class LocalRuntimeStatelessRemotingListenerReplicaTemplate
         : ConfigurableObject<IStatelessServiceHostRemotingListenerReplicaTemplateConfigurator>,
           IStatelessServiceHostRemotingListenerReplicaTemplate
     {

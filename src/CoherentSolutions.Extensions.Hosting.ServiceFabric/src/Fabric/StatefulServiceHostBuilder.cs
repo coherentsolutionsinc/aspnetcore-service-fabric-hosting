@@ -1,6 +1,6 @@
 ﻿using System;
 
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Exceptions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
@@ -44,7 +44,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
             private static IStatefulServiceRuntimeRegistrant DefaultRuntimeRegistrant(
                 IServiceProvider provider)
             {
-                return new StatefulServiceRuntimeRegistrant();
+                return ActivatorUtilities.CreateInstance<StatefulServiceRuntimeRegistrant>(provider);
             }
 
             private static IStatefulServiceHostEventSourceReplicaTemplate DefaultEventSourceReplicaTemplateFunc()

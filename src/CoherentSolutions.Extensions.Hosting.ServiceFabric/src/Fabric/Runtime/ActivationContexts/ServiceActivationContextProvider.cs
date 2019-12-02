@@ -3,7 +3,7 @@ using System.IO;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ActivationContexts
 {
-    public class ServiceActivationContextProvider : IServiceActivationContextProvider
+    public class ServiceActivationContextProvider
     {
         private const string APPLICATION_NAME = "fabric:/ApplicationName";
 

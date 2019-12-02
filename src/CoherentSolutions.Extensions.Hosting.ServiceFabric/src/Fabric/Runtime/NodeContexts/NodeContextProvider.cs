@@ -4,7 +4,7 @@ using System.Numerics;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.NodeContexts
 {
-    public class NodeContextProvider : INodeContextProvider
+    public class NodeContextProvider
     {
         public NodeContext GetNodeContext()
         {

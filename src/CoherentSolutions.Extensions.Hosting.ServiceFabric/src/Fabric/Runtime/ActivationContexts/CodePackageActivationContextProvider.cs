@@ -5,7 +5,7 @@ using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Configur
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ActivationContexts
 {
-    public class CodePackageActivationContextProvider : ICodePackageActivationContextProvider
+    public class CodePackageActivationContextProvider
     {
         private readonly ServiceManifestElement manifest;
 

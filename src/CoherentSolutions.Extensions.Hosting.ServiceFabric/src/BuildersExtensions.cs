@@ -2,17 +2,12 @@
 using System.Threading.Tasks;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime;
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ActivationContexts;
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Configurations;
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.NodeContexts;
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tools;
 
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Server.HttpSys;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.ServiceFabric.Services.Communication.AspNetCore;
 using Microsoft.ServiceFabric.Services.Remoting.FabricTransport.Runtime;
 using Microsoft.ServiceFabric.Services.Remoting.V2;
@@ -1101,50 +1096,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
         {
             @this.ConfigureObject(
                 configurator => configurator.ConfigureWebHost(configAction));
-
-            return @this;
-        }
-
-        public static IStatelessServiceHostBuilder UseLocalRuntime(
-            this IStatelessServiceHostBuilder @this)
-        {
-            /*
-             * UseLocalRuntime should do nothing when code is executed inside Service Fabric service
-             */
-            if (Environment.GetEnvironmentVariable("Fabric_ApplicationName") is object)
-            {
-                return @this;
-            }
-
-            @this.ConfigureObject(
-                configurator =>
-                {
-                    configurator.ConfigureDependencies(
-                        dependencies =>
-                        {
-                            dependencies.AddLogging(logging => logging.AddConsole());
-
-                            dependencies.AddSingleton(
-                                provider => ActivatorUtilities.CreateInstance<ServiceActivationContextProvider>(provider).GetActivationContext());
-                            dependencies.AddSingleton(
-                                provider => ActivatorUtilities.CreateInstance<NodeContextProvider>(provider).GetNodeContext());
-                            dependencies.AddSingleton(
-                                provider => ActivatorUtilities.CreateInstance<ServicePackageProvider>(provider).GetPackage());
-                            dependencies.AddSingleton(
-                                provider => ActivatorUtilities.CreateInstance<ServiceManifestProvider>(provider).GetManifest());
-                            dependencies.AddSingleton(
-                                provider => ActivatorUtilities.CreateInstance<CodePackageActivationContextProvider>(provider).GetActivationContext());
-                            
-                            dependencies.AddTransient<IServiceManifestReader, ServiceManifestReader>();
-                            dependencies.AddTransient<ICodePackageActivationContextReader, CodePackageActivationContextReader>();
-
-                            dependencies.AddSingleton<ILocalRuntime, LocalRuntime>();
-                        });
-
-                    configurator.UseRemotingListenerReplicaTemplate(() => new LocalRuntimeRemotingListenerReplicaTemplate());
-                    configurator.UseRuntimeRegistrant(
-                        provider => ActivatorUtilities.CreateInstance<LocalRuntimeStatelessServiceRuntimeRegistrant>(provider));
-                });
 
             return @this;
         }

@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Configurations
 {
-    public class ServicePackageProvider : IServicePackageProvider
+    public class ServicePackageProvider
     {
         private const string PACKAGE_DIRECTORY_NAME = "PackageRoot";
 

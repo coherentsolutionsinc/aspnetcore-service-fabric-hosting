@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
 {
-    public class LocalRuntime : ILocalRuntime
+    public class LocalRuntime : IServiceHostRuntime
     {
         private static readonly byte[] initializationData;
 
@@ -39,9 +39,19 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
             this.loggerProvider = loggerProvider ?? throw new ArgumentNullException(nameof(loggerProvider));
         }
 
+        public Task RegisterServiceAsync(
+            string serviceTypeName,
+            Func<StatefulServiceContext, StatefulService> serviceFactory,
+            TimeSpan timeout = default,
+            CancellationToken cancellationToken = default)
+        {
+            throw new NotSupportedException("Stateful Services aren't supported by local service runtime.");
+        }
+
         public async Task RegisterServiceAsync(
             string serviceTypeName,
             Func<StatelessServiceContext, StatelessService> serviceFactory,
+            TimeSpan timeout = default,
             CancellationToken cancellationToken = default)
         {
             if (serviceTypeName is null)
@@ -99,7 +109,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime
             var service = serviceFactory(serviceContext);
             if (service is null)
             {
-                throw new InvalidOperationException($"No stateless service instance was created");
+                throw new InvalidOperationException("No stateless service instance was created");
             }
 
             var serviceAdapter = new LocalRuntimeStatelessServiceAdapter(

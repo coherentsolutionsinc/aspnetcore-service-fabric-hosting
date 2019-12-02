@@ -5,8 +5,6 @@ using System.Threading.Tasks;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
 
-using Microsoft.ServiceFabric.Services.Runtime;
-
 using ServiceFabric.Mocks;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Mocks
@@ -17,7 +15,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Mocks
 
         public Task RegisterAsync(
             string serviceTypeName,
-            Func<StatefulServiceContext, StatefulServiceBase> serviceFactory,
+            Func<StatefulServiceContext, StatefulService> serviceFactory,
             CancellationToken cancellationToken)
         {
             var context = MockStatefulServiceContextFactory.Create(

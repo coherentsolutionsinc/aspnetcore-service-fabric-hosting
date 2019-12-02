@@ -2,7 +2,7 @@
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Configurations
 {
-    public class ServiceManifestProvider : IServiceManifestProvider
+    public class ServiceManifestProvider
     {
         private readonly IServicePackage package;
 
