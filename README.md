@@ -363,6 +363,6 @@ Besides this project [Coherent Solutions][4] also maintains a few more open sour
 [4]:  https://www.coherentsolutions.com/ "Coherent Solutions Inc."
 [5]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/blob/master/LICENSE.md "License"
 [6]:  https://github.com/coherentsolutionsinc/service-fabric-run-tests
-[7]:  https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting "Service Fabric Hosting"
+[7]:  https://github.com/coherentsolutionsinc/anywhere-configuration "AnyWhere Configuration"
 [8]:  https://github.com/coherentsolutionsinc/issoft-insights-2019-sdc-carla-ros
 [9]:  http://wiki.ros.org/
