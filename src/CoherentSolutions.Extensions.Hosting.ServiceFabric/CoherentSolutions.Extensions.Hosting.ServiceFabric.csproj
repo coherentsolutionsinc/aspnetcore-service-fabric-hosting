@@ -8,7 +8,7 @@
     <Company>Coherent Solutions, Inc</Company>
     <Authors>Coherent Solutions, Inc</Authors>
     <RootNamespace>CoherentSolutions.Extensions.Hosting.ServiceFabric</RootNamespace>
-    <Description>This package provides an extensions to HostBuilder class that simplifies development and debugging of Service Fabric Reliable Services.</Description>
+    <Description>This package provides an extensions to HostBuilder class that simplifies development of Service Fabric Reliable Services.</Description>
     <PackageTags>aspnetcore, servicefabric, hosting</PackageTags>
     <RepositoryType>Git</RepositoryType>
     <Version>1.5.0</Version>
@@ -16,12 +16,11 @@
     <Product>CoherentSolutions.AspNetCore.ServiceFabric.Hosting</Product>
     <RepositoryUrl>https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting</RepositoryUrl>
     <PackageProjectUrl>https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting</PackageProjectUrl>
-    <PackageLicenseUrl></PackageLicenseUrl>
     <PlatformTarget>x64</PlatformTarget>
     <PackageId>CoherentSolutions.Extensions.Hosting.ServiceFabric</PackageId>
     <LangVersion>latest</LangVersion>
     <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
-    <PackageIconUrl>https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/blob/master/favicon.png?raw=true</PackageIconUrl>
+    <PackageIcon>favicon.png</PackageIcon>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>
@@ -30,6 +29,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
   <ItemGroup>
     <None Include="..\..\LICENSE.md" Pack="true" PackagePath="" />
+    <None Include="..\..\favicon.png" Pack="true" PackagePath=""/>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore" Version="2.0.3" />
