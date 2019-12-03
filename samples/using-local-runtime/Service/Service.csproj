@@ -17,6 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CoherentSolutions.Extensions.Hosting.ServiceFabric" Version="1.5.1" />
     <PackageReference Include="Microsoft.AspNetCore.All" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.2.0" />
     <PackageReference Include="Microsoft.ServiceFabric" Version="7.0.457" />
@@ -31,12 +32,6 @@
 
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.4" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="CoherentSolutions.Extensions.Hosting.ServiceFabric">
-      <HintPath>..\..\..\src\CoherentSolutions.Extensions.Hosting.ServiceFabric\bin\Debug\netstandard2.0\CoherentSolutions.Extensions.Hosting.ServiceFabric.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>
