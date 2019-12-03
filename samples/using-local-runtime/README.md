@@ -1,6 +1,8 @@
-# Using Local Runtime
+# Using Local Runtime for Debugging
 
-This sample demonstrates how to use **local runtime** feature to debug `StatelessService` locally (without deploying it to Service Fabric Cluster).
+This sample demonstrates how to debug **stateless service** locally without deploying it to Service Fabric Cluster.
+
+This sample is just for demonstration purposes and includes only essential theory. Please check [wiki article][1] for complete feature information.
 
 ## What is inside?
 
@@ -53,17 +55,6 @@ The value of `CS_EHSF_RUNTIME` variable can be defined inside `launchSettings.js
   }
 }
 ```
-
-**Mechanics**
-
-When using **local runtime** all runtime related information is outputted into console:
-
-```
-info : fabric:/ApplicationName/ServiceType-1[0]
-      ServiceEndpoint: http://<host>:<port>/8541ea28-e5e8-4a21-989f-9fd058ba7dac/1
-```
-
-`ServiceEndpoint` URI depends on the endpoint configuration defined in `ServiceManifest.xml` (`Port` is supported) and whether `UseUniqueServiceUrlIntegration` method was used inside `DefineAspNetCoreListener`.
 
 ## How to use?
 
@@ -159,11 +150,28 @@ Environment Variables from IConfiguration:
 - Fabric_ApplicationName = fabric:/ApplicationName
 ```
 
+## FAQ
+
+**1. Where can I find service endpoint URI?** 
+
+When using **local runtime** all runtime related information is outputted into console:
+
+```
+info : fabric:/ApplicationName/ServiceType-1[0]
+      ServiceEndpoint: http://<host>:<port>/8541ea28-e5e8-4a21-989f-9fd058ba7dac/1
+```
+URI format depends on the endpoint configuration in `ServiceManifest.xml` (`Port` is supported) and whether `UseUniqueServiceUrlIntegration` method was used inside `DefineAspNetCoreListener`.
+
+**2. I see multiple exceptions thrown when initializing `StatelessService`. Is it OK?**
+
+These exceptions a caused by a call to Service Fabric trace infrastructure inside `StatelessServer` constructor. Just ignore them.
+
+
 ## Conclusion
 
 For more information please check this [wiki article][1] and explore the source code! 
 
 If you have a suggestion or found an issue please consider [reporting it][2].
 
-[1]: https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Using-Local-Runtime
+[1]: https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Understanding-Local-Runtime
 [2]: https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/issues
