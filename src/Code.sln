@@ -1,11 +1,23 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27703.2018
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29519.87
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoherentSolutions.Extensions.Hosting.ServiceFabric", "CoherentSolutions.Extensions.Hosting.ServiceFabric\CoherentSolutions.Extensions.Hosting.ServiceFabric.csproj", "{A501A897-6BC0-4233-83EC-B71654152529}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests", "CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests\CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.csproj", "{DB757D07-65BE-4E71-BE71-687521BE0E76}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A557497A-7F7E-46BA-9E9B-DF643DEF2F02}"
+	ProjectSection(SolutionItems) = preProject
+		..\CONTRIBUTING.md = ..\CONTRIBUTING.md
+		..\favicon.png = ..\favicon.png
+		..\LICENSE.md = ..\LICENSE.md
+		..\README.md = ..\README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{C85688EA-88D5-4E24-B7C7-C8BB8604AAA8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{6C371E4A-1ED6-4977-AB36-31A91DA0108A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,6 +54,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A501A897-6BC0-4233-83EC-B71654152529} = {C85688EA-88D5-4E24-B7C7-C8BB8604AAA8}
+		{DB757D07-65BE-4E71-BE71-687521BE0E76} = {6C371E4A-1ED6-4977-AB36-31A91DA0108A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {B16C2BAA-9054-459B-8E39-30F5BA77F6FE}

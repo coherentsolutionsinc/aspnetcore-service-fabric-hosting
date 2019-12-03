@@ -8,24 +8,29 @@
     <Company>Coherent Solutions, Inc</Company>
     <Authors>Coherent Solutions, Inc</Authors>
     <RootNamespace>CoherentSolutions.Extensions.Hosting.ServiceFabric</RootNamespace>
-    <Description>This package provides an extensions to HostBuilder class that simplifies development of Service Fabric Reliable Services.</Description>
+    <Description>This package provides an extensions to HostBuilder class that simplifies development and debugging of Service Fabric Reliable Services.</Description>
     <PackageTags>aspnetcore, servicefabric, hosting</PackageTags>
     <RepositoryType>Git</RepositoryType>
-    <Version>1.4.0</Version>
+    <Version>1.5.0</Version>
     <PackageReleaseNotes>Please visit https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/wiki/Version-History for details.</PackageReleaseNotes>
     <Product>CoherentSolutions.AspNetCore.ServiceFabric.Hosting</Product>
     <RepositoryUrl>https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting</RepositoryUrl>
     <PackageProjectUrl>https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting</PackageProjectUrl>
-    <PackageLicenseUrl>https://opensource.org/licenses/MS-PL</PackageLicenseUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
     <PlatformTarget>x64</PlatformTarget>
     <PackageId>CoherentSolutions.Extensions.Hosting.ServiceFabric</PackageId>
     <LangVersion>latest</LangVersion>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <PackageIconUrl>https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/blob/master/favicon.png?raw=true</PackageIconUrl>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DocumentationFile>
     </DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
+  <ItemGroup>
+    <None Include="..\..\LICENSE.md" Pack="true" PackagePath="" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore" Version="2.0.3" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.1.0" />
