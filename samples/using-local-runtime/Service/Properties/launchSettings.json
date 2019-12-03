@@ -3,7 +3,7 @@
     "WebService": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "api/me",
+      "launchUrl": "api/print",
       "environmentVariables": {
         "CS_EHSF_RUNTIME": "Local",
         "ASPNETCORE_ENVIRONMENT": "Development"
