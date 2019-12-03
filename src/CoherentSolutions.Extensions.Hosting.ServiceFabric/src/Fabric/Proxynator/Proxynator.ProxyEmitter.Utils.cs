@@ -165,7 +165,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator
                     var arguments = typeInfo.GetGenericArguments();
                     var parameters = typeBuilder.DefineGenericParameters(arguments.Select(i => i.Name).ToArray()).ToArray();
 
-                    CopyGenericParameterInformation(parameters, arguments);
+                    CopyGenericParametersInformation(parameters, arguments);
 
                     return parameters;
                 }
@@ -187,12 +187,12 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Proxynator
                     var arguments = methodInfo.GetGenericArguments();
                     var parameters = methodBuilder.DefineGenericParameters(arguments.Select(i => i.Name).ToArray()).ToArray();
 
-                    CopyGenericParameterInformation(parameters, arguments);
+                    CopyGenericParametersInformation(parameters, arguments);
 
                     return parameters;
                 }
 
-                private static void CopyGenericParameterInformation(
+                private static void CopyGenericParametersInformation(
                     IEnumerable<GenericTypeParameterBuilder> parameters,
                     IEnumerable<Type> arguments)
                 {

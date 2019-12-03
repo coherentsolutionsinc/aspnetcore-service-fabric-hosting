@@ -1,6 +1,6 @@
 ﻿using System;
 
-using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Exceptions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
@@ -9,6 +9,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
               IStatefulServiceHost,
               IStatefulServiceHostBuilderParameters,
               IStatefulServiceHostBuilderConfigurator,
+              IStatefulServiceRuntimeRegistrant,
               IStatefulServiceHostEventSourceReplicableTemplate,
               IStatefulServiceHostEventSourceReplicaTemplate,
               IStatefulServiceHostEventSourceReplicator,
@@ -27,12 +28,9 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
               IStatefulServiceHostBuilderParameters,
               IStatefulServiceHostBuilderConfigurator
         {
-            public Func<IStatefulServiceRuntimeRegistrant> RuntimeRegistrantFunc { get; private set; }
-
             public StatefulParameters()
             {
-                this.RuntimeRegistrantFunc = DefaultRuntimeRegistrant;
-
+                this.UseRuntimeRegistrant(DefaultRuntimeRegistrant);
                 this.UseEventSourceReplicaTemplate(DefaultEventSourceReplicaTemplateFunc);
                 this.UseEventSourceReplicator(DefaultEventSourceReplicatorFunc);
                 this.UseDelegateReplicaTemplate(DefaultDelegateReplicaTemplateFunc);
@@ -43,16 +41,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
                 this.UseListenerReplicator(DefaultListenerReplicatorFunc);
             }
 
-            public void UseRuntimeRegistrant(
-                Func<IStatefulServiceRuntimeRegistrant> factoryFunc)
+            private static IStatefulServiceRuntimeRegistrant DefaultRuntimeRegistrant(
+                IServiceProvider provider)
             {
-                this.RuntimeRegistrantFunc = factoryFunc
-                 ?? throw new ArgumentNullException(nameof(factoryFunc));
-            }
-
-            private static IStatefulServiceRuntimeRegistrant DefaultRuntimeRegistrant()
-            {
-                return new StatefulServiceRuntimeRegistrant();
+                return ActivatorUtilities.CreateInstance<StatefulServiceRuntimeRegistrant>(provider);
             }
 
             private static IStatefulServiceHostEventSourceReplicaTemplate DefaultEventSourceReplicaTemplateFunc()
@@ -105,17 +97,11 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 
             this.UpstreamConfiguration(parameters);
 
-            var registrant = parameters.RuntimeRegistrantFunc();
-            if (registrant == null)
-            {
-                throw new FactoryProducesNullInstanceException<IStatefulServiceRuntimeRegistrant>();
-            }
-
             var compilation = this.CompileParameters(parameters);
 
             return new StatefulServiceHost(
                 parameters.ServiceTypeName,
-                registrant,
+                compilation.RuntimeRegistrant,
                 compilation.EventSourceReplicator,
                 compilation.DelegateReplicators,
                 compilation.ListenerReplicators);

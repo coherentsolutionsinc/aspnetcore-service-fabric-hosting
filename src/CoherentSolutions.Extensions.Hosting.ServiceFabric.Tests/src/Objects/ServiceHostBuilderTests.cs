@@ -1,6 +1,7 @@
 ﻿using System;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Mocks;
 
 using Moq;
 
@@ -12,6 +13,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         : ServiceHostBuilderTests<IStatefulServiceHost,
             IStatefulServiceHostBuilderParameters,
             IStatefulServiceHostBuilderConfigurator,
+            IStatefulServiceRuntimeRegistrant,
             IStatefulServiceHostEventSourceReplicableTemplate,
             IStatefulServiceHostEventSourceReplicaTemplate,
             IStatefulServiceHostEventSourceReplicaTemplateConfigurator,
@@ -34,6 +36,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
                 IStatefulServiceHost,
                 IStatefulServiceHostBuilderParameters,
                 IStatefulServiceHostBuilderConfigurator,
+                IStatefulServiceRuntimeRegistrant,
                 IStatefulServiceHostEventSourceReplicableTemplate,
                 IStatefulServiceHostEventSourceReplicaTemplate,
                 IStatefulServiceHostEventSourceReplicator,
@@ -48,7 +51,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             >
             CreateServiceInstance()
         {
-            return new StatefulServiceHostBuilder();
+            var builder = new StatefulServiceHostBuilder();
+            builder.UseRuntimeRegistrant(() => new MockStatefulServiceRuntimeRegistrant());
+
+            return builder;
         }
     }
 
@@ -56,6 +62,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         : ServiceHostBuilderTests<IStatelessServiceHost,
             IStatelessServiceHostBuilderParameters,
             IStatelessServiceHostBuilderConfigurator,
+            IStatelessServiceRuntimeRegistrant,
             IStatelessServiceHostEventSourceReplicableTemplate,
             IStatelessServiceHostEventSourceReplicaTemplate,
             IStatelessServiceHostEventSourceReplicaTemplateConfigurator,
@@ -78,6 +85,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
                 IStatelessServiceHost,
                 IStatelessServiceHostBuilderParameters,
                 IStatelessServiceHostBuilderConfigurator,
+                IStatelessServiceRuntimeRegistrant,
                 IStatelessServiceHostEventSourceReplicableTemplate,
                 IStatelessServiceHostEventSourceReplicaTemplate,
                 IStatelessServiceHostEventSourceReplicator,
@@ -92,7 +100,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             >
             CreateServiceInstance()
         {
-            return new StatelessServiceHostBuilder();
+            var builder = new StatelessServiceHostBuilder();
+            builder.UseRuntimeRegistrant(() => new MockStatelessServiceRuntimeRegistrant());
+
+            return builder;
         }
     }
 
@@ -100,6 +111,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         TServiceHost,
         TParameters,
         TConfigurator,
+        TRuntimeRegistrant,
         TEventSourceReplicableTemplate,
         TEventSourceReplicaTemplate,
         TEventSourceReplicaTemplateConfigurator,
@@ -119,6 +131,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         where TParameters :
         class,
         IServiceHostBuilderParameters,
+        IServiceHostBuilderRuntimeParameters<TRuntimeRegistrant>,
         IServiceHostBuilderEventSourceParameters<TEventSourceReplicaTemplate>,
         IServiceHostBuilderEventSourceReplicationParameters<TEventSourceReplicableTemplate, TEventSourceReplicator>,
         IServiceHostBuilderDelegateParameters<TDelegateReplicaTemplate>,
@@ -130,6 +143,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         where TConfigurator :
         class,
         IServiceHostBuilderConfigurator,
+        IServiceHostBuilderRuntimeConfigurator<TRuntimeRegistrant>,
         IServiceHostBuilderEventSourceConfigurator<TEventSourceReplicaTemplate>,
         IServiceHostBuilderEventSourceReplicationConfigurator<TEventSourceReplicableTemplate, TEventSourceReplicator>,
         IServiceHostBuilderDelegateConfigurator<TDelegateReplicaTemplate>,
@@ -138,7 +152,8 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         IServiceHostBuilderRemotingListenerConfigurator<TListenerRemotingReplicaTemplate>,
         IServiceHostBuilderGenericListenerConfigurator<TListenerGenericReplicaTemplate>,
         IServiceHostBuilderListenerReplicationConfigurator<TListenerReplicableTemplate, TListenerReplicator>
-        where TEventSourceReplicaTemplate :
+        where TRuntimeRegistrant : class
+        where TEventSourceReplicaTemplate : 
         class,
         TEventSourceReplicableTemplate,
         IServiceHostEventSourceReplicaTemplate<TEventSourceReplicaTemplateConfigurator>
@@ -183,6 +198,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
         protected abstract ServiceHostBuilder<TServiceHost,
             TParameters,
             TConfigurator,
+            TRuntimeRegistrant,
             TEventSourceReplicableTemplate,
             TEventSourceReplicaTemplate,
             TEventSourceReplicator,

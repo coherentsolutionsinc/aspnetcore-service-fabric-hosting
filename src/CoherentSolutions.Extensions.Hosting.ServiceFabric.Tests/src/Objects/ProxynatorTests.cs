@@ -555,6 +555,13 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
                             typeof(TestGenericTypeWithGenericInterfaceConstraint<,>),
                             typeof(ITestGenericTypeWithGenericInterfaceConstraint<ITestGenericType<int>, int>))
                     };
+                    yield return new object[]
+                    {
+                        new Case(
+                            typeof(ITestGenericType<int>),
+                            typeof(TestDerivedFromGenericType),
+                            typeof(ITestGenericType<int>))
+                    };
                 }
             }
         }
@@ -828,6 +835,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
 
         private class TestGenericTypeWithNewConstraints<T> : ITestGenericTypeWithNewConstraints<T>
             where T : new()
+        {
+        }
+
+        private class TestDerivedFromGenericType : ITestGenericType<int>
         {
         }
 

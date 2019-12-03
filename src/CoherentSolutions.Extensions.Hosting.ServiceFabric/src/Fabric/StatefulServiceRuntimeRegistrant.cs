@@ -9,12 +9,23 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric
 {
     public class StatefulServiceRuntimeRegistrant : IStatefulServiceRuntimeRegistrant
     {
+        private readonly IServiceHostRuntime serviceHostRuntime;
+
+        public StatefulServiceRuntimeRegistrant(
+            IServiceHostRuntime serviceHostRuntime)
+        {
+            this.serviceHostRuntime = serviceHostRuntime ?? throw new ArgumentNullException(nameof(serviceHostRuntime));
+        }
+
         public Task RegisterAsync(
             string serviceTypeName,
-            Func<StatefulServiceContext, StatefulServiceBase> serviceFactory,
+            Func<StatefulServiceContext, StatefulService> serviceFactory,
             CancellationToken cancellationToken)
         {
-            return ServiceRuntime.RegisterServiceAsync(serviceTypeName, serviceFactory, cancellationToken: cancellationToken);
+            return this.serviceHostRuntime.RegisterServiceAsync(
+                serviceTypeName, 
+                serviceFactory, 
+                cancellationToken: cancellationToken);
         }
 
         public Task UnregisterAsync(

@@ -1,0 +1,14 @@
+{
+  "profiles": {
+    "WebService": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "api/print",
+      "environmentVariables": {
+        "CS_EHSF_RUNTIME": "Local",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "http://localhost:50564/"
+    }
+  }
+}
