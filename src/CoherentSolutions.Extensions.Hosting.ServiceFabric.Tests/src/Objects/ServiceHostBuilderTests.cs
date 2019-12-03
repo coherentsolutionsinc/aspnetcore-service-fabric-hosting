@@ -1,6 +1,7 @@
 ﻿using System;
 
 using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric;
+using CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Mocks;
 
 using Moq;
 
@@ -50,7 +51,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             >
             CreateServiceInstance()
         {
-            return new StatefulServiceHostBuilder();
+            var builder = new StatefulServiceHostBuilder();
+            builder.UseRuntimeRegistrant(() => new MockStatefulServiceRuntimeRegistrant());
+
+            return builder;
         }
     }
 
@@ -96,7 +100,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Tests.Objects
             >
             CreateServiceInstance()
         {
-            return new StatelessServiceHostBuilder();
+            var builder = new StatelessServiceHostBuilder();
+            builder.UseRuntimeRegistrant(() => new MockStatelessServiceRuntimeRegistrant());
+
+            return builder;
         }
     }
 
