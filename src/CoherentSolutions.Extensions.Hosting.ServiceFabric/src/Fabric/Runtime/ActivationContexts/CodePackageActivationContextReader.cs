@@ -25,7 +25,7 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
                 throw new ArgumentNullException(nameof(manifest));
             }
 
-            var location = Assembly.GetExecutingAssembly().Location;
+            var location = Assembly.GetEntryAssembly()?.Location;
             var path = Path.GetDirectoryName(location) ?? Path.GetPathRoot(location);
 
             /*

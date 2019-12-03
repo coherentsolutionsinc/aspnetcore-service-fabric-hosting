@@ -15,10 +15,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Conf
 
         public IServicePackage GetPackage()
         {
-            var location = Assembly.GetExecutingAssembly().Location;
+            var location = Assembly.GetEntryAssembly()?.Location;
             var current = location;
 
-            var br = false;
+            var br = current is null;
             for (; !br;)
             {
                 current = Path.GetDirectoryName(current);
