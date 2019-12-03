@@ -16,23 +16,26 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Conf
                 throw new ArgumentNullException(nameof(package));
             }
 
-            using var manifestStream = package.GetManifestStream();
-
-            var manifest = DeserializeElement<ServiceManifestElement>(manifestStream);
-            manifest.PackageRoot = package.Path;
-
-            foreach (var configurationPackage in manifest.ConfigurationPackages)
+            using (var manifestStream = package.GetManifestStream())
             {
-                using var settingsStream = package.GetSettingsStream(configurationPackage.Name);
-                if (settingsStream is null)
+                var manifest = DeserializeElement<ServiceManifestElement>(manifestStream);
+                manifest.PackageRoot = package.Path;
+
+                foreach (var configurationPackage in manifest.ConfigurationPackages)
                 {
-                    continue;
+                    using (var settingsStream = package.GetSettingsStream(configurationPackage.Name))
+                    {
+                        if (settingsStream is null)
+                        {
+                            continue;
+                        }
+
+                        configurationPackage.Settings = DeserializeElement<ConfigurationSettingsElement>(settingsStream);
+                    }
                 }
 
-                configurationPackage.Settings = DeserializeElement<ConfigurationSettingsElement>(settingsStream);
+                return manifest;
             }
-
-            return manifest;
         }
 
         private static T DeserializeElement<T>(
