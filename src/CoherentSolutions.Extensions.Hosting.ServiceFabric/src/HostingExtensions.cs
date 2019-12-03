@@ -60,6 +60,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
                 internalConfigAction =>
                 {
                     var builder = new StatefulServiceHostBuilder();
+                    
+                    externalConfigAction(builder);
+                    internalConfigAction(builder);
+
                     builder.ConfigureObject(
                         configurator =>
                         {
@@ -78,9 +82,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
                                     throw new ArgumentOutOfRangeException();
                             }
                         });
-
-                    externalConfigAction(builder);
-                    internalConfigAction(builder);
 
                     return builder.Build();
                 });
@@ -106,6 +107,10 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
                 internalConfigAction =>
                 {
                     var builder = new StatelessServiceHostBuilder();
+
+                    externalConfigAction(builder);
+                    internalConfigAction(builder);
+
                     builder.ConfigureObject(
                         configurator =>
                         {
@@ -148,9 +153,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric
                                     throw new ArgumentOutOfRangeException();
                             }
                         });
-
-                    externalConfigAction(builder);
-                    internalConfigAction(builder);
 
                     return builder.Build();
                 });
