@@ -1,7 +1,7 @@
 # CoherentSolutions.Extensions.Hosting.ServiceFabric
 
 [![Build Status](https://dev.azure.com/coherent-oss/oss-pipelines/_apis/build/status/coherentsolutionsinc.aspnetcore-service-fabric-hosting?branchName=master)](https://dev.azure.com/coherent-oss/oss-pipelines/_build/latest?definitionId=2&branchName=master)
-[![nuget package](https://img.shields.io/badge/nuget-1.4.0-blue.svg)](https://www.nuget.org/packages/CoherentSolutions.Extensions.Hosting.ServiceFabric/1.4.0)
+[![nuget package](https://img.shields.io/badge/nuget-1.5.1-blue.svg)](https://www.nuget.org/packages/CoherentSolutions.Extensions.Hosting.ServiceFabric/1.5.1)
 
 ## About the Project
 
