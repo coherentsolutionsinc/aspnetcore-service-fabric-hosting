@@ -336,6 +336,16 @@ For information on past releases please refer to [version history][2] page.
 
 For additional information on how to contribute to this project, please see [CONTRIBUTING.md][3].
 
+## Samples
+
+* [**Configuring Service**](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/tree/master/samples/configuring-service)
+* [**Configuring Multiple Services**](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/tree/master/samples/configuring-multiple-services)
+* [**Configuring Custom Service Event Source**](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/tree/master/samples/configuring-custom-event-source)
+* [**Using Hierarchical Dependency Registration**](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/tree/master/samples/using-hierarchical-dependency-registration)
+* [**Reacting On Service Lifecycle: Routine Events**](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/tree/master/samples/reacting-on-service-lifecycle-events)
+* [**Reacting on Service Lifecycle: Package Events**](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/tree/master/samples/reacting-on-service-package-events)
+* [**Using Local Runtime for Debugging**](https://github.com/coherentsolutionsinc/aspnetcore-service-fabric-hosting/tree/master/samples/using-local-runtime)
+
 ## Authors
 
 This project is owned and maintained by [Coherent Solutions][4].
