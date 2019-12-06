@@ -74,9 +74,9 @@ namespace Service.Controllers
                 {
                     var obj = context.CodePackageActivationContext.GetCodePackageObject(name);
                     sb.AppendFormat("- Package: {0}", obj.Description.Name).AppendLine()
-                       .AppendFormat("  * Package: {0}", obj.Path).AppendLine()
-                       .AppendFormat("  * Package: {0}", obj.Description.ServiceManifestName).AppendLine()
-                       .AppendFormat("  * Package: {0}", obj.Description.ServiceManifestVersion).AppendLine();
+                       .AppendFormat("  * Path                   : {0}", obj.Path).AppendLine()
+                       .AppendFormat("  * ServiceManifestName    : {0}", obj.Description.ServiceManifestName).AppendLine()
+                       .AppendFormat("  * ServiceManifestVersion : {0}", obj.Description.ServiceManifestVersion).AppendLine();
                 }
             }
 
@@ -95,9 +95,9 @@ namespace Service.Controllers
                 {
                     var obj = context.CodePackageActivationContext.GetDataPackageObject(name);
                     sb.AppendFormat("- Package: {0}", obj.Description.Name).AppendLine()
-                       .AppendFormat("  * Package: {0}", obj.Path).AppendLine()
-                       .AppendFormat("  * Package: {0}", obj.Description.ServiceManifestName).AppendLine()
-                       .AppendFormat("  * Package: {0}", obj.Description.ServiceManifestVersion).AppendLine()
+                       .AppendFormat("  * Path                   : {0}", obj.Path).AppendLine()
+                       .AppendFormat("  * ServiceManifestName    : {0}", obj.Description.ServiceManifestName).AppendLine()
+                       .AppendFormat("  * ServiceManifestVersion : {0}", obj.Description.ServiceManifestVersion).AppendLine()
                        .AppendLine("  * Content:");
 
                     foreach (var f in Directory.EnumerateFileSystemEntries(obj.Path))
@@ -122,9 +122,9 @@ namespace Service.Controllers
                 {
                     var obj = context.CodePackageActivationContext.GetConfigurationPackageObject(name);
                     sb.AppendFormat("- Package: {0}", obj.Description.Name).AppendLine()
-                       .AppendFormat("  * Package: {0}", obj.Path).AppendLine()
-                       .AppendFormat("  * Package: {0}", obj.Description.ServiceManifestName).AppendLine()
-                       .AppendFormat("  * Package: {0}", obj.Description.ServiceManifestVersion).AppendLine()
+                       .AppendFormat("  * Path                   : {0}", obj.Path).AppendLine()
+                       .AppendFormat("  * ServiceManifestName    : {0}", obj.Description.ServiceManifestName).AppendLine()
+                       .AppendFormat("  * ServiceManifestVersion : {0}", obj.Description.ServiceManifestVersion).AppendLine()
                        .AppendLine("  * Settings:");
 
                     if (obj.Settings is null)
