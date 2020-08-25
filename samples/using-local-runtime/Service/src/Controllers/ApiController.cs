@@ -7,8 +7,6 @@ using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 
-using Remotion.Linq.Clauses.ResultOperators;
-
 namespace Service.Controllers
 {
     [Route("api")]
