@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace Service
@@ -22,12 +23,16 @@ namespace Service
             services.AddMvc();
         }
 
-        public void Configure(
-            IApplicationBuilder app,
-            IHostingEnvironment env,
-            ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostEnvironment env)
         {
-            app.UseMvcWithDefaultRoute();
+            if (env.IsDevelopment()) app.UseDeveloperExceptionPage();
+
+            app.UseRouting();
+            app.UseEndpoints(
+                options =>
+                {
+                    options.MapControllers();
+                });
         }
     }
 }
