@@ -1,0 +1,17 @@
+{
+	"name": "C# (.NET Core)",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"args": { 
+			"SERVICE_FABRIC_VERSION": "7.1.410.1"
+		}
+	},
+
+	"settings": {
+		"terminal.integrated.shell.linux": "/bin/bash"
+	},
+
+	"extensions": [
+		"ms-dotnettools.csharp"
+	]
+}
