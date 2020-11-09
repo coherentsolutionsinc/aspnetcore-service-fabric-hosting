@@ -1,10 +1,7 @@
 {
-	"name": "C# (.NET Core)",
+	"name": "C# (.NET Core) + Service Fabric",
 	"build": {
-		"dockerfile": "Dockerfile",
-		"args": { 
-			"SERVICE_FABRIC_VERSION": "7.1.410.1"
-		}
+		"dockerfile": "Dockerfile"
 	},
 
 	"settings": {
