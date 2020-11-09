@@ -1,5 +1,7 @@
 FROM mcr.microsoft.com/vscode/devcontainers/dotnetcore:0-3.1
 
+ENV APT_KEY_DONT_WARN_ON_DANGEROUS_USAGE=DontWarn
+
 RUN apt-key adv --keyserver apt-mo.trafficmanager.net --recv-keys 417A0893 && \
     apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 417A0893
 
