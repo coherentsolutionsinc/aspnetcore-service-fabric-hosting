@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <DebugType>portable</DebugType>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-    <RuntimeFrameworkVersion>2.0.0</RuntimeFrameworkVersion>
     <Description>This project contains unit-tests designed to ensure quality of CoherentSolutions.AspNetCore.ServiceFabric.Hosting project.</Description>
     <Authors>Coherent Solutions, Inc</Authors>
     <Copyright>2019 Coherent Solutions, Inc</Copyright>
@@ -14,23 +13,22 @@
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.ServiceFabric" Version="7.0.457" />
-    <PackageReference Include="Microsoft.ServiceFabric.AspNetCore.Abstractions" Version="4.0.457" />
-    <PackageReference Include="Microsoft.ServiceFabric.AspNetCore.HttpSys" Version="4.0.457" />
-    <PackageReference Include="Microsoft.ServiceFabric.AspNetCore.Kestrel" Version="4.0.457" />
-    <PackageReference Include="Microsoft.ServiceFabric.Diagnostics.Internal" Version="4.0.457" />
-    <PackageReference Include="Microsoft.ServiceFabric.FabricTransport.Internal" Version="4.0.457" />
-    <PackageReference Include="Microsoft.ServiceFabric.Services" Version="4.0.457" />
-    <PackageReference Include="Microsoft.ServiceFabric.Services.Remoting" Version="4.0.457" />
-    <PackageReference Include="Moq" Version="4.10.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
-    <PackageReference Include="ServiceFabric.Mocks" Version="4.0.0" />
+    <PackageReference Include="Microsoft.ServiceFabric" Version="7.2.445" />
+    <PackageReference Include="Microsoft.ServiceFabric.AspNetCore.Abstractions" Version="4.2.445" />
+    <PackageReference Include="Microsoft.ServiceFabric.AspNetCore.HttpSys" Version="4.2.445" />
+    <PackageReference Include="Microsoft.ServiceFabric.AspNetCore.Kestrel" Version="4.2.445" />
+    <PackageReference Include="Microsoft.ServiceFabric.Diagnostics.Internal" Version="4.2.445" />
+    <PackageReference Include="Microsoft.ServiceFabric.FabricTransport.Internal" Version="4.2.445" />
+    <PackageReference Include="Microsoft.ServiceFabric.Services" Version="4.2.445" />
+    <PackageReference Include="Microsoft.ServiceFabric.Services.Remoting" Version="4.2.445" />
+    <PackageReference Include="Moq" Version="4.16.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.10.0" />
+    <PackageReference Include="ServiceFabric.Mocks" Version="4.2.9" />
     <PackageReference Include="xunit" Version="2.4.1" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1">
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
-    <DotNetCliToolReference Include="dotnet-xunit" Version="2.3.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CoherentSolutions.Extensions.Hosting.ServiceFabric\CoherentSolutions.Extensions.Hosting.ServiceFabric.csproj" />
