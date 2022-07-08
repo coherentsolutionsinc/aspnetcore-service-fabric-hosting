@@ -8,6 +8,10 @@ using System.Linq;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ActivationContexts
 {
+    // Disabling "is-not-used" warning because these are runtime stubs
+    //
+    #pragma warning disable CS0067
+
     public class CodePackageActivationContext : ICodePackageActivationContext
     {
         private readonly ApplicationPrincipalsDescription applicationPrincipalsDescription;
@@ -275,4 +279,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
         {
         }
     }
+
+    #pragma warning restore CS0067
 }
