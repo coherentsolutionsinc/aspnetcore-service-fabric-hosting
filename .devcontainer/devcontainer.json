@@ -1,0 +1,14 @@
+{
+	"name": "C# (.NET Core) + Service Fabric",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+
+	"settings": {
+		"terminal.integrated.shell.linux": "/bin/bash"
+	},
+
+	"extensions": [
+		"ms-dotnettools.csharp"
+	]
+}

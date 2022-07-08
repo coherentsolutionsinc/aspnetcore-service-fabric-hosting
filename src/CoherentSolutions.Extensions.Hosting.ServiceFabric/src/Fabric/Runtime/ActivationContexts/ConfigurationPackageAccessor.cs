@@ -7,6 +7,10 @@ using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Extensions;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ActivationContexts
 {
+    // Disabling "obsolete" warning because these are runtime stubs
+    //
+    #pragma warning disable CS0618
+
     public class ConfigurationPackageAccessor : PackageAccessor<ConfigurationPackage, ConfigurationPackageDescription>
     {
         private static readonly Lazy<PropertyInfo> settings;
@@ -28,4 +32,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
         {
         }
     }
+
+    #pragma warning restore CS0618
 }

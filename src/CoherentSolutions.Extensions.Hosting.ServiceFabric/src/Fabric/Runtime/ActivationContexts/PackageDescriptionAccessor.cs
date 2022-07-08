@@ -6,6 +6,10 @@ using CoherentSolutions.Extensions.Hosting.ServiceFabric.Common.Extensions;
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ActivationContexts
 {
+    // Disabling "obsolete" warning because these are runtime stubs
+    //
+    #pragma warning disable CS0618
+
     public class PackageDescriptionAccessor<TPackageDescription>
         where TPackageDescription : PackageDescription
     {
@@ -66,4 +70,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
             this.Instance = instance ?? throw new ArgumentNullException(nameof(instance));
         }
     }
+
+    #pragma warning restore CS0618
 }

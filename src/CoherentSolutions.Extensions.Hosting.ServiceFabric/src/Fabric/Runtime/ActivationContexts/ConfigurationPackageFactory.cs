@@ -5,6 +5,10 @@ using CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Configur
 
 namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.ActivationContexts
 {
+    // Disabling "obsolete" warning because these are runtime stubs
+    //
+    #pragma warning disable CS0618
+
     public class ConfigurationPackageFactory : PackageFactory<ConfigurationPackageElement, ConfigurationPackage, ConfigurationPackageDescription>
     {
         protected override void InitializePackageDescription(
@@ -31,4 +35,6 @@ namespace CoherentSolutions.Extensions.Hosting.ServiceFabric.Fabric.Runtime.Acti
             };
         }
     }
+
+    #pragma warning restore CS0618
 }
